@@ -3,7 +3,12 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Programming/RealProjects/RoutineTracker/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.234" />
+        <entry key="..\:/Programming/RealProjects/RoutineTracker/app/src/main/res/drawable/ic_launcher_background.xml" value="0.152" />
         <entry key="..\:/Programming/RealProjects/RoutineTracker/app/src/main/res/layout/activity_main.xml" value="0.2994791666666667" />
+        <entry key="..\:/Programming/RealProjects/RoutineTracker/app/src/main/res/layout/category_activity_english.xml" value="0.2611111111111111" />
+        <entry key="..\:/Programming/RealProjects/RoutineTracker/app/src/main/res/layout/detail_activity_task.xml" value="0.5" />
+        <entry key="..\:/Programming/RealProjects/RoutineTracker/app/src/main/res/layout/top_activity_routine.xml" value="0.2611111111111111" />
       </map>
     </option>
   </component>
@@ -12,5 +17,12 @@
   </component>
   <component name="ProjectType">
     <option name="id" value="Android" />
+  </component>
+  <component name="VisualizationToolProject">
+    <option name="state">
+      <ProjectState>
+        <option name="scale" value="0.22" />
+      </ProjectState>
+    </option>
   </component>
 </project>
