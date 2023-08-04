@@ -1,8 +1,7 @@
 package com.rendox.routinetracker.ui.routine
 
-import androidx.annotation.ArrayRes
+import android.app.Activity
 import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,22 +16,24 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.rendox.routinetracker.R
-import com.rendox.routinetracker.ui.components.CollapsingTopAppBar
+import com.rendox.routinetracker.ui.components.CollapsingToolbarLarge
 import com.rendox.routinetracker.ui.theme.PaddingMedium
 import com.rendox.routinetracker.ui.theme.PaddingSmall
 import me.onebone.toolbar.CollapsingToolbarScaffold
@@ -41,28 +42,32 @@ import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
 import kotlin.math.roundToInt
 
 @Composable
-private fun RoutineItemScreen(
+fun RoutineItemScreen(
     modifier: Modifier = Modifier,
-    @DrawableRes imageId: Int?,
+    @DrawableRes imageId: Int? = null,
     title: String,
     routineProgress: Float,
     description: String,
     amountOfWorkToday: Int,
     amountOfWorkTodayCompleted: Int,
-//    frequency: Int,
-//    time: String,
-//    numberOfDaysRemaining: Int
 ) {
+    val view = LocalView.current
+    SideEffect {
+        val window = (view.context as Activity).window
+        window.statusBarColor = Color.Transparent.toArgb()
+    }
+
     val scaffoldState = rememberCollapsingToolbarScaffoldState()
+    // TODO check this: scaffoldState.toolbarState.collapse()
     CollapsingToolbarScaffold(
         modifier = modifier.fillMaxSize(),
         state = scaffoldState,
         scrollStrategy = ScrollStrategy.ExitUntilCollapsed,
         toolbarModifier = Modifier.background(MaterialTheme.colorScheme.primary),
         toolbar = {
-            CollapsingTopAppBar(
+            CollapsingToolbarLarge(
                 imageId = imageId,
-                scaffoldState = scaffoldState,
+                toolbarState = scaffoldState.toolbarState,
                 navigationIcon = { TopAppBarNavigationIcon() },
                 actions = { TopAppBarActions() },
             )
@@ -108,6 +113,9 @@ private fun RoutineItemScreen(
                 }
             }
             // TODO add tabs with their content
+            items(30) {
+                Text(text = "Item $it")
+            }
         }
     }
 }
@@ -122,7 +130,7 @@ private fun RoutineItemScreen(
 fun RoutineUpperPartPreview() {
     RoutineItemScreen(
         title = "Do sports",
-        imageId = R.drawable.cycling,
+//        imageId = R.drawable.cycling,
         routineProgress = 0.25f,
         description = "Stay fit and healthy Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim adz minim veniam, quis nostrud",
         amountOfWorkToday = 4,
@@ -136,8 +144,6 @@ fun TopAppBarActions(modifier: Modifier = Modifier) {
         repeat(2) {
             IconButton(
                 onClick = { /*TODO*/ },
-                colors = IconButtonDefaults
-                    .iconButtonColors(contentColor = MaterialTheme.colorScheme.onPrimary)
             ) {
                 Icon(
                     imageVector = Icons.Filled.Add,
@@ -153,8 +159,6 @@ fun TopAppBarNavigationIcon(modifier: Modifier = Modifier) {
     IconButton(
         modifier = modifier,
         onClick = { /*TODO*/ },
-        colors = IconButtonDefaults
-            .iconButtonColors(contentColor = MaterialTheme.colorScheme.onPrimary)
     ) {
         Icon(
             imageVector = Icons.Filled.Menu,
