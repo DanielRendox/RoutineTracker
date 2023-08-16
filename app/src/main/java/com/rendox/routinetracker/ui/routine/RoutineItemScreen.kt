@@ -1,6 +1,5 @@
 package com.rendox.routinetracker.ui.routine
 
-import android.app.Activity
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -22,20 +21,15 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.rendox.routinetracker.R
 import com.rendox.routinetracker.ui.components.CollapsingToolbarLarge
-import com.rendox.routinetracker.ui.theme.PaddingMedium
-import com.rendox.routinetracker.ui.theme.PaddingSmall
 import me.onebone.toolbar.CollapsingToolbarScaffold
 import me.onebone.toolbar.ScrollStrategy
 import me.onebone.toolbar.rememberCollapsingToolbarScaffoldState
@@ -51,12 +45,6 @@ fun RoutineItemScreen(
     amountOfWorkToday: Int,
     amountOfWorkTodayCompleted: Int,
 ) {
-    val view = LocalView.current
-    SideEffect {
-        val window = (view.context as Activity).window
-        window.statusBarColor = Color.Transparent.toArgb()
-    }
-
     val scaffoldState = rememberCollapsingToolbarScaffoldState()
     // TODO check this: scaffoldState.toolbarState.collapse()
     CollapsingToolbarScaffold(
@@ -76,7 +64,7 @@ fun RoutineItemScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth(),
-            contentPadding = PaddingValues(PaddingMedium),
+            contentPadding = PaddingValues(16.dp),
         ) {
             item {
                 Text(
@@ -86,13 +74,13 @@ fun RoutineItemScreen(
             }
             item {
                 RoutineProgressBar(
-                    modifier = modifier.padding(top = PaddingSmall),
+                    modifier = modifier.padding(top = 8.dp),
                     routineProgress = routineProgress
                 )
             }
             item {
                 Text(
-                    modifier = Modifier.padding(top = PaddingSmall),
+                    modifier = Modifier.padding(top = 8.dp),
                     text = description,
                     style = MaterialTheme.typography.bodySmall
                 )
@@ -101,7 +89,7 @@ fun RoutineItemScreen(
                 val selectedTabIndex = 0 /* TODO */
                 TabRow(
                     selectedTabIndex = selectedTabIndex,
-                    modifier = Modifier.padding(top = PaddingSmall)
+                    modifier = Modifier.padding(top = 8.dp)
                 ) {
                     stringArrayResource(R.array.routine_item_tabs)
                         .forEachIndexed { index, title ->
@@ -177,7 +165,7 @@ fun RoutineProgressBar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            modifier = Modifier.padding(end = PaddingSmall),
+            modifier = Modifier.padding(end = 8.dp),
             text = (routineProgress * 100).roundToInt().toString() + "%",
             style = MaterialTheme.typography.labelSmall,
         )
