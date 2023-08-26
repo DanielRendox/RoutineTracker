@@ -1,17 +1,72 @@
 package com.rendox.routinetracker.api
 
 import kotlinx.datetime.Clock
+import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DateTimePeriod
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 
 // TODO replace with user preference
-val DefaultDayStart = LocalTime(0,0,0)
+val DefaultDayStart = LocalTime(0, 0, 0)
+
+enum class WeekDayRelativeToMonth {
+    First,
+    Second,
+    Third,
+    Forth,
+    Fifth,
+    Last;
+
+    companion object {
+        fun deriveExplicitFrom(weekDayNumber: Int) = when (weekDayNumber) {
+            1 -> First
+            2 -> Second
+            3 -> Third
+            4 -> Forth
+            5 -> Fifth
+            else -> {
+                throw IllegalArgumentException("Counter value should be in the range 1..5")
+            }
+        }
+
+        fun getNumber(date: LocalDate): Int {
+            val firstWeekDay = findDateOfFirstWeekDayInMonth(date)
+            var resultingDate = firstWeekDay
+            var counter = 1
+            while (resultingDate != date) {
+                resultingDate = resultingDate.plus(DateTimeUnit.WEEK)
+                counter++
+            }
+            return counter
+        }
+        fun findDateOfLastWeekDayInMonth(
+            date: LocalDate
+        ): LocalDate {
+            var lastWeekDay = date.atEndOfMonth
+            while (lastWeekDay.dayOfWeek != date.dayOfWeek) {
+                lastWeekDay = lastWeekDay.minus(DatePeriod(days = 1))
+            }
+            return lastWeekDay
+        }
+        fun findDateOfFirstWeekDayInMonth(
+            date: LocalDate
+        ): LocalDate {
+            var firstWeekDay = date.withDayOfMonth(1)
+            while (firstWeekDay.dayOfWeek != date.dayOfWeek) {
+                firstWeekDay = firstWeekDay.plus(DatePeriod(days = 1))
+            }
+            return firstWeekDay
+        }
+    }
+}
 
 data class ZonedDateTime(
     private val dateTime: LocalDateTime,
@@ -60,6 +115,7 @@ data class TimeInterval(
 
     fun getStartTime(newTimeZone: TimeZone = TimeZone.currentSystemDefault()) =
         ZonedDateTime.refreshTime(startTime, timeZone, newTimeZone)
+
     fun getEndTime(newTimeZone: TimeZone = TimeZone.currentSystemDefault()) =
         endTime?.let { ZonedDateTime.refreshTime(it, timeZone, newTimeZone) }
 
@@ -88,21 +144,16 @@ data class TimeInterval(
         Pair(startTime.toInstant(timeZone), endTime!!.toInstant(timeZone))
 }
 
-enum class WeekDay(val index: Int) {
-    Monday(1),
-    Tuesday(2),
-    Wednesday(3),
-    Thursday(4),
-    Friday(5),
-    Saturday(6),
-    Sunday(7);
-}
+/**
+ * Returns this date with another day of month.
+ *
+ * @throws IllegalArgumentException if the resulting date is invalid or exceeds the platform-specific boundary.
+ */
+fun LocalDate.withDayOfMonth(dayOfMonth: Int) = LocalDate(this.year, this.month, dayOfMonth)
 
-enum class MonthWeekNumber {
-    First,
-    Second,
-    Third,
-    Forth,
-    Fifth,
-    Last;
-}
+/**
+ * The beginning of the next month.
+ */
+val LocalDate.nextMonth
+    get() = withDayOfMonth(1).plus(1, DateTimeUnit.MONTH)
+val LocalDate.atEndOfMonth get() = nextMonth - DatePeriod(days = 1)

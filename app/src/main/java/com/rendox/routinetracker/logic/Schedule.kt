@@ -1,56 +1,61 @@
 package com.rendox.routinetracker.logic
 
-//import com.rendox.routinetracker.api.NumberOfDaysInWeek
-//
-//sealed class Schedule {
-//
-//    /**
-//     * When the vacation mode gets activated, each day in the period is a holiday
-//     */
-//    var vacationPeriod: Period? = null
-//
-//    /**
-//     * The maximum period during which the Completable may not be completed
-//     * until the streak breaks
-//     */
-//    var maxAllowedGapDays: Int = NumberOfDaysInWeek
-//    var completionHistory: MutableMap<LocalDate, Boolean> = mutableMapOf()
-//    val completables =
-//
-//    abstract fun isWorkday(date: LocalDate): Boolean
-//
-//    fun isOnVacation(date: LocalDate) = vacationPeriod?.contains(date) ?: false
-//}
-//
-//object DailySchedule : Schedule() {
-//    override fun isWorkday(date: LocalDate) = !isOnVacation(date)
-//}
-//
-//data class WeeklySchedule(var weekDaysIndices: List<Int>) : Schedule() {
-//    fun createSchedule(weekDays: List<WeekDay>) =
-//        WeeklySchedule(weekDays.map { it.index })
-//
-//    fun createSchedule(numberOfDays: Int) =
-//        WeeklySchedule(List(numberOfDays) { index -> index })
-//
-//    override fun isWorkday(date: LocalDate): Boolean {
-//        if (isOnVacation(date)) return false
-//        return weekDaysIndices.contains(date.dayOfWeek.value)
-//    }
-//}
-//
-//data class MonthlyTraditionalSchedule(val monthDaysIndices: List<Int>) {
-//    fun createSchedule(monthDaysIndices: List<Int>) =
-//        MonthlyTraditionalSchedule(monthDaysIndices)
-//
-//    fun createSchedule(numberOfDays: Int) =
-//        MonthlyTraditionalSchedule(List(numberOfDays) { index -> index })
-//}
-//
-//data class MonthlyCustomSchedule(
-//    val weekdayToWeekNumber: Map<WeekDay, MonthWeekNumber>
-//)
-//
+import com.rendox.routinetracker.api.WeekDayRelativeToMonth
+import kotlinx.datetime.LocalDate
+
+sealed interface Schedule {
+    fun isDue(validationDate: LocalDate): Boolean
+}
+
+object EveryDaySchedule : Schedule {
+    override fun isDue(validationDate: LocalDate) = true
+}
+
+data class WeeklySchedule(var weekDaysWhenDue: List<Int>) : Schedule {
+    override fun isDue(validationDate: LocalDate) =
+        weekDaysWhenDue.contains(validationDate.dayOfWeek.value)
+}
+
+data class MonthlyTraditionalSchedule(var monthDaysWhenDue: List<Int>) : Schedule {
+
+    override fun isDue(validationDate: LocalDate) =
+        monthDaysWhenDue.contains(validationDate.dayOfMonth)
+}
+
+data class MonthlyCustomSchedule(val weekdaysToWeekNumbers: List<WeekDayMonthRelatedPattern>) :
+    Schedule {
+    override fun isDue(validationDate: LocalDate): Boolean {
+        weekdaysToWeekNumbers.forEach {
+            if (it.matches(validationDate)) return true
+        }
+        return false
+    }
+}
+
+data class WeekDayMonthRelatedPattern(
+    val weekDayIndex: Int,
+    val weekDayRelativeToMonth: WeekDayRelativeToMonth,
+) {
+    fun matches(validationDate: LocalDate): Boolean {
+        if (validationDate.dayOfWeek.value != weekDayIndex) return false
+
+        return with(WeekDayRelativeToMonth) {
+            val validationValue = deriveExplicitFrom(getNumber(validationDate))
+            val pattern = if (weekDayRelativeToMonth != WeekDayRelativeToMonth.Last) {
+                weekDayRelativeToMonth
+            } else {
+                val lastWeekDayNumber = getNumber( findDateOfLastWeekDayInMonth(validationDate))
+                deriveExplicitFrom(lastWeekDayNumber)
+            }
+
+            validationValue == pattern
+        }
+    }
+}
+
+infix fun Int.to(that: WeekDayRelativeToMonth) =
+    WeekDayMonthRelatedPattern(this, that)
+
 //data class CustomPeriodSchedule(
 //    val activityDaysNumber: Int = 1,
 //    val restDaysNumber: Int,

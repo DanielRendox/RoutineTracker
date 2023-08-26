@@ -8,46 +8,66 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
 
-//sealed class Routine(
-//    var title: String,
-//    var description: String,
-//    // var image
-////    var progress: Float = 0f,
-////    var completables: List<Completable>,
-////    val target: Target,
+sealed class Routine(
+    var title: String,
+    var description: String,
+    val startDate: LocalDate,
+    // var image
+//    var progress: Float = 0f,
+//    var completables: List<Completable>,
+//    val target: Target,
 //    val schedule: Schedule,
-//) : Completable {
-//
-//
-//
-//    /**
-//     * A period, during which the specified amount of work should be done for the routine's plan
-//     * to be considered completed.
-//     */
-//    abstract val targetPeriod: DatePeriod
-//
+) : Completable {
+
+    /**
+     * A period, during which the specified amount of work should be done for the routine's plan
+     * to be considered completed.
+     */
+    abstract val targetPeriod: DatePeriod
+
+    /**
+     * When the vacation mode gets activated, each day in the period is a holiday
+     */
+    var vacationPeriod: TimeInterval? = null
+
 //    fun computeRoutineStatus(date: LocalDate): CompletableStatus {
-//        // if the routine was started, return its CompletionStatus
 //        val completionStatus = computeCompletionStatus(date)
 //        if (completionStatus != null) return completionStatus
 //        // if the routine is paused,
-//        if () return CompletableStatus.NotDue
+////        if () return CompletableStatus.NotDue
 //    }
-//
-//    abstract fun computePlanningStatus(date: LocalDate): PlanningStatus
-//    abstract fun computeCompletionStatus(date: LocalDate): CompletionStatus?
-//}
-//
+
+    abstract fun computePlanningStatus(date: LocalDate): PlanningStatus
+    abstract fun computeCompletionStatus(date: LocalDate): CompletionStatus?
+
+//    fun isOnVacation(date: LocalDate) = vacationPeriod?.contains(date) ?: false
+}
+
 //class YesNoRoutine(
 //    title: String,
 //    description: String,
 //) : Routine(title, description) {
 //    override val targetPeriod = DatePeriod(days = 1)
-//    var completionHistory: MutableMap<LocalDate, Boolean> = mutableMapOf()
-//    override fun computeStatus(date: LocalDate) =
-//        if (completionHistory[date]) CompletableStatus.FullyCompleted else CompletableStatus.NotStarted
+//    private var completionHistory = emptyList<Boolean>()
+//    override fun computeStatus(validationDate: LocalDate): CompletableStatus {
+//        val periodBetweenStartAndCurrent = validationDate - startDate
+//        val currentDayNumber = periodBetweenStartAndCurrent.days + 1
+//        val currentDateIsInHistory = completionHistory.lastIndex < currentDayNumber
+//
+////        return if (currentDateIsInHistory) {
+////            if (completionHistory[currentDayNumber]) {
+////                CompletionStatus.FullyCompleted
+////            } else {
+////
+////            }
+////        } else {
+////            TODO
+////        }
+//
+//    }
 //}
 
 
