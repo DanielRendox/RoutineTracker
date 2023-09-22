@@ -1,0 +1,90 @@
+plugins {
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.jetbrains.kotlin.android)
+}
+
+android {
+    namespace 'com.rendox.routinetracker'
+    compileSdk 33
+
+    defaultConfig {
+        testInstrumentationRunner "com.rendox.routinetracker.InstrumentationTestRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    flavorDimensions = ["minSdk"]
+    productFlavors {
+        minSdk26 {
+            dimension "minSdk"
+            minSdk 26
+        }
+        minSdk21 {
+            dimension "minSdk"
+            minSdk 21
+            compileOptions {
+                coreLibraryDesugaringEnabled true
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+    buildFeatures {
+        compose true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion '1.4.8'
+    }
+}
+
+dependencies {
+    coreLibraryDesugaring libs.android.tools.desugar
+
+    implementation project(":core:data")
+    implementation project(":core:domain")
+
+    implementation libs.androidx.core.ktx
+    implementation libs.appcompat
+    implementation libs.material
+    implementation libs.androidx.core.ktx
+    implementation platform(libs.jetbrains.kotlin.bom)
+
+    // Compose
+    implementation libs.androidx.activity.compose
+    implementation libs.androidx.compose.runtime
+    implementation platform(libs.androidx.compose.bom)
+    implementation "androidx.compose.ui:ui"
+    implementation "androidx.compose.ui:ui-graphics"
+    implementation "androidx.compose.ui:ui-tooling-preview"
+    implementation libs.androidx.compose.material
+    implementation libs.androidx.lifecycle.runtime.ktx
+    implementation libs.androidx.lifecycle.runtime.compose
+    implementation libs.androidx.lifecycle.viewmodel.compose
+    implementation libs.jetbrains.kotlinx.datetime
+
+    // Koin
+    implementation platform(libs.insert.koin.bom)
+    implementation "io.insert-koin:koin-android"
+    implementation "io.insert-koin:koin-test"
+    implementation "io.insert-koin:koin-android-test"
+
+    testImplementation libs.junit
+
+    androidTestImplementation libs.androidx.test.ext.junit
+    androidTestImplementation libs.androidx.test.espresso
+    androidTestImplementation platform(libs.androidx.compose.bom)
+    androidTestImplementation "androidx.compose.ui:ui-test"
+    androidTestImplementation "androidx.compose.ui:ui-test-junit4"
+    androidTestImplementation libs.google.truth
+}

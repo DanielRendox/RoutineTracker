@@ -8,10 +8,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
-import com.rendox.routinetracker.ui.routine.RoutineItemScreen
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rendox.routinetracker.ui.theme.RoutineTrackerTheme
+import androidx.compose.runtime.getValue
+import com.rendox.routinetracker.RoutineDetailsScreen
+import com.rendox.routinetracker.RoutineViewModel
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -22,13 +28,14 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    RoutineItemScreen(
-                        title = "Do sports",
-//                        imageId = R.drawable.cycling,
-                        routineProgress = 0.25f,
-                        description = "Stay fit and healthy Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim adz minim veniam, quis nostrud",
-                        amountOfWorkToday = 4,
-                        amountOfWorkTodayCompleted = 1,
+                    val routineId = 1
+                    val viewModel by viewModel<RoutineViewModel> {
+                        parametersOf(routineId)
+                    }
+                    val state by viewModel.routineScreenState.collectAsStateWithLifecycle()
+                    RoutineDetailsScreen(
+                        modifier = Modifier.fillMaxSize(),
+                        routineScreenState = state,
                     )
                 }
             }

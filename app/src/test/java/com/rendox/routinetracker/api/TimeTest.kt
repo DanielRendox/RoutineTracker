@@ -1,6 +1,7 @@
 package com.rendox.routinetracker.api
 
 import com.google.common.truth.Truth.assertThat
+import com.rendox.routinetracker.atEndOfMonth
 import com.rendox.routinetracker.logic.WeekDayMonthRelatedPattern
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
@@ -104,5 +105,12 @@ class TimeTest {
         val date = LocalDate(year, Month.SEPTEMBER, 1)
         val lastDayOfMonth = date.atEndOfMonth
         assertThat(lastDayOfMonth).isEqualTo(LocalDate(year, java.time.Month.SEPTEMBER, 30))
+    }
+
+    @Test
+    fun `calculate the number of days in month`() {
+        val date = LocalDate(2023, Month.SEPTEMBER, 30)
+        val daysInMonth = date.atEndOfMonth.dayOfMonth
+        assertThat(daysInMonth).isEqualTo(30)
     }
 }
