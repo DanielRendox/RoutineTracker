@@ -1,0 +1,33 @@
+import com.rendox.routinetracker.core.model.HistoricalStatus;
+import com.rendox.routinetracker.core.model.RoutineType;
+import kotlin.Boolean;
+import kotlin.Int;
+import kotlinx.datetime.LocalDate;
+
+CREATE TABLE routine (
+    id INTEGER NOT NULL PRIMARY KEY,
+    type TEXT AS RoutineType NOT NULL,
+    name TEXT NOT NULL,
+    startDate INTEGER AS LocalDate NOT NULL,
+    backlogEnabled INTEGER AS Boolean NOT NULL,
+    periodSeparation INTEGER AS Boolean NOT NULL,
+    vacationStartDate INTEGER AS LocalDate,
+    vacationEndDate INTEGER AS LocalDate
+);
+
+getRoutineById:
+SELECT *
+FROM routine
+WHERE id = :id;
+
+insertRoutine:
+INSERT INTO routine
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+CREATE TABLE completionHistory (
+    id INTEGER NOT NULL PRIMARY KEY,
+    routineId INTEGER NOT NULL,
+    numberOfDateFromRoutineStart INTEGER AS Int NOT NULL,
+    status TEXT AS HistoricalStatus,
+    FOREIGN KEY(routineId) REFERENCES routine(id)
+);

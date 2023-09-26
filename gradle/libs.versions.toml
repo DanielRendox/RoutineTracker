@@ -4,7 +4,8 @@ coreKtx = "1.10.1"
 kotlin = "1.8.22"
 activityCompose = "1.7.2"
 composeRuntime = "1.5.1"
-compose = "2023.06.01"
+compose = "1.4.8"
+composeBom = "2023.06.00"
 material = "1.1.1"
 androidLifecycle = "2.6.2"
 systemuicontroller = "0.30.1"
@@ -22,15 +23,18 @@ androidGradlePlugin = "8.1.1"
 kotlinPlugin = "1.8.22"
 appcompat = "1.6.1"
 com-google-android-material-material = "1.9.0"
-org-jetbrains-kotlin-jvm = "1.8.22"
 
 [libraries]
+android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }
+kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+sqldelight-gradlePlugin = { group = "app.cash.sqldelight", name = "gradle-plugin", version.ref = "sqldelight" }
+
 android-tools-desugar = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "coreLibraryDesugaring" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 jetbrains-kotlin-bom = { group = "org.jetbrains.kotlin", name = "kotlin-bom", version.ref = "kotlin" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime", version.ref = "composeRuntime" }
-androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-compose-material = { group = "androidx.compose.material3", name = "material3", version.ref = "material" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "androidLifecycle" }
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidLifecycle" }
@@ -38,6 +42,7 @@ androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "l
 google-accompanist-systemuicontroller = { group = "com.google.accompanist", name = "accompanist-systemuicontroller", version.ref = "systemuicontroller" }
 jetbrains-kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
 jetbrains-kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
+jetbrains-kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
 insert-koin-bom = { group = "io.insert-koin", name = "koin-bom", version.ref = "koin" }
 app-cash-sqldelight-android-driver = { group = "app.cash.sqldelight", name = "android-driver", version.ref = "sqldelight" }
 app-cash-sqldelight-coroutines-extensions-jvm = { group = "app.cash.sqldelight", name = "coroutines-extensions-jvm", version.ref = "sqldelight" }
@@ -45,17 +50,18 @@ app-cash-sqldelight-primitive-adapters = { group = "app.cash.sqldelight", name =
 androidx-test-core = { group = "androidx.test", name = "core", version.ref = "androidxTestCore" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 google-truth = { group = "com.google.truth", name = "truth", version.ref = "googleTruth" }
-androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxJunit"}
+androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxJunit" }
 androidx-test-espresso = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "com-google-android-material-material" }
+androidx-runner = { group = "androidx.test", name = "runner", version = "1.5.2" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinPlugin" }
-app-cash-sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight"}
-org-jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "org-jetbrains-kotlin-jvm" }
+app-cash-sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
+org-jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 
 [bundles]
 
