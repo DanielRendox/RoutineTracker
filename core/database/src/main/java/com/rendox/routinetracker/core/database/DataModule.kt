@@ -3,7 +3,7 @@ package com.rendox.routinetracker.core.database
 import app.cash.sqldelight.ColumnAdapter
 import app.cash.sqldelight.EnumColumnAdapter
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
-import com.rendox.routinetracker.core.database.routine.Routine
+import com.rendox.routinetracker.core.database.routine.RoutineEntity
 import com.rendox.routinetracker.core.logic.time.epoch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.datetime.DatePeriod
@@ -24,7 +24,7 @@ val dataModule = module {
                 schema = RoutineTrackerDatabase.Schema,
                 context = get(),
             ),
-            routineAdapter = Routine.Adapter(
+            routineEntityAdapter = RoutineEntity.Adapter(
                 typeAdapter = EnumColumnAdapter(),
                 startDateAdapter = localDateAdapter,
                 vacationStartDateAdapter = localDateAdapter,

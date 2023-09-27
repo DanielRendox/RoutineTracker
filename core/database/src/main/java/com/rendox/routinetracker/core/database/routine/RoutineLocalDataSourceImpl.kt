@@ -11,9 +11,9 @@ class RoutineLocalDataSourceImpl(
     private val dispatcher: CoroutineDispatcher,
 ): RoutineLocalDataSource {
 
-    private val queries = db.routineQueries
+    private val queries = db.routineEntityQueries
 
-    override suspend fun getRoutineById(id: Long): Routine? {
+    override suspend fun getRoutineById(id: Long): RoutineEntity? {
         return withContext(dispatcher) {
             queries.getRoutineById(id).executeAsOneOrNull()
         }

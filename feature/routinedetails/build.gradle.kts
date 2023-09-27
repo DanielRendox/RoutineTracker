@@ -10,7 +10,5 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:database"))
-
     implementation(libs.jetbrains.kotlinx.datetime)
 }

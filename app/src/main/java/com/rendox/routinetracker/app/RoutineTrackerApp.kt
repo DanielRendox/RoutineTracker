@@ -10,9 +10,9 @@ import org.koin.core.context.startKoin
 class RoutineTrackerApp: Application() {
     override fun onCreate() {
         super.onCreate()
-//        startKoin {
-//            androidContext(this@RoutineTrackerApp)
-//            modules(dataModule, routineDataModule, routineModule)
-//        }
+        startKoin {
+            androidContext(this@RoutineTrackerApp)
+            modules(dataModule, routineDataModule, routineModule)
+        }
     }
 }

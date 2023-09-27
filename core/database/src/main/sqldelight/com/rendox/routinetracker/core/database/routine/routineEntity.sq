@@ -4,7 +4,7 @@ import kotlin.Boolean;
 import kotlin.Int;
 import kotlinx.datetime.LocalDate;
 
-CREATE TABLE routine (
+CREATE TABLE routineEntity (
     id INTEGER NOT NULL PRIMARY KEY,
     type TEXT AS RoutineType NOT NULL,
     name TEXT NOT NULL,
@@ -17,11 +17,11 @@ CREATE TABLE routine (
 
 getRoutineById:
 SELECT *
-FROM routine
+FROM routineEntity
 WHERE id = :id;
 
 insertRoutine:
-INSERT INTO routine
+INSERT INTO routineEntity
 VALUES (?, ?, ?, ?, ?, ?, ?, ?);
 
 CREATE TABLE completionHistory (
@@ -29,5 +29,5 @@ CREATE TABLE completionHistory (
     routineId INTEGER NOT NULL,
     numberOfDateFromRoutineStart INTEGER AS Int NOT NULL,
     status TEXT AS HistoricalStatus,
-    FOREIGN KEY(routineId) REFERENCES routine(id)
+    FOREIGN KEY(routineId) REFERENCES routineEntity(id)
 );

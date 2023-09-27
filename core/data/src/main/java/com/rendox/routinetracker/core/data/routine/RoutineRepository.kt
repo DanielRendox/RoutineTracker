@@ -1,6 +1,6 @@
 package com.rendox.routinetracker.core.data.routine
 
-import com.rendox.routinetracker.core.database.routine.Routine
+import com.rendox.routinetracker.core.model.Routine
 import kotlinx.datetime.LocalDate
 
 interface RoutineRepository {

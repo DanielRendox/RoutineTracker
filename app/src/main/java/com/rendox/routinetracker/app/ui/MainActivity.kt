@@ -9,7 +9,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.rendox.routinetracker.app.ui.theme.RoutineTrackerTheme
+import com.rendox.routinetracker.core.ui.theme.RoutineTrackerTheme
 import androidx.compose.runtime.getValue
 import com.rendox.routinetracker.feature.routinedetails.RoutineDetailsScreen
 import com.rendox.routinetracker.feature.routinedetails.RoutineViewModel

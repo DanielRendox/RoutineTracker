@@ -1,4 +1,4 @@
-package com.rendox.routinetracker.app.ui.theme
+package com.rendox.routinetracker.core.ui.theme
 
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme

@@ -43,6 +43,7 @@ dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:database"))
     implementation(project(":core:testcommon"))
+    implementation(project(":core:ui"))
 
     implementation(libs.jetbrains.kotlinx.datetime)
 }

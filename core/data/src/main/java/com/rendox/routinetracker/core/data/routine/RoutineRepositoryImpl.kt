@@ -1,7 +1,7 @@
 package com.rendox.routinetracker.core.data.routine
 
-import com.rendox.routinetracker.core.database.routine.Routine
 import com.rendox.routinetracker.core.database.routine.RoutineLocalDataSource
+import com.rendox.routinetracker.core.model.Routine
 import kotlinx.datetime.LocalDate
 
 class RoutineRepositoryImpl(
@@ -9,7 +9,7 @@ class RoutineRepositoryImpl(
 ): RoutineRepository {
 
     override suspend fun getRoutineById(id: Long): Routine? {
-        return localDataSource.getRoutineById(id = id)
+        return localDataSource.getRoutineById(id = id)?.asExternalModel()
     }
 
     override suspend fun insertRoutine(
