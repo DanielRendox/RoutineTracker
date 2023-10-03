@@ -21,7 +21,6 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
             extensions.configure<LibraryExtension> {
                 configureKotlinAndroid(this)
                 defaultConfig.targetSdk = 33
-                defaultConfig.minSdk = 21
                 configureBuildTypes(this)
                 configurePackaging(this)
                 addLocalTestDependencies(this)

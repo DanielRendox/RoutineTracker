@@ -5,6 +5,10 @@ plugins {
 
 android {
     namespace = "com.rendox.routinetracker.core.testcommon"
+
+    defaultConfig {
+        minSdk = 21
+    }
 }
 
 dependencies {

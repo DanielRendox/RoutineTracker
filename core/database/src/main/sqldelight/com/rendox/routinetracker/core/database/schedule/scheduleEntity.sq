@@ -1,0 +1,25 @@
+import com.rendox.routinetracker.core.database.model.ScheduleType;
+import kotlin.Boolean;
+import kotlin.Int;
+import kotlinx.datetime.DayOfWeek;
+
+CREATE TABLE scheduleEntity (
+    id INTEGER NOT NULL PRIMARY KEY,
+    type TEXT AS ScheduleType NOT NULL,
+    numOfDaysInPeriodicSchedule INTEGER AS Int,
+    startDayOfWeekInWeeklySchedule INTEGER AS DayOfWeek,
+    includeLastDayOfMonthInMonthlySchedule INTEGER AS Boolean,
+    FOREIGN KEY(id) REFERENCES routineEntity(id)
+);
+
+getScheduleById:
+SELECT *
+FROM scheduleEntity
+WHERE id = ?;
+
+insertSchedule:
+INSERT INTO scheduleEntity
+VALUES (?, ?, ?, ?, ?);
+
+lastInsertRowId:
+SELECT last_insert_rowid();

@@ -1,12 +1,29 @@
 plugins {
     id("routinetracker.android.application")
     id("routinetracker.android.application.compose")
-    id("routinetracker.android.application.flavors")
     id("routinetracker.android.koin")
 }
 
 android {
     namespace = "com.rendox.routinetracker.app"
+
+    flavorDimensions += "minSdk"
+    productFlavors {
+        create("minSdk26") {
+            dimension = "minSdk"
+            minSdk = 26
+            compileOptions {
+                isCoreLibraryDesugaringEnabled = false
+            }
+        }
+        create("minSdk21") {
+            dimension = "minSdk"
+            minSdk = 21
+            compileOptions {
+                isCoreLibraryDesugaringEnabled = true
+            }
+        }
+    }
 
     defaultConfig {
         applicationId = "com.rendox.routinetracker"
@@ -42,6 +59,7 @@ dependencies {
     implementation(project(":feature:routinedetails"))
     implementation(project(":core:data"))
     implementation(project(":core:database"))
+    implementation(project(":core:model"))
     implementation(project(":core:testcommon"))
     implementation(project(":core:ui"))
 

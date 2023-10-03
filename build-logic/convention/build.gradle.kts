@@ -47,10 +47,6 @@ gradlePlugin {
             id = "routinetracker.android.feature"
             implementationClass = "AndroidFeatureConventionPlugin"
         }
-        register("androidFlavors") {
-            id = "routinetracker.android.application.flavors"
-            implementationClass = "AndroidApplicationFlavorsConventionPlugin"
-        }
         register("jvmLibrary") {
             id = "routinetracker.jvm.library"
             implementationClass = "JvmLibraryConventionPlugin"

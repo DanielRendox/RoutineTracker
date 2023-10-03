@@ -1,0 +1,17 @@
+import kotlin.Int;
+
+CREATE TABLE dueDateEntity (
+    id INTEGER NOT NULL PRIMARY KEY,
+    scheduleId INTEGER NOT NULL,
+    dueDateNumber INTEGER AS Int NOT NULL,
+    FOREIGN KEY(scheduleId) REFERENCES scheduleEntity(id)
+);
+
+getDueDates:
+SELECT *
+FROM dueDateEntity
+WHERE scheduleId = ?;
+
+insertDueDate:
+INSERT INTO dueDateEntity
+VALUES (?, ?, ?);

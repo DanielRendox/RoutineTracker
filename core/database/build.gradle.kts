@@ -15,6 +15,25 @@ sqldelight {
 
 android {
     namespace = "com.rendox.routinetracker.core.database"
+
+    flavorDimensions += "minSdk"
+
+    productFlavors {
+        create("minSdk26") {
+            dimension = "minSdk"
+            minSdk = 26
+            compileOptions {
+                isCoreLibraryDesugaringEnabled = false
+            }
+        }
+        create("minSdk21") {
+            dimension = "minSdk"
+            minSdk = 21
+            compileOptions {
+                isCoreLibraryDesugaringEnabled = true
+            }
+        }
+    }
 }
 
 dependencies {
@@ -26,6 +45,8 @@ dependencies {
     implementation(libs.app.cash.sqldelight.android.driver)
     implementation(libs.app.cash.sqldelight.coroutines.extensions.jvm)
     implementation(libs.app.cash.sqldelight.primitive.adapters)
+    implementation(libs.app.cash.sqldelight.sqlite.driver)
 
+    testImplementation(libs.jetbrains.kotlinx.coroutines.test)
     androidTestImplementation(libs.jetbrains.kotlinx.coroutines.test)
 }

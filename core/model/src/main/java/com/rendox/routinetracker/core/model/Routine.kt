@@ -2,13 +2,24 @@ package com.rendox.routinetracker.core.model
 
 import kotlinx.datetime.LocalDate
 
-data class Routine(
-    val id: Long,
-    val type: RoutineType,
-    val name: String,
-    val startDate: LocalDate,
-    val backlogEnabled: Boolean,
-    val periodSeparation: Boolean,
-    val vacationStartDate: LocalDate?,
-    val vacationEndDate: LocalDate?,
-)
+sealed class Routine {
+    abstract val id: Long?
+    abstract val name: String
+    abstract val startDate: LocalDate
+    abstract val backlogEnabled: Boolean
+    abstract val periodSeparation: Boolean
+    abstract val vacationStartDate: LocalDate?
+    abstract val vacationEndDate: LocalDate?
+    abstract val schedule: Schedule
+
+    data class YesNoRoutine(
+        override val id: Long?,
+        override val name: String,
+        override val startDate: LocalDate,
+        override val backlogEnabled: Boolean,
+        override val periodSeparation: Boolean,
+        override val vacationStartDate: LocalDate?,
+        override val vacationEndDate: LocalDate?,
+        override val schedule: Schedule,
+    ) : Routine()
+}

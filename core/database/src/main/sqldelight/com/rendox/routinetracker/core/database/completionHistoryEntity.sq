@@ -1,0 +1,26 @@
+import com.rendox.routinetracker.core.model.HistoricalStatus;
+
+CREATE TABLE completionHistoryEntity (
+    numberOfDateFromRoutineStart INTEGER NOT NULL PRIMARY KEY,
+    routineId INTEGER NOT NULL,
+    status TEXT AS HistoricalStatus NOT NULL,
+    FOREIGN KEY(routineId) REFERENCES routineEntity(id)
+);
+
+getHistoryEntriesByIndices:
+SELECT *
+FROM completionHistoryEntity
+WHERE routineId = :routineId
+    AND numberOfDateFromRoutineStart BETWEEN :start AND :end;
+
+getHistoryEntryByIndex:
+SELECT *
+FROM completionHistoryEntity
+WHERE routineId = ?
+    AND numberOfDateFromRoutineStart = ?
+ORDER BY
+        numberOfDateFromRoutineStart ASC;
+
+insertHistoryEntry:
+INSERT INTO completionHistoryEntity
+VALUES (?, ?, ?);

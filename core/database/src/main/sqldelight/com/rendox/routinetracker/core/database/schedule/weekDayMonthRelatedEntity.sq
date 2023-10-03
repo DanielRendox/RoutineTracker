@@ -1,0 +1,19 @@
+import com.rendox.routinetracker.core.model.WeekDayNumberMonthRelated;
+import kotlin.Int;
+
+CREATE TABLE weekDayMonthRelatedEntity (
+    id INTEGER NOT NULL PRIMARY KEY,
+    scheduleId INTEGER NOT NULL,
+    weekDayIndex INTEGER AS Int NOT NULL,
+    weekDayNumberMonthRelated TEXT AS WeekDayNumberMonthRelated NOT NULL,
+    FOREIGN KEY(scheduleId) REFERENCES scheduleEntity(id)
+);
+
+getWeekDayMonthRelatedDays:
+SELECT *
+FROM weekDayMonthRelatedEntity
+WHERE scheduleId = :scheduleId;
+
+insertWeekDayMonthRelatedEntry:
+INSERT INTO weekDayMonthRelatedEntity
+VALUES (?, ?, ?, ?);

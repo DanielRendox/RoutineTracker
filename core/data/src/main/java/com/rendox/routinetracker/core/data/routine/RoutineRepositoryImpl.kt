@@ -6,27 +6,13 @@ import kotlinx.datetime.LocalDate
 
 class RoutineRepositoryImpl(
     private val localDataSource: RoutineLocalDataSource,
-): RoutineRepository {
+) : RoutineRepository {
 
     override suspend fun getRoutineById(id: Long): Routine? {
-        return localDataSource.getRoutineById(id = id)?.asExternalModel()
+        return localDataSource.getRoutineById(id = id)
     }
 
-    override suspend fun insertRoutine(
-        id: Long?,
-        type: com.rendox.routinetracker.core.model.RoutineType,
-        name: String,
-        startDate: LocalDate,
-        backlogEnabled: Boolean,
-        periodSeparation: Boolean,
-    ) {
-        localDataSource.insertRoutine(
-            id = id,
-            type = type,
-            name = name,
-            startDate = startDate,
-            backlogEnabled = backlogEnabled,
-            periodSeparation = periodSeparation,
-        )
+    override suspend fun insertRoutine(routine: Routine) {
+        localDataSource.insertRoutine(routine)
     }
 }

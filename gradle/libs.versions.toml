@@ -47,6 +47,7 @@ insert-koin-bom = { group = "io.insert-koin", name = "koin-bom", version.ref = "
 app-cash-sqldelight-android-driver = { group = "app.cash.sqldelight", name = "android-driver", version.ref = "sqldelight" }
 app-cash-sqldelight-coroutines-extensions-jvm = { group = "app.cash.sqldelight", name = "coroutines-extensions-jvm", version.ref = "sqldelight" }
 app-cash-sqldelight-primitive-adapters = { group = "app.cash.sqldelight", name = "primitive-adapters", version.ref = "sqldelight" }
+app-cash-sqldelight-sqlite-driver = { group = "app.cash.sqldelight", name = "sqlite-driver", version.ref = "sqldelight" }
 androidx-test-core = { group = "androidx.test", name = "core", version.ref = "androidxTestCore" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 google-truth = { group = "com.google.truth", name = "truth", version.ref = "googleTruth" }
