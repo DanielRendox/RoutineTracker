@@ -20,7 +20,7 @@ class CompletionHistoryLocalDataSourceImpl(
         return db.completionHistoryEntityQueries.getHistoryEntriesByIndices(
             routineId = routineId,
             start = dateFromRoutineStartIndices.first,
-            end = dateFromRoutineStartIndices.last
+            end = dateFromRoutineStartIndices.last,
         ).asFlow().mapToList(dispatcher).map {
             it.map { historyEntity -> historyEntity.status }
         }

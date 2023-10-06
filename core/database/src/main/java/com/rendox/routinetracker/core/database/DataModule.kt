@@ -9,11 +9,13 @@ import com.rendox.routinetracker.core.database.routine.RoutineEntity
 import com.rendox.routinetracker.core.database.schedule.DueDateEntity
 import com.rendox.routinetracker.core.database.schedule.ScheduleEntity
 import com.rendox.routinetracker.core.database.schedule.WeekDayMonthRelatedEntity
+import com.rendox.routinetracker.core.logic.time.AnnualDate
 import com.rendox.routinetracker.core.logic.time.epoch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.Month
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.plus
 import org.koin.dsl.module
@@ -44,6 +46,7 @@ val dataModule = module {
                 typeAdapter = EnumColumnAdapter(),
                 numOfDaysInPeriodicScheduleAdapter = IntColumnAdapter,
                 startDayOfWeekInWeeklyScheduleAdapter = dayOfWeekAdapter,
+                startDayOfYearInAnnualScheduleAdapter = annualDateAdapter,
             ),
             dueDateEntityAdapter = DueDateEntity.Adapter(
                 dueDateNumberAdapter = IntColumnAdapter,
@@ -74,3 +77,26 @@ val localDateAdapter = object : ColumnAdapter<LocalDate, Long> {
 
 fun Int.toLocalDate() = epoch.plus(DatePeriod(days = this))
 fun LocalDate.toInt() = epoch.daysUntil(this)
+
+val annualDateAdapter = object : ColumnAdapter<AnnualDate, Long> {
+    override fun decode(databaseValue: Long) = databaseValue.toInt().toAnnualDate()
+    override fun encode(value: AnnualDate) = value.toInt().toLong()
+}
+
+fun Int.toAnnualDate(): AnnualDate {
+    if (this == 366) {
+        return AnnualDate(Month.FEBRUARY, 29)
+    }
+    val arbitraryNotLeapYearStart = epoch
+    val requestedDate = arbitraryNotLeapYearStart.plus(DatePeriod(days = this))
+    return AnnualDate(requestedDate.month, requestedDate.dayOfMonth)
+}
+
+fun AnnualDate.toInt(): Int {
+    if (this == AnnualDate(Month.FEBRUARY, 29)) {
+        return 366
+    }
+    val arbitraryNotLeapYearStart = epoch
+    val requestedDate = LocalDate(arbitraryNotLeapYearStart.year, this.month, this.dayOfMonth)
+    return arbitraryNotLeapYearStart.daysUntil(requestedDate)
+}

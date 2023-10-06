@@ -3,5 +3,7 @@ plugins {
 }
 
 dependencies {
+    implementation(project(":core:logic"))
+
     implementation(libs.jetbrains.kotlinx.datetime)
 }

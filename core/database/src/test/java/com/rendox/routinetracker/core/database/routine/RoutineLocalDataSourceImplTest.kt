@@ -5,10 +5,11 @@ import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
 import com.rendox.routinetracker.core.database.dataModule
+import com.rendox.routinetracker.core.logic.time.AnnualDate
 import com.rendox.routinetracker.core.model.Routine
 import com.rendox.routinetracker.core.model.Schedule
-import com.rendox.routinetracker.core.model.WeekDayMonthRelated
-import com.rendox.routinetracker.core.model.WeekDayNumberMonthRelated
+import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
+import com.rendox.routinetracker.core.logic.time.WeekDayNumberMonthRelated
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -63,7 +64,6 @@ class RoutineLocalDataSourceImplTest : KoinTest {
             name = "Programming",
             startDate = LocalDate(2023, Month.SEPTEMBER, 1),
             backlogEnabled = true,
-            periodSeparation = false,
             vacationStartDate = LocalDate(2023, Month.SEPTEMBER, 10),
             vacationEndDate = null,
             schedule = Schedule.EveryDaySchedule,
@@ -98,7 +98,6 @@ class RoutineLocalDataSourceImplTest : KoinTest {
             name = "Programming",
             startDate = LocalDate(2023, Month.SEPTEMBER, 28),
             backlogEnabled = true,
-            periodSeparation = true,
             vacationStartDate = LocalDate(2023, Month.OCTOBER, 10),
             vacationEndDate = null,
             schedule = schedule,
@@ -127,6 +126,7 @@ class RoutineLocalDataSourceImplTest : KoinTest {
             dueDatesIndices = dueDatesIndices,
             includeLastDayOfMonth = true,
             weekDaysMonthRelated = weekDaysMonthRelated,
+            startFromRoutineStart = true,
         )
 
         val routine = Routine.YesNoRoutine(
@@ -134,7 +134,34 @@ class RoutineLocalDataSourceImplTest : KoinTest {
             name = "Studying",
             startDate = LocalDate(2023, Month.SEPTEMBER, 28),
             backlogEnabled = false,
-            periodSeparation = true,
+            vacationStartDate = LocalDate(2023, Month.OCTOBER, 10),
+            vacationEndDate = LocalDate(2023, Month.NOVEMBER, 1),
+            schedule = schedule,
+        )
+
+        routineLocalDataSource.insertRoutine(routine)
+        val resultingRoutine = routineLocalDataSource.getRoutineById(routine.id!!)
+        assertThat(resultingRoutine).isEqualTo(routine)
+    }
+
+    @Test
+    fun getInsertRoutineWithMonthlyScheduleOnlyLastDayOfMonth() = runTest {
+        val routineLocalDataSource = RoutineLocalDataSourceImpl(
+            db = get(), dispatcher = UnconfinedTestDispatcher(testScheduler)
+        )
+
+        val schedule = Schedule.MonthlySchedule(
+            dueDatesIndices = emptyList(),
+            includeLastDayOfMonth = true,
+            weekDaysMonthRelated = emptyList(),
+            startFromRoutineStart = true,
+        )
+
+        val routine = Routine.YesNoRoutine(
+            id = 1,
+            name = "Studying",
+            startDate = LocalDate(2023, Month.SEPTEMBER, 28),
+            backlogEnabled = false,
             vacationStartDate = LocalDate(2023, Month.OCTOBER, 10),
             vacationEndDate = LocalDate(2023, Month.NOVEMBER, 1),
             schedule = schedule,
@@ -167,7 +194,39 @@ class RoutineLocalDataSourceImplTest : KoinTest {
             name = "Studying",
             startDate = LocalDate(2023, Month.SEPTEMBER, 28),
             backlogEnabled = false,
-            periodSeparation = true,
+            vacationStartDate = LocalDate(2023, Month.OCTOBER, 10),
+            vacationEndDate = LocalDate(2023, Month.NOVEMBER, 1),
+            schedule = schedule,
+        )
+
+        routineLocalDataSource.insertRoutine(routine)
+        val resultingRoutine = routineLocalDataSource.getRoutineById(routine.id!!)
+        assertThat(resultingRoutine).isEqualTo(routine)
+    }
+
+    @Test
+    fun getInsertRoutineWithAnnualSchedule() = runTest {
+        val routineLocalDataSource = RoutineLocalDataSourceImpl(
+            db = get(), dispatcher = UnconfinedTestDispatcher(testScheduler)
+        )
+
+        val dueDates = listOf(
+            AnnualDate(Month.JANUARY, 1),
+            AnnualDate(Month.FEBRUARY, 29),
+            AnnualDate(Month.MAY, 25),
+            AnnualDate(Month.SEPTEMBER, 30),
+        )
+
+        val schedule = Schedule.AnnualSchedule(
+            dueDates = dueDates,
+            startDayOfYear = AnnualDate(Month.MAY, 25)
+        )
+
+        val routine = Routine.YesNoRoutine(
+            id = 1,
+            name = "Studying",
+            startDate = LocalDate(2023, Month.SEPTEMBER, 28),
+            backlogEnabled = false,
             vacationStartDate = LocalDate(2023, Month.OCTOBER, 10),
             vacationEndDate = LocalDate(2023, Month.NOVEMBER, 1),
             schedule = schedule,

@@ -1,4 +1,4 @@
-import com.rendox.routinetracker.core.model.RoutineType;
+import com.rendox.routinetracker.core.database.model.RoutineType;
 import kotlin.Boolean;
 import kotlinx.datetime.LocalDate;
 
@@ -8,7 +8,7 @@ CREATE TABLE routineEntity (
     name TEXT NOT NULL,
     startDate INTEGER AS LocalDate NOT NULL,
     backlogEnabled INTEGER AS Boolean NOT NULL,
-    periodSeparation INTEGER AS Boolean NOT NULL,
+    periodSeparation INTEGER AS Boolean,
     vacationStartDate INTEGER AS LocalDate,
     vacationEndDate INTEGER AS LocalDate
 );

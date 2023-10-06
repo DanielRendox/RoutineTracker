@@ -5,5 +5,6 @@ enum class ScheduleType {
     WeeklySchedule,
     MonthlySchedule,
     PeriodicCustomSchedule,
-    CustomDateSchedule;
+    CustomDateSchedule,
+    AnnualSchedule;
 }

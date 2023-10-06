@@ -11,7 +11,6 @@ internal fun RoutineEntity.toYesNoRoutine(
     name = this.name,
     startDate = this.startDate,
     backlogEnabled = this.backlogEnabled,
-    periodSeparation = this.periodSeparation,
     vacationStartDate = this.vacationStartDate,
     vacationEndDate = this.vacationEndDate,
     schedule = schedule,

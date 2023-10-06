@@ -14,9 +14,10 @@ import com.rendox.routinetracker.core.database.schedule.ScheduleEntity
 import com.rendox.routinetracker.core.database.toDayOfWeek
 import com.rendox.routinetracker.core.database.toInt
 import com.rendox.routinetracker.core.model.Routine
-import com.rendox.routinetracker.core.model.RoutineType
+import com.rendox.routinetracker.core.database.model.RoutineType
+import com.rendox.routinetracker.core.database.model.toAnnualSchedule
 import com.rendox.routinetracker.core.model.Schedule
-import com.rendox.routinetracker.core.model.WeekDayMonthRelated
+import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
@@ -28,28 +29,27 @@ class RoutineLocalDataSourceImpl(
     override suspend fun getRoutineById(id: Long): Routine? {
         return withContext(dispatcher) {
             db.routineEntityQueries.transactionWithResult {
-                val schedule: Schedule? = getScheduleEntity(id)?.toExternalModel { getDueDates(it) }
-                schedule?.let { getRoutineEntity(id)?.toExternalModel(it) }
+                val schedule: Schedule = getScheduleEntity(id).toExternalModel { getDueDates(it) }
+                getRoutineEntity(id).toExternalModel(schedule)
             }
         }
     }
 
     @Suppress("UnusedReceiverParameter")
-    private fun TransactionWithReturn<Routine?>.getRoutineEntity(id: Long): RoutineEntity? =
-        db.routineEntityQueries.getRoutineById(id).executeAsOneOrNull()
+    private fun TransactionWithReturn<Routine?>.getRoutineEntity(id: Long): RoutineEntity =
+        db.routineEntityQueries.getRoutineById(id).executeAsOne()
 
     @Suppress("UnusedReceiverParameter")
-    private fun TransactionWithReturn<Routine?>.getScheduleEntity(id: Long): ScheduleEntity? =
-        db.scheduleEntityQueries.getScheduleById(id).executeAsOneOrNull()
+    private fun TransactionWithReturn<Routine?>.getScheduleEntity(id: Long): ScheduleEntity =
+        db.scheduleEntityQueries.getScheduleById(id).executeAsOne()
 
     @Suppress("UnusedReceiverParameter")
     private fun TransactionWithReturn<Routine?>.getDueDates(scheduleId: Long): List<Int> =
         db.dueDateEntityQueries.getDueDates(scheduleId).executeAsList().map { it.dueDateNumber }
 
-    private fun ScheduleEntity.toExternalModel(dueDatesProvider: (Long) -> List<Int>): Schedule? {
+    private fun ScheduleEntity.toExternalModel(dueDatesProvider: (Long) -> List<Int>): Schedule {
         if (type == ScheduleType.EveryDaySchedule) return constructEveryDaySchedule()
         val dueDates = dueDatesProvider(id)
-        if (dueDates.isEmpty()) return null
         return when (type) {
             ScheduleType.WeeklySchedule -> this.toWeeklySchedule(dueDates)
             ScheduleType.MonthlySchedule -> {
@@ -59,6 +59,7 @@ class RoutineLocalDataSourceImpl(
 
             ScheduleType.PeriodicCustomSchedule -> this.toPeriodicCustomSchedule(dueDates)
             ScheduleType.CustomDateSchedule -> constructCustomDateSchedule(dueDates)
+            ScheduleType.AnnualSchedule -> this.toAnnualSchedule(dueDates)
             else -> throw IllegalArgumentException()
         }
     }
@@ -101,7 +102,7 @@ class RoutineLocalDataSourceImpl(
             name = routine.name,
             startDate = routine.startDate,
             backlogEnabled = routine.backlogEnabled,
-            periodSeparation = routine.periodSeparation,
+            periodSeparation = null,
             vacationStartDate = routine.vacationStartDate,
             vacationEndDate = routine.vacationEndDate,
         )
@@ -119,9 +120,7 @@ class RoutineLocalDataSourceImpl(
                 insertMonthlySchedule(schedule)
                 val insertedScheduleId = db.scheduleEntityQueries.lastInsertRowId().executeAsOne()
                 insertDueDates(schedule.dueDatesIndices)
-                schedule.weekDaysMonthRelated?.let {
-                    insertWeekDaysMonthRelated(insertedScheduleId, it)
-                }
+                insertWeekDaysMonthRelated(insertedScheduleId, schedule.weekDaysMonthRelated)
             }
 
             is Schedule.PeriodicCustomSchedule -> {
@@ -131,6 +130,11 @@ class RoutineLocalDataSourceImpl(
 
             is Schedule.CustomDateSchedule -> {
                 insertCustomDateSchedule()
+                insertDueDates(schedule.dueDates.map { it.toInt() })
+            }
+
+            is Schedule.AnnualSchedule -> {
+                insertAnnualSchedule(schedule)
                 insertDueDates(schedule.dueDates.map { it.toInt() })
             }
         }
@@ -143,6 +147,8 @@ class RoutineLocalDataSourceImpl(
             numOfDaysInPeriodicSchedule = null,
             startDayOfWeekInWeeklySchedule = null,
             includeLastDayOfMonthInMonthlySchedule = null,
+            startFromRoutineStartInMonthlySchedule = null,
+            startDayOfYearInAnnualSchedule = null,
         )
     }
 
@@ -153,6 +159,8 @@ class RoutineLocalDataSourceImpl(
             numOfDaysInPeriodicSchedule = null,
             startDayOfWeekInWeeklySchedule = schedule.startDayOfWeek,
             includeLastDayOfMonthInMonthlySchedule = null,
+            startFromRoutineStartInMonthlySchedule = null,
+            startDayOfYearInAnnualSchedule = null,
         )
     }
 
@@ -163,6 +171,8 @@ class RoutineLocalDataSourceImpl(
             numOfDaysInPeriodicSchedule = null,
             startDayOfWeekInWeeklySchedule = null,
             includeLastDayOfMonthInMonthlySchedule = schedule.includeLastDayOfMonth,
+            startFromRoutineStartInMonthlySchedule = schedule.startFromRoutineStart,
+            startDayOfYearInAnnualSchedule = null,
         )
     }
 
@@ -181,9 +191,11 @@ class RoutineLocalDataSourceImpl(
         db.scheduleEntityQueries.insertSchedule(
             id = null,
             type = ScheduleType.PeriodicCustomSchedule,
-            numOfDaysInPeriodicSchedule = schedule.numOfDays,
+            numOfDaysInPeriodicSchedule = schedule.numOfDaysInPeriod,
             startDayOfWeekInWeeklySchedule = null,
             includeLastDayOfMonthInMonthlySchedule = null,
+            startFromRoutineStartInMonthlySchedule = null,
+            startDayOfYearInAnnualSchedule = null,
         )
     }
 
@@ -194,6 +206,20 @@ class RoutineLocalDataSourceImpl(
             numOfDaysInPeriodicSchedule = null,
             startDayOfWeekInWeeklySchedule = null,
             includeLastDayOfMonthInMonthlySchedule = null,
+            startFromRoutineStartInMonthlySchedule = null,
+            startDayOfYearInAnnualSchedule = null,
+        )
+    }
+
+    private fun insertAnnualSchedule(schedule: Schedule.AnnualSchedule) {
+        db.scheduleEntityQueries.insertSchedule(
+            id = null,
+            type = ScheduleType.AnnualSchedule,
+            numOfDaysInPeriodicSchedule = null,
+            startDayOfWeekInWeeklySchedule = null,
+            includeLastDayOfMonthInMonthlySchedule = null,
+            startFromRoutineStartInMonthlySchedule = null,
+            startDayOfYearInAnnualSchedule = schedule.startDayOfYear,
         )
     }
 

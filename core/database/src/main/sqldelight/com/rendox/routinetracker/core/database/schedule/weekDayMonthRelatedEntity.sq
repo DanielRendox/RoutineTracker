@@ -1,4 +1,4 @@
-import com.rendox.routinetracker.core.model.WeekDayNumberMonthRelated;
+import com.rendox.routinetracker.core.logic.time.WeekDayNumberMonthRelated;
 import kotlin.Int;
 
 CREATE TABLE weekDayMonthRelatedEntity (
