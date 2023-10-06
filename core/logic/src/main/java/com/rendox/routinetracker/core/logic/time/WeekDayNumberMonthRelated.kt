@@ -21,6 +21,9 @@ enum class WeekDayNumberMonthRelated {
     Last;
 }
 
+/**
+ * Never returns WeekDayMonthRelated.Last
+ */
 fun LocalDate.deriveWeekDayRelativeToMonthNumber(): WeekDayNumberMonthRelated {
     val firstWeekDay = this.findDateOfFirstWeekDayInMonth()
     var resultingDate = firstWeekDay
@@ -65,4 +68,21 @@ private fun LocalDate.findDateOfFirstWeekDayInMonth(): LocalDate {
         firstWeekDay = firstWeekDay.plus(DatePeriod(days = 1))
     }
     return firstWeekDay
+}
+
+fun WeekDayMonthRelated.matches(validationDate: LocalDate): Boolean {
+    if (validationDate.dayOfWeek != this.dayOfWeek) return false
+
+    if (
+        this.weekDayNumberMonthRelated == WeekDayNumberMonthRelated.Last
+        &&
+        validationDate.isLastWeekDayInMonth()
+    ) {
+        return true
+    }
+
+    val validationDateWeekDayNumberMonthRelated = validationDate
+        .deriveWeekDayRelativeToMonthNumber()
+
+    return this.weekDayNumberMonthRelated == validationDateWeekDayNumberMonthRelated
 }
