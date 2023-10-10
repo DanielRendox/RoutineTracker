@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.rendox.routinetracker.core.logic.time.AnnualDate
 import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
 import com.rendox.routinetracker.core.logic.time.WeekDayNumberMonthRelated
+import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.Schedule
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DayOfWeek
@@ -21,13 +22,15 @@ class ScheduleUtilTest {
 
     @Test
     fun everyDayScheduleIsDue() {
-        val schedule: Schedule = Schedule.EveryDaySchedule
+        val schedule: Schedule = Schedule.EveryDaySchedule(
+            startDate = routineStartDate,
+        )
         val date1 = LocalDate(2023, (1..12).random(), (1..28).random())
         val date2 = LocalDate(2024, Month.FEBRUARY, 29)
         val date3 = LocalDate(2022, Month.OCTOBER, 31)
-        assertThat(schedule.isDue(date1, routineStartDate)).isTrue()
-        assertThat(schedule.isDue(date2, routineStartDate)).isTrue()
-        assertThat(schedule.isDue(date3, routineStartDate)).isTrue()
+        assertThat(schedule.isDue(date1)).isTrue()
+        assertThat(schedule.isDue(date2)).isTrue()
+        assertThat(schedule.isDue(date3)).isTrue()
     }
 
     @Test
@@ -45,8 +48,14 @@ class ScheduleUtilTest {
             DayOfWeek.FRIDAY,
             DayOfWeek.SATURDAY,
         )
-        val schedule1: Schedule = Schedule.WeeklySchedule(dueDaysOfWeek1)
-        val schedule2: Schedule = Schedule.WeeklySchedule(dueDaysOfWeek2)
+        val schedule1: Schedule = Schedule.WeeklySchedule(
+            startDate = routineStartDate,
+            dueDaysOfWeek = dueDaysOfWeek1,
+        )
+        val schedule2: Schedule = Schedule.WeeklySchedule(
+            startDate = routineStartDate,
+            dueDaysOfWeek = dueDaysOfWeek2,
+        )
 
         val monday = LocalDate(2023, Month.OCTOBER, 30)
         val tuesday = LocalDate(2023, Month.DECEMBER, 12)
@@ -56,21 +65,21 @@ class ScheduleUtilTest {
         val saturday = LocalDate(2024, Month.JUNE, 15)
         val sunday = LocalDate(2024, Month.JUNE, 30)
 
-        assertThat(schedule1.isDue(monday, routineStartDate)).isTrue()
-        assertThat(schedule1.isDue(wednesday, routineStartDate)).isTrue()
-        assertThat(schedule1.isDue(thursday, routineStartDate)).isTrue()
-        assertThat(schedule1.isDue(sunday, routineStartDate)).isTrue()
-        assertThat(schedule1.isDue(tuesday, routineStartDate)).isFalse()
-        assertThat(schedule1.isDue(friday, routineStartDate)).isFalse()
-        assertThat(schedule1.isDue(saturday, routineStartDate)).isFalse()
+        assertThat(schedule1.isDue(monday)).isTrue()
+        assertThat(schedule1.isDue(wednesday)).isTrue()
+        assertThat(schedule1.isDue(thursday)).isTrue()
+        assertThat(schedule1.isDue(sunday)).isTrue()
+        assertThat(schedule1.isDue(tuesday)).isFalse()
+        assertThat(schedule1.isDue(friday)).isFalse()
+        assertThat(schedule1.isDue(saturday)).isFalse()
 
-        assertThat(schedule2.isDue(tuesday, routineStartDate)).isTrue()
-        assertThat(schedule2.isDue(wednesday, routineStartDate)).isTrue()
-        assertThat(schedule2.isDue(friday, routineStartDate)).isTrue()
-        assertThat(schedule2.isDue(saturday, routineStartDate)).isTrue()
-        assertThat(schedule2.isDue(monday, routineStartDate)).isFalse()
-        assertThat(schedule2.isDue(thursday, routineStartDate)).isFalse()
-        assertThat(schedule2.isDue(sunday, routineStartDate)).isFalse()
+        assertThat(schedule2.isDue(tuesday)).isTrue()
+        assertThat(schedule2.isDue(wednesday)).isTrue()
+        assertThat(schedule2.isDue(friday)).isTrue()
+        assertThat(schedule2.isDue(saturday)).isTrue()
+        assertThat(schedule2.isDue(monday)).isFalse()
+        assertThat(schedule2.isDue(thursday)).isFalse()
+        assertThat(schedule2.isDue(sunday)).isFalse()
     }
 
     @Test
@@ -98,14 +107,15 @@ class ScheduleUtilTest {
             includeLastDayOfMonth = false,
             startFromRoutineStart = true,
             weekDaysMonthRelated = emptyList(),
+            startDate = routineStartDate,
         )
 
         for (dueDate in dueDates) {
-            assertThat(schedule.isDue(dueDate, routineStartDate)).isTrue()
+            assertThat(schedule.isDue(dueDate)).isTrue()
         }
 
         for (notDueDate in notDueDates) {
-            assertThat(schedule.isDue(notDueDate, routineStartDate)).isFalse()
+            assertThat(schedule.isDue(notDueDate)).isFalse()
         }
     }
 
@@ -124,15 +134,16 @@ class ScheduleUtilTest {
             includeLastDayOfMonth = true,
             startFromRoutineStart = true,
             weekDaysMonthRelated = emptyList(),
+            startDate = routineStartDate,
         )
 
-        assertThat(schedule.isDue(februaryHeapYearLastDate, routineStartDate)).isTrue()
-        assertThat(schedule.isDue(februaryLastDate, routineStartDate)).isTrue()
-        assertThat(schedule.isDue(januaryLastDate, routineStartDate)).isTrue()
-        assertThat(schedule.isDue(aprilLastDate, routineStartDate)).isTrue()
-        assertThat(schedule.isDue(februaryHeapYearDayBeforeLast, routineStartDate)).isFalse()
-        assertThat(schedule.isDue(januaryDayBeforeLast, routineStartDate)).isFalse()
-        assertThat(schedule.isDue(aprilDayBeforeLast, routineStartDate)).isFalse()
+        assertThat(schedule.isDue(februaryHeapYearLastDate)).isTrue()
+        assertThat(schedule.isDue(februaryLastDate)).isTrue()
+        assertThat(schedule.isDue(januaryLastDate)).isTrue()
+        assertThat(schedule.isDue(aprilLastDate)).isTrue()
+        assertThat(schedule.isDue(februaryHeapYearDayBeforeLast)).isFalse()
+        assertThat(schedule.isDue(januaryDayBeforeLast)).isFalse()
+        assertThat(schedule.isDue(aprilDayBeforeLast)).isFalse()
     }
 
     @Test
@@ -150,6 +161,7 @@ class ScheduleUtilTest {
                 WeekDayMonthRelated(DayOfWeek.THURSDAY, WeekDayNumberMonthRelated.Fifth),
             ),
             startFromRoutineStart = true,
+            startDate = routineStartDate,
         )
 
         val firstMonday1 = LocalDate(2024, Month.FEBRUARY, 5)
@@ -165,18 +177,18 @@ class ScheduleUtilTest {
         val forthWednesday = LocalDate(2023, Month.NOVEMBER, 22)
         val secondTuesday = LocalDate(2023, Month.NOVEMBER, 14)
 
-        assertThat(schedule.isDue(firstMonday1, routineStartDate)).isTrue()
-        assertThat(schedule.isDue(firstMonday2, routineStartDate)).isTrue()
-        assertThat(schedule.isDue(thirdTuesday, routineStartDate)).isTrue()
-        assertThat(schedule.isDue(secondFriday, routineStartDate)).isTrue()
-        assertThat(schedule.isDue(forthMonday, routineStartDate)).isTrue()
-        assertThat(schedule.isDue(lastSundayAndLastDayOfMonth, routineStartDate)).isTrue()
-        assertThat(schedule.isDue(forthAndLastSunday, routineStartDate)).isTrue()
-        assertThat(schedule.isDue(forthNotLastSunday, routineStartDate)).isFalse()
-        assertThat(schedule.isDue(fifthThursday, routineStartDate)).isTrue()
-        assertThat(schedule.isDue(forthThursday, routineStartDate)).isFalse()
-        assertThat(schedule.isDue(forthWednesday, routineStartDate)).isTrue()
-        assertThat(schedule.isDue(secondTuesday, routineStartDate)).isFalse()
+        assertThat(schedule.isDue(firstMonday1)).isTrue()
+        assertThat(schedule.isDue(firstMonday2)).isTrue()
+        assertThat(schedule.isDue(thirdTuesday)).isTrue()
+        assertThat(schedule.isDue(secondFriday)).isTrue()
+        assertThat(schedule.isDue(forthMonday)).isTrue()
+        assertThat(schedule.isDue(lastSundayAndLastDayOfMonth)).isTrue()
+        assertThat(schedule.isDue(forthAndLastSunday)).isTrue()
+        assertThat(schedule.isDue(forthNotLastSunday)).isFalse()
+        assertThat(schedule.isDue(fifthThursday)).isTrue()
+        assertThat(schedule.isDue(forthThursday)).isFalse()
+        assertThat(schedule.isDue(forthWednesday)).isTrue()
+        assertThat(schedule.isDue(secondTuesday)).isFalse()
     }
 
     @Test
@@ -191,6 +203,7 @@ class ScheduleUtilTest {
         val schedule: Schedule = Schedule.PeriodicCustomSchedule(
             dueDatesIndices = dueDaysIndices,
             numOfDaysInPeriod = numOfDaysInPeriod,
+            startDate = routineStartDate,
         )
 
         for (dueDayIndex in dueDaysIndices) {
@@ -203,7 +216,6 @@ class ScheduleUtilTest {
                             days = numOfDaysInPeriod * numOfPeriodsAlreadyPassed + dueDayIndex - 1
                         )
                     ),
-                    routineStartDate = routineStartDate,
                 )
             ).isTrue()
         }
@@ -218,7 +230,6 @@ class ScheduleUtilTest {
                             days = numOfDaysInPeriod * numOfPeriodsAlreadyPassed + notDueDayIndex - 1
                         )
                     ),
-                    routineStartDate = routineStartDate,
                 )
             ).isFalse()
         }
@@ -265,14 +276,17 @@ class ScheduleUtilTest {
         notDueDates.add(LocalDate(2024, Month.AUGUST, 31))
         notDueDates.add(LocalDate(2024, Month.SEPTEMBER, 30))
 
-        val schedule = Schedule.CustomDateSchedule(dueDates)
+        val schedule = Schedule.CustomDateSchedule(
+            startDate = routineStartDate,
+            dueDates = dueDates,
+        )
 
         for (dueDate in dueDates) {
-            assertThat(schedule.isDue(dueDate, routineStartDate)).isTrue()
+            assertThat(schedule.isDue(dueDate)).isTrue()
         }
 
         for (notDueDate in notDueDates) {
-            assertThat(schedule.isDue(notDueDate, routineStartDate)).isFalse()
+            assertThat(schedule.isDue(notDueDate)).isFalse()
         }
     }
 
@@ -310,33 +324,39 @@ class ScheduleUtilTest {
         val expectedDueDates = mutableListOf<LocalDate>()
 
         dueDates.forEach {
-            expectedDueDates.add(LocalDate(
-                year = Random.nextInt(2024..2200),
-                month = it.month,
-                dayOfMonth = it.dayOfMonth
-            ))
             expectedDueDates.add(
                 LocalDate(
-                year = Random.nextInt(2024..2200),
-                month = it.month,
-                dayOfMonth = it.dayOfMonth,
+                    year = Random.nextInt(2024..2200),
+                    month = it.month,
+                    dayOfMonth = it.dayOfMonth
+                )
             )
+            expectedDueDates.add(
+                LocalDate(
+                    year = Random.nextInt(2024..2200),
+                    month = it.month,
+                    dayOfMonth = it.dayOfMonth,
+                )
             )
         }
 
         val expectedNotDueDates = mutableListOf<LocalDate>()
 
         notDueDates.forEach {
-            expectedNotDueDates.add(LocalDate(
-                year = Random.nextInt(2024..2200),
-                month = it.month,
-                dayOfMonth = it.dayOfMonth
-            ))
-            expectedNotDueDates.add(LocalDate(
-                year = Random.nextInt(2024..2200),
-                month = it.month,
-                dayOfMonth = it.dayOfMonth,
-            ))
+            expectedNotDueDates.add(
+                LocalDate(
+                    year = Random.nextInt(2024..2200),
+                    month = it.month,
+                    dayOfMonth = it.dayOfMonth
+                )
+            )
+            expectedNotDueDates.add(
+                LocalDate(
+                    year = Random.nextInt(2024..2200),
+                    month = it.month,
+                    dayOfMonth = it.dayOfMonth,
+                )
+            )
         }
 
         dueDates.add(AnnualDate(Month.FEBRUARY, 29))
@@ -346,14 +366,62 @@ class ScheduleUtilTest {
         val schedule = Schedule.AnnualSchedule(
             dueDates = dueDates,
             startDayOfYear = AnnualDate(Month.MAY, 25), // doesn't matter here
+            startDate = routineStartDate,
         )
 
         for (dueDate in expectedDueDates) {
-            assertThat(schedule.isDue(dueDate, routineStartDate)).isTrue()
+            assertThat(schedule.isDue(dueDate)).isTrue()
         }
 
         for (notDueDate in expectedNotDueDates) {
-            assertThat(schedule.isDue(notDueDate, routineStartDate)).isFalse()
+            assertThat(schedule.isDue(notDueDate)).isFalse()
         }
+    }
+
+    @Test
+    fun everyDayScheduleGetPeriodRange() {
+        val schedule = Schedule.EveryDaySchedule(startDate = routineStartDate)
+        val currentDate = LocalDate(2023, Month.OCTOBER, 6)
+        assertThat(schedule.getPeriodRange(currentDate))
+            .isEqualTo(currentDate..currentDate)
+    }
+
+    @Test
+    fun weeklyScheduleGetPeriodRangeStartFromRoutineStart() {
+        val dueDaysOfWeek = listOf(
+            DayOfWeek.MONDAY,
+            DayOfWeek.TUESDAY,
+            DayOfWeek.WEDNESDAY,
+            DayOfWeek.SATURDAY,
+        )
+
+        val routineStartDate = LocalDate(2023, Month.SEPTEMBER, 30)
+
+        val schedule = Schedule.WeeklySchedule(
+            dueDaysOfWeek = dueDaysOfWeek,
+            startDayOfWeek = null,
+            startDate = routineStartDate,
+        )
+
+        // still first week
+        val lastDayOfFirstWeek = LocalDate(2023, Month.OCTOBER, 6)
+        val expectedResultFirstWeek = routineStartDate..lastDayOfFirstWeek
+
+        // forth week
+        val forthWeekArbitraryDate1 = LocalDate(2023, Month.OCTOBER, 23)
+        val forthWeekArbitraryDate2 = LocalDate(2023, Month.OCTOBER, 25)
+
+        val forthWeekStartDate = LocalDate(2023, Month.OCTOBER, 21)
+        val forthWeekEndDate = LocalDate(2023, Month.OCTOBER, 27)
+        val expectedResultForthWeek = forthWeekStartDate..forthWeekEndDate
+
+        val resultFirstWeek = schedule.getPeriodRange(lastDayOfFirstWeek)
+        assertThat(resultFirstWeek).isEqualTo(expectedResultFirstWeek)
+
+        val resultForthWeek1 = schedule.getPeriodRange(forthWeekArbitraryDate1)
+        assertThat(resultForthWeek1).isEqualTo(expectedResultForthWeek)
+
+        val resultForthWeek2 = schedule.getPeriodRange(forthWeekArbitraryDate2)
+        assertThat(resultForthWeek2).isEqualTo(expectedResultForthWeek)
     }
 }

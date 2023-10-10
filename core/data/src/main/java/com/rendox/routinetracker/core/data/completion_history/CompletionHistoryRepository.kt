@@ -10,10 +10,10 @@ interface CompletionHistoryRepository {
         dateFromRoutineStartIndices: LongRange,
     ): Flow<List<HistoricalStatus>>
 
-    suspend fun getHistoryEntryByIndex(
+    fun getHistoryEntryByIndex(
         routineId: Long,
         numberOfDateFromRoutineStart: Long,
-    ): HistoricalStatus?
+    ): Flow<HistoricalStatus?>
 
     suspend fun insertHistoryEntry(
         numberOfDateFromRoutineStart: Long,

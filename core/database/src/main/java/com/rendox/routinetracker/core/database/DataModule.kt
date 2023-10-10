@@ -38,15 +38,16 @@ val dataModule = module {
             driver = get(),
             routineEntityAdapter = RoutineEntity.Adapter(
                 typeAdapter = EnumColumnAdapter(),
-                startDateAdapter = localDateAdapter,
-                vacationStartDateAdapter = localDateAdapter,
-                vacationEndDateAdapter = localDateAdapter,
             ),
             scheduleEntityAdapter = ScheduleEntity.Adapter(
                 typeAdapter = EnumColumnAdapter(),
+                startDateAdapter = localDateAdapter,
+                vacationStartDateAdapter = localDateAdapter,
+                vacationEndDateAdapter = localDateAdapter,
                 numOfDaysInPeriodicScheduleAdapter = IntColumnAdapter,
                 startDayOfWeekInWeeklyScheduleAdapter = dayOfWeekAdapter,
                 startDayOfYearInAnnualScheduleAdapter = annualDateAdapter,
+                scheduleDeviationAdapter = IntColumnAdapter,
             ),
             dueDateEntityAdapter = DueDateEntity.Adapter(
                 dueDateNumberAdapter = IntColumnAdapter,

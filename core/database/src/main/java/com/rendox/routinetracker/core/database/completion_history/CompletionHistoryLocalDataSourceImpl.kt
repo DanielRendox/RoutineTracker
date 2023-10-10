@@ -2,6 +2,7 @@ package com.rendox.routinetracker.core.database.completion_history
 
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
+import app.cash.sqldelight.coroutines.mapToOneOrNull
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
 import com.rendox.routinetracker.core.model.HistoricalStatus
 import kotlinx.coroutines.CoroutineDispatcher
@@ -26,14 +27,14 @@ class CompletionHistoryLocalDataSourceImpl(
         }
     }
 
-    override suspend fun getHistoryEntryByIndex(
+    override fun getHistoryEntryByIndex(
         routineId: Long,
         numberOfDateFromRoutineStart: Long
-    ): HistoricalStatus? {
+    ): Flow<HistoricalStatus?> {
         return db.completionHistoryEntityQueries.getHistoryEntryByIndex(
             routineId = routineId,
             numberOfDateFromRoutineStart = numberOfDateFromRoutineStart,
-        ).executeAsOneOrNull()?.status
+        ).asFlow().mapToOneOrNull(dispatcher).map { it?.status }
     }
 
     override suspend fun insertHistoryEntry(

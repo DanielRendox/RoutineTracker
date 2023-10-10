@@ -16,34 +16,34 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-@Composable
-fun RoutineDetailsScreen(
-    modifier: Modifier,
-    routineScreenState: RoutineScreenState,
-) {
-    Scaffold(modifier = modifier) {
-        Box(
-            modifier = Modifier.fillMaxSize().padding(paddingValues = it),
-            contentAlignment = Alignment.Center
-        ) {
-            Column {
-                Text(
-                    text = routineScreenState.routineName ?: "Routine name not found :(",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(16.dp)
-                )
-                Row {
-                    Icon(
-                        imageVector = Icons.Default.DateRange,
-                        contentDescription = "",
-                        modifier = Modifier.padding(end = 16.dp)
-                    )
-                    Text(
-                        text = routineScreenState.routineStartDate
-                            ?: "Routine start date not found :("
-                    )
-                }
-            }
-        }
-    }
-}
+//@Composable
+//fun RoutineDetailsScreen(
+//    modifier: Modifier,
+//    routineScreenState: RoutineScreenState,
+//) {
+//    Scaffold(modifier = modifier) {
+//        Box(
+//            modifier = Modifier.fillMaxSize().padding(paddingValues = it),
+//            contentAlignment = Alignment.Center
+//        ) {
+//            Column {
+//                Text(
+//                    text = routineScreenState.routineName ?: "Routine name not found :(",
+//                    style = MaterialTheme.typography.titleMedium,
+//                    modifier = Modifier.padding(16.dp)
+//                )
+//                Row {
+//                    Icon(
+//                        imageVector = Icons.Default.DateRange,
+//                        contentDescription = "",
+//                        modifier = Modifier.padding(end = 16.dp)
+//                    )
+//                    Text(
+//                        text = routineScreenState.routineStartDate
+//                            ?: "Routine start date not found :("
+//                    )
+//                }
+//            }
+//        }
+//    }
+//}

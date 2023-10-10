@@ -3,6 +3,7 @@ import com.rendox.routinetracker.core.logic.time.AnnualDate;
 import kotlin.Boolean;
 import kotlin.Int;
 import kotlinx.datetime.DayOfWeek;
+import kotlinx.datetime.LocalDate;
 
 CREATE TABLE scheduleEntity (
     id INTEGER NOT NULL PRIMARY KEY,
@@ -12,6 +13,12 @@ CREATE TABLE scheduleEntity (
     includeLastDayOfMonthInMonthlySchedule INTEGER AS Boolean,
     startFromRoutineStartInMonthlySchedule INTEGER AS Boolean,
     startDayOfYearInAnnualSchedule INTEGER AS AnnualDate,
+    scheduleDeviation INTEGER AS Int NOT NULL,
+    startDate INTEGER AS LocalDate NOT NULL,
+    vacationStartDate INTEGER AS LocalDate,
+    vacationEndDate INTEGER AS LocalDate,
+    backlogEnabled INTEGER AS Boolean NOT NULL,
+    cancelDuenessIfDoneAhead INTEGER AS Boolean NOT NULL,
     FOREIGN KEY(id) REFERENCES routineEntity(id)
 );
 
@@ -22,7 +29,7 @@ WHERE id = ?;
 
 insertSchedule:
 INSERT INTO scheduleEntity
-VALUES (?, ?, ?, ?, ?, ?, ?);
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 lastInsertRowId:
 SELECT last_insert_rowid();

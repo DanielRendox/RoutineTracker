@@ -9,9 +9,5 @@ internal fun RoutineEntity.toYesNoRoutine(
 ) = Routine.YesNoRoutine(
     id = this.id,
     name = this.name,
-    startDate = this.startDate,
-    backlogEnabled = this.backlogEnabled,
-    vacationStartDate = this.vacationStartDate,
-    vacationEndDate = this.vacationEndDate,
     schedule = schedule,
 )

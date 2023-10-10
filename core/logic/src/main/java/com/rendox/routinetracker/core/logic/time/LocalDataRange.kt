@@ -2,15 +2,12 @@ package com.rendox.routinetracker.core.logic.time
 
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 
-class LocalDateRange(
+data class LocalDateRange(
     override val start: LocalDate,
     override val endInclusive: LocalDate,
 ) : Iterable<LocalDate>, ClosedRange<LocalDate> {
-    val daysNumber
-        get() = (endInclusive - start).days + 1
 
     override fun iterator(): Iterator<LocalDate> {
         return LocalDateIterator(start, endInclusive)

@@ -8,10 +8,10 @@ class CompletionHistoryRepositoryImpl(
     private val localDataSource: CompletionHistoryLocalDataSource,
 ) : CompletionHistoryRepository {
 
-    override suspend fun getHistoryEntryByIndex(
+    override fun getHistoryEntryByIndex(
         routineId: Long,
         numberOfDateFromRoutineStart: Long
-    ): HistoricalStatus? {
+    ): Flow<HistoricalStatus?> {
         return localDataSource.getHistoryEntryByIndex(routineId, numberOfDateFromRoutineStart)
     }
 

@@ -1,11 +1,11 @@
 package com.rendox.routinetracker.core.database.routine
 
-import app.cash.sqldelight.TransactionWithReturn
 import app.cash.sqldelight.TransactionWithoutReturn
+import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToOne
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
 import com.rendox.routinetracker.core.database.model.ScheduleType
-import com.rendox.routinetracker.core.database.model.constructCustomDateSchedule
-import com.rendox.routinetracker.core.database.model.constructEveryDaySchedule
+import com.rendox.routinetracker.core.database.model.toEveryDaySchedule
 import com.rendox.routinetracker.core.database.model.toMonthlySchedule
 import com.rendox.routinetracker.core.database.model.toPeriodicCustomSchedule
 import com.rendox.routinetracker.core.database.model.toWeeklySchedule
@@ -16,9 +16,12 @@ import com.rendox.routinetracker.core.database.toInt
 import com.rendox.routinetracker.core.model.Routine
 import com.rendox.routinetracker.core.database.model.RoutineType
 import com.rendox.routinetracker.core.database.model.toAnnualSchedule
+import com.rendox.routinetracker.core.database.model.toCustomDateSchedule
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.withContext
 
 class RoutineLocalDataSourceImpl(
@@ -26,40 +29,37 @@ class RoutineLocalDataSourceImpl(
     private val dispatcher: CoroutineDispatcher,
 ) : RoutineLocalDataSource {
 
-    override suspend fun getRoutineById(id: Long): Routine? {
-        return withContext(dispatcher) {
-            db.routineEntityQueries.transactionWithResult {
-                val schedule: Schedule = getScheduleEntity(id).toExternalModel { getDueDates(it) }
-                getRoutineEntity(id).toExternalModel(schedule)
+    override fun getRoutineById(id: Long): Flow<Routine?> {
+        return db.routineEntityQueries.transactionWithResult {
+            getScheduleEntity(id).combine(getRoutineEntity(id)) { scheduleEntity, routineEntity ->
+                val schedule = scheduleEntity.toExternalModel { getDueDates(it) }
+                routineEntity.toExternalModel(schedule)
             }
         }
     }
 
-    @Suppress("UnusedReceiverParameter")
-    private fun TransactionWithReturn<Routine?>.getRoutineEntity(id: Long): RoutineEntity =
-        db.routineEntityQueries.getRoutineById(id).executeAsOne()
+    private fun getRoutineEntity(id: Long): Flow<RoutineEntity> =
+        db.routineEntityQueries.getRoutineById(id).asFlow().mapToOne(dispatcher)
 
-    @Suppress("UnusedReceiverParameter")
-    private fun TransactionWithReturn<Routine?>.getScheduleEntity(id: Long): ScheduleEntity =
-        db.scheduleEntityQueries.getScheduleById(id).executeAsOne()
+    private fun getScheduleEntity(id: Long): Flow<ScheduleEntity> =
+        db.scheduleEntityQueries.getScheduleById(id).asFlow().mapToOne(dispatcher)
 
-    @Suppress("UnusedReceiverParameter")
-    private fun TransactionWithReturn<Routine?>.getDueDates(scheduleId: Long): List<Int> =
+    private fun getDueDates(scheduleId: Long): List<Int> =
         db.dueDateEntityQueries.getDueDates(scheduleId).executeAsList().map { it.dueDateNumber }
 
     private fun ScheduleEntity.toExternalModel(dueDatesProvider: (Long) -> List<Int>): Schedule {
-        if (type == ScheduleType.EveryDaySchedule) return constructEveryDaySchedule()
+        if (type == ScheduleType.EveryDaySchedule) return toEveryDaySchedule()
         val dueDates = dueDatesProvider(id)
         return when (type) {
-            ScheduleType.WeeklySchedule -> this.toWeeklySchedule(dueDates)
+            ScheduleType.WeeklySchedule -> toWeeklySchedule(dueDates)
             ScheduleType.MonthlySchedule -> {
                 val weekDaysMonthRelated = getWeekDayMonthRelatedDays(id)
-                this.toMonthlySchedule(dueDates, weekDaysMonthRelated)
+                toMonthlySchedule(dueDates, weekDaysMonthRelated)
             }
 
-            ScheduleType.PeriodicCustomSchedule -> this.toPeriodicCustomSchedule(dueDates)
-            ScheduleType.CustomDateSchedule -> constructCustomDateSchedule(dueDates)
-            ScheduleType.AnnualSchedule -> this.toAnnualSchedule(dueDates)
+            ScheduleType.PeriodicCustomSchedule -> toPeriodicCustomSchedule(dueDates)
+            ScheduleType.CustomDateSchedule -> toCustomDateSchedule(dueDates)
+            ScheduleType.AnnualSchedule -> toAnnualSchedule(dueDates)
             else -> throw IllegalArgumentException()
         }
     }
@@ -100,17 +100,12 @@ class RoutineLocalDataSourceImpl(
             id = routine.id,
             type = RoutineType.YesNoRoutine,
             name = routine.name,
-            startDate = routine.startDate,
-            backlogEnabled = routine.backlogEnabled,
-            periodSeparation = null,
-            vacationStartDate = routine.vacationStartDate,
-            vacationEndDate = routine.vacationEndDate,
         )
     }
 
     private fun insertSchedule(schedule: Schedule) {
         when (schedule) {
-            is Schedule.EveryDaySchedule -> insertEveryDaySchedule()
+            is Schedule.EveryDaySchedule -> insertEveryDaySchedule(schedule)
             is Schedule.WeeklySchedule -> {
                 insertWeeklySchedule(schedule)
                 insertDueDates(schedule.dueDaysOfWeek.map { it.toInt() })
@@ -129,7 +124,7 @@ class RoutineLocalDataSourceImpl(
             }
 
             is Schedule.CustomDateSchedule -> {
-                insertCustomDateSchedule()
+                insertCustomDateSchedule(schedule)
                 insertDueDates(schedule.dueDates.map { it.toInt() })
             }
 
@@ -140,7 +135,7 @@ class RoutineLocalDataSourceImpl(
         }
     }
 
-    private fun insertEveryDaySchedule() {
+    private fun insertEveryDaySchedule(schedule: Schedule.EveryDaySchedule) {
         db.scheduleEntityQueries.insertSchedule(
             id = null,
             type = ScheduleType.EveryDaySchedule,
@@ -149,6 +144,12 @@ class RoutineLocalDataSourceImpl(
             includeLastDayOfMonthInMonthlySchedule = null,
             startFromRoutineStartInMonthlySchedule = null,
             startDayOfYearInAnnualSchedule = null,
+            startDate = schedule.startDate,
+            scheduleDeviation = schedule.scheduleDeviation,
+            backlogEnabled = schedule.backlogEnabled,
+            cancelDuenessIfDoneAhead = schedule.cancelDuenessIfDoneAhead,
+            vacationStartDate = schedule.vacationStartDate,
+            vacationEndDate = schedule.vacationEndDate,
         )
     }
 
@@ -161,6 +162,12 @@ class RoutineLocalDataSourceImpl(
             includeLastDayOfMonthInMonthlySchedule = null,
             startFromRoutineStartInMonthlySchedule = null,
             startDayOfYearInAnnualSchedule = null,
+            startDate = schedule.startDate,
+            scheduleDeviation = schedule.scheduleDeviation,
+            backlogEnabled = schedule.backlogEnabled,
+            cancelDuenessIfDoneAhead = schedule.cancelDuenessIfDoneAhead,
+            vacationStartDate = schedule.vacationStartDate,
+            vacationEndDate = schedule.vacationEndDate,
         )
     }
 
@@ -173,6 +180,12 @@ class RoutineLocalDataSourceImpl(
             includeLastDayOfMonthInMonthlySchedule = schedule.includeLastDayOfMonth,
             startFromRoutineStartInMonthlySchedule = schedule.startFromRoutineStart,
             startDayOfYearInAnnualSchedule = null,
+            startDate = schedule.startDate,
+            scheduleDeviation = schedule.scheduleDeviation,
+            backlogEnabled = schedule.backlogEnabled,
+            cancelDuenessIfDoneAhead = schedule.cancelDuenessIfDoneAhead,
+            vacationStartDate = schedule.vacationStartDate,
+            vacationEndDate = schedule.vacationEndDate,
         )
     }
 
@@ -196,10 +209,16 @@ class RoutineLocalDataSourceImpl(
             includeLastDayOfMonthInMonthlySchedule = null,
             startFromRoutineStartInMonthlySchedule = null,
             startDayOfYearInAnnualSchedule = null,
+            startDate = schedule.startDate,
+            scheduleDeviation = schedule.scheduleDeviation,
+            backlogEnabled = schedule.backlogEnabled,
+            cancelDuenessIfDoneAhead = schedule.cancelDuenessIfDoneAhead,
+            vacationStartDate = schedule.vacationStartDate,
+            vacationEndDate = schedule.vacationEndDate,
         )
     }
 
-    private fun insertCustomDateSchedule() {
+    private fun insertCustomDateSchedule(schedule: Schedule.CustomDateSchedule) {
         db.scheduleEntityQueries.insertSchedule(
             id = null,
             type = ScheduleType.CustomDateSchedule,
@@ -208,6 +227,12 @@ class RoutineLocalDataSourceImpl(
             includeLastDayOfMonthInMonthlySchedule = null,
             startFromRoutineStartInMonthlySchedule = null,
             startDayOfYearInAnnualSchedule = null,
+            startDate = schedule.startDate,
+            scheduleDeviation = schedule.scheduleDeviation,
+            backlogEnabled = schedule.backlogEnabled,
+            cancelDuenessIfDoneAhead = schedule.cancelDuenessIfDoneAhead,
+            vacationStartDate = schedule.vacationStartDate,
+            vacationEndDate = schedule.vacationEndDate,
         )
     }
 
@@ -220,6 +245,12 @@ class RoutineLocalDataSourceImpl(
             includeLastDayOfMonthInMonthlySchedule = null,
             startFromRoutineStartInMonthlySchedule = null,
             startDayOfYearInAnnualSchedule = schedule.startDayOfYear,
+            startDate = schedule.startDate,
+            scheduleDeviation = schedule.scheduleDeviation,
+            backlogEnabled = schedule.backlogEnabled,
+            cancelDuenessIfDoneAhead = schedule.cancelDuenessIfDoneAhead,
+            vacationStartDate = schedule.vacationStartDate,
+            vacationEndDate = schedule.vacationEndDate,
         )
     }
 

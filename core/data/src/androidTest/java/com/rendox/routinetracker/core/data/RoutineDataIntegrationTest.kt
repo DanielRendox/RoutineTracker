@@ -68,16 +68,16 @@ class RoutineDataIntegrationTest : KoinTest {
                 DayOfWeek.THURSDAY
             ),
             startDayOfWeek = DayOfWeek.MONDAY,
+            startDate = LocalDate(2023, Month.SEPTEMBER, 28),
+            backlogEnabled = false,
+            cancelDuenessIfDoneAhead = true,
+            vacationStartDate = null,
+            vacationEndDate = null,
         )
 
         val routine = Routine.YesNoRoutine(
             id = 1,
             name = "Do sports",
-            startDate = LocalDate(2023, Month.SEPTEMBER, 28),
-            backlogEnabled = false,
-            periodSeparation = true,
-            vacationStartDate = null,
-            vacationEndDate = null,
             schedule = schedule,
         )
 
@@ -108,7 +108,7 @@ class RoutineDataIntegrationTest : KoinTest {
             )
         }
 
-        val resultingRoutine = routineRepository.getRoutineById(routine.id!!)
+        val resultingRoutine = routineRepository.getRoutineById(routine.id!!).first()
         val resultingHistory = completionHistoryRepository.getHistoryEntriesByIndices(
             routineId = routine.id!!,
             dateFromRoutineStartIndices = 1L..3L,

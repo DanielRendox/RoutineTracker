@@ -7,11 +7,24 @@ import com.rendox.routinetracker.core.database.toLocalDate
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
 
-internal fun constructEveryDaySchedule() = Schedule.EveryDaySchedule
+internal fun ScheduleEntity.toEveryDaySchedule() = Schedule.EveryDaySchedule(
+    startDate = startDate,
+    scheduleDeviation = scheduleDeviation,
+    backlogEnabled = backlogEnabled,
+    cancelDuenessIfDoneAhead = cancelDuenessIfDoneAhead,
+    vacationStartDate = vacationStartDate,
+    vacationEndDate = vacationEndDate,
+)
 
 internal fun ScheduleEntity.toWeeklySchedule(dueDates: List<Int>) = Schedule.WeeklySchedule(
     dueDaysOfWeek = dueDates.map { it.toDayOfWeek() },
     startDayOfWeek = startDayOfWeekInWeeklySchedule,
+    startDate = startDate,
+    scheduleDeviation = scheduleDeviation,
+    backlogEnabled = backlogEnabled,
+    cancelDuenessIfDoneAhead = cancelDuenessIfDoneAhead,
+    vacationStartDate = vacationStartDate,
+    vacationEndDate = vacationEndDate,
 )
 
 internal fun ScheduleEntity.toMonthlySchedule(
@@ -22,6 +35,12 @@ internal fun ScheduleEntity.toMonthlySchedule(
     includeLastDayOfMonth = includeLastDayOfMonthInMonthlySchedule!!,
     weekDaysMonthRelated = weekDaysMonthRelated,
     startFromRoutineStart = startFromRoutineStartInMonthlySchedule!!,
+    startDate = startDate,
+    scheduleDeviation = scheduleDeviation,
+    backlogEnabled = backlogEnabled,
+    cancelDuenessIfDoneAhead = cancelDuenessIfDoneAhead,
+    vacationStartDate = vacationStartDate,
+    vacationEndDate = vacationEndDate,
 )
 
 internal fun ScheduleEntity.toPeriodicCustomSchedule(
@@ -29,6 +48,24 @@ internal fun ScheduleEntity.toPeriodicCustomSchedule(
 ) = Schedule.PeriodicCustomSchedule(
     dueDatesIndices = dueDatesIndices,
     numOfDaysInPeriod = numOfDaysInPeriodicSchedule!!,
+    startDate = startDate,
+    scheduleDeviation = scheduleDeviation,
+    backlogEnabled = backlogEnabled,
+    cancelDuenessIfDoneAhead = cancelDuenessIfDoneAhead,
+    vacationStartDate = vacationStartDate,
+    vacationEndDate = vacationEndDate,
+)
+
+internal fun ScheduleEntity.toCustomDateSchedule(
+    dueDatesIndices: List<Int>,
+) = Schedule.CustomDateSchedule(
+    dueDates = dueDatesIndices.map { it.toLocalDate() },
+    startDate = startDate,
+    scheduleDeviation = scheduleDeviation,
+    backlogEnabled = backlogEnabled,
+    cancelDuenessIfDoneAhead = cancelDuenessIfDoneAhead,
+    vacationStartDate = vacationStartDate,
+    vacationEndDate = vacationEndDate,
 )
 
 internal fun ScheduleEntity.toAnnualSchedule(
@@ -36,10 +73,10 @@ internal fun ScheduleEntity.toAnnualSchedule(
 ) = Schedule.AnnualSchedule(
     dueDates = dueDates.map { it.toAnnualDate() },
     startDayOfYear = startDayOfYearInAnnualSchedule,
-)
-
-internal fun constructCustomDateSchedule(
-    dueDatesIndices: List<Int>,
-) = Schedule.CustomDateSchedule(
-    dueDates = dueDatesIndices.map { it.toLocalDate() },
+    startDate = startDate,
+    scheduleDeviation = scheduleDeviation,
+    backlogEnabled = backlogEnabled,
+    cancelDuenessIfDoneAhead = cancelDuenessIfDoneAhead,
+    vacationStartDate = vacationStartDate,
+    vacationEndDate = vacationEndDate,
 )
