@@ -34,5 +34,6 @@ dependencies {
 
     implementation(libs.jetbrains.kotlinx.datetime)
 
+    androidTestImplementation(project(":core:testcommon"))
     androidTestImplementation(libs.jetbrains.kotlinx.coroutines.test)
 }

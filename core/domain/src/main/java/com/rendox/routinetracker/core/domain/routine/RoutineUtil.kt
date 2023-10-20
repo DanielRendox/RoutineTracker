@@ -1,26 +1,20 @@
 package com.rendox.routinetracker.core.domain.routine
 
-import com.rendox.routinetracker.core.model.CompletableStatus
-import com.rendox.routinetracker.core.model.HistoricalStatus
+import com.rendox.routinetracker.core.logic.time.plusDays
+import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.PlanningStatus
 import com.rendox.routinetracker.core.model.Routine
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.daysUntil
 
-fun Routine.computeStatus(
-    validationDate: LocalDate,
-    completionHistory: List<HistoricalStatus>,
-): CompletableStatus {
-    val validationDateIndex = schedule.startDate.daysUntil(validationDate)
-    if (validationDateIndex < 0) return PlanningStatus.Unknown
+fun Routine.computePlanningStatus(validationDate: LocalDate): PlanningStatus? {
+    if (validationDate < schedule.routineStartDate) return null
+    schedule.routineEndDate?.let { if (validationDate > it) return null }
 
-    if (validationDateIndex in completionHistory.indices) {
-        return completionHistory[validationDateIndex]
+    if (isCurrentlyOnVacation(validationDate)) return PlanningStatus.OnVacation
+    
+    return when (this) {
+        is Routine.YesNoRoutine -> yesNoRoutineComputePlanningStatus(validationDate)
     }
-
-    if (isCurrentlyOnVacation(validationDate)) return HistoricalStatus.OnVacation
-
-    return computeRoutinePlanningStatus(validationDate)
 }
 
 private fun Routine.isCurrentlyOnVacation(validationDate: LocalDate): Boolean {
@@ -33,34 +27,31 @@ private fun Routine.isCurrentlyOnVacation(validationDate: LocalDate): Boolean {
     return true
 }
 
-private fun Routine.computeRoutinePlanningStatus(validationDate: LocalDate): PlanningStatus {
-    return when (this) {
-        is Routine.YesNoRoutine -> yesNoRoutineComputePlanningStatus(validationDate)
-    }
-}
-
 private fun Routine.YesNoRoutine.yesNoRoutineComputePlanningStatus(
-    validationDate: LocalDate
+    validationDate: LocalDate,
 ): PlanningStatus {
-//    val allPeriods = listOf(schedule.getPeriodRange(validationDate))
-//    val periodRange = allPeriods[allPeriods.lastIndex]
-//    val periodStartIndex = schedule.startDate.daysUntil(periodRange.start)
-//    val periodEndIndex = schedule.startDate.daysUntil(periodRange.endInclusive)
-//    val periodCompletionHistory = completionHistory.slice(periodStartIndex..periodEndIndex)
-//
-//    val daysDone = periodCompletionHistory.count { it == HistoricalStatus.FullyCompleted }
-//    val daysToBeDone = periodRange
-//        .toList().count { schedule.isDue(it) }
-
-    if (schedule.backlogEnabled && schedule.scheduleDeviation < 0) {
-        return PlanningStatus.Planned
+    if (schedule.cancelDuenessIfDoneAhead && lastDateInHistory != null) {
+        var dueDaysCounter = 0
+        for (day in lastDateInHistory!!.plusDays(1)..validationDate) {
+            if (schedule.isDue(day)) dueDaysCounter++
+        }
+        if (scheduleDeviation >= dueDaysCounter) return PlanningStatus.AlreadyCompleted
     }
 
-    if (schedule.cancelDuenessIfDoneAhead && schedule.scheduleDeviation > 0) {
-        return PlanningStatus.NotDue
+    if (schedule.isDue(validationDate)) return PlanningStatus.Planned
+
+    // In cases when there is a backlog but the routine is also due on this day because
+    // of the schedule, we want to return Planned and not Backlog. That's why the following
+    // check isn't performed earlier.
+    if (schedule.backlogEnabled && lastDateInHistory != null) {
+        var notDueDaysCounter = 0
+        for (day in lastDateInHistory!!.plusDays(1)..validationDate) {
+            if (!schedule.isDue(day)) notDueDaysCounter++
+        }
+        if (scheduleDeviation <= notDueDaysCounter) return PlanningStatus.Backlog
     }
 
-    return if (schedule.isDue(validationDate)) PlanningStatus.Planned else PlanningStatus.NotDue
+    return PlanningStatus.NotDue
 }
 
 

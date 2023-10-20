@@ -1,4 +1,4 @@
-import com.rendox.routinetracker.core.database.model.ScheduleType;
+import com.rendox.routinetracker.core.database.routine.model.ScheduleType;
 import com.rendox.routinetracker.core.logic.time.AnnualDate;
 import kotlin.Boolean;
 import kotlin.Int;

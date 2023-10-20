@@ -1,8 +1,8 @@
 package com.rendox.routinetracker.core.logic.time
 
-import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.plus
+import kotlinx.datetime.daysUntil
+import kotlin.random.Random
 
 data class LocalDateRange(
     override val start: LocalDate,
@@ -26,9 +26,25 @@ class LocalDateIterator(
 
     override fun next(): LocalDate {
         val result = initValue
-        initValue = initValue.plus(DatePeriod(days = 1))
+        initValue = initValue.plusDays(1)
         return result
     }
 }
 
 operator fun LocalDate.rangeTo(that: LocalDate) = LocalDateRange(this, that)
+
+fun generateRandomDateRange(minDate: LocalDate, maxDateInclusive: LocalDate): LocalDateRange {
+    val maxNumOfDays = minDate.daysUntil(maxDateInclusive) + 1
+    val firstNumber = Random.nextInt(until = maxNumOfDays)
+    val secondNumber = Random.nextInt(until = maxNumOfDays)
+    val periodStartDate: LocalDate
+    val periodEndDate: LocalDate
+    if (firstNumber < secondNumber) {
+        periodStartDate = minDate.plusDays(firstNumber)
+        periodEndDate = minDate.plusDays(secondNumber)
+    } else {
+        periodStartDate = minDate.plusDays(secondNumber)
+        periodEndDate = minDate.plusDays(firstNumber)
+    }
+    return periodStartDate..periodEndDate
+}

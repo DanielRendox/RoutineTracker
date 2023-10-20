@@ -1,4 +1,4 @@
-package com.rendox.routinetracker.core.database.model
+package com.rendox.routinetracker.core.database.routine.model
 
 enum class ScheduleType {
     EveryDaySchedule,

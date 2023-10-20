@@ -29,8 +29,12 @@ android {
 
 dependencies {
     implementation(project(":core:data"))
+    implementation(project(":core:database"))
     implementation(project(":core:model"))
     implementation(project(":core:logic"))
 
+    implementation(libs.app.cash.sqldelight.sqlite.driver)
     implementation(libs.jetbrains.kotlinx.datetime)
+
+    testImplementation(libs.jetbrains.kotlinx.coroutines.test)
 }

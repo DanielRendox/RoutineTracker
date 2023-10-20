@@ -1,36 +1,65 @@
 package com.rendox.routinetracker.core.data.completion_history
 
 import com.rendox.routinetracker.core.database.completion_history.CompletionHistoryLocalDataSource
+import com.rendox.routinetracker.core.logic.time.LocalDateRange
+import com.rendox.routinetracker.core.model.CompletionHistoryEntry
 import com.rendox.routinetracker.core.model.HistoricalStatus
-import kotlinx.coroutines.flow.Flow
+import kotlinx.datetime.LocalDate
 
 class CompletionHistoryRepositoryImpl(
     private val localDataSource: CompletionHistoryLocalDataSource,
 ) : CompletionHistoryRepository {
 
-    override fun getHistoryEntryByIndex(
+    override suspend fun getHistoryEntries(
         routineId: Long,
-        numberOfDateFromRoutineStart: Long
-    ): Flow<HistoricalStatus?> {
-        return localDataSource.getHistoryEntryByIndex(routineId, numberOfDateFromRoutineStart)
-    }
-
-    override fun getHistoryEntriesByIndices(
-        routineId: Long,
-        dateFromRoutineStartIndices: LongRange
-    ): Flow<List<HistoricalStatus>> {
-        return localDataSource.getHistoryEntriesByIndices(routineId, dateFromRoutineStartIndices)
+        dates: LocalDateRange
+    ): List<CompletionHistoryEntry> {
+        return localDataSource.getHistoryEntries(routineId, dates)
     }
 
     override suspend fun insertHistoryEntry(
-        numberOfDateFromRoutineStart: Long,
+        id: Long?,
         routineId: Long,
-        status: HistoricalStatus,
+        entry: CompletionHistoryEntry,
+        tasksCompletedCounterIncrementAmount: Int?,
     ) {
         localDataSource.insertHistoryEntry(
-            numberOfDateFromRoutineStart = numberOfDateFromRoutineStart,
+            id = id,
             routineId = routineId,
-            status = status,
+            entry = entry,
+            tasksCompletedCounterIncrementAmount = tasksCompletedCounterIncrementAmount,
         )
+    }
+
+    override suspend fun updateHistoryEntryStatusByDate(
+        routineId: Long,
+        date: LocalDate,
+        status: HistoricalStatus,
+        tasksCompletedCounterIncrementAmount: Int?
+    ) {
+        localDataSource.updateHistoryEntryStatusByDate(
+            routineId = routineId,
+            date = date,
+            status = status,
+            tasksCompletedCounterIncrementAmount = tasksCompletedCounterIncrementAmount,
+        )
+    }
+
+    override suspend fun updateHistoryEntryStatusByStatus(
+        routineId: Long,
+        newStatus: HistoricalStatus,
+        tasksCompletedCounterIncrementAmount: Int?,
+        matchingStatuses: List<HistoricalStatus>
+    ) {
+        localDataSource.updateHistoryEntryStatusByStatus(
+            routineId = routineId,
+            newStatus = newStatus,
+            tasksCompletedCounterIncrementAmount = tasksCompletedCounterIncrementAmount,
+            matchingStatuses = matchingStatuses,
+        )
+    }
+
+    override suspend fun getLastHistoryEntryDate(routineId: Long): LocalDate? {
+        return localDataSource.getLastHistoryEntryDate(routineId)
     }
 }

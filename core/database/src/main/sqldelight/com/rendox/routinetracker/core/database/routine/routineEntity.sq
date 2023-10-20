@@ -1,9 +1,11 @@
-import com.rendox.routinetracker.core.database.model.RoutineType;
+import com.rendox.routinetracker.core.database.routine.model.RoutineType;
+import kotlin.Int;
 
 CREATE TABLE routineEntity (
     id INTEGER NOT NULL PRIMARY KEY,
     type TEXT AS RoutineType NOT NULL,
-    name TEXT NOT NULL
+    name TEXT NOT NULL,
+    tasksCompletedCounter INTEGER AS Int
 );
 
 getRoutineById:
@@ -13,4 +15,9 @@ WHERE id = ?;
 
 insertRoutine:
 INSERT INTO routineEntity
-VALUES (?, ?, ?);
+VALUES (?, ?, ?, ?);
+
+incrementTasksCompletedCounter:
+UPDATE routineEntity
+SET tasksCompletedCounter = tasksCompletedCounter + :incrementAmount
+WHERE id = :routineId;

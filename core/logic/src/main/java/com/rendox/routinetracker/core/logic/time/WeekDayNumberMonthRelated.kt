@@ -5,7 +5,6 @@ import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
-import kotlinx.datetime.plus
 
 data class WeekDayMonthRelated(
     val dayOfWeek: DayOfWeek,
@@ -29,7 +28,7 @@ fun LocalDate.deriveWeekDayRelativeToMonthNumber(): WeekDayNumberMonthRelated {
     var resultingDate = firstWeekDay
     var counter = 1
     while (resultingDate != this) {
-        resultingDate = resultingDate.plus(DatePeriod(days = DateTimeUnit.WEEK.days))
+        resultingDate = resultingDate.plusDays(DateTimeUnit.WEEK.days)
         counter++
     }
     return counter.deriveExplicitWeekDayRelativeToMonth()
@@ -65,7 +64,7 @@ private fun LocalDate.findDateOfLastWeekDayInMonth(): LocalDate {
 private fun LocalDate.findDateOfFirstWeekDayInMonth(): LocalDate {
     var firstWeekDay = this.withDayOfMonth(1)
     while (firstWeekDay.dayOfWeek != this.dayOfWeek) {
-        firstWeekDay = firstWeekDay.plus(DatePeriod(days = 1))
+        firstWeekDay = firstWeekDay.plusDays(1)
     }
     return firstWeekDay
 }

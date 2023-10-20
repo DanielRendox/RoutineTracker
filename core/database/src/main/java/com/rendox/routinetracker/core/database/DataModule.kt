@@ -10,17 +10,16 @@ import com.rendox.routinetracker.core.database.schedule.DueDateEntity
 import com.rendox.routinetracker.core.database.schedule.ScheduleEntity
 import com.rendox.routinetracker.core.database.schedule.WeekDayMonthRelatedEntity
 import com.rendox.routinetracker.core.logic.time.AnnualDate
-import com.rendox.routinetracker.core.logic.time.epoch
+import com.rendox.routinetracker.core.logic.time.epochDate
+import com.rendox.routinetracker.core.logic.time.plusDays
 import kotlinx.coroutines.Dispatchers
-import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Month
 import kotlinx.datetime.daysUntil
-import kotlinx.datetime.plus
 import org.koin.dsl.module
 
-val dataModule = module {
+val localDataSourceModule = module {
 
     single {
         Dispatchers.IO
@@ -38,6 +37,7 @@ val dataModule = module {
             driver = get(),
             routineEntityAdapter = RoutineEntity.Adapter(
                 typeAdapter = EnumColumnAdapter(),
+                tasksCompletedCounterAdapter = IntColumnAdapter,
             ),
             scheduleEntityAdapter = ScheduleEntity.Adapter(
                 typeAdapter = EnumColumnAdapter(),
@@ -58,6 +58,7 @@ val dataModule = module {
             ),
             completionHistoryEntityAdapter = CompletionHistoryEntity.Adapter(
                 statusAdapter = EnumColumnAdapter(),
+                dateAdapter = localDateAdapter,
             )
         )
     }
@@ -76,8 +77,8 @@ val localDateAdapter = object : ColumnAdapter<LocalDate, Long> {
     override fun encode(value: LocalDate) = value.toInt().toLong()
 }
 
-fun Int.toLocalDate() = epoch.plus(DatePeriod(days = this))
-fun LocalDate.toInt() = epoch.daysUntil(this)
+fun Int.toLocalDate() = epochDate.plusDays(this)
+fun LocalDate.toInt() = epochDate.daysUntil(this)
 
 val annualDateAdapter = object : ColumnAdapter<AnnualDate, Long> {
     override fun decode(databaseValue: Long) = databaseValue.toInt().toAnnualDate()
@@ -88,8 +89,8 @@ fun Int.toAnnualDate(): AnnualDate {
     if (this == 366) {
         return AnnualDate(Month.FEBRUARY, 29)
     }
-    val arbitraryNotLeapYearStart = epoch
-    val requestedDate = arbitraryNotLeapYearStart.plus(DatePeriod(days = this))
+    val arbitraryNotLeapYearStart = epochDate
+    val requestedDate = arbitraryNotLeapYearStart.plusDays(this)
     return AnnualDate(requestedDate.month, requestedDate.dayOfMonth)
 }
 
@@ -97,7 +98,7 @@ fun AnnualDate.toInt(): Int {
     if (this == AnnualDate(Month.FEBRUARY, 29)) {
         return 366
     }
-    val arbitraryNotLeapYearStart = epoch
+    val arbitraryNotLeapYearStart = epochDate
     val requestedDate = LocalDate(arbitraryNotLeapYearStart.year, this.month, this.dayOfMonth)
     return arbitraryNotLeapYearStart.daysUntil(requestedDate)
 }

@@ -4,13 +4,14 @@ import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
+import kotlinx.datetime.Month
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 
 // TODO replace with user preference
 val DefaultDayStart = LocalTime(0, 0, 0)
 
-val epoch = LocalDate(1970, 1, 1)
+val epochDate = LocalDate(1970, 1, 1)
 
 /**
  * Returns this date with another day of month.
@@ -19,9 +20,13 @@ val epoch = LocalDate(1970, 1, 1)
  */
 fun LocalDate.withDayOfMonth(dayOfMonth: Int) = LocalDate(this.year, this.month, dayOfMonth)
 
+val LocalDate.atEndOfYear get() = LocalDate(this.year, Month.DECEMBER, 31)
+
 /**
  * The beginning of the next month.
  */
 val LocalDate.nextMonth
     get() = withDayOfMonth(1).plus(1, DateTimeUnit.MONTH)
 val LocalDate.atEndOfMonth get() = nextMonth - DatePeriod(days = 1)
+
+fun LocalDate.plusDays(daysNumber: Int) = plus(DatePeriod(days = daysNumber))

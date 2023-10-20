@@ -27,7 +27,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
             }
 
             dependencies {
-                add("implementation", project(":core:testcommon"))
+                add("testImplementation", project(":core:testcommon"))
             }
         }
     }

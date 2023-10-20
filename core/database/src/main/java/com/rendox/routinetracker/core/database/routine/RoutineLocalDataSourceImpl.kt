@@ -1,48 +1,46 @@
 package com.rendox.routinetracker.core.database.routine
 
 import app.cash.sqldelight.TransactionWithoutReturn
-import app.cash.sqldelight.coroutines.asFlow
-import app.cash.sqldelight.coroutines.mapToOne
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
-import com.rendox.routinetracker.core.database.model.ScheduleType
-import com.rendox.routinetracker.core.database.model.toEveryDaySchedule
-import com.rendox.routinetracker.core.database.model.toMonthlySchedule
-import com.rendox.routinetracker.core.database.model.toPeriodicCustomSchedule
-import com.rendox.routinetracker.core.database.model.toWeeklySchedule
-import com.rendox.routinetracker.core.database.model.toYesNoRoutine
+import com.rendox.routinetracker.core.database.routine.model.RoutineType
+import com.rendox.routinetracker.core.database.routine.model.ScheduleType
+import com.rendox.routinetracker.core.database.routine.model.toAnnualSchedule
+import com.rendox.routinetracker.core.database.routine.model.toCustomDateSchedule
+import com.rendox.routinetracker.core.database.routine.model.toEveryDaySchedule
+import com.rendox.routinetracker.core.database.routine.model.toMonthlySchedule
+import com.rendox.routinetracker.core.database.routine.model.toPeriodicCustomSchedule
+import com.rendox.routinetracker.core.database.routine.model.toWeeklySchedule
+import com.rendox.routinetracker.core.database.routine.model.toYesNoRoutine
 import com.rendox.routinetracker.core.database.schedule.ScheduleEntity
 import com.rendox.routinetracker.core.database.toDayOfWeek
 import com.rendox.routinetracker.core.database.toInt
-import com.rendox.routinetracker.core.model.Routine
-import com.rendox.routinetracker.core.database.model.RoutineType
-import com.rendox.routinetracker.core.database.model.toAnnualSchedule
-import com.rendox.routinetracker.core.database.model.toCustomDateSchedule
-import com.rendox.routinetracker.core.model.Schedule
+import com.rendox.routinetracker.core.logic.time.AnnualDate
 import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
+import com.rendox.routinetracker.core.model.Routine
+import com.rendox.routinetracker.core.model.Schedule
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Month
 
 class RoutineLocalDataSourceImpl(
     private val db: RoutineTrackerDatabase,
     private val dispatcher: CoroutineDispatcher,
 ) : RoutineLocalDataSource {
 
-    override fun getRoutineById(id: Long): Flow<Routine?> {
-        return db.routineEntityQueries.transactionWithResult {
-            getScheduleEntity(id).combine(getRoutineEntity(id)) { scheduleEntity, routineEntity ->
-                val schedule = scheduleEntity.toExternalModel { getDueDates(it) }
-                routineEntity.toExternalModel(schedule)
+    override suspend fun getRoutineById(routineId: Long): Routine {
+        return withContext(dispatcher) {
+            db.routineEntityQueries.transactionWithResult {
+                val schedule = getScheduleEntity(routineId).toExternalModel { getDueDates(it) }
+                getRoutineEntity(routineId).toExternalModel(schedule)
             }
         }
     }
 
-    private fun getRoutineEntity(id: Long): Flow<RoutineEntity> =
-        db.routineEntityQueries.getRoutineById(id).asFlow().mapToOne(dispatcher)
+    private fun getRoutineEntity(id: Long): RoutineEntity =
+        db.routineEntityQueries.getRoutineById(id).executeAsOne()
 
-    private fun getScheduleEntity(id: Long): Flow<ScheduleEntity> =
-        db.scheduleEntityQueries.getScheduleById(id).asFlow().mapToOne(dispatcher)
+    private fun getScheduleEntity(id: Long): ScheduleEntity =
+        db.scheduleEntityQueries.getScheduleById(id).executeAsOne()
 
     private fun getDueDates(scheduleId: Long): List<Int> =
         db.dueDateEntityQueries.getDueDates(scheduleId).executeAsList().map { it.dueDateNumber }
@@ -100,6 +98,7 @@ class RoutineLocalDataSourceImpl(
             id = routine.id,
             type = RoutineType.YesNoRoutine,
             name = routine.name,
+            tasksCompletedCounter = routine.scheduleDeviation,
         )
     }
 
@@ -144,12 +143,12 @@ class RoutineLocalDataSourceImpl(
             includeLastDayOfMonthInMonthlySchedule = null,
             startFromRoutineStartInMonthlySchedule = null,
             startDayOfYearInAnnualSchedule = null,
-            startDate = schedule.startDate,
-            scheduleDeviation = schedule.scheduleDeviation,
+            startDate = schedule.routineStartDate,
             backlogEnabled = schedule.backlogEnabled,
             cancelDuenessIfDoneAhead = schedule.cancelDuenessIfDoneAhead,
             vacationStartDate = schedule.vacationStartDate,
             vacationEndDate = schedule.vacationEndDate,
+            scheduleDeviation = 0, // TODO
         )
     }
 
@@ -162,12 +161,12 @@ class RoutineLocalDataSourceImpl(
             includeLastDayOfMonthInMonthlySchedule = null,
             startFromRoutineStartInMonthlySchedule = null,
             startDayOfYearInAnnualSchedule = null,
-            startDate = schedule.startDate,
-            scheduleDeviation = schedule.scheduleDeviation,
+            startDate = schedule.routineStartDate,
             backlogEnabled = schedule.backlogEnabled,
             cancelDuenessIfDoneAhead = schedule.cancelDuenessIfDoneAhead,
             vacationStartDate = schedule.vacationStartDate,
             vacationEndDate = schedule.vacationEndDate,
+            scheduleDeviation = 0, // TODO
         )
     }
 
@@ -180,12 +179,12 @@ class RoutineLocalDataSourceImpl(
             includeLastDayOfMonthInMonthlySchedule = schedule.includeLastDayOfMonth,
             startFromRoutineStartInMonthlySchedule = schedule.startFromRoutineStart,
             startDayOfYearInAnnualSchedule = null,
-            startDate = schedule.startDate,
-            scheduleDeviation = schedule.scheduleDeviation,
+            startDate = schedule.routineStartDate,
             backlogEnabled = schedule.backlogEnabled,
             cancelDuenessIfDoneAhead = schedule.cancelDuenessIfDoneAhead,
             vacationStartDate = schedule.vacationStartDate,
             vacationEndDate = schedule.vacationEndDate,
+            scheduleDeviation = 0, // TODO
         )
     }
 
@@ -209,12 +208,12 @@ class RoutineLocalDataSourceImpl(
             includeLastDayOfMonthInMonthlySchedule = null,
             startFromRoutineStartInMonthlySchedule = null,
             startDayOfYearInAnnualSchedule = null,
-            startDate = schedule.startDate,
-            scheduleDeviation = schedule.scheduleDeviation,
+            startDate = schedule.routineStartDate,
             backlogEnabled = schedule.backlogEnabled,
             cancelDuenessIfDoneAhead = schedule.cancelDuenessIfDoneAhead,
             vacationStartDate = schedule.vacationStartDate,
             vacationEndDate = schedule.vacationEndDate,
+            scheduleDeviation = 0, // TODO
         )
     }
 
@@ -227,12 +226,12 @@ class RoutineLocalDataSourceImpl(
             includeLastDayOfMonthInMonthlySchedule = null,
             startFromRoutineStartInMonthlySchedule = null,
             startDayOfYearInAnnualSchedule = null,
-            startDate = schedule.startDate,
-            scheduleDeviation = schedule.scheduleDeviation,
+            startDate = schedule.routineStartDate,
             backlogEnabled = schedule.backlogEnabled,
             cancelDuenessIfDoneAhead = schedule.cancelDuenessIfDoneAhead,
             vacationStartDate = schedule.vacationStartDate,
             vacationEndDate = schedule.vacationEndDate,
+            scheduleDeviation = 0, // TODO
         )
     }
 
@@ -244,13 +243,13 @@ class RoutineLocalDataSourceImpl(
             startDayOfWeekInWeeklySchedule = null,
             includeLastDayOfMonthInMonthlySchedule = null,
             startFromRoutineStartInMonthlySchedule = null,
-            startDayOfYearInAnnualSchedule = schedule.startDayOfYear,
-            startDate = schedule.startDate,
-            scheduleDeviation = schedule.scheduleDeviation,
+            startDayOfYearInAnnualSchedule = AnnualDate(Month.JANUARY, 1), //TODO
+            startDate = schedule.routineStartDate,
             backlogEnabled = schedule.backlogEnabled,
             cancelDuenessIfDoneAhead = schedule.cancelDuenessIfDoneAhead,
             vacationStartDate = schedule.vacationStartDate,
             vacationEndDate = schedule.vacationEndDate,
+            scheduleDeviation = 0, // TODO
         )
     }
 

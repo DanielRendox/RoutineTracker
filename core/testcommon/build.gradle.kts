@@ -6,11 +6,32 @@ plugins {
 android {
     namespace = "com.rendox.routinetracker.core.testcommon"
 
-    defaultConfig {
-        minSdk = 21
+    flavorDimensions += "minSdk"
+
+    productFlavors {
+        create("minSdk26") {
+            dimension = "minSdk"
+            minSdk = 26
+            compileOptions {
+                isCoreLibraryDesugaringEnabled = false
+            }
+        }
+        create("minSdk21") {
+            dimension = "minSdk"
+            minSdk = 21
+            compileOptions {
+                isCoreLibraryDesugaringEnabled = true
+            }
+        }
     }
 }
 
 dependencies {
     implementation(libs.androidx.runner)
+    implementation(libs.jetbrains.kotlinx.datetime)
+
+    implementation(project(":core:database"))
+    implementation(project(":core:data"))
+    implementation(project(":core:logic"))
+    implementation(project(":core:model"))
 }

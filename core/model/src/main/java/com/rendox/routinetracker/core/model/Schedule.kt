@@ -6,58 +6,65 @@ import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.Month
 
 sealed class Schedule {
 
-    abstract val startDate: LocalDate
-    abstract val scheduleDeviation: Int
+    abstract val routineStartDate: LocalDate
+    abstract val routineEndDate: LocalDate?
+
     abstract val backlogEnabled: Boolean
     abstract val cancelDuenessIfDoneAhead: Boolean
+    abstract val periodSeparationEnabled: Boolean
+
     abstract val vacationStartDate: LocalDate?
     abstract val vacationEndDate: LocalDate?
 
-    abstract val correspondingPeriod: DatePeriod
-    abstract val numOfDueDays: Int
+    abstract val numOfDueDaysInStandardPeriod: Int
+    abstract val correspondingPeriod: DatePeriod?
 
     data class EveryDaySchedule(
-        override val startDate: LocalDate,
-        override val scheduleDeviation: Int = 0,
+        override val routineStartDate: LocalDate,
         override val backlogEnabled: Boolean = false,
         override val cancelDuenessIfDoneAhead: Boolean = false,
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
+        override val routineEndDate: LocalDate? = null,
     ) : Schedule() {
-        override val correspondingPeriod: DatePeriod
-            get() = DatePeriod(days = 1)
 
-        override val numOfDueDays: Int
+        override val numOfDueDaysInStandardPeriod: Int
             get() = 1
+
+        override val periodSeparationEnabled: Boolean = false
+
+        override val correspondingPeriod: DatePeriod?
+            get() = null
     }
 
     data class WeeklySchedule(
-        override val startDate: LocalDate,
-        override val scheduleDeviation: Int = 0,
+        override val routineStartDate: LocalDate,
         override val backlogEnabled: Boolean = false,
         override val cancelDuenessIfDoneAhead: Boolean = false,
+        override val periodSeparationEnabled: Boolean = false,
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
+        override val routineEndDate: LocalDate? = null,
         val dueDaysOfWeek: List<DayOfWeek>,
         val startDayOfWeek: DayOfWeek? = null,
     ) : Schedule() {
         override val correspondingPeriod: DatePeriod
             get() = DatePeriod(days = DateTimeUnit.WEEK.days)
-        override val numOfDueDays: Int
+        override val numOfDueDaysInStandardPeriod: Int
             get() = dueDaysOfWeek.size
     }
 
     data class MonthlySchedule(
-        override val startDate: LocalDate,
-        override val scheduleDeviation: Int = 0,
+        override val routineStartDate: LocalDate,
         override val backlogEnabled: Boolean = false,
         override val cancelDuenessIfDoneAhead: Boolean = false,
+        override val periodSeparationEnabled: Boolean = false,
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
+        override val routineEndDate: LocalDate? = null,
         val dueDatesIndices: List<Int>,
         val includeLastDayOfMonth: Boolean = false,
         val weekDaysMonthRelated: List<WeekDayMonthRelated>,
@@ -65,7 +72,7 @@ sealed class Schedule {
         ) : Schedule() {
         override val correspondingPeriod: DatePeriod
             get() = DatePeriod(months = 1)
-        override val numOfDueDays: Int
+        override val numOfDueDaysInStandardPeriod: Int
             get() {
                 var dueDaysCounter = dueDatesIndices.size
                 if (includeLastDayOfMonth) dueDaysCounter++
@@ -75,54 +82,54 @@ sealed class Schedule {
     }
 
     data class PeriodicCustomSchedule(
-        override val startDate: LocalDate,
-        override val scheduleDeviation: Int = 0,
+        override val routineStartDate: LocalDate,
         override val backlogEnabled: Boolean = false,
         override val cancelDuenessIfDoneAhead: Boolean = false,
+        override val periodSeparationEnabled: Boolean = false,
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
+        override val routineEndDate: LocalDate? = null,
         val dueDatesIndices: List<Int>,
         val numOfDaysInPeriod: Int,
     ) : Schedule() {
         override val correspondingPeriod: DatePeriod
             get() = DatePeriod(days = numOfDaysInPeriod)
-        override val numOfDueDays: Int
+        override val numOfDueDaysInStandardPeriod: Int
             get() = dueDatesIndices.size
     }
 
     data class CustomDateSchedule(
-        override val startDate: LocalDate,
-        override val scheduleDeviation: Int = 0,
+        override val routineStartDate: LocalDate,
         override val backlogEnabled: Boolean = false,
         override val cancelDuenessIfDoneAhead: Boolean = false,
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
+        override val routineEndDate: LocalDate? = null,
         val dueDates: List<LocalDate>,
     ) : Schedule() {
-        override val correspondingPeriod: DatePeriod
-            get() = DatePeriod(days = dueDates.size)
-        override val numOfDueDays: Int
+        override val numOfDueDaysInStandardPeriod: Int
             get() = dueDates.size
+
+        override val periodSeparationEnabled: Boolean = false
+
+        override val correspondingPeriod: DatePeriod?
+            get() = null
     }
 
     data class AnnualSchedule(
-        override val startDate: LocalDate,
-        override val scheduleDeviation: Int = 0,
+        override val routineStartDate: LocalDate,
         override val backlogEnabled: Boolean = false,
         override val cancelDuenessIfDoneAhead: Boolean = false,
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
+        override val routineEndDate: LocalDate? = null,
+        override val periodSeparationEnabled: Boolean = false,
         val dueDates: List<AnnualDate>,
-        val startDayOfYear: AnnualDate?,
+        val startFromRoutineStart: Boolean,
         ) : Schedule() {
-        init {
-            check(startDayOfYear != AnnualDate(Month.FEBRUARY, 29)) {
-                "Start day of year should be consistent throughout years."
-            }
-        }
         override val correspondingPeriod: DatePeriod
             get() = DatePeriod(years = 1)
-        override val numOfDueDays: Int
+        override val numOfDueDaysInStandardPeriod: Int
             get() = dueDates.size
     }
 }
