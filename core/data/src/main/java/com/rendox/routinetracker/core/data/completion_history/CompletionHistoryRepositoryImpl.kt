@@ -62,4 +62,11 @@ class CompletionHistoryRepositoryImpl(
     override suspend fun getLastHistoryEntryDate(routineId: Long): LocalDate? {
         return localDataSource.getLastHistoryEntryDate(routineId)
     }
+
+    override suspend fun countDaysThatMatchStatusInPeriodRange(
+        status: HistoricalStatus,
+        period: LocalDateRange,
+    ): Int {
+        return localDataSource.countDaysThatMatchStatusInPeriodRange(status, period)
+    }
 }

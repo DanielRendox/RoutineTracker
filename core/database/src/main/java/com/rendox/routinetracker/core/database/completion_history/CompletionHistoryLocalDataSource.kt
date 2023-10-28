@@ -34,4 +34,9 @@ interface CompletionHistoryLocalDataSource {
     )
 
     suspend fun getLastHistoryEntryDate(routineId: Long): LocalDate?
+
+    suspend fun countDaysThatMatchStatusInPeriodRange(
+        status: HistoricalStatus,
+        period: LocalDateRange,
+    ): Int
 }

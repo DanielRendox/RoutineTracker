@@ -49,15 +49,15 @@ class RoutineLocalDataSourceImpl(
         if (type == ScheduleType.EveryDaySchedule) return toEveryDaySchedule()
         val dueDates = dueDatesProvider(id)
         return when (type) {
-            ScheduleType.WeeklySchedule -> toWeeklySchedule(dueDates)
-            ScheduleType.MonthlySchedule -> {
+            ScheduleType.WeeklyScheduleByDueDaysOfWeek -> toWeeklySchedule(dueDates)
+            ScheduleType.MonthlyScheduleByDueDaysOfMonth -> {
                 val weekDaysMonthRelated = getWeekDayMonthRelatedDays(id)
                 toMonthlySchedule(dueDates, weekDaysMonthRelated)
             }
 
             ScheduleType.PeriodicCustomSchedule -> toPeriodicCustomSchedule(dueDates)
             ScheduleType.CustomDateSchedule -> toCustomDateSchedule(dueDates)
-            ScheduleType.AnnualSchedule -> toAnnualSchedule(dueDates)
+            ScheduleType.AnnualScheduleByDueDaysOfYear -> toAnnualSchedule(dueDates)
             else -> throw IllegalArgumentException()
         }
     }
@@ -105,32 +105,35 @@ class RoutineLocalDataSourceImpl(
     private fun insertSchedule(schedule: Schedule) {
         when (schedule) {
             is Schedule.EveryDaySchedule -> insertEveryDaySchedule(schedule)
-            is Schedule.WeeklySchedule -> {
-                insertWeeklySchedule(schedule)
+            is Schedule.WeeklyScheduleByDueDaysOfWeek -> {
+                insertWeeklyScheduleByDueDaysOfWeek(schedule)
                 insertDueDates(schedule.dueDaysOfWeek.map { it.toInt() })
             }
 
-            is Schedule.MonthlySchedule -> {
-                insertMonthlySchedule(schedule)
+            is Schedule.WeeklyScheduleByNumOfDueDays -> insertWeeklyScheduleByNumOfDueDays(schedule)
+
+            is Schedule.MonthlyScheduleByDueDatesIndices -> {
+                insertMonthlyScheduleByDueDaysOfMonth(schedule)
                 val insertedScheduleId = db.scheduleEntityQueries.lastInsertRowId().executeAsOne()
                 insertDueDates(schedule.dueDatesIndices)
                 insertWeekDaysMonthRelated(insertedScheduleId, schedule.weekDaysMonthRelated)
             }
 
-            is Schedule.PeriodicCustomSchedule -> {
-                insertPeriodicCustomSchedule(schedule)
-                insertDueDates(schedule.dueDatesIndices)
-            }
+            is Schedule.MonthlyScheduleByNumOfDueDays -> insertMonthlyScheduleByNumOfDueDays(schedule)
+
+            is Schedule.PeriodicCustomSchedule -> insertPeriodicCustomSchedule(schedule)
 
             is Schedule.CustomDateSchedule -> {
                 insertCustomDateSchedule(schedule)
                 insertDueDates(schedule.dueDates.map { it.toInt() })
             }
 
-            is Schedule.AnnualSchedule -> {
-                insertAnnualSchedule(schedule)
+            is Schedule.AnnualScheduleByDueDates -> {
+                insertAnnualScheduleByDueDaysOfYear(schedule)
                 insertDueDates(schedule.dueDates.map { it.toInt() })
             }
+
+            is Schedule.AnnualScheduleByNumOfDueDays -> insertAnnualScheduleByNumOfDueDays(schedule)
         }
     }
 
@@ -152,10 +155,10 @@ class RoutineLocalDataSourceImpl(
         )
     }
 
-    private fun insertWeeklySchedule(schedule: Schedule.WeeklySchedule) {
+    private fun insertWeeklyScheduleByDueDaysOfWeek(schedule: Schedule.WeeklyScheduleByDueDaysOfWeek) {
         db.scheduleEntityQueries.insertSchedule(
             id = null,
-            type = ScheduleType.WeeklySchedule,
+            type = ScheduleType.WeeklyScheduleByDueDaysOfWeek,
             numOfDaysInPeriodicSchedule = null,
             startDayOfWeekInWeeklySchedule = schedule.startDayOfWeek,
             includeLastDayOfMonthInMonthlySchedule = null,
@@ -170,10 +173,14 @@ class RoutineLocalDataSourceImpl(
         )
     }
 
-    private fun insertMonthlySchedule(schedule: Schedule.MonthlySchedule) {
+    private fun insertWeeklyScheduleByNumOfDueDays(schedule: Schedule.WeeklyScheduleByNumOfDueDays) {
+        TODO()
+    }
+
+    private fun insertMonthlyScheduleByDueDaysOfMonth(schedule: Schedule.MonthlyScheduleByDueDatesIndices) {
         db.scheduleEntityQueries.insertSchedule(
             id = null,
-            type = ScheduleType.MonthlySchedule,
+            type = ScheduleType.MonthlyScheduleByDueDaysOfMonth,
             numOfDaysInPeriodicSchedule = null,
             startDayOfWeekInWeeklySchedule = null,
             includeLastDayOfMonthInMonthlySchedule = schedule.includeLastDayOfMonth,
@@ -188,6 +195,10 @@ class RoutineLocalDataSourceImpl(
         )
     }
 
+    private fun insertMonthlyScheduleByNumOfDueDays(schedule: Schedule.MonthlyScheduleByNumOfDueDays) {
+        TODO()
+    }
+
     private fun insertWeekDaysMonthRelated(scheduleId: Long, values: List<WeekDayMonthRelated>) {
         for (weekDayMonthRelated in values) {
             db.weekDayMonthRelatedEntityQueries.insertWeekDayMonthRelatedEntry(
@@ -200,21 +211,7 @@ class RoutineLocalDataSourceImpl(
     }
 
     private fun insertPeriodicCustomSchedule(schedule: Schedule.PeriodicCustomSchedule) {
-        db.scheduleEntityQueries.insertSchedule(
-            id = null,
-            type = ScheduleType.PeriodicCustomSchedule,
-            numOfDaysInPeriodicSchedule = schedule.numOfDaysInPeriod,
-            startDayOfWeekInWeeklySchedule = null,
-            includeLastDayOfMonthInMonthlySchedule = null,
-            startFromRoutineStartInMonthlySchedule = null,
-            startDayOfYearInAnnualSchedule = null,
-            startDate = schedule.routineStartDate,
-            backlogEnabled = schedule.backlogEnabled,
-            cancelDuenessIfDoneAhead = schedule.cancelDuenessIfDoneAhead,
-            vacationStartDate = schedule.vacationStartDate,
-            vacationEndDate = schedule.vacationEndDate,
-            scheduleDeviation = 0, // TODO
-        )
+        TODO()
     }
 
     private fun insertCustomDateSchedule(schedule: Schedule.CustomDateSchedule) {
@@ -235,10 +232,10 @@ class RoutineLocalDataSourceImpl(
         )
     }
 
-    private fun insertAnnualSchedule(schedule: Schedule.AnnualSchedule) {
+    private fun insertAnnualScheduleByDueDaysOfYear(schedule: Schedule.AnnualScheduleByDueDates) {
         db.scheduleEntityQueries.insertSchedule(
             id = null,
-            type = ScheduleType.AnnualSchedule,
+            type = ScheduleType.AnnualScheduleByDueDaysOfYear,
             numOfDaysInPeriodicSchedule = null,
             startDayOfWeekInWeeklySchedule = null,
             includeLastDayOfMonthInMonthlySchedule = null,
@@ -253,6 +250,10 @@ class RoutineLocalDataSourceImpl(
         )
     }
 
+    private fun insertAnnualScheduleByNumOfDueDays(schedule: Schedule.AnnualScheduleByNumOfDueDays) {
+        TODO()
+    }
+
     private fun insertDueDates(dueDates: List<Int>) {
         val lastInsertScheduleId = db.scheduleEntityQueries.lastInsertRowId().executeAsOne()
         for (dueDate in dueDates) {
@@ -262,5 +263,9 @@ class RoutineLocalDataSourceImpl(
                 dueDateNumber = dueDate,
             )
         }
+    }
+
+    override suspend fun updateScheduleDeviation(newValue: Int, routineId: Long) {
+        TODO()
     }
 }

@@ -65,7 +65,7 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
             history.add(
                 CompletionHistoryEntry(
                     date = dateCounter.plusDays(index),
-                    status = HistoricalStatus.FullyCompleted,
+                    status = HistoricalStatus.Completed,
                 )
             )
         }
@@ -139,11 +139,11 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
         val routineStartDate = LocalDate(2023, Month.OCTOBER, 1)
 
         val history = listOf(
-            CompletionHistoryEntry(routineStartDate, HistoricalStatus.FullyCompleted),
+            CompletionHistoryEntry(routineStartDate, HistoricalStatus.Completed),
             CompletionHistoryEntry(routineStartDate.plusDays(1), HistoricalStatus.Skipped),
             CompletionHistoryEntry(routineStartDate.plusDays(2), HistoricalStatus.PartiallyCompleted),
             CompletionHistoryEntry(routineStartDate.plusDays(3), HistoricalStatus.NotCompleted),
-            CompletionHistoryEntry(routineStartDate.plusDays(4), HistoricalStatus.FullyCompleted),
+            CompletionHistoryEntry(routineStartDate.plusDays(4), HistoricalStatus.Completed),
         )
 
         for (entry in history) {
@@ -156,7 +156,7 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
 
         val newEntry = CompletionHistoryEntry(
             date = routineStartDate.plusDays(2),
-            status = HistoricalStatus.FullyCompleted,
+            status = HistoricalStatus.Completed,
         )
 
         completionHistoryLocalDataSource.updateHistoryEntryStatusByDate(
@@ -184,11 +184,11 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
         val routineStartDate = LocalDate(2023, Month.OCTOBER, 1)
 
         val history = listOf(
-            CompletionHistoryEntry(routineStartDate, HistoricalStatus.FullyCompleted),
+            CompletionHistoryEntry(routineStartDate, HistoricalStatus.Completed),
             CompletionHistoryEntry(routineStartDate.plusDays(1), HistoricalStatus.Skipped),
             CompletionHistoryEntry(routineStartDate.plusDays(2), HistoricalStatus.PartiallyCompleted),
             CompletionHistoryEntry(routineStartDate.plusDays(3), HistoricalStatus.NotCompleted),
-            CompletionHistoryEntry(routineStartDate.plusDays(4), HistoricalStatus.FullyCompleted),
+            CompletionHistoryEntry(routineStartDate.plusDays(4), HistoricalStatus.Completed),
         )
 
         for (entry in history) {
@@ -201,12 +201,12 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
 
         val notCompletedUpdatedEntry = CompletionHistoryEntry(
             date = routineStartDate.plusDays(3),
-            status = HistoricalStatus.FullyCompleted,
+            status = HistoricalStatus.Completed,
         )
 
         val partiallyCompletedUpdatedEntry = CompletionHistoryEntry(
             date = routineStartDate.plusDays(2),
-            status = HistoricalStatus.FullyCompleted,
+            status = HistoricalStatus.Completed,
         )
 
         val backlogStatuses = listOf(

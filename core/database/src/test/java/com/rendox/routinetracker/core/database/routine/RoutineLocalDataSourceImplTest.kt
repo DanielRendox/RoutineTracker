@@ -67,8 +67,6 @@ class RoutineLocalDataSourceImplTest : KoinTest {
                 routineStartDate = LocalDate(2023, Month.SEPTEMBER, 1),
                 vacationStartDate = LocalDate(2023, Month.SEPTEMBER, 10),
                 vacationEndDate = null,
-                backlogEnabled = false,
-                cancelDuenessIfDoneAhead = false,
             ),
         )
 
@@ -91,7 +89,7 @@ class RoutineLocalDataSourceImplTest : KoinTest {
             DayOfWeek.SATURDAY,
         )
 
-        val schedule = Schedule.WeeklySchedule(
+        val schedule = Schedule.WeeklyScheduleByDueDaysOfWeek(
             dueDaysOfWeek = dueDaysOfWeek,
             startDayOfWeek = DayOfWeek.WEDNESDAY,
             routineStartDate = LocalDate(2023, Month.SEPTEMBER, 1),
@@ -126,7 +124,7 @@ class RoutineLocalDataSourceImplTest : KoinTest {
             WeekDayMonthRelated(DayOfWeek.FRIDAY, WeekDayNumberMonthRelated.Last)
         )
 
-        val schedule = Schedule.MonthlySchedule(
+        val schedule = Schedule.MonthlyScheduleByDueDatesIndices(
             dueDatesIndices = dueDatesIndices,
             includeLastDayOfMonth = true,
             weekDaysMonthRelated = weekDaysMonthRelated,
@@ -155,7 +153,7 @@ class RoutineLocalDataSourceImplTest : KoinTest {
             db = get(), dispatcher = UnconfinedTestDispatcher(testScheduler)
         )
 
-        val schedule = Schedule.MonthlySchedule(
+        val schedule = Schedule.MonthlyScheduleByDueDatesIndices(
             dueDatesIndices = emptyList(),
             includeLastDayOfMonth = true,
             weekDaysMonthRelated = emptyList(),
@@ -224,7 +222,7 @@ class RoutineLocalDataSourceImplTest : KoinTest {
             AnnualDate(Month.SEPTEMBER, 30),
         )
 
-        val schedule = Schedule.AnnualSchedule(
+        val schedule = Schedule.AnnualScheduleByDueDates(
             dueDates = dueDates,
             routineStartDate = LocalDate(2023, Month.SEPTEMBER, 1),
             vacationStartDate = LocalDate(2023, Month.SEPTEMBER, 10),

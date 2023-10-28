@@ -1,15 +1,14 @@
-package com.rendox.routinetracker.core.domain.routine
+package com.rendox.routinetracker.core.domain.routine.schedule_util
 
 import com.google.common.truth.Truth.assertThat
+import com.rendox.routinetracker.core.domain.routine.schedule.isDue
 import com.rendox.routinetracker.core.logic.time.AnnualDate
-import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
 import com.rendox.routinetracker.core.logic.time.WeekDayNumberMonthRelated
-import com.rendox.routinetracker.core.logic.time.atEndOfMonth
 import com.rendox.routinetracker.core.logic.time.plusDays
-import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.Schedule
 import kotlinx.datetime.DatePeriod
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Month
@@ -18,8 +17,9 @@ import kotlinx.datetime.plus
 import org.junit.Test
 import kotlin.random.Random
 import kotlin.random.nextInt
+import kotlin.test.assertFailsWith
 
-class ScheduleUtilTest {
+class ScheduleIsDueTest {
 
     private val routineStartDate = LocalDate(2023, Month.JANUARY, 1)
 
@@ -33,11 +33,11 @@ class ScheduleUtilTest {
         val date3 = LocalDate(2022, Month.OCTOBER, 31)
         assertThat(schedule.isDue(date1)).isTrue()
         assertThat(schedule.isDue(date2)).isTrue()
-        assertThat(schedule.isDue(date3)).isTrue()
+        assertFailsWith<IllegalArgumentException> { schedule.isDue(date3) }
     }
 
     @Test
-    fun weeklyScheduleIsDue() {
+    fun weeklyScheduleByDueDaysIsDue() {
         val dueDaysOfWeek1 = listOf(
             DayOfWeek.MONDAY,
             DayOfWeek.WEDNESDAY,
@@ -51,11 +51,11 @@ class ScheduleUtilTest {
             DayOfWeek.FRIDAY,
             DayOfWeek.SATURDAY,
         )
-        val schedule1: Schedule = Schedule.WeeklySchedule(
+        val schedule1: Schedule = Schedule.WeeklyScheduleByDueDaysOfWeek(
             routineStartDate = routineStartDate,
             dueDaysOfWeek = dueDaysOfWeek1,
         )
-        val schedule2: Schedule = Schedule.WeeklySchedule(
+        val schedule2: Schedule = Schedule.WeeklyScheduleByDueDaysOfWeek(
             routineStartDate = routineStartDate,
             dueDaysOfWeek = dueDaysOfWeek2,
         )
@@ -86,6 +86,135 @@ class ScheduleUtilTest {
     }
 
     @Test
+    fun `weekly schedule, first period is short, assert fails with an exception`() {
+        assertFailsWith<IllegalStateException> {
+            Schedule.WeeklyScheduleByNumOfDueDays(
+                routineStartDate = routineStartDate,
+                numOfDueDays = 5,
+                startDayOfWeek = DayOfWeek.MONDAY,
+                numOfDueDaysInFirstPeriod = null,
+            )
+        }
+    }
+
+    @Test
+    fun `weekly schedule due X days per week, due on first X days`() {
+        val numOfDueDays = 5
+
+        val schedule = Schedule.WeeklyScheduleByNumOfDueDays(
+            routineStartDate = routineStartDate,
+            numOfDueDays = numOfDueDays,
+            startDayOfWeek = null,
+            numOfDueDaysInFirstPeriod = null,
+            lastDateInHistory = null,
+            numOfCompletedDaysInCurrentPeriod = 0,
+        )
+
+        val futurePeriodStart = schedule.routineStartDate.plusDays(DateTimeUnit.WEEK.days)
+
+        for (dayIndex in 0 until numOfDueDays) {
+            assertThat(schedule.isDue(futurePeriodStart.plusDays(dayIndex))).isTrue()
+        }
+
+        for (dayIndex in numOfDueDays until DateTimeUnit.WEEK.days) {
+            assertThat(schedule.isDue(futurePeriodStart.plusDays(dayIndex))).isFalse()
+        }
+    }
+
+    @Test
+    fun `weekly schedule due X days per week, assert skipped, then due X days, then not due`() {
+        var schedule = Schedule.WeeklyScheduleByNumOfDueDays(
+            routineStartDate = routineStartDate,
+            numOfDueDays = 3,
+            startDayOfWeek = null,
+            numOfDueDaysInFirstPeriod = null,
+            numOfCompletedDaysInCurrentPeriod = 0,
+            lastDateInHistory = null,
+        )
+
+        for (dayIndex in 0..2) {
+            val currentDate = routineStartDate.plusDays(dayIndex)
+            assertThat(schedule.isDue(currentDate)).isTrue()
+            schedule = schedule.copy(
+                lastDateInHistory = currentDate,
+            )
+        }
+
+        for (dayIndex in 3..5) {
+            val currentDate = routineStartDate.plusDays(dayIndex)
+            assertThat(schedule.isDue(currentDate)).isTrue()
+        }
+
+        assertThat(schedule.isDue(routineStartDate.plusDays(6))).isFalse()
+    }
+
+    @Test
+    fun `weekly schedule due X days per week, assert not due because all completed`() {
+        val schedule = Schedule.WeeklyScheduleByNumOfDueDays(
+            routineStartDate = routineStartDate,
+            numOfDueDays = 4,
+            startDayOfWeek = null,
+            numOfDueDaysInFirstPeriod = null,
+            numOfCompletedDaysInCurrentPeriod = 4,
+            lastDateInHistory = routineStartDate.plusDays(3),
+        )
+
+        for (dayIndex in 4..6) {
+            val currentDate = routineStartDate.plusDays(dayIndex)
+            assertThat(schedule.isDue(currentDate)).isFalse()
+        }
+    }
+
+    @Test
+    fun `weekly schedule due X days per week, some days skipped, assert not due because all completed`() {
+        val schedule = Schedule.WeeklyScheduleByNumOfDueDays(
+            routineStartDate = routineStartDate,
+            numOfDueDays = 4,
+            startDayOfWeek = null,
+            numOfDueDaysInFirstPeriod = null,
+            numOfCompletedDaysInCurrentPeriod = 4,
+            lastDateInHistory = routineStartDate.plusDays(5),
+        )
+
+        assertThat(schedule.isDue(routineStartDate.plusDays(6))).isFalse()
+    }
+
+    @Test
+    fun `weekly schedule due X days per week, assert works fine when first period is short`() {
+        var schedule = Schedule.WeeklyScheduleByNumOfDueDays(
+            routineStartDate = LocalDate(2023, Month.OCTOBER, 25), // wednesday
+            numOfDueDays = 4,
+            startDayOfWeek = DayOfWeek.MONDAY,
+            numOfDueDaysInFirstPeriod = 3,
+            numOfCompletedDaysInCurrentPeriod = 0,
+            lastDateInHistory = null,
+        )
+
+        for (dayIndex in 0..2) {
+            val currentDate = schedule.routineStartDate.plusDays(dayIndex)
+            assertThat(schedule.isDue(currentDate)).isTrue()
+        }
+
+        schedule = schedule.copy(
+            numOfCompletedDaysInCurrentPeriod = 2,
+            lastDateInHistory = schedule.routineStartDate.plusDays(2)
+        )
+
+        assertThat(schedule.isDue(schedule.routineStartDate.plusDays(3))).isTrue()
+        assertThat(schedule.isDue(schedule.routineStartDate.plusDays(4))).isFalse()
+
+        for (dayIndex in 5..8) {
+            val currentDate = schedule.routineStartDate.plusDays(dayIndex)
+            assertThat(schedule.isDue(currentDate)).isTrue()
+        }
+
+        for (dayIndex in 9..11) {
+            val currentDate = schedule.routineStartDate.plusDays(dayIndex)
+            assertThat(schedule.isDue(currentDate)).isFalse()
+        }
+    }
+
+    @Test
     fun `MonthlySchedule is due, check due dates`() {
         val dates = (1..28).shuffled()
         val dueDatesIndices = dates.take(14)
@@ -105,7 +234,7 @@ class ScheduleUtilTest {
             )
         }
 
-        val schedule: Schedule = Schedule.MonthlySchedule(
+        val schedule: Schedule = Schedule.MonthlyScheduleByDueDatesIndices(
             dueDatesIndices = dueDatesIndices,
             includeLastDayOfMonth = false,
             startFromRoutineStart = true,
@@ -132,7 +261,7 @@ class ScheduleUtilTest {
         val januaryDayBeforeLast = januaryLastDate.minus(DatePeriod(days = 1))
         val aprilDayBeforeLast = aprilLastDate.minus(DatePeriod(days = 1))
 
-        val schedule = Schedule.MonthlySchedule(
+        val schedule = Schedule.MonthlyScheduleByDueDatesIndices(
             dueDatesIndices = emptyList(),
             includeLastDayOfMonth = true,
             startFromRoutineStart = true,
@@ -151,7 +280,7 @@ class ScheduleUtilTest {
 
     @Test
     fun `MonthlySchedule is due, check WeekDayMonthRelated`() {
-        val schedule: Schedule = Schedule.MonthlySchedule(
+        val schedule: Schedule = Schedule.MonthlyScheduleByDueDatesIndices(
             dueDatesIndices = emptyList(),
             includeLastDayOfMonth = true,
             weekDaysMonthRelated = listOf(
@@ -195,35 +324,124 @@ class ScheduleUtilTest {
     }
 
     @Test
-    fun periodicCustomScheduleIsDue() {
-        val numOfDaysInPeriod = Random.nextInt(2..100)
+    fun `MonthlyScheduleByNumOfDueDays, first period is short, assert fails with an exception`() {
+        assertFailsWith<IllegalStateException> {
+            // should fail because routine start date is not the first day of month
+            Schedule.MonthlyScheduleByNumOfDueDays(
+                routineStartDate = routineStartDate.plusDays(Random.nextInt(1..27)),
+                numOfDueDays = 18,
+                startFromRoutineStart = false,
+                numOfDueDaysInFirstPeriod = null,
+            )
+        }
+    }
 
-        val daysIndices = (1..numOfDaysInPeriod).shuffled()
+    @Test
+    fun `MonthlyScheduleByNumOfDueDays, start from routine start, due on specified days`() {
+        val schedule = Schedule.MonthlyScheduleByNumOfDueDays(
+            routineStartDate = routineStartDate,
+            numOfDueDays = Random.nextInt(2..30),
+            startFromRoutineStart = true,
+            numOfDueDaysInFirstPeriod = null,
+        )
+
+        for (dueDayMonthNumber in 1..schedule.numOfDueDays) {
+            val dueDate = LocalDate(2023, Random.nextInt(1..12), dueDayMonthNumber)
+            assertThat(schedule.isDue(dueDate)).isTrue()
+        }
+
+        for (notDueDayNumber in (schedule.numOfDueDays + 1)..28) {
+            val dueDate = LocalDate(2023, Random.nextInt(1..12), notDueDayNumber)
+            assertThat(schedule.isDue(dueDate)).isFalse()
+        }
+    }
+
+    @Test
+    fun `MonthlyScheduleByNumOfDueDays, backlog is resolvable at inconsistent days`() {
+        val schedule = Schedule.MonthlyScheduleByNumOfDueDays(
+            routineStartDate = routineStartDate,
+            numOfDueDays = 10,
+            startFromRoutineStart = true,
+            numOfDueDaysInFirstPeriod = null,
+            lastDateInHistory = LocalDate(2023, Month.JANUARY, 28),
+            numOfCompletedDaysInCurrentPeriod = 5,
+        )
+
+        for (dayIndex in 28..30) {
+            val dueDate = routineStartDate.plusDays(dayIndex)
+            assertThat(schedule.isDue(dueDate)).isTrue()
+        }
+
+        for (dayIndex in 31..40) {
+            val dueDate = routineStartDate.plusDays(dayIndex)
+            assertThat(schedule.isDue(dueDate)).isTrue()
+        }
+
+        for (dayIndex in 41..58) {
+            val dueDate = routineStartDate.plusDays(dayIndex)
+            assertThat(schedule.isDue(dueDate)).isFalse()
+        }
+    }
+
+    @Test
+    fun `MonthlyScheduleByNumOfDueDays, assert num of due days more than 28 doesn't introduce backlog`() {
+        val schedule = Schedule.MonthlyScheduleByNumOfDueDays(
+            routineStartDate = routineStartDate,
+            startFromRoutineStart = true,
+            numOfDueDaysInFirstPeriod = null,
+            numOfDueDays = 29,
+        )
+
+        for (dayIndex in 0..28) {
+            val dueDate = routineStartDate.plusDays(dayIndex)
+            assertThat(schedule.isDue(dueDate)).isTrue()
+        }
+
+        for (dayIndex in 29..30) {
+            val dueDate = routineStartDate.plusDays(dayIndex)
+            assertThat(schedule.isDue(dueDate)).isFalse()
+        }
+
+        for (dayIndex in 31..87) {
+            val dueDate = routineStartDate.plusDays(dayIndex)
+            assertThat(schedule.isDue(dueDate)).isTrue()
+        }
+
+        for (dayIndex in 88..89) {
+            val dueDate = routineStartDate.plusDays(dayIndex)
+            assertThat(schedule.isDue(dueDate)).isFalse()
+        }
+    }
+
+    @Test
+    fun periodicCustomScheduleIsDueRandomNumOfDays() {
+        val numOfDaysInPeriod = Random.nextInt(2..100)
         val dueDaysNumber = numOfDaysInPeriod / 2
-        val dueDaysIndices = daysIndices.take(dueDaysNumber)
-        val notDueDaysIndices = daysIndices.drop(dueDaysNumber)
+
+        println("dueDaysNumber = $dueDaysNumber")
+        println("numOfDaysInPeriod = $numOfDaysInPeriod")
 
         val schedule: Schedule = Schedule.PeriodicCustomSchedule(
-            dueDatesIndices = dueDaysIndices,
+            numOfDueDays = dueDaysNumber,
             numOfDaysInPeriod = numOfDaysInPeriod,
             routineStartDate = routineStartDate,
         )
 
-        for (dueDayIndex in dueDaysIndices) {
+        for (dueDayNumber in 1..dueDaysNumber) {
             val numOfPeriodsAlreadyPassed = Random.nextInt(1..50)
             assertThat(
                 schedule.isDue(
                     validationDate = routineStartDate.plus(
                         DatePeriod(
                             // subtract one because indices start count from 1, not from 0
-                            days = numOfDaysInPeriod * numOfPeriodsAlreadyPassed + dueDayIndex - 1
+                            days = numOfDaysInPeriod * numOfPeriodsAlreadyPassed + dueDayNumber - 1
                         )
                     ),
                 )
             ).isTrue()
         }
 
-        for (notDueDayIndex in notDueDaysIndices) {
+        for (notDueDayIndex in (dueDaysNumber + 1)..numOfDaysInPeriod) {
             val numOfPeriodsAlreadyPassed = Random.nextInt(1..50)
             assertThat(
                 schedule.isDue(
@@ -294,7 +512,7 @@ class ScheduleUtilTest {
     }
 
     @Test
-    fun annualScheduleIsDue() {
+    fun annualScheduleByDueDaysOfYearIsDue() {
         val dueDates = mutableListOf<AnnualDate>()
         val notDueDates = mutableListOf<AnnualDate>()
 
@@ -366,7 +584,7 @@ class ScheduleUtilTest {
         expectedDueDates.add(LocalDate(2024, Month.FEBRUARY, 29))
         expectedNotDueDates.add(LocalDate(2025, Month.FEBRUARY, 28))
 
-        val schedule = Schedule.AnnualSchedule(
+        val schedule = Schedule.AnnualScheduleByDueDates(
             dueDates = dueDates,
             routineStartDate = routineStartDate,
             startFromRoutineStart = false,
@@ -382,197 +600,38 @@ class ScheduleUtilTest {
     }
 
     @Test
-    fun weeklyScheduleGetPeriodRangeStartFromRoutineStart() {
-        val routineStartDate = LocalDate(2023, Month.SEPTEMBER, 30)
-
-        val schedule = Schedule.WeeklySchedule(
-            dueDaysOfWeek = emptyList(),
-            startDayOfWeek = null,
-            routineStartDate = routineStartDate,
-        )
-
-        // still first week
-        val lastDayOfFirstWeek = LocalDate(2023, Month.OCTOBER, 6)
-        val firstWeek = routineStartDate..lastDayOfFirstWeek
-
-        val forthWeekStartDate = LocalDate(2023, Month.OCTOBER, 21)
-        val forthWeekEndDate = LocalDate(2023, Month.OCTOBER, 27)
-        val forthWeek = forthWeekStartDate..forthWeekEndDate
-
-        assertEachDateOfRangeIsInExpectedRange(schedule, firstWeek)
-        assertEachDateOfRangeIsInExpectedRange(schedule, forthWeek)
+    fun `AnnualScheduleByNumOfDueDays, first period is short, fails with an exception`() {
+        assertFailsWith<IllegalStateException> {
+            Schedule.AnnualScheduleByNumOfDueDays(
+                routineStartDate = routineStartDate.plusDays(Random.nextInt(1..364)),
+                startFromRoutineStart = false,
+                numOfDueDays = 0,
+                numOfDueDaysInFirstPeriod = null,
+            )
+        }
     }
 
     @Test
-    fun weeklyScheduleGetPeriodRangeStartFromCustomDayOfWeek() {
-        val routineStartDate = LocalDate(2023, Month.OCTOBER, 18)
+    fun `AnnualScheduleByNumOfDueDays, start from routine start, due on specified days`() {
 
-        val schedule = Schedule.WeeklySchedule(
-            dueDaysOfWeek = emptyList(),
-            startDayOfWeek = DayOfWeek.SUNDAY,
+        val schedule = Schedule.AnnualScheduleByNumOfDueDays(
             routineStartDate = routineStartDate,
-        )
-
-        val firstWeek = routineStartDate..LocalDate(2023, Month.OCTOBER, 21)
-        assertEachDateOfRangeIsInExpectedRange(schedule, firstWeek)
-
-        val secondWeek =
-            LocalDate(2023, Month.OCTOBER, 22)..LocalDate(2023, Month.OCTOBER, 28)
-        assertEachDateOfRangeIsInExpectedRange(schedule, secondWeek)
-    }
-
-    @Test
-    fun monthlyScheduleGetPeriodRangeStartFromRoutineStart() {
-        val routineStartDate = LocalDate(2023, Month.OCTOBER, 18)
-
-        val schedule = Schedule.MonthlySchedule(
-            routineStartDate = routineStartDate,
-            dueDatesIndices = emptyList(),
-            weekDaysMonthRelated = emptyList(),
+            numOfDueDays = Random.nextInt(2..364),
             startFromRoutineStart = true,
+            numOfDueDaysInFirstPeriod = null,
+            numOfCompletedDaysInCurrentPeriod = 0,
         )
 
-        val firstMonth = routineStartDate..routineStartDate
-            .plus(DatePeriod(months = 1))
-            .minus(DatePeriod(days = 1))
-        assertEachDateOfRangeIsInExpectedRange(schedule, firstMonth)
+        for (dueDayNumber in 1..schedule.numOfDueDays) {
+            val dueDate = LocalDate(Random.nextInt(2023..2030), 1, 1)
+                .plusDays(dueDayNumber - 1)
+            assertThat(schedule.isDue(dueDate)).isTrue()
+        }
 
-        val secondMonthStartDay = routineStartDate.plus(DatePeriod(months = 1))
-        val secondMonth = secondMonthStartDay..secondMonthStartDay
-            .plus(DatePeriod(months = 1))
-            .minus(DatePeriod(days = 1))
-        assertEachDateOfRangeIsInExpectedRange(schedule, secondMonth)
-    }
-
-    @Test
-    fun monthlyScheduleGetPeriodRangeStartFromMonthStart() {
-        val routineStartDate = LocalDate(2023, Month.OCTOBER, 18)
-
-        val schedule = Schedule.MonthlySchedule(
-            routineStartDate = routineStartDate,
-            dueDatesIndices = emptyList(),
-            weekDaysMonthRelated = emptyList(),
-            startFromRoutineStart = false,
-        )
-
-        val firstMonth = routineStartDate..routineStartDate.atEndOfMonth
-        assertEachDateOfRangeIsInExpectedRange(schedule, firstMonth)
-
-        val secondMonthStartDay = routineStartDate.atEndOfMonth.plus(DatePeriod(days = 1))
-        val secondMonth = secondMonthStartDay..secondMonthStartDay.atEndOfMonth
-        assertEachDateOfRangeIsInExpectedRange(schedule, secondMonth)
-    }
-
-    @Test
-    fun annualScheduleGetPeriodRangeStartFromRoutineStartFebruary29() {
-        val routineStartDate = LocalDate(2024, Month.FEBRUARY, 29)
-
-        val schedule = Schedule.AnnualSchedule(
-            routineStartDate = routineStartDate,
-            dueDates = emptyList(),
-            startFromRoutineStart = true,
-        )
-
-        val firstYear = routineStartDate..LocalDate(2025, Month.FEBRUARY, 28)
-        assertEachDateOfRangeIsInExpectedRange(schedule, firstYear)
-
-        val secondYearStartDate = LocalDate(2025, Month.MARCH, 1)
-        val secondYearEndDate = LocalDate(2026, Month.FEBRUARY, 28)
-
-        val secondYear = secondYearStartDate..secondYearEndDate
-        assertEachDateOfRangeIsInExpectedRange(schedule, secondYear)
-    }
-
-    @Test
-    fun annualScheduleGetPeriodRangeStartFromRoutineStartMarch1() {
-        val routineStartDate = LocalDate(2023, Month.MARCH, 1)
-
-        val schedule = Schedule.AnnualSchedule(
-            routineStartDate = routineStartDate,
-            dueDates = emptyList(),
-            startFromRoutineStart = true,
-        )
-
-        val firstYear = routineStartDate..LocalDate(2024, Month.FEBRUARY, 29)
-        assertEachDateOfRangeIsInExpectedRange(schedule, firstYear)
-
-        val secondYearStartDate = LocalDate(2025, Month.MARCH, 1)
-        val secondYearEndDate = LocalDate(2026, Month.FEBRUARY, 28)
-
-        val secondYear = secondYearStartDate..secondYearEndDate
-        assertEachDateOfRangeIsInExpectedRange(schedule, secondYear)
-    }
-
-    @Test
-    fun annualScheduleGetPeriodRangeStartFromRoutineStartRandomDate() {
-        val routineStartDate = LocalDate(2023, Month.SEPTEMBER, 30)
-
-        val schedule = Schedule.AnnualSchedule(
-            routineStartDate = routineStartDate,
-            dueDates = emptyList(),
-            startFromRoutineStart = true,
-        )
-
-        val firstYear = routineStartDate..LocalDate(2024, Month.SEPTEMBER, 29)
-        assertEachDateOfRangeIsInExpectedRange(schedule, firstYear)
-
-        val secondYearStartDate = LocalDate(2025, Month.SEPTEMBER, 30)
-        val secondYearEndDate = LocalDate(2026, Month.SEPTEMBER, 29)
-
-        val secondYear = secondYearStartDate..secondYearEndDate
-        assertEachDateOfRangeIsInExpectedRange(schedule, secondYear)
-    }
-
-    @Test
-    fun annualScheduleGetPeriodRangeYearStartsFromYearStart() {
-        val routineStartDate = LocalDate(2023, Month.SEPTEMBER, 30)
-
-        val schedule = Schedule.AnnualSchedule(
-            routineStartDate = routineStartDate,
-            dueDates = emptyList(),
-            startFromRoutineStart = false,
-        )
-
-        val firstYear = routineStartDate..LocalDate(2023, Month.DECEMBER, 31)
-        assertEachDateOfRangeIsInExpectedRange(schedule, firstYear)
-
-        val secondYearStartDate = LocalDate(2024, Month.JANUARY, 1)
-        val secondYear = secondYearStartDate..secondYearStartDate
-            .plus(DatePeriod(years = 1))
-            .minus(DatePeriod(days = 1))
-        assertEachDateOfRangeIsInExpectedRange(schedule, secondYear)
-    }
-
-    @Test
-    fun periodicCustomScheduleTest() {
-        val routineStartDate = LocalDate(2023, Month.JULY, 6)
-
-        val numOfDaysInPeriod = Random.nextInt(99)
-
-        val schedule = Schedule.PeriodicCustomSchedule(
-            routineStartDate = routineStartDate,
-            dueDatesIndices = emptyList(),
-            numOfDaysInPeriod = numOfDaysInPeriod,
-        )
-
-        val firstPeriodEndDate =
-            routineStartDate.plusDays(numOfDaysInPeriod).minus(DatePeriod(days = 1))
-
-        val firstPeriod = routineStartDate..firstPeriodEndDate
-        assertEachDateOfRangeIsInExpectedRange(schedule, firstPeriod)
-
-        val secondPeriodStartDate =
-            routineStartDate.plusDays(numOfDaysInPeriod)
-        val secondPeriodEndDate =
-            routineStartDate.plusDays(numOfDaysInPeriod * 2).minus(DatePeriod(days = 1))
-
-        val secondPeriod = secondPeriodStartDate..secondPeriodEndDate
-        assertEachDateOfRangeIsInExpectedRange(schedule, secondPeriod)
-    }
-
-    private fun assertEachDateOfRangeIsInExpectedRange(schedule: Schedule, range: LocalDateRange) {
-        for (date in range) {
-            assertThat(schedule.getPeriodRange(date)).isEqualTo(range)
+        for (notDueDayNumber in (schedule.numOfDueDays + 1)..364) {
+            val notDueDate = LocalDate(Random.nextInt(2023..2030), 1, 1)
+                .plusDays(notDueDayNumber - 1)
+            assertThat(schedule.isDue(notDueDate)).isFalse()
         }
     }
 }

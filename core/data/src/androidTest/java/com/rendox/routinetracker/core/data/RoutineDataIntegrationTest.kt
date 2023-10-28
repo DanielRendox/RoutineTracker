@@ -79,7 +79,7 @@ class RoutineDataIntegrationTest : KoinTest {
             history.add(
                 CompletionHistoryEntry(
                     date = dateCounter.plusDays(index),
-                    status = HistoricalStatus.FullyCompleted,
+                    status = HistoricalStatus.Completed,
                 )
             )
         }

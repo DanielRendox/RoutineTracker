@@ -15,7 +15,7 @@ class RoutineRepositoryImpl(
         localDataSource.insertRoutine(routine)
     }
 
-    override suspend fun setScheduleDeviation(newValue: Int) {
-        TODO("Not yet implemented")
+    override suspend fun updateScheduleDeviation(newValue: Int, routineId: Long) {
+        localDataSource.updateScheduleDeviation(newValue, routineId)
     }
 }

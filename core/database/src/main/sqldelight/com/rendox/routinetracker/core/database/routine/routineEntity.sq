@@ -5,7 +5,7 @@ CREATE TABLE routineEntity (
     id INTEGER NOT NULL PRIMARY KEY,
     type TEXT AS RoutineType NOT NULL,
     name TEXT NOT NULL,
-    tasksCompletedCounter INTEGER AS Int
+    scheduleDeviation INTEGER AS Int
 );
 
 getRoutineById:
@@ -19,5 +19,5 @@ VALUES (?, ?, ?, ?);
 
 incrementTasksCompletedCounter:
 UPDATE routineEntity
-SET tasksCompletedCounter = tasksCompletedCounter + :incrementAmount
+SET scheduleDeviation = scheduleDeviation + :incrementAmount
 WHERE id = :routineId;

@@ -100,4 +100,11 @@ class CompletionHistoryLocalDataSourceImpl(
                 .executeAsOneOrNull()
         }
     }
+
+    override suspend fun countDaysThatMatchStatusInPeriodRange(
+        status: HistoricalStatus,
+        period: LocalDateRange,
+    ): Int {
+        TODO("Not yet implemented")
+    }
 }

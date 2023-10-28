@@ -8,5 +8,5 @@ interface RoutineRepository {
 
     suspend fun insertRoutine(routine: Routine)
 
-    suspend fun setScheduleDeviation(newValue: Int)
+    suspend fun updateScheduleDeviation(newValue: Int, routineId: Long)
 }

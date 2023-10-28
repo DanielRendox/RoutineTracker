@@ -9,13 +9,11 @@ import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
 
 internal fun ScheduleEntity.toEveryDaySchedule() = Schedule.EveryDaySchedule(
     routineStartDate = startDate,
-    backlogEnabled = backlogEnabled,
-    cancelDuenessIfDoneAhead = cancelDuenessIfDoneAhead,
     vacationStartDate = vacationStartDate,
     vacationEndDate = vacationEndDate,
 )
 
-internal fun ScheduleEntity.toWeeklySchedule(dueDates: List<Int>) = Schedule.WeeklySchedule(
+internal fun ScheduleEntity.toWeeklySchedule(dueDates: List<Int>) = Schedule.WeeklyScheduleByDueDaysOfWeek(
     dueDaysOfWeek = dueDates.map { it.toDayOfWeek() },
     startDayOfWeek = startDayOfWeekInWeeklySchedule,
     routineStartDate = startDate,
@@ -28,7 +26,7 @@ internal fun ScheduleEntity.toWeeklySchedule(dueDates: List<Int>) = Schedule.Wee
 internal fun ScheduleEntity.toMonthlySchedule(
     dueDatesIndices: List<Int>,
     weekDaysMonthRelated: List<WeekDayMonthRelated>,
-) = Schedule.MonthlySchedule(
+) = Schedule.MonthlyScheduleByDueDatesIndices(
     dueDatesIndices = dueDatesIndices,
     includeLastDayOfMonth = includeLastDayOfMonthInMonthlySchedule!!,
     weekDaysMonthRelated = weekDaysMonthRelated,
@@ -42,15 +40,9 @@ internal fun ScheduleEntity.toMonthlySchedule(
 
 internal fun ScheduleEntity.toPeriodicCustomSchedule(
     dueDatesIndices: List<Int>,
-) = Schedule.PeriodicCustomSchedule(
-    dueDatesIndices = dueDatesIndices,
-    numOfDaysInPeriod = numOfDaysInPeriodicSchedule!!,
-    routineStartDate = startDate,
-    backlogEnabled = backlogEnabled,
-    cancelDuenessIfDoneAhead = cancelDuenessIfDoneAhead,
-    vacationStartDate = vacationStartDate,
-    vacationEndDate = vacationEndDate,
-)
+): Schedule.PeriodicCustomSchedule {
+    TODO()
+}
 
 internal fun ScheduleEntity.toCustomDateSchedule(
     dueDatesIndices: List<Int>,
@@ -65,7 +57,7 @@ internal fun ScheduleEntity.toCustomDateSchedule(
 
 internal fun ScheduleEntity.toAnnualSchedule(
     dueDates: List<Int>,
-) = Schedule.AnnualSchedule(
+) = Schedule.AnnualScheduleByDueDates(
     dueDates = dueDates.map { it.toAnnualDate() },
     routineStartDate = startDate,
     backlogEnabled = backlogEnabled,

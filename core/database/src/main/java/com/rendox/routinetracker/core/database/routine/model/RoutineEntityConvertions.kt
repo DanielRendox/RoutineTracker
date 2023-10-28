@@ -10,6 +10,5 @@ internal fun RoutineEntity.toYesNoRoutine(
     id = id,
     name = name,
     schedule = schedule,
-    scheduleDeviation = tasksCompletedCounter!!,
-    lastDateInHistory = null, //TODO
+    scheduleDeviation = scheduleDeviation!!,
 )

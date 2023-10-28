@@ -7,4 +7,6 @@ interface RoutineLocalDataSource {
     suspend fun getRoutineById(routineId: Long): Routine
 
     suspend fun insertRoutine(routine: Routine)
+
+    suspend fun updateScheduleDeviation(newValue: Int, routineId: Long)
 }
