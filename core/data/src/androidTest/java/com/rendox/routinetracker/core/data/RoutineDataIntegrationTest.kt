@@ -2,9 +2,9 @@ package com.rendox.routinetracker.core.data
 
 import com.google.common.truth.Truth.assertThat
 import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
-import com.rendox.routinetracker.core.data.completion_history.completionHistoryDataModule
+import com.rendox.routinetracker.core.data.di.completionHistoryDataModule
+import com.rendox.routinetracker.core.data.di.routineDataModule
 import com.rendox.routinetracker.core.data.routine.RoutineRepository
-import com.rendox.routinetracker.core.data.routine.routineDataModule
 import com.rendox.routinetracker.core.database.localDataSourceModule
 import com.rendox.routinetracker.core.logic.time.generateRandomDateRange
 import com.rendox.routinetracker.core.logic.time.plusDays
@@ -58,16 +58,16 @@ class RoutineDataIntegrationTest : KoinTest {
         val routineRepository: RoutineRepository = get()
         val completionHistoryRepository: CompletionHistoryRepository = get()
 
+        val schedule = Schedule.EveryDaySchedule(
+            routineStartDate = LocalDate(2023, Month.SEPTEMBER, 1),
+            vacationStartDate = LocalDate(2023, Month.SEPTEMBER, 10),
+            vacationEndDate = null,
+        )
+
         val routine = Routine.YesNoRoutine(
             id = 1,
             name = "Programming",
-            schedule = Schedule.EveryDaySchedule(
-                routineStartDate = LocalDate(2023, Month.SEPTEMBER, 1),
-                vacationStartDate = LocalDate(2023, Month.SEPTEMBER, 10),
-                vacationEndDate = null,
-                backlogEnabled = false,
-                cancelDuenessIfDoneAhead = false,
-            ),
+            schedule = schedule,
         )
 
         routineRepository.insertRoutine(routine)
@@ -108,7 +108,7 @@ class RoutineDataIntegrationTest : KoinTest {
                 id = null,
                 routineId = routine.id!!,
                 entry = entry,
-                tasksCompletedCounterIncrementAmount = when (index) {
+                scheduleDeviationIncrementAmount = when (index) {
                     in 0..49 -> 1
                     in 50..99 -> 0
                     in 100..149 -> 0
@@ -147,7 +147,10 @@ class RoutineDataIntegrationTest : KoinTest {
             )
         ).isEqualTo(listOf(history[startDate.daysUntil(randomDate)]))
 
+        val resultingSchedule = schedule.copy(lastDateInHistory = history.last().date)
         val resultingRoutine = routineRepository.getRoutineById(routine.id!!)
-        assertThat(resultingRoutine).isEqualTo(routine.copy(scheduleDeviation = 50))
+        assertThat(resultingRoutine).isEqualTo(
+            routine.copy(scheduleDeviation = 50, schedule = resultingSchedule)
+        )
     }
 }

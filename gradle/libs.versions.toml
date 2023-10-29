@@ -1,12 +1,12 @@
 [versions]
 coreLibraryDesugaring = "2.0.3"
-coreKtx = "1.10.1"
+coreKtx = "1.12.0"
 kotlin = "1.8.22"
-activityCompose = "1.7.2"
-composeRuntime = "1.5.1"
+activityCompose = "1.8.0"
+composeRuntime = "1.5.4"
 compose = "1.4.8"
-composeBom = "2023.06.00"
-material = "1.1.1"
+composeBom = "2023.10.01"
+material = "1.1.2"
 androidLifecycle = "2.6.2"
 systemuicontroller = "0.30.1"
 kotlinxDatetime = "0.4.1"
@@ -19,10 +19,10 @@ googleTruth = "1.1.5"
 androidxJunit = "1.1.5"
 espresso = "3.5.1"
 
-androidGradlePlugin = "8.1.1"
+androidGradlePlugin = "8.1.2"
 kotlinPlugin = "1.8.22"
 appcompat = "1.6.1"
-com-google-android-material-material = "1.9.0"
+com-google-android-material-material = "1.10.0"
 
 [libraries]
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "androidGradlePlugin" }

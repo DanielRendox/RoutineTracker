@@ -21,13 +21,13 @@ class CompletionHistoryRepositoryImpl(
         id: Long?,
         routineId: Long,
         entry: CompletionHistoryEntry,
-        tasksCompletedCounterIncrementAmount: Int?,
+        scheduleDeviationIncrementAmount: Int,
     ) {
         localDataSource.insertHistoryEntry(
             id = id,
             routineId = routineId,
             entry = entry,
-            tasksCompletedCounterIncrementAmount = tasksCompletedCounterIncrementAmount,
+            scheduleDeviationIncrementAmount = scheduleDeviationIncrementAmount,
         )
     }
 
@@ -35,38 +35,31 @@ class CompletionHistoryRepositoryImpl(
         routineId: Long,
         date: LocalDate,
         status: HistoricalStatus,
-        tasksCompletedCounterIncrementAmount: Int?
+        scheduleDeviationIncrementAmount: Int,
     ) {
         localDataSource.updateHistoryEntryStatusByDate(
             routineId = routineId,
             date = date,
             status = status,
-            tasksCompletedCounterIncrementAmount = tasksCompletedCounterIncrementAmount,
+            scheduleDeviationIncrementAmount = scheduleDeviationIncrementAmount,
         )
     }
 
     override suspend fun updateHistoryEntryStatusByStatus(
         routineId: Long,
         newStatus: HistoricalStatus,
-        tasksCompletedCounterIncrementAmount: Int?,
+        scheduleDeviationIncrementAmount: Int,
         matchingStatuses: List<HistoricalStatus>
     ) {
         localDataSource.updateHistoryEntryStatusByStatus(
             routineId = routineId,
             newStatus = newStatus,
-            tasksCompletedCounterIncrementAmount = tasksCompletedCounterIncrementAmount,
+            scheduleDeviationIncrementAmount = scheduleDeviationIncrementAmount,
             matchingStatuses = matchingStatuses,
         )
     }
 
     override suspend fun getLastHistoryEntryDate(routineId: Long): LocalDate? {
         return localDataSource.getLastHistoryEntryDate(routineId)
-    }
-
-    override suspend fun countDaysThatMatchStatusInPeriodRange(
-        status: HistoricalStatus,
-        period: LocalDateRange,
-    ): Int {
-        return localDataSource.countDaysThatMatchStatusInPeriodRange(status, period)
     }
 }

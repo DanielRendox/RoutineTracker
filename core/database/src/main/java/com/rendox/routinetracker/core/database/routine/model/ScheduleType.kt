@@ -4,10 +4,10 @@ enum class ScheduleType {
     EveryDaySchedule,
     WeeklyScheduleByDueDaysOfWeek,
     WeeklyScheduleByNumOfDueDays,
-    MonthlyScheduleByDueDaysOfMonth,
+    MonthlyScheduleByDueDatesIndices,
     MonthlyScheduleByNumOfDueDays,
     PeriodicCustomSchedule,
     CustomDateSchedule,
-    AnnualScheduleByDueDaysOfYear,
+    AnnualScheduleByDueDates,
     AnnualScheduleByNumOfDueDays,
 }

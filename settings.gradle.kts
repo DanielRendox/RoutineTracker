@@ -17,10 +17,11 @@ dependencyResolutionManagement {
 rootProject.name = "Routine Tracker"
 include(":app")
 include(":core:database")
-include(":feature:routinedetails")
 include(":core:ui")
 include(":core:logic")
 include(":core:testcommon")
 include(":core:data")
 include(":core:model")
 include(":core:domain")
+include(":feature")
+include(":feature:routine_stats")

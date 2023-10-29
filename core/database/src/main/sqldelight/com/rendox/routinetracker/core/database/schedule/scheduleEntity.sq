@@ -1,5 +1,4 @@
 import com.rendox.routinetracker.core.database.routine.model.ScheduleType;
-import com.rendox.routinetracker.core.logic.time.AnnualDate;
 import kotlin.Boolean;
 import kotlin.Int;
 import kotlinx.datetime.DayOfWeek;
@@ -8,17 +7,20 @@ import kotlinx.datetime.LocalDate;
 CREATE TABLE scheduleEntity (
     id INTEGER NOT NULL PRIMARY KEY,
     type TEXT AS ScheduleType NOT NULL,
-    numOfDaysInPeriodicSchedule INTEGER AS Int,
-    startDayOfWeekInWeeklySchedule INTEGER AS DayOfWeek,
-    includeLastDayOfMonthInMonthlySchedule INTEGER AS Boolean,
-    startFromRoutineStartInMonthlySchedule INTEGER AS Boolean,
-    startDayOfYearInAnnualSchedule INTEGER AS AnnualDate,
-    scheduleDeviation INTEGER AS Int NOT NULL,
-    startDate INTEGER AS LocalDate NOT NULL,
-    vacationStartDate INTEGER AS LocalDate,
-    vacationEndDate INTEGER AS LocalDate,
+    routineStartDate INTEGER AS LocalDate NOT NULL,
+    routineEndDate INTEGER AS LocalDate,
     backlogEnabled INTEGER AS Boolean NOT NULL,
     cancelDuenessIfDoneAhead INTEGER AS Boolean NOT NULL,
+    vacationStartDate INTEGER AS LocalDate,
+    vacationEndDate INTEGER AS LocalDate,
+    startDayOfWeekInWeeklySchedule INTEGER AS DayOfWeek,
+    startFromRoutineStartInMonthlyAndAnnualSchedule INTEGER AS Boolean,
+    includeLastDayOfMonthInMonthlySchedule INTEGER AS Boolean,
+    periodicSeparationEnabledInPeriodicSchedule INTEGER AS Boolean,
+    numOfDueDaysInByNumOfDueDaysSchedule INTEGER AS Int,
+    numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule INTEGER AS Int,
+    numOfCompletedDaysInCurrentPeriodInByNumOfDueDaysSchedule INTEGER AS Int,
+    numOfDaysInPeriodicCustomSchedule INTEGER AS Int,
     FOREIGN KEY(id) REFERENCES routineEntity(id)
 );
 
@@ -29,7 +31,7 @@ WHERE id = ?;
 
 insertSchedule:
 INSERT INTO scheduleEntity
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 lastInsertRowId:
 SELECT last_insert_rowid();

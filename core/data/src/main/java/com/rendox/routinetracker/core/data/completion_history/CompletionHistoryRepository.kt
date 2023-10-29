@@ -16,27 +16,22 @@ interface CompletionHistoryRepository {
         id: Long? = null,
         routineId: Long,
         entry: CompletionHistoryEntry,
-        tasksCompletedCounterIncrementAmount: Int?,
+        scheduleDeviationIncrementAmount: Int,
     )
 
     suspend fun updateHistoryEntryStatusByDate(
         routineId: Long,
         date: LocalDate,
         status: HistoricalStatus,
-        tasksCompletedCounterIncrementAmount: Int?,
+        scheduleDeviationIncrementAmount: Int,
     )
 
     suspend fun updateHistoryEntryStatusByStatus(
         routineId: Long,
         newStatus: HistoricalStatus,
-        tasksCompletedCounterIncrementAmount: Int?,
+        scheduleDeviationIncrementAmount: Int,
         matchingStatuses: List<HistoricalStatus>,
     )
 
     suspend fun getLastHistoryEntryDate(routineId: Long): LocalDate?
-
-    suspend fun countDaysThatMatchStatusInPeriodRange(
-        status: HistoricalStatus,
-        period: LocalDateRange,
-    ): Int
 }

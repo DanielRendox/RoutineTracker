@@ -17,7 +17,12 @@ insertRoutine:
 INSERT INTO routineEntity
 VALUES (?, ?, ?, ?);
 
-incrementTasksCompletedCounter:
+incrementScheduleDeviation:
 UPDATE routineEntity
 SET scheduleDeviation = scheduleDeviation + :incrementAmount
+WHERE id = :routineId;
+
+updateScheduleDeviation:
+UPDATE routineEntity
+SET scheduleDeviation = :newValue
 WHERE id = :routineId;

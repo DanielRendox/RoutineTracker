@@ -94,7 +94,7 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
                 id = null,
                 routineId = 1,
                 entry = entry,
-                tasksCompletedCounterIncrementAmount = null,
+                scheduleDeviationIncrementAmount = 0,
             )
         }
 
@@ -141,7 +141,7 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
         val history = listOf(
             CompletionHistoryEntry(routineStartDate, HistoricalStatus.Completed),
             CompletionHistoryEntry(routineStartDate.plusDays(1), HistoricalStatus.Skipped),
-            CompletionHistoryEntry(routineStartDate.plusDays(2), HistoricalStatus.PartiallyCompleted),
+            CompletionHistoryEntry(routineStartDate.plusDays(2), HistoricalStatus.Completed),
             CompletionHistoryEntry(routineStartDate.plusDays(3), HistoricalStatus.NotCompleted),
             CompletionHistoryEntry(routineStartDate.plusDays(4), HistoricalStatus.Completed),
         )
@@ -150,7 +150,7 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
             completionHistoryLocalDataSource.insertHistoryEntry(
                 routineId = routineId,
                 entry = entry,
-                tasksCompletedCounterIncrementAmount = null,
+                scheduleDeviationIncrementAmount = 0,
             )
         }
 
@@ -163,7 +163,7 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
             routineId = routineId,
             date = newEntry.date,
             status = newEntry.status,
-            tasksCompletedCounterIncrementAmount = null,
+            scheduleDeviationIncrementAmount = 0,
         )
 
         val updatedDateValue = completionHistoryLocalDataSource.getHistoryEntries(
@@ -186,7 +186,7 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
         val history = listOf(
             CompletionHistoryEntry(routineStartDate, HistoricalStatus.Completed),
             CompletionHistoryEntry(routineStartDate.plusDays(1), HistoricalStatus.Skipped),
-            CompletionHistoryEntry(routineStartDate.plusDays(2), HistoricalStatus.PartiallyCompleted),
+            CompletionHistoryEntry(routineStartDate.plusDays(2), HistoricalStatus.Completed),
             CompletionHistoryEntry(routineStartDate.plusDays(3), HistoricalStatus.NotCompleted),
             CompletionHistoryEntry(routineStartDate.plusDays(4), HistoricalStatus.Completed),
         )
@@ -195,7 +195,7 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
             completionHistoryLocalDataSource.insertHistoryEntry(
                 routineId = routineId,
                 entry = entry,
-                tasksCompletedCounterIncrementAmount = null,
+                scheduleDeviationIncrementAmount = 0,
             )
         }
 
@@ -204,19 +204,13 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
             status = HistoricalStatus.Completed,
         )
 
-        val partiallyCompletedUpdatedEntry = CompletionHistoryEntry(
-            date = routineStartDate.plusDays(2),
-            status = HistoricalStatus.Completed,
-        )
-
         val backlogStatuses = listOf(
-            HistoricalStatus.PartiallyCompleted,
             HistoricalStatus.NotCompleted,
         )
 
         completionHistoryLocalDataSource.updateHistoryEntryStatusByStatus(
             routineId = routineId,
-            tasksCompletedCounterIncrementAmount = null,
+            scheduleDeviationIncrementAmount = 0,
             newStatus = notCompletedUpdatedEntry.status,
             matchingStatuses = backlogStatuses,
         )
@@ -226,18 +220,5 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
             dates = notCompletedUpdatedEntry.date..notCompletedUpdatedEntry.date,
         )[0]
         assertThat(notCompletedUpdatedEntryDbValue).isEqualTo(notCompletedUpdatedEntry)
-
-        completionHistoryLocalDataSource.updateHistoryEntryStatusByStatus(
-            routineId = routineId,
-            tasksCompletedCounterIncrementAmount = null,
-            newStatus = partiallyCompletedUpdatedEntry.status,
-            matchingStatuses = backlogStatuses,
-        )
-
-        val partiallyCompletedUpdatedEntryDbValue = completionHistoryLocalDataSource.getHistoryEntries(
-            routineId = routineId,
-            dates = partiallyCompletedUpdatedEntry.date..partiallyCompletedUpdatedEntry.date,
-        )[0]
-        assertThat(partiallyCompletedUpdatedEntryDbValue).isEqualTo(partiallyCompletedUpdatedEntry)
     }
 }

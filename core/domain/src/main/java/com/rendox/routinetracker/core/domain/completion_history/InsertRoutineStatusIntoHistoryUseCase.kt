@@ -74,7 +74,7 @@ class InsertRoutineStatusIntoHistoryUseCase(
             entry = CompletionHistoryEntry(
                 currentDate, historicalStatusData.historicalStatus
             ),
-            tasksCompletedCounterIncrementAmount = historicalStatusData.scheduleDeviationIncrementAmount,
+            scheduleDeviationIncrementAmount = historicalStatusData.scheduleDeviationIncrementAmount,
         )
     }
 
@@ -151,7 +151,7 @@ class InsertRoutineStatusIntoHistoryUseCase(
         completionHistoryRepository.updateHistoryEntryStatusByStatus(
             routineId = routineId,
             newStatus = HistoricalStatus.CompletedLater,
-            tasksCompletedCounterIncrementAmount = 0,
+            scheduleDeviationIncrementAmount = 0,
             matchingStatuses = listOf(HistoricalStatus.NotCompleted),
         )
 

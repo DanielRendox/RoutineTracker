@@ -29,22 +29,20 @@ class CompletionHistoryLocalDataSourceFake(
         id: Long?,
         routineId: Long,
         entry: CompletionHistoryEntry,
-        tasksCompletedCounterIncrementAmount: Int?
+        scheduleDeviationIncrementAmount: Int
     ) {
         addToCompletionHistory(routineId, entry)
-        tasksCompletedCounterIncrementAmount?.let {
-            incrementScheduleDeviation(
-                incrementAmount = it,
-                routineId = routineId,
-            )
-        }
+        incrementScheduleDeviation(
+            incrementAmount = scheduleDeviationIncrementAmount,
+            routineId = routineId,
+        )
     }
 
     override suspend fun updateHistoryEntryStatusByDate(
         routineId: Long,
         date: LocalDate,
         status: HistoricalStatus,
-        tasksCompletedCounterIncrementAmount: Int?
+        scheduleDeviationIncrementAmount: Int
     ) {
         val entry =
             routineData.completionHistory.find { it.first == routineId && it.second.date == date }
@@ -54,18 +52,16 @@ class CompletionHistoryLocalDataSourceFake(
                 set(entryId, it.copy(second = CompletionHistoryEntry(date, status)))
             }
         }
-        tasksCompletedCounterIncrementAmount?.let {
-            incrementScheduleDeviation(
-                incrementAmount = it,
-                routineId = routineId,
-            )
-        }
+        incrementScheduleDeviation(
+            incrementAmount = scheduleDeviationIncrementAmount,
+            routineId = routineId,
+        )
     }
 
     override suspend fun updateHistoryEntryStatusByStatus(
         routineId: Long,
         newStatus: HistoricalStatus,
-        tasksCompletedCounterIncrementAmount: Int?,
+        scheduleDeviationIncrementAmount: Int,
         matchingStatuses: List<HistoricalStatus>
     ) {
         val entry = routineData.completionHistory.findLast {
@@ -77,12 +73,10 @@ class CompletionHistoryLocalDataSourceFake(
                 set(entryId, it.copy(second = CompletionHistoryEntry(it.second.date, newStatus)))
             }
         }
-        tasksCompletedCounterIncrementAmount?.let {
-            incrementScheduleDeviation(
-                incrementAmount = it,
-                routineId = routineId,
-            )
-        }
+        incrementScheduleDeviation(
+            incrementAmount = scheduleDeviationIncrementAmount,
+            routineId = routineId,
+        )
     }
 
     override suspend fun getLastHistoryEntryDate(routineId: Long): LocalDate? {
@@ -91,20 +85,14 @@ class CompletionHistoryLocalDataSourceFake(
     }
 
     private fun incrementScheduleDeviation(incrementAmount: Int, routineId: Long) {
-        val newRoutine = when (val oldRoutine = routineData.listOfRoutines[(routineId - 1).toInt()]) {
-            is Routine.YesNoRoutine -> oldRoutine.copy(
-                scheduleDeviation = oldRoutine.scheduleDeviation + incrementAmount
-            )
-        }
+        val newRoutine =
+            when (val oldRoutine = routineData.listOfRoutines[(routineId - 1).toInt()]) {
+                is Routine.YesNoRoutine -> oldRoutine.copy(
+                    scheduleDeviation = oldRoutine.scheduleDeviation + incrementAmount
+                )
+            }
         routineData.listOfRoutines = routineData.listOfRoutines.toMutableList().apply {
             set((routineId - 1).toInt(), newRoutine)
         }
-    }
-
-    override suspend fun countDaysThatMatchStatusInPeriodRange(
-        status: HistoricalStatus,
-        period: LocalDateRange
-    ): Int {
-        TODO("Not yet implemented")
     }
 }

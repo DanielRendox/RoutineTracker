@@ -6,7 +6,8 @@ plugins {
 }
 
 android {
-    namespace = "com.rendox.routinetracker.feature.routinedetails"
+
+    namespace = "com.rendox.routinetracker.feature.routine_stats"
 
     flavorDimensions += "minSdk"
 

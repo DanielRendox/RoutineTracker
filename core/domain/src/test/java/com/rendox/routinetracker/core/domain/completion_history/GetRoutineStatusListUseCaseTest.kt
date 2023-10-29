@@ -1,9 +1,9 @@
 package com.rendox.routinetracker.core.domain.completion_history
 
 import com.google.common.truth.Truth.assertThat
-import com.rendox.routinetracker.core.data.completion_history.completionHistoryDataModule
+import com.rendox.routinetracker.core.data.di.completionHistoryDataModule
 import com.rendox.routinetracker.core.data.routine.RoutineRepository
-import com.rendox.routinetracker.core.data.routine.routineDataModule
+import com.rendox.routinetracker.core.data.di.routineDataModule
 import com.rendox.routinetracker.core.database.completion_history.CompletionHistoryLocalDataSource
 import com.rendox.routinetracker.core.database.routine.RoutineLocalDataSource
 import com.rendox.routinetracker.core.logic.time.plusDays

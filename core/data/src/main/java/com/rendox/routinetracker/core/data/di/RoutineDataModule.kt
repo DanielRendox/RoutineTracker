@@ -1,5 +1,7 @@
-package com.rendox.routinetracker.core.data.routine
+package com.rendox.routinetracker.core.data.di
 
+import com.rendox.routinetracker.core.data.routine.RoutineRepository
+import com.rendox.routinetracker.core.data.routine.RoutineRepositoryImpl
 import com.rendox.routinetracker.core.database.routine.RoutineLocalDataSource
 import com.rendox.routinetracker.core.database.routine.RoutineLocalDataSourceImpl
 import org.koin.dsl.module

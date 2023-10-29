@@ -56,7 +56,6 @@ android {
 }
 
 dependencies {
-    implementation(project(":feature:routinedetails"))
     implementation(project(":core:data"))
     implementation(project(":core:database"))
     implementation(project(":core:model"))

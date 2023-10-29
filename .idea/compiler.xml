@@ -3,6 +3,7 @@
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="11">
       <module name="Routine_Tracker.domain" target="17" />
+      <module name="Routine_Tracker.feature.routinedetails" target="17" />
     </bytecodeTargetLevel>
   </component>
 </project>

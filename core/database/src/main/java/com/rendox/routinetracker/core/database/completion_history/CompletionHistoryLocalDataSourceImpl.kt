@@ -34,7 +34,7 @@ class CompletionHistoryLocalDataSourceImpl(
         id: Long?,
         routineId: Long,
         entry: CompletionHistoryEntry,
-        tasksCompletedCounterIncrementAmount: Int?,
+        scheduleDeviationIncrementAmount: Int,
     ) {
         withContext(dispatcher) {
             db.routineEntityQueries.transaction {
@@ -44,8 +44,8 @@ class CompletionHistoryLocalDataSourceImpl(
                     date = entry.date,
                     status = entry.status,
                 )
-                db.routineEntityQueries.incrementTasksCompletedCounter(
-                    incrementAmount = tasksCompletedCounterIncrementAmount,
+                db.routineEntityQueries.incrementScheduleDeviation(
+                    incrementAmount = scheduleDeviationIncrementAmount,
                     routineId = routineId,
                 )
             }
@@ -56,7 +56,7 @@ class CompletionHistoryLocalDataSourceImpl(
         routineId: Long,
         date: LocalDate,
         status: HistoricalStatus,
-        tasksCompletedCounterIncrementAmount: Int?,
+        scheduleDeviationIncrementAmount: Int,
     ) {
         withContext(dispatcher) {
             db.routineEntityQueries.transaction {
@@ -65,8 +65,8 @@ class CompletionHistoryLocalDataSourceImpl(
                     routineId = routineId,
                     date = date
                 )
-                db.routineEntityQueries.incrementTasksCompletedCounter(
-                    incrementAmount = tasksCompletedCounterIncrementAmount,
+                db.routineEntityQueries.incrementScheduleDeviation(
+                    incrementAmount = scheduleDeviationIncrementAmount,
                     routineId = routineId,
                 )
             }
@@ -76,7 +76,7 @@ class CompletionHistoryLocalDataSourceImpl(
     override suspend fun updateHistoryEntryStatusByStatus(
         routineId: Long,
         newStatus: HistoricalStatus,
-        tasksCompletedCounterIncrementAmount: Int?,
+        scheduleDeviationIncrementAmount: Int,
         matchingStatuses: List<HistoricalStatus>,
     ) {
         withContext(dispatcher) {
@@ -86,8 +86,8 @@ class CompletionHistoryLocalDataSourceImpl(
                     routineId = routineId,
                     statusPredicate = matchingStatuses,
                 )
-                db.routineEntityQueries.incrementTasksCompletedCounter(
-                    incrementAmount = tasksCompletedCounterIncrementAmount,
+                db.routineEntityQueries.incrementScheduleDeviation(
+                    incrementAmount = scheduleDeviationIncrementAmount,
                     routineId = routineId,
                 )
             }
@@ -99,12 +99,5 @@ class CompletionHistoryLocalDataSourceImpl(
             db.completionHistoryEntityQueries.getLastHistoryEntryDate(routineId)
                 .executeAsOneOrNull()
         }
-    }
-
-    override suspend fun countDaysThatMatchStatusInPeriodRange(
-        status: HistoricalStatus,
-        period: LocalDateRange,
-    ): Int {
-        TODO("Not yet implemented")
     }
 }

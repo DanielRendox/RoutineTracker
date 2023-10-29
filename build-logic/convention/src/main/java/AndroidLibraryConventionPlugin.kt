@@ -4,11 +4,9 @@ import com.rendox.routinetracker.addLocalTestDependencies
 import com.rendox.routinetracker.configureBuildTypes
 import com.rendox.routinetracker.configureKotlinAndroid
 import com.rendox.routinetracker.configurePackaging
-import com.rendox.routinetracker.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.dependencies
 
 class AndroidLibraryConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -20,7 +18,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
 
             extensions.configure<LibraryExtension> {
                 configureKotlinAndroid(this)
-                defaultConfig.targetSdk = 33
+                defaultConfig.targetSdk = 34
                 configureBuildTypes(this)
                 configurePackaging(this)
                 addLocalTestDependencies(this)
