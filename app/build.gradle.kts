@@ -61,6 +61,8 @@ dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:ui"))
 
+    implementation(project(":feature:routine_stats"))
+
     testImplementation(project(":core:testcommon"))
 
     implementation(libs.jetbrains.kotlinx.datetime)

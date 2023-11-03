@@ -79,6 +79,11 @@ class CompletionHistoryLocalDataSourceFake(
         )
     }
 
+    override suspend fun getFirstHistoryEntryDate(routineId: Long): LocalDate? {
+        if (routineData.completionHistory.isEmpty()) return null
+        return routineData.completionHistory.first().second.date
+    }
+
     override suspend fun getLastHistoryEntryDate(routineId: Long): LocalDate? {
         if (routineData.completionHistory.isEmpty()) return null
         return routineData.completionHistory.last().second.date
@@ -94,5 +99,15 @@ class CompletionHistoryLocalDataSourceFake(
         routineData.listOfRoutines = routineData.listOfRoutines.toMutableList().apply {
             set((routineId - 1).toInt(), newRoutine)
         }
+    }
+
+    override suspend fun getFirstHistoryEntryDateByStatus(
+        routineId: Long,
+        startingFromDate: LocalDate,
+        matchingStatuses: List<HistoricalStatus>,
+    ): LocalDate? {
+        return routineData.completionHistory.map { it.second }.firstOrNull {
+            it.date >= startingFromDate && it.status in matchingStatuses
+        }?.date
     }
 }

@@ -8,7 +8,7 @@ plugins {
 sqldelight {
     databases {
         create("RoutineTrackerDatabase") {
-            packageName = "com.rendox.routinetracker.core.database"
+            packageName.set("com.rendox.routinetracker.core.database")
         }
     }
 }

@@ -61,7 +61,7 @@ class InsertRoutineStatusIntoHistoryUseCaseTest {
             HistoricalStatus.Completed,
             HistoricalStatus.Completed,
             HistoricalStatus.NotCompleted,
-            HistoricalStatus.OnVacation,
+            HistoricalStatus.NotCompletedOnVacation,
             HistoricalStatus.Completed,
             HistoricalStatus.NotCompleted,
         ).mapIndexed { index, status ->
@@ -674,7 +674,9 @@ class InsertRoutineStatusIntoHistoryUseCaseTest {
         routineRepository.insertRoutine(routine)
 
         val completionHistory = mutableListOf<Boolean>()
-        repeat(34) { completionHistory.add(false) }
+        repeat(17) { completionHistory.add(false) }
+        repeat(2) { completionHistory.add(true) }
+        repeat(15) { completionHistory.add(false) }
         completionHistory.forEachIndexed { index, isCompleted ->
             insertRoutineStatusIntoHistory(
                 routineId = routineId,
@@ -687,11 +689,14 @@ class InsertRoutineStatusIntoHistoryUseCaseTest {
         repeat(4) { expectedEntriesList.add(HistoricalStatus.Skipped) }
         expectedEntriesList.add(HistoricalStatus.NotCompleted)
         repeat(2) { expectedEntriesList.add(HistoricalStatus.Skipped) }
-        expectedEntriesList.add(HistoricalStatus.NotCompleted)
+        expectedEntriesList.add(HistoricalStatus.CompletedLater)
         expectedEntriesList.add(HistoricalStatus.Skipped)
-        expectedEntriesList.add(HistoricalStatus.NotCompleted)
+        expectedEntriesList.add(HistoricalStatus.CompletedLater)
         repeat(4) { expectedEntriesList.add(HistoricalStatus.Skipped) }
-        repeat(7) { expectedEntriesList.add(HistoricalStatus.OnVacation) }
+        repeat(3) { expectedEntriesList.add(HistoricalStatus.NotCompletedOnVacation) }
+        expectedEntriesList.add(HistoricalStatus.SortedOutBacklogOnVacation)
+        expectedEntriesList.add(HistoricalStatus.SortedOutBacklogOnVacation)
+        repeat(2) { expectedEntriesList.add(HistoricalStatus.NotCompletedOnVacation) }
         expectedEntriesList.add(HistoricalStatus.Skipped)
         expectedEntriesList.add(HistoricalStatus.NotCompleted)
         expectedEntriesList.add(HistoricalStatus.Skipped)
@@ -714,7 +719,7 @@ class InsertRoutineStatusIntoHistoryUseCaseTest {
         val expectedResultingSchedule =
             schedule.copy(lastDateInHistory = routineStartDate.plusDays(33))
         val expectedResultingRoutine =
-            routine.copy(scheduleDeviation = -8, schedule = expectedResultingSchedule)
+            routine.copy(scheduleDeviation = -6, schedule = expectedResultingSchedule)
 
         assertThat(routineRepository.getRoutineById(routineId)).isEqualTo(expectedResultingRoutine)
     }

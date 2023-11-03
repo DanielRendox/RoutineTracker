@@ -66,7 +66,9 @@ class InsertRoutineStatusIntoHistoryUseCase(
             )
 
             PlanningStatus.OnVacation ->
-                deriveHistoricalStatusFromOnVacationStatus(completedOnCurrentDate)
+                deriveHistoricalStatusFromOnVacationStatus(
+                    completedOnCurrentDate, routine.id!!, routine.scheduleDeviation
+                )
         }
 
         completionHistoryRepository.insertHistoryEntry(
@@ -148,14 +150,8 @@ class InsertRoutineStatusIntoHistoryUseCase(
     private suspend fun deriveHistoricalStatusFromBacklogStatus(
         completed: Boolean, routineId: Long
     ): HistoricalStatusData = if (completed) {
-        completionHistoryRepository.updateHistoryEntryStatusByStatus(
-            routineId = routineId,
-            newStatus = HistoricalStatus.CompletedLater,
-            scheduleDeviationIncrementAmount = 0,
-            matchingStatuses = listOf(HistoricalStatus.NotCompleted),
-        )
+        sortOutBacklog(routineId)
 
-        println("backlog sorted out")
         HistoricalStatusData(
             scheduleDeviationIncrementAmount = 1,
             historicalStatus = HistoricalStatus.SortedOutBacklog,
@@ -195,17 +191,36 @@ class InsertRoutineStatusIntoHistoryUseCase(
         )
     }
 
-    private fun deriveHistoricalStatusFromOnVacationStatus(
-        completed: Boolean
+    private suspend fun deriveHistoricalStatusFromOnVacationStatus(
+        completed: Boolean,
+        routineId: Long,
+        currentScheduleDeviation: Int,
     ): HistoricalStatusData = if (completed) {
-        HistoricalStatusData(
-            scheduleDeviationIncrementAmount = 1,
-            historicalStatus = HistoricalStatus.OverCompletedOnVacation,
-        )
+        if (currentScheduleDeviation < 0) {
+            sortOutBacklog(routineId)
+            HistoricalStatusData(
+                scheduleDeviationIncrementAmount = 1,
+                historicalStatus = HistoricalStatus.SortedOutBacklogOnVacation,
+            )
+        } else {
+            HistoricalStatusData(
+                scheduleDeviationIncrementAmount = 1,
+                historicalStatus = HistoricalStatus.OverCompletedOnVacation,
+            )
+        }
     } else {
         HistoricalStatusData(
             scheduleDeviationIncrementAmount = 0,
-            historicalStatus = HistoricalStatus.OnVacation,
+            historicalStatus = HistoricalStatus.NotCompletedOnVacation,
+        )
+    }
+
+    private suspend fun sortOutBacklog(routineId: Long) {
+        completionHistoryRepository.updateHistoryEntryStatusByStatus(
+            routineId = routineId,
+            newStatus = HistoricalStatus.CompletedLater,
+            scheduleDeviationIncrementAmount = 0,
+            matchingStatuses = listOf(HistoricalStatus.NotCompleted),
         )
     }
 

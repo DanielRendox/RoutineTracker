@@ -88,7 +88,7 @@ class RoutineDataIntegrationTest : KoinTest {
             history.add(
                 CompletionHistoryEntry(
                     date = dateCounter.plusDays(index),
-                    status = HistoricalStatus.OnVacation,
+                    status = HistoricalStatus.NotCompletedOnVacation,
                 )
             )
         }

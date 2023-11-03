@@ -94,10 +94,29 @@ class CompletionHistoryLocalDataSourceImpl(
         }
     }
 
+    override suspend fun getFirstHistoryEntryDate(routineId: Long): LocalDate? {
+        return withContext(dispatcher) {
+            db.completionHistoryEntityQueries.getFirstHistoryEntryDate(routineId)
+                .executeAsOneOrNull()
+        }
+    }
+
     override suspend fun getLastHistoryEntryDate(routineId: Long): LocalDate? {
         return withContext(dispatcher) {
             db.completionHistoryEntityQueries.getLastHistoryEntryDate(routineId)
                 .executeAsOneOrNull()
+        }
+    }
+
+    override suspend fun getFirstHistoryEntryDateByStatus(
+        routineId: Long,
+        startingFromDate: LocalDate,
+        matchingStatuses: List<HistoricalStatus>,
+    ): LocalDate? {
+        return withContext(dispatcher) {
+            db.completionHistoryEntityQueries.getFirstHistoryEntryDateByStatus(
+                routineId, startingFromDate, matchingStatuses
+            ).executeAsOneOrNull()
         }
     }
 }

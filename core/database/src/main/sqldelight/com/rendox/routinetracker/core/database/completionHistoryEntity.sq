@@ -37,6 +37,22 @@ WHERE id = (
     LIMIT 1
 );
 
+getFirstHistoryEntryDateByStatus:
+SELECT date
+FROM completionHistoryEntity
+WHERE routineId = :routineId
+    AND (date >= :startDate)
+    AND status IN :matchingStatuses
+ORDER BY date ASC
+LIMIT 1;
+
+getFirstHistoryEntryDate:
+SELECT date
+FROM completionHistoryEntity
+WHERE routineId = ?
+ORDER BY date ASC
+LIMIT 1;
+
 getLastHistoryEntryDate:
 SELECT date
 FROM completionHistoryEntity

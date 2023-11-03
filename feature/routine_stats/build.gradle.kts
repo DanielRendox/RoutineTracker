@@ -30,5 +30,6 @@ android {
 }
 
 dependencies {
+    implementation(libs.kizitonwose.calendar.compose)
     implementation(libs.jetbrains.kotlinx.datetime)
 }

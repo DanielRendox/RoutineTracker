@@ -5,7 +5,7 @@ kotlin = "1.8.22"
 activityCompose = "1.8.0"
 composeRuntime = "1.5.4"
 compose = "1.4.8"
-composeBom = "2023.10.01"
+composeBom = "2023.06.00"
 material = "1.1.2"
 androidLifecycle = "2.6.2"
 systemuicontroller = "0.30.1"
@@ -18,6 +18,8 @@ junit = "4.13.2"
 googleTruth = "1.1.5"
 androidxJunit = "1.1.5"
 espresso = "3.5.1"
+androidxRunner = "1.5.2"
+composeCalendar = "2.4.0"
 
 androidGradlePlugin = "8.1.2"
 kotlinPlugin = "1.8.22"
@@ -55,7 +57,8 @@ androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version
 androidx-test-espresso = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "com-google-android-material-material" }
-androidx-runner = { group = "androidx.test", name = "runner", version = "1.5.2" }
+androidx-runner = { group = "androidx.test", name = "runner", version.ref = "androidxRunner" }
+kizitonwose-calendar-compose = { group = "com.kizitonwose.calendar", name = "compose", version.ref = "composeCalendar"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }

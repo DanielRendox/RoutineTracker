@@ -24,6 +24,7 @@ import org.koin.dsl.module
 import org.koin.test.KoinTest
 import org.koin.test.get
 import kotlin.random.Random
+import kotlin.random.nextInt
 
 class CompletionHistoryLocalDataSourceImplTest : KoinTest {
     private lateinit var sqlDriver: SqlDriver
@@ -74,7 +75,7 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
             history.add(
                 CompletionHistoryEntry(
                     date = dateCounter.plusDays(index),
-                    status = HistoricalStatus.OnVacation,
+                    status = HistoricalStatus.NotCompletedOnVacation,
                 )
             )
         }
@@ -220,5 +221,49 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
             dates = notCompletedUpdatedEntry.date..notCompletedUpdatedEntry.date,
         )[0]
         assertThat(notCompletedUpdatedEntryDbValue).isEqualTo(notCompletedUpdatedEntry)
+    }
+
+    @Test
+    fun getFirstHistoryEntryDateByStatus() = runTest {
+        val completionHistoryLocalDataSource = CompletionHistoryLocalDataSourceImpl(
+            db = get(), dispatcher = get()
+        )
+
+        val historicalStatusValues = HistoricalStatus.values()
+
+        val statuses = mutableListOf<HistoricalStatus>()
+        repeat(Random.nextInt(3..10)) { statuses.addAll(historicalStatusValues) }
+        statuses.shuffle()
+
+        val routineId = 1L
+        val routineStartDate = LocalDate(2023, Month.JANUARY, 1)
+        val history = statuses.mapIndexed { index, status ->
+            CompletionHistoryEntry(
+                date = routineStartDate.plusDays(index),
+                status = status,
+            )
+        }
+
+        for (entry in history) {
+            completionHistoryLocalDataSource.insertHistoryEntry(
+                routineId = routineId,
+                entry = entry,
+                scheduleDeviationIncrementAmount = 0,
+            )
+        }
+
+        for (matchingStatus in historicalStatusValues) {
+            val matchingStatuses = listOf(matchingStatus, historicalStatusValues.random())
+            val startDate = routineStartDate.plusDays(Random.nextInt(0..19))
+            val result: LocalDate? = completionHistoryLocalDataSource.getFirstHistoryEntryDateByStatus(
+                routineId = routineId,
+                startingFromDate = startDate,
+                matchingStatuses = matchingStatuses,
+            )
+            val expectedResult: LocalDate? = history.firstOrNull {
+                it.date >= startDate && it.status in matchingStatuses
+            }?.date
+            assertThat(result).isEqualTo(expectedResult)
+        }
     }
 }

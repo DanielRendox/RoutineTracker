@@ -49,6 +49,12 @@ enum class HistoricalStatus : RoutineStatus {
      */
     OverCompletedOnVacation,
 
+    /**
+     * The routine wasn't due on the day because it was currently
+     * on vacation but the user still sorted out some backlog.
+     */
+    SortedOutBacklogOnVacation,
+
     /** The user didn't complete the day and didn't need to, thanks to the routine's frequency */
     Skipped,
 
@@ -56,7 +62,7 @@ enum class HistoricalStatus : RoutineStatus {
      * The user didn't complete the day and didn't need to,
      * because the routine was currently on vacation.
      */
-    OnVacation,
+    NotCompletedOnVacation,
 
     /**
      * The routine was due but the user failed to complete it on that day.

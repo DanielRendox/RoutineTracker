@@ -59,7 +59,21 @@ class CompletionHistoryRepositoryImpl(
         )
     }
 
+    override suspend fun getFirstHistoryEntryDate(routineId: Long): LocalDate? {
+        return localDataSource.getFirstHistoryEntryDate(routineId)
+    }
+
     override suspend fun getLastHistoryEntryDate(routineId: Long): LocalDate? {
         return localDataSource.getLastHistoryEntryDate(routineId)
+    }
+
+    override suspend fun getFirstHistoryEntryDateByStatus(
+        routineId: Long,
+        startingFromDate: LocalDate,
+        matchingStatuses: List<HistoricalStatus>
+    ): LocalDate? {
+        return localDataSource.getFirstHistoryEntryDateByStatus(
+            routineId, startingFromDate, matchingStatuses
+        )
     }
 }

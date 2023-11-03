@@ -33,5 +33,12 @@ interface CompletionHistoryRepository {
         matchingStatuses: List<HistoricalStatus>,
     )
 
+    suspend fun getFirstHistoryEntryDate(routineId: Long): LocalDate?
     suspend fun getLastHistoryEntryDate(routineId: Long): LocalDate?
+
+    suspend fun getFirstHistoryEntryDateByStatus(
+        routineId: Long,
+        startingFromDate: LocalDate,
+        matchingStatuses: List<HistoricalStatus>,
+    ): LocalDate?
 }
