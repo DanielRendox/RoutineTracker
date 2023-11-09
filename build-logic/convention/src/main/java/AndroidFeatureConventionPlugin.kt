@@ -30,10 +30,13 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
                 add("implementation", project(":core:ui"))
                 add("implementation", project(":core:data"))
                 add("implementation", project(":core:model"))
+                add("implementation", project(":core:domain"))
+                add("implementation", project(":core:logic"))
 
                 add("implementation", libs.findLibrary("androidx-lifecycle-runtime-ktx").get())
                 add("implementation", libs.findLibrary("androidx-lifecycle-runtime-compose").get())
                 add("implementation", libs.findLibrary("androidx-lifecycle-viewmodel-compose").get())
+                add("implementation", libs.findLibrary("androidx-lifecycle-viewmodel-ktx").get())
             }
         }
     }

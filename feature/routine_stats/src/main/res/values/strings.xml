@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="calendar_left_navigation_icon_content_description">Navigate to the previous month</string>
-    <string name="calendar_right_navigation_icon_content_description">Navigate to the next month</string>
-</resources>

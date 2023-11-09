@@ -51,28 +51,37 @@ class RoutineLocalDataSourceImpl(
         db.scheduleEntityQueries.getScheduleById(id).executeAsOne()
 
     private fun getDueDates(scheduleId: Long): List<Int> =
-        db.dueDateEntityQueries.getDueDates(scheduleId).executeAsList().map { it.dueDateNumber }
+        db.dueDateEntityQueries.getDueDates(scheduleId).executeAsList()
 
-    private fun ScheduleEntity.toExternalModel(lastDateInHistory: LocalDate?, dueDatesProvider: (Long) -> List<Int>): Schedule {
+    private fun ScheduleEntity.toExternalModel(
+        lastDateInHistory: LocalDate?,
+        dueDatesProvider: (Long) -> List<Int>
+    ): Schedule {
         return when (type) {
             ScheduleType.EveryDaySchedule -> toEveryDaySchedule(lastDateInHistory)
             ScheduleType.WeeklyScheduleByDueDaysOfWeek ->
                 toWeeklyScheduleByDueDaysOfWeek(dueDatesProvider(id), lastDateInHistory)
+
             ScheduleType.WeeklyScheduleByNumOfDueDays ->
                 toWeeklyScheduleByNumOfDueDays(lastDateInHistory)
+
             ScheduleType.MonthlyScheduleByDueDatesIndices -> {
                 val weekDaysMonthRelated = getWeekDayMonthRelatedDays(id)
                 toMonthlyScheduleByDueDatesIndices(
                     dueDatesProvider(id), weekDaysMonthRelated, lastDateInHistory
                 )
             }
+
             ScheduleType.MonthlyScheduleByNumOfDueDays ->
                 toMonthlyScheduleByNumOfDueDays(lastDateInHistory)
+
             ScheduleType.PeriodicCustomSchedule -> toPeriodicCustomSchedule(lastDateInHistory)
             ScheduleType.CustomDateSchedule ->
                 toCustomDateSchedule(dueDatesProvider(id), lastDateInHistory)
+
             ScheduleType.AnnualScheduleByDueDates ->
                 toAnnualScheduleByDueDates(dueDatesProvider(id), lastDateInHistory)
+
             ScheduleType.AnnualScheduleByNumOfDueDays ->
                 toAnnualScheduleByNumOfDueDays(lastDateInHistory)
         }
@@ -114,7 +123,12 @@ class RoutineLocalDataSourceImpl(
             id = routine.id,
             type = RoutineType.YesNoRoutine,
             name = routine.name,
+            description = routine.description,
+            sessionDurationMinutes = routine.sessionDurationMinutes,
+            progress = routine.progress,
             scheduleDeviation = routine.scheduleDeviation,
+            defaultCompletionTimeHour = routine.defaultCompletionTime?.hour,
+            defaultCompletionTimeMinute = routine.defaultCompletionTime?.minute,
         )
     }
 
@@ -135,7 +149,9 @@ class RoutineLocalDataSourceImpl(
                 insertWeekDaysMonthRelated(insertedScheduleId, schedule.weekDaysMonthRelated)
             }
 
-            is Schedule.MonthlyScheduleByNumOfDueDays -> insertMonthlyScheduleByNumOfDueDays(schedule)
+            is Schedule.MonthlyScheduleByNumOfDueDays -> insertMonthlyScheduleByNumOfDueDays(
+                schedule
+            )
 
             is Schedule.PeriodicCustomSchedule -> insertPeriodicCustomSchedule(schedule)
 
@@ -360,6 +376,8 @@ class RoutineLocalDataSourceImpl(
                 id = null,
                 scheduleId = lastInsertScheduleId,
                 dueDateNumber = dueDate,
+                completionTimeHour = null,
+                completionTimeMinute = null,
             )
         }
     }

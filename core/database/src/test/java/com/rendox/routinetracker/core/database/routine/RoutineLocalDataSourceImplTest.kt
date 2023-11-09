@@ -15,6 +15,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.Month
 import org.junit.After
 import org.junit.Before
@@ -63,11 +64,15 @@ class RoutineLocalDataSourceImplTest : KoinTest {
         val routine = Routine.YesNoRoutine(
             id = 1,
             name = "Programming",
+            description = "Make my app",
+            sessionDurationMinutes = 120,
+            progress = 0.8f,
             schedule = Schedule.EveryDaySchedule(
                 routineStartDate = LocalDate(2023, Month.SEPTEMBER, 1),
                 vacationStartDate = LocalDate(2023, Month.SEPTEMBER, 10),
                 vacationEndDate = null,
             ),
+            defaultCompletionTime = LocalTime(hour = 18, minute = 30),
         )
 
         routineLocalDataSource.insertRoutine(routine)

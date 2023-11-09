@@ -61,7 +61,8 @@ dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:ui"))
 
-    implementation(project(":feature:routine_stats"))
+    implementation(project(":feature:routine_details"))
+    implementation(project(":feature:agenda"))
 
     testImplementation(project(":core:testcommon"))
 

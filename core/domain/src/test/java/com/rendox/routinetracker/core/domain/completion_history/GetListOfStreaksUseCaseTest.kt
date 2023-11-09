@@ -8,6 +8,7 @@ import com.rendox.routinetracker.core.data.routine.RoutineRepository
 import com.rendox.routinetracker.core.database.completion_history.CompletionHistoryLocalDataSource
 import com.rendox.routinetracker.core.database.routine.RoutineLocalDataSource
 import com.rendox.routinetracker.core.logic.time.plusDays
+import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.CompletionHistoryEntry
 import com.rendox.routinetracker.core.model.HistoricalStatus
 import com.rendox.routinetracker.core.model.Routine
@@ -499,5 +500,76 @@ class GetListOfStreaksUseCaseTest : KoinTest {
             ),
         )
         assertThat(getListOfStreaks(routineId)).isEqualTo(expectedStreaks)
+    }
+
+    @Test
+    fun `one endless streak, derive streak dates from DatePeriod, not exceeding streak start`() {
+        val streak = Streak(start = LocalDate(2023, Month.OCTOBER, 1), end = null)
+        val streakList = listOf(streak)
+        val dateRange =
+            LocalDate(2023, Month.OCTOBER, 10)..LocalDate(2023, Month.OCTOBER, 30)
+        val result = deriveDatesIncludedInStreak(streakList, dateRange)
+        val expectedDatesIncludedInStreak = mutableListOf<LocalDate>()
+        for (streakDate in dateRange) expectedDatesIncludedInStreak.add(streakDate)
+        assertThat(result).isEqualTo(expectedDatesIncludedInStreak)
+    }
+
+    @Test
+    fun `one endless streak, derive streak dates from DatePeriod, exceeding streak start`() {
+        val streak = Streak(start = LocalDate(2023, Month.OCTOBER, 1), end = null)
+        val streakList = listOf(streak)
+        val dateRange =
+            LocalDate(2023, Month.SEPTEMBER, 10)..LocalDate(2023, Month.OCTOBER, 30)
+        val streakDateRange =
+            LocalDate(2023, Month.OCTOBER, 1)..LocalDate(2023, Month.OCTOBER, 30)
+        val result = deriveDatesIncludedInStreak(streakList, dateRange)
+        val expectedDatesIncludedInStreak = mutableListOf<LocalDate>()
+        for (streakDate in streakDateRange) expectedDatesIncludedInStreak.add(streakDate)
+        assertThat(result).isEqualTo(expectedDatesIncludedInStreak)
+    }
+
+    @Test
+    fun `empty streak list, derive streak dates from DatePeriod`() {
+        val streakList = emptyList<Streak>()
+        val dateRange =
+            LocalDate(2023, Month.SEPTEMBER, 10)..LocalDate(2023, Month.OCTOBER, 30)
+        assertThat(deriveDatesIncludedInStreak(streakList, dateRange)).isEmpty()
+    }
+
+    @Test
+    fun `multiple streaks within given DatePeriod, derive streak dates from DatePeriod`() {
+        val streaks = listOf(
+            Streak(
+                start = LocalDate(2022, Month.JANUARY, 1),
+                end = LocalDate(2022, Month.JANUARY, 5),
+            ),
+            Streak(
+                start = LocalDate(2023, Month.OCTOBER, 2),
+                end = LocalDate(2023, Month.OCTOBER, 4),
+            ),
+            Streak(
+                start = LocalDate(2023, Month.OCTOBER, 15),
+                end = LocalDate(2023, Month.OCTOBER, 15),
+            ),
+            Streak(
+                start = LocalDate(2023, Month.OCTOBER, 30),
+                end = LocalDate(2023, Month.NOVEMBER, 2),
+            ),
+            Streak(
+                start = LocalDate(2024, Month.JANUARY, 1),
+                end = LocalDate(2024, Month.JANUARY, 5),
+            )
+        )
+        val dateRange =
+            LocalDate(2023, Month.OCTOBER, 1)..LocalDate(2023, Month.OCTOBER, 30)
+        val expectedDatesIncludedInStreak = listOf(
+            LocalDate(2023, Month.OCTOBER, 2),
+            LocalDate(2023, Month.OCTOBER, 3),
+            LocalDate(2023, Month.OCTOBER, 4),
+            LocalDate(2023, Month.OCTOBER, 15),
+            LocalDate(2023, Month.OCTOBER, 30),
+        )
+        val result = deriveDatesIncludedInStreak(streaks, dateRange)
+        assertThat(result).isEqualTo(expectedDatesIncludedInStreak)
     }
 }

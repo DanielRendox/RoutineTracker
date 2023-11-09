@@ -25,13 +25,15 @@ class RoutineLocalDataSourceFake(
     }
 
     override suspend fun updateScheduleDeviation(newValue: Int, routineId: Long) {
-        val newRoutine = when (val oldRoutine = routineData.listOfRoutines[(routineId - 1).toInt()]) {
-            is Routine.YesNoRoutine -> oldRoutine.copy(
-                scheduleDeviation = newValue
-            )
-        }
+        val newRoutine =
+            when (val oldRoutine = routineData.listOfRoutines[(routineId - 1).toInt()]) {
+                is Routine.YesNoRoutine -> oldRoutine.copy(
+                    scheduleDeviation = newValue
+                )
+            }
         routineData.listOfRoutines =
-            routineData.listOfRoutines.toMutableList().apply { set((routineId - 1).toInt(), newRoutine) }
+            routineData.listOfRoutines.toMutableList()
+                .apply { set((routineId - 1).toInt(), newRoutine) }
     }
 
     private fun Routine.createNewRoutineWithUpdatedProperties(
@@ -42,18 +44,25 @@ class RoutineLocalDataSourceFake(
             is Schedule.EveryDaySchedule -> schedule.copy(lastDateInHistory = lastDateInHistory)
             is Schedule.WeeklyScheduleByDueDaysOfWeek ->
                 schedule.copy(lastDateInHistory = lastDateInHistory)
+
             is Schedule.WeeklyScheduleByNumOfDueDays ->
                 schedule.copy(lastDateInHistory = lastDateInHistory)
+
             is Schedule.MonthlyScheduleByDueDatesIndices ->
                 schedule.copy(lastDateInHistory = lastDateInHistory)
+
             is Schedule.MonthlyScheduleByNumOfDueDays ->
                 schedule.copy(lastDateInHistory = lastDateInHistory)
+
             is Schedule.PeriodicCustomSchedule ->
                 schedule.copy(lastDateInHistory = lastDateInHistory)
+
             is Schedule.CustomDateSchedule ->
                 schedule.copy(lastDateInHistory = lastDateInHistory)
+
             is Schedule.AnnualScheduleByDueDates ->
                 schedule.copy(lastDateInHistory = lastDateInHistory)
+
             is Schedule.AnnualScheduleByNumOfDueDays ->
                 schedule.copy(lastDateInHistory = lastDateInHistory)
         }

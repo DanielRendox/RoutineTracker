@@ -9,12 +9,9 @@ import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.Routine
 import com.rendox.routinetracker.core.model.StatusEntry
 import com.rendox.routinetracker.core.model.toStatusEntry
-import kotlinx.datetime.Clock
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
-import kotlinx.datetime.todayIn
 
 class GetRoutineStatusListUseCase(
     private val routineRepository: RoutineRepository,
@@ -24,7 +21,7 @@ class GetRoutineStatusListUseCase(
     suspend operator fun invoke(
         routineId: Long,
         dates: LocalDateRange,
-        today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
+        today: LocalDate,
     ): List<StatusEntry> {
         val yesterday = today.minus(DatePeriod(days = 1))
 

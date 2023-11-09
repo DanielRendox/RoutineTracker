@@ -35,7 +35,8 @@
             <option value="$PROJECT_DIR$/core/testcommon" />
             <option value="$PROJECT_DIR$/core/ui" />
             <option value="$PROJECT_DIR$/feature" />
-            <option value="$PROJECT_DIR$/feature/routine_stats" />
+            <option value="$PROJECT_DIR$/feature/agenda" />
+            <option value="$PROJECT_DIR$/feature/routine_details" />
           </set>
         </option>
       </GradleProjectSettings>

@@ -2,6 +2,7 @@ package com.rendox.routinetracker.core.database
 
 import app.cash.sqldelight.ColumnAdapter
 import app.cash.sqldelight.EnumColumnAdapter
+import app.cash.sqldelight.adapter.primitive.FloatColumnAdapter
 import app.cash.sqldelight.adapter.primitive.IntColumnAdapter
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
@@ -38,6 +39,10 @@ val localDataSourceModule = module {
             routineEntityAdapter = RoutineEntity.Adapter(
                 typeAdapter = EnumColumnAdapter(),
                 scheduleDeviationAdapter = IntColumnAdapter,
+                sessionDurationMinutesAdapter = IntColumnAdapter,
+                progressAdapter = FloatColumnAdapter,
+                defaultCompletionTimeHourAdapter = IntColumnAdapter,
+                defaultCompletionTimeMinuteAdapter = IntColumnAdapter,
             ),
             scheduleEntityAdapter = ScheduleEntity.Adapter(
                 typeAdapter = EnumColumnAdapter(),
@@ -53,6 +58,8 @@ val localDataSourceModule = module {
             ),
             dueDateEntityAdapter = DueDateEntity.Adapter(
                 dueDateNumberAdapter = IntColumnAdapter,
+                completionTimeMinuteAdapter = IntColumnAdapter,
+                completionTimeHourAdapter = IntColumnAdapter,
             ),
             weekDayMonthRelatedEntityAdapter = WeekDayMonthRelatedEntity.Adapter(
                 weekDayIndexAdapter = IntColumnAdapter,
@@ -61,6 +68,11 @@ val localDataSourceModule = module {
             completionHistoryEntityAdapter = CompletionHistoryEntity.Adapter(
                 statusAdapter = EnumColumnAdapter(),
                 dateAdapter = localDateAdapter,
+            ),
+            specificDateCustomCompletionTimeAdapter = SpecificDateCustomCompletionTime.Adapter(
+                dateAdapter = localDateAdapter,
+                completionTimeHourAdapter = IntColumnAdapter,
+                completionTimeMinuteAdapter = IntColumnAdapter,
             )
         )
     }

@@ -9,7 +9,7 @@ data class ZonedDateTime(
     private val dateTime: LocalDateTime,
     private val timeZone: TimeZone,
 ) {
-    fun getDateTime(newTimeZone: TimeZone = TimeZone.currentSystemDefault()): LocalDateTime =
+    fun getDateTime(newTimeZone: TimeZone): LocalDateTime =
         refreshTime(dateTime, timeZone, newTimeZone)
 
     companion object {

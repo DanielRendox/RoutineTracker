@@ -2,10 +2,12 @@ package com.rendox.routinetracker.core.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import com.rendox.routinetracker.core.ui.helpers.LocalLocale
+import com.rendox.routinetracker.core.ui.helpers.getLocale
 
 
 private val LightColors = lightColorScheme(
@@ -76,18 +78,19 @@ private val DarkColors = darkColorScheme(
 @Composable
 fun RoutineTrackerTheme(
     useDarkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
-    val colors = if (!useDarkTheme) {
-        LightColors
-    } else {
-        DarkColors
-    }
-
+    val colors = if (useDarkTheme) DarkColors else LightColors
     val routineStatusColors =
-        if (useDarkTheme) routineStatusColorsLight else routineStatusColorsDark
+        if (useDarkTheme) routineStatusColorsDark else routineStatusColorsLight
+    val customTextColors =
+        if (useDarkTheme) customTextColorsDark else customTextColorsLight
 
-    CompositionLocalProvider(LocalRoutineStatusColors provides routineStatusColors) {
+    CompositionLocalProvider(
+        LocalRoutineStatusColors provides routineStatusColors,
+        LocalCustomTextColors provides customTextColors,
+        LocalLocale provides getLocale()
+    ) {
         MaterialTheme(
             colorScheme = colors,
             content = content

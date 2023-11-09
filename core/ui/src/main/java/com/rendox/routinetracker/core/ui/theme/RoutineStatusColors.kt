@@ -15,21 +15,9 @@ data class RoutineStatusColors(
     val failedStroke: Color,
     val vacationBackground: Color,
     val vacationStroke: Color,
-    val skippedInStreak: Color,
-    val skippedOutOfStreak: Color,
+    val completedBackgroundLight: Color,
+    val failedBackgroundLight: Color,
     val pending: Color,
-)
-
-val routineStatusColorsDark = RoutineStatusColors(
-    completedBackground = routine_status_dark_completed_background,
-    completedStroke = routine_status_dark_completed_stroke,
-    failedBackground = routine_status_dark_failed_background,
-    failedStroke = routine_status_dark_failed_stroke,
-    vacationBackground = routine_status_dark_vacation_background,
-    vacationStroke = routine_status_dark_vacation_stroke,
-    pending = routine_status_dark_pending,
-    skippedInStreak = routine_status_dark_skipped_in_streak,
-    skippedOutOfStreak = routine_status_dark_skipped_out_of_streak,
 )
 
 val routineStatusColorsLight = RoutineStatusColors(
@@ -40,11 +28,23 @@ val routineStatusColorsLight = RoutineStatusColors(
     vacationBackground = routine_status_light_vacation_background,
     vacationStroke = routine_status_light_vacation_stroke,
     pending = routine_status_light_pending,
-    skippedInStreak = routine_status_light_skipped_in_streak,
-    skippedOutOfStreak = routine_status_light_skipped_out_of_streak,
+    completedBackgroundLight = routine_status_light_skipped_in_streak,
+    failedBackgroundLight = routine_status_light_skipped_out_of_streak,
 )
 
-val LocalRoutineStatusColors = compositionLocalOf { routineStatusColorsDark }
+val routineStatusColorsDark = RoutineStatusColors(
+    completedBackground = routine_status_dark_completed_background,
+    completedStroke = routine_status_dark_completed_stroke,
+    failedBackground = routine_status_dark_failed_background,
+    failedStroke = routine_status_dark_failed_stroke,
+    vacationBackground = routine_status_dark_vacation_background,
+    vacationStroke = routine_status_dark_vacation_stroke,
+    pending = routine_status_dark_pending,
+    completedBackgroundLight = routine_status_dark_skipped_in_streak,
+    failedBackgroundLight = routine_status_dark_skipped_out_of_streak,
+)
+
+val LocalRoutineStatusColors = compositionLocalOf { routineStatusColorsLight }
 
 @Suppress("UnusedReceiverParameter")
 val MaterialTheme.routineStatusColors: RoutineStatusColors

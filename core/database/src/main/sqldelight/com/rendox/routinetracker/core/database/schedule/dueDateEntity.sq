@@ -4,14 +4,26 @@ CREATE TABLE dueDateEntity (
     id INTEGER NOT NULL PRIMARY KEY,
     scheduleId INTEGER NOT NULL,
     dueDateNumber INTEGER AS Int NOT NULL,
+    completionTimeHour INTEGER AS Int,
+    completionTimeMinute INTEGER AS Int,
     FOREIGN KEY(scheduleId) REFERENCES scheduleEntity(id)
 );
 
 getDueDates:
-SELECT *
+SELECT dueDateNumber
 FROM dueDateEntity
 WHERE scheduleId = ?;
 
+getCompletionTime:
+SELECT completionTimeHour, completionTimeMinute
+FROM dueDateEntity
+WHERE scheduleId = ? AND dueDateNumber = ?;
+
+updateCompletionTime:
+UPDATE dueDateEntity
+SET completionTimeHour = ?, completionTimeMinute = ?
+WHERE scheduleId = ? AND dueDateNumber = ?;
+
 insertDueDate:
 INSERT INTO dueDateEntity
-VALUES (?, ?, ?);
+VALUES (?, ?, ?, ?, ?);

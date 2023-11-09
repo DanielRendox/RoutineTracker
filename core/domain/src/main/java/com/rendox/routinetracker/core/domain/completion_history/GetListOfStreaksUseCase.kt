@@ -3,6 +3,8 @@ package com.rendox.routinetracker.core.domain.completion_history
 import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
 import com.rendox.routinetracker.core.data.routine.RoutineRepository
 import com.rendox.routinetracker.core.domain.routine.schedule.getPeriodRange
+import com.rendox.routinetracker.core.logic.time.LocalDateRange
+import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.HistoricalStatus
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.model.Streak
@@ -30,6 +32,7 @@ class GetListOfStreaksUseCase(
             completionHistoryRepository.getFirstHistoryEntryDate(routineId) ?: return emptyList()
 
         val schedule = routineRepository.getRoutineById(routineId).schedule
+        if (schedule is Schedule.CustomDateSchedule) return emptyList()
 
         val streaks = mutableListOf<Streak>()
         var streakStart: LocalDate
@@ -87,4 +90,26 @@ class GetListOfStreaksUseCase(
             matchingStatuses = positiveHistoricalStatuses,
         )
     }
+}
+
+fun deriveDatesIncludedInStreak(
+    streaks: List<Streak>, dateRange: LocalDateRange
+): List<LocalDate> {
+    val streakDates = mutableListOf<LocalDate>()
+    for (streak in streaks) {
+        val streakEnd = streak.end
+        val streakStartNotGreaterThanLastDate = streak.start <= dateRange.endInclusive
+        val streakEndNotLessThanFirstDate = (streakEnd == null) || streakEnd >= dateRange.start
+        val streakIncludesPartOfGivenRange =
+            streakStartNotGreaterThanLastDate && streakEndNotLessThanFirstDate
+        if (streakIncludesPartOfGivenRange) {
+            val startDateWithinRange: LocalDate =
+                if (streak.start <= dateRange.start) dateRange.start else streak.start
+            val endDateWithinRange: LocalDate =
+                if (streakEnd == null || streakEnd >= dateRange.endInclusive) dateRange.endInclusive
+                else streakEnd
+            for (date in startDateWithinRange..endDateWithinRange) streakDates.add(date)
+        }
+    }
+    return streakDates
 }

@@ -19,23 +19,6 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.until
 import kotlinx.datetime.yearsUntil
 
-fun Schedule.PeriodicSchedule.getAllPeriodRangesUntilDate(
-    dateThatDefinesLastPeriod: LocalDate
-): List<LocalDateRange> {
-    val periodRanges = mutableListOf<LocalDateRange>()
-    var periodStartDate: LocalDate = routineStartDate
-    val lastPeriod = getPeriodRange(dateThatDefinesLastPeriod)
-
-    do {
-        val currentPeriod = getPeriodRange(periodStartDate)
-        periodRanges.add(currentPeriod)
-        periodStartDate = currentPeriod.endInclusive.plusDays(1)
-    } while (periodStartDate != lastPeriod.start)
-
-    periodRanges.add(lastPeriod)
-    return periodRanges
-}
-
 fun Schedule.PeriodicSchedule.getPeriodRange(currentDate: LocalDate): LocalDateRange {
     if (currentDate < routineStartDate) {
         throw IllegalArgumentException(

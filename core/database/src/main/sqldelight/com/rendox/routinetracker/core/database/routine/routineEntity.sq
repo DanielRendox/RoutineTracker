@@ -1,10 +1,16 @@
 import com.rendox.routinetracker.core.database.routine.model.RoutineType;
+import kotlin.Float;
 import kotlin.Int;
 
 CREATE TABLE routineEntity (
     id INTEGER NOT NULL PRIMARY KEY,
     type TEXT AS RoutineType NOT NULL,
     name TEXT NOT NULL,
+    description TEXT,
+    sessionDurationMinutes INTEGER AS Int,
+    progress REAL AS Float,
+    defaultCompletionTimeHour INTEGER AS Int,
+    defaultCompletionTimeMinute INTEGER AS Int,
     scheduleDeviation INTEGER AS Int
 );
 
@@ -15,7 +21,7 @@ WHERE id = ?;
 
 insertRoutine:
 INSERT INTO routineEntity
-VALUES (?, ?, ?, ?);
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 incrementScheduleDeviation:
 UPDATE routineEntity
