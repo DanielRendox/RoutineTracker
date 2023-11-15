@@ -19,8 +19,6 @@ sealed class Schedule {
     abstract val vacationStartDate: LocalDate?
     abstract val vacationEndDate: LocalDate?
 
-    abstract val lastDateInHistory: LocalDate?
-
     sealed class PeriodicSchedule: Schedule() {
         abstract val periodSeparationEnabled: Boolean
         abstract val correspondingPeriod: DatePeriod
@@ -38,8 +36,6 @@ sealed class Schedule {
 
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
-
-        override val lastDateInHistory: LocalDate? = null
     ) : NonPeriodicSchedule() {
         override val backlogEnabled: Boolean = false
         override val cancelDuenessIfDoneAhead: Boolean = false
@@ -65,8 +61,6 @@ sealed class Schedule {
 
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
-
-        override val lastDateInHistory: LocalDate? = null
     ) : WeeklySchedule() {
 
         init {
@@ -91,8 +85,6 @@ sealed class Schedule {
 
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
-
-        override val lastDateInHistory: LocalDate? = null
     ) : WeeklySchedule(), ByNumOfDueDays {
 
         private val firstPeriodIsShort
@@ -145,8 +137,6 @@ sealed class Schedule {
 
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
-
-        override val lastDateInHistory: LocalDate? = null
     ) : MonthlySchedule() {
 
         init {
@@ -171,8 +161,6 @@ sealed class Schedule {
 
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
-
-        override val lastDateInHistory: LocalDate? = null
     ) : MonthlySchedule(), ByNumOfDueDays {
 
         private val firstPeriodIsShort
@@ -217,8 +205,6 @@ sealed class Schedule {
 
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
-
-        override val lastDateInHistory: LocalDate? = null
     ) : PeriodicSchedule(), ByNumOfDueDays {
 
         override val correspondingPeriod: DatePeriod
@@ -240,8 +226,6 @@ sealed class Schedule {
 
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
-
-        override val lastDateInHistory: LocalDate? = null
     ) : NonPeriodicSchedule()
 
     sealed class AnnualSchedule : PeriodicSchedule() {
@@ -264,8 +248,6 @@ sealed class Schedule {
 
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
-
-        override val lastDateInHistory: LocalDate? = null
     ) : AnnualSchedule()
 
     data class AnnualScheduleByNumOfDueDays(
@@ -283,8 +265,6 @@ sealed class Schedule {
 
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
-
-        override val lastDateInHistory: LocalDate? = null
     ) : AnnualSchedule(), ByNumOfDueDays {
 
         private val firstPeriodIsShort

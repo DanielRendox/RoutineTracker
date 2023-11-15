@@ -60,6 +60,7 @@ dependencies {
     implementation(project(":core:database"))
     implementation(project(":core:model"))
     implementation(project(":core:ui"))
+    implementation(project(":core:domain"))
 
     implementation(project(":feature:routine_details"))
     implementation(project(":feature:agenda"))

@@ -21,50 +21,52 @@ class CompletionHistoryRepositoryImpl(
         id: Long?,
         routineId: Long,
         entry: CompletionHistoryEntry,
-        scheduleDeviationIncrementAmount: Int,
     ) {
         localDataSource.insertHistoryEntry(
             id = id,
             routineId = routineId,
             entry = entry,
-            scheduleDeviationIncrementAmount = scheduleDeviationIncrementAmount,
         )
+    }
+
+    override suspend fun deleteHistoryEntry(routineId: Long, date: LocalDate) {
+        localDataSource.deleteHistoryEntry(routineId, date)
     }
 
     override suspend fun updateHistoryEntryStatusByDate(
         routineId: Long,
         date: LocalDate,
-        status: HistoricalStatus,
-        scheduleDeviationIncrementAmount: Int,
+        newStatus: HistoricalStatus,
+        newScheduleDeviation: Int,
     ) {
         localDataSource.updateHistoryEntryStatusByDate(
             routineId = routineId,
             date = date,
-            status = status,
-            scheduleDeviationIncrementAmount = scheduleDeviationIncrementAmount,
+            newStatus = newStatus,
+            newScheduleDeviation = newScheduleDeviation,
         )
     }
 
     override suspend fun updateHistoryEntryStatusByStatus(
         routineId: Long,
         newStatus: HistoricalStatus,
-        scheduleDeviationIncrementAmount: Int,
-        matchingStatuses: List<HistoricalStatus>
+        newScheduleDeviation: Int,
+        matchingStatuses: List<HistoricalStatus>,
     ) {
         localDataSource.updateHistoryEntryStatusByStatus(
             routineId = routineId,
             newStatus = newStatus,
-            scheduleDeviationIncrementAmount = scheduleDeviationIncrementAmount,
+            newScheduleDeviation = newScheduleDeviation,
             matchingStatuses = matchingStatuses,
         )
     }
 
-    override suspend fun getFirstHistoryEntryDate(routineId: Long): LocalDate? {
-        return localDataSource.getFirstHistoryEntryDate(routineId)
+    override suspend fun getFirstHistoryEntry(routineId: Long): CompletionHistoryEntry? {
+        return localDataSource.getFirstHistoryEntry(routineId)
     }
 
-    override suspend fun getLastHistoryEntryDate(routineId: Long): LocalDate? {
-        return localDataSource.getLastHistoryEntryDate(routineId)
+    override suspend fun getLastHistoryEntry(routineId: Long): CompletionHistoryEntry? {
+        return localDataSource.getLastHistoryEntry(routineId)
     }
 
     override suspend fun getFirstHistoryEntryDateByStatus(
@@ -76,4 +78,20 @@ class CompletionHistoryRepositoryImpl(
             routineId, startingFromDate, matchingStatuses
         )
     }
+
+    override suspend fun checkIfStatusWasCompletedLater(routineId: Long, date: LocalDate): Boolean {
+        return localDataSource.checkIfStatusWasCompletedLater(routineId, date)
+    }
+
+    override suspend fun insertCompletedLaterDate(id: Long?, routineId: Long, date: LocalDate) {
+        localDataSource.insertCompletedLaterDate(id, routineId, date)
+    }
+
+    override suspend fun deleteCompletedLaterDate(routineId: Long, date: LocalDate) {
+        localDataSource.deleteCompletedLaterDate(routineId, date)
+    }
+
+    override suspend fun findLastHistoryEntryDateByStatus(
+        routineId: Long, matchingStatuses: List<HistoricalStatus>
+    ): CompletionHistoryEntry? = localDataSource.findLastHistoryEntryDateByStatus(routineId, matchingStatuses)
 }

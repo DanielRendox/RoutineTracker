@@ -20,7 +20,6 @@ sealed class Routine {
         override val progress: Float? = null,
         override val schedule: Schedule,
         override val defaultCompletionTime: LocalTime? = null,
-        val scheduleDeviation: Int = 0,
     ) : Routine()
 
     data class NumericalValueRoutineUnit(

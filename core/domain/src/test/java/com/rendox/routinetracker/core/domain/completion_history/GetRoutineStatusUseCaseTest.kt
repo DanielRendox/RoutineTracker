@@ -34,10 +34,10 @@ import org.koin.test.get
 import kotlin.random.Random
 import kotlin.random.nextInt
 
-class GetRoutineStatusListUseCaseTest : KoinTest {
+class GetRoutineStatusUseCaseTest : KoinTest {
 
-    private lateinit var insertRoutineStatusIntoHistory: InsertRoutineStatusIntoHistoryUseCase
-    private lateinit var getRoutineStatusList: GetRoutineStatusListUseCase
+    private lateinit var insertRoutineStatusIntoHistory: InsertRoutineStatusUseCase
+    private lateinit var getRoutineStatusList: GetRoutineStatusUseCase
     private lateinit var routineRepository: RoutineRepository
 
     private val routineId = 1L
@@ -82,15 +82,15 @@ class GetRoutineStatusListUseCaseTest : KoinTest {
 
         routineRepository = get()
 
-        insertRoutineStatusIntoHistory = InsertRoutineStatusIntoHistoryUseCase(
+        insertRoutineStatusIntoHistory = InsertRoutineStatusUseCase(
             completionHistoryRepository = get(),
             routineRepository = get(),
         )
 
-        getRoutineStatusList = GetRoutineStatusListUseCase(
+        getRoutineStatusList = GetRoutineStatusUseCase(
             routineRepository = get(),
             completionHistoryRepository = get(),
-            insertRoutineStatusIntoHistory = insertRoutineStatusIntoHistory,
+            insertRoutineStatus = insertRoutineStatusIntoHistory,
         )
     }
 

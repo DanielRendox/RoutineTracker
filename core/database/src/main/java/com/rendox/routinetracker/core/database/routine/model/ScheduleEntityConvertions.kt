@@ -1,25 +1,22 @@
 package com.rendox.routinetracker.core.database.routine.model
 
 import com.rendox.routinetracker.core.database.schedule.ScheduleEntity
-import com.rendox.routinetracker.core.database.toAnnualDate
-import com.rendox.routinetracker.core.database.toDayOfWeek
-import com.rendox.routinetracker.core.database.toLocalDate
+import com.rendox.routinetracker.core.database.di.toAnnualDate
+import com.rendox.routinetracker.core.database.di.toDayOfWeek
+import com.rendox.routinetracker.core.database.di.toLocalDate
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
 import kotlinx.datetime.LocalDate
 
-internal fun ScheduleEntity.toEveryDaySchedule(
-    lastDateInHistory: LocalDate?
-) = Schedule.EveryDaySchedule(
+internal fun ScheduleEntity.toEveryDaySchedule() = Schedule.EveryDaySchedule(
     routineStartDate = routineStartDate,
     routineEndDate = routineEndDate,
     vacationStartDate = vacationStartDate,
     vacationEndDate = vacationEndDate,
-    lastDateInHistory = lastDateInHistory,
 )
 
 internal fun ScheduleEntity.toWeeklyScheduleByDueDaysOfWeek(
-    dueDates: List<Int>, lastDateInHistory: LocalDate?
+    dueDates: List<Int>
 ) = Schedule.WeeklyScheduleByDueDaysOfWeek(
     dueDaysOfWeek = dueDates.map { it.toDayOfWeek() },
     startDayOfWeek = startDayOfWeekInWeeklySchedule,
@@ -30,12 +27,9 @@ internal fun ScheduleEntity.toWeeklyScheduleByDueDaysOfWeek(
     vacationEndDate = vacationEndDate,
     backlogEnabled = backlogEnabled,
     cancelDuenessIfDoneAhead = cancelDuenessIfDoneAhead,
-    lastDateInHistory = lastDateInHistory,
 )
 
-internal fun ScheduleEntity.toWeeklyScheduleByNumOfDueDays(
-    lastDateInHistory: LocalDate?
-) = Schedule.WeeklyScheduleByNumOfDueDays(
+internal fun ScheduleEntity.toWeeklyScheduleByNumOfDueDays() = Schedule.WeeklyScheduleByNumOfDueDays(
     numOfDueDays = numOfDueDaysInByNumOfDueDaysSchedule!!,
     numOfDueDaysInFirstPeriod = numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule,
     numOfCompletedDaysInCurrentPeriod = numOfCompletedDaysInCurrentPeriodInByNumOfDueDaysSchedule!!,
@@ -45,13 +39,11 @@ internal fun ScheduleEntity.toWeeklyScheduleByNumOfDueDays(
     vacationEndDate = vacationEndDate,
     backlogEnabled = backlogEnabled,
     cancelDuenessIfDoneAhead = cancelDuenessIfDoneAhead,
-    lastDateInHistory = lastDateInHistory,
 )
 
 internal fun ScheduleEntity.toMonthlyScheduleByDueDatesIndices(
     dueDatesIndices: List<Int>,
     weekDaysMonthRelated: List<WeekDayMonthRelated>,
-    lastDateInHistory: LocalDate?,
 ) = Schedule.MonthlyScheduleByDueDatesIndices(
     dueDatesIndices = dueDatesIndices,
     includeLastDayOfMonth = includeLastDayOfMonthInMonthlySchedule!!,
@@ -64,12 +56,9 @@ internal fun ScheduleEntity.toMonthlyScheduleByDueDatesIndices(
     vacationEndDate = vacationEndDate,
     backlogEnabled = backlogEnabled,
     cancelDuenessIfDoneAhead = cancelDuenessIfDoneAhead,
-    lastDateInHistory = lastDateInHistory,
 )
 
-internal fun ScheduleEntity.toMonthlyScheduleByNumOfDueDays(
-    lastDateInHistory: LocalDate?
-) = Schedule.MonthlyScheduleByNumOfDueDays(
+internal fun ScheduleEntity.toMonthlyScheduleByNumOfDueDays() = Schedule.MonthlyScheduleByNumOfDueDays(
     numOfDueDays = numOfDueDaysInByNumOfDueDaysSchedule!!,
     numOfDueDaysInFirstPeriod = numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule,
     numOfCompletedDaysInCurrentPeriod = numOfCompletedDaysInCurrentPeriodInByNumOfDueDaysSchedule!!,
@@ -81,12 +70,9 @@ internal fun ScheduleEntity.toMonthlyScheduleByNumOfDueDays(
     vacationEndDate = vacationEndDate,
     backlogEnabled = backlogEnabled,
     cancelDuenessIfDoneAhead = cancelDuenessIfDoneAhead,
-    lastDateInHistory = lastDateInHistory,
 )
 
-internal fun ScheduleEntity.toPeriodicCustomSchedule(
-    lastDateInHistory: LocalDate?,
-) = Schedule.PeriodicCustomSchedule (
+internal fun ScheduleEntity.toPeriodicCustomSchedule() = Schedule.PeriodicCustomSchedule (
     numOfDueDays = numOfDueDaysInByNumOfDueDaysSchedule!!,
     numOfDaysInPeriod = numOfDaysInPeriodicCustomSchedule!!,
     numOfCompletedDaysInCurrentPeriod = numOfCompletedDaysInCurrentPeriodInByNumOfDueDaysSchedule!!,
@@ -96,12 +82,10 @@ internal fun ScheduleEntity.toPeriodicCustomSchedule(
     vacationEndDate = vacationEndDate,
     backlogEnabled = backlogEnabled,
     cancelDuenessIfDoneAhead = cancelDuenessIfDoneAhead,
-    lastDateInHistory = lastDateInHistory,
 )
 
 internal fun ScheduleEntity.toCustomDateSchedule(
     dueDatesIndices: List<Int>,
-    lastDateInHistory: LocalDate?,
 ) = Schedule.CustomDateSchedule(
     dueDates = dueDatesIndices.map { it.toLocalDate() },
     routineStartDate = routineStartDate,
@@ -110,12 +94,10 @@ internal fun ScheduleEntity.toCustomDateSchedule(
     vacationEndDate = vacationEndDate,
     backlogEnabled = backlogEnabled,
     cancelDuenessIfDoneAhead = cancelDuenessIfDoneAhead,
-    lastDateInHistory = lastDateInHistory,
 )
 
 internal fun ScheduleEntity.toAnnualScheduleByDueDates(
     dueDates: List<Int>,
-    lastDateInHistory: LocalDate?,
 ) = Schedule.AnnualScheduleByDueDates(
     dueDates = dueDates.map { it.toAnnualDate() },
     startFromRoutineStart = startFromRoutineStartInMonthlyAndAnnualSchedule!!,
@@ -126,12 +108,9 @@ internal fun ScheduleEntity.toAnnualScheduleByDueDates(
     vacationEndDate = vacationEndDate,
     backlogEnabled = backlogEnabled,
     cancelDuenessIfDoneAhead = cancelDuenessIfDoneAhead,
-    lastDateInHistory = lastDateInHistory,
 )
 
-internal fun ScheduleEntity.toAnnualScheduleByNumOfDueDays(
-    lastDateInHistory: LocalDate?,
-) = Schedule.AnnualScheduleByNumOfDueDays(
+internal fun ScheduleEntity.toAnnualScheduleByNumOfDueDays() = Schedule.AnnualScheduleByNumOfDueDays(
     numOfDueDays = numOfDueDaysInByNumOfDueDaysSchedule!!,
     numOfDueDaysInFirstPeriod = numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule,
     numOfCompletedDaysInCurrentPeriod = numOfCompletedDaysInCurrentPeriodInByNumOfDueDaysSchedule!!,
@@ -142,5 +121,4 @@ internal fun ScheduleEntity.toAnnualScheduleByNumOfDueDays(
     vacationEndDate = vacationEndDate,
     backlogEnabled = backlogEnabled,
     cancelDuenessIfDoneAhead = cancelDuenessIfDoneAhead,
-    lastDateInHistory = lastDateInHistory,
 )

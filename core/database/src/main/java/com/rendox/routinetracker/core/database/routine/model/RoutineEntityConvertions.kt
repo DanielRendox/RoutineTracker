@@ -20,7 +20,6 @@ internal fun RoutineEntity.toYesNoRoutine(
         sessionDurationMinutes = sessionDurationMinutes,
         progress = progress,
         schedule = schedule,
-        scheduleDeviation = scheduleDeviation!!,
         defaultCompletionTime = defaultCompletionTime,
     )
 }

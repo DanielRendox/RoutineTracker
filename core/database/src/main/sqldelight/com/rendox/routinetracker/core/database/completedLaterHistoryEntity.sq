@@ -1,0 +1,21 @@
+import kotlinx.datetime.LocalDate;
+
+CREATE TABLE completedLaterHistoryEntity (
+    id INTEGER NOT NULL PRIMARY KEY,
+    routineId INTEGER NOT NULL,
+    date INTEGER AS LocalDate NOT NULL,
+    FOREIGN KEY(routineId) REFERENCES scheduleEntity(id)
+);
+
+getEntityByDate:
+SELECT *
+FROM completedLaterHistoryEntity
+WHERE routineId = ? AND date = ?;
+
+insertCompletedLaterDate:
+INSERT INTO completedLaterHistoryEntity
+VALUES (?, ?, ?);
+
+deleteCompletedLaterDate:
+DELETE FROM completedLaterHistoryEntity
+WHERE routineId = ? AND date = ?;

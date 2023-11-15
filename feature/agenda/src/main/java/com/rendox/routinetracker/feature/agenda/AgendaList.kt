@@ -2,6 +2,7 @@ package com.rendox.routinetracker.feature.agenda
 
 import android.view.ViewGroup
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -43,14 +44,13 @@ import com.rendox.routinetracker.core.ui.helpers.LocalLocale
 import com.rendox.routinetracker.core.ui.theme.RoutineTrackerTheme
 import com.rendox.routinetracker.core.ui.theme.routineStatusColors
 import kotlinx.datetime.toJavaLocalTime
-import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 class AgendaListAdapter(
-    private val routineNames: List<String>,
-    private val statusList: List<RoutineStatus>,
-    private val completionTimeList: List<LocalTime?>,
+    private val routineList: List<RoutineListElement>,
+    private val onRoutineClick: (Long) -> Unit,
+    private val onStatusCheckmarkClick: (Long, RoutineStatus) -> Unit,
 ) : RecyclerView.Adapter<AgendaListViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AgendaListViewHolder {
@@ -58,14 +58,15 @@ class AgendaListAdapter(
     }
 
     override fun getItemCount(): Int {
-        return routineNames.size
+        return routineList.size
     }
 
     override fun onBindViewHolder(holder: AgendaListViewHolder, position: Int) {
+        val routine = routineList[position]
         holder.bind(
-            name = routineNames[position],
-            status = statusList[position],
-            completionTime = completionTimeList[position],
+            routine = routine,
+            onRoutineClick = { onRoutineClick(routine.id) },
+            onStatusCheckmarkClick = { status -> onStatusCheckmarkClick(routine.id, status) },
         )
     }
 }
@@ -74,9 +75,9 @@ class AgendaListViewHolder(
     private val composeView: ComposeView
 ) : RecyclerView.ViewHolder(composeView) {
     fun bind(
-        name: String,
-        status: RoutineStatus,
-        completionTime: LocalTime?,
+        routine: RoutineListElement,
+        onRoutineClick: () -> Unit,
+        onStatusCheckmarkClick: (RoutineStatus) -> Unit,
     ) {
         composeView.setContent {
             RoutineTrackerTheme {
@@ -84,9 +85,9 @@ class AgendaListViewHolder(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 10.dp, end = 8.dp, top = 12.dp, bottom = 12.dp),
-                    name = name,
-                    status = status,
-                    completionTime = completionTime,
+                    routine = routine,
+                    onRoutineClick = onRoutineClick,
+                    onStatusCheckmarkClick = onStatusCheckmarkClick,
                 )
             }
         }
@@ -96,9 +97,9 @@ class AgendaListViewHolder(
 @Composable
 fun AgendaItem(
     modifier: Modifier = Modifier,
-    name: String,
-    status: RoutineStatus,
-    completionTime: LocalTime?,
+    routine: RoutineListElement,
+    onRoutineClick: () -> Unit,
+    onStatusCheckmarkClick: (RoutineStatus) -> Unit,
 ) {
     val locale = LocalLocale.current
     val timeFormatter =
@@ -118,49 +119,55 @@ fun AgendaItem(
 
     Row(
         modifier = modifier.alpha(
-            if (notDueStatuses.contains(status)) 0.5f else 1f
+            if (notDueStatuses.contains(routine.status)) 0.5f else 1f
         ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (completionTime != null) {
+        if (routine.completionTime != null) {
             Text(
                 modifier = Modifier
                     .width(100.dp)
                     .padding(end = 10.dp),
                 style = MaterialTheme.typography.labelLarge,
-                text = completionTime.format(timeFormatter),
+                text = routine.completionTime.toJavaLocalTime().format(timeFormatter),
             )
         } else {
             Spacer(modifier = Modifier.width(100.dp))
         }
 
         StatusCheckmark(
-            modifier = Modifier.padding(end = 15.dp),
-            status = status,
+            modifier = Modifier
+                .padding(end = 15.dp),
+            status = routine.status,
+            onClick = onStatusCheckmarkClick,
         )
 
-        Column {
-            Text(
-                modifier = Modifier.padding(bottom = 2.dp),
-                text = name,
-                fontWeight = FontWeight.Normal,
-                fontSize = 18.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(20))
-                    .background(MaterialTheme.colorScheme.primaryContainer)
-            ) {
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onRoutineClick() }) {
+            Column {
                 Text(
-                    modifier = Modifier
-                        .padding(horizontal = 2.dp)
-                        .paddingFromBaseline(2.dp),
-                    text = status.toString(),
-                    fontSize = 11.sp,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.padding(bottom = 2.dp),
+                    text = routine.name,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 18.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(20))
+                        .background(MaterialTheme.colorScheme.primaryContainer)
+                ) {
+                    Text(
+                        modifier = Modifier
+                            .padding(horizontal = 2.dp)
+                            .paddingFromBaseline(2.dp),
+                        text = routine.status.toString(),
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                }
             }
         }
     }
@@ -170,6 +177,7 @@ fun AgendaItem(
 private fun StatusCheckmark(
     modifier: Modifier = Modifier,
     status: RoutineStatus,
+    onClick: (RoutineStatus) -> Unit,
 ) {
     val backgroundColor: Color
     val icon: ImageVector?
@@ -272,6 +280,7 @@ private fun StatusCheckmark(
             .size(28.dp)
             .clip(CircleShape)
             .background(backgroundColor)
+            .clickable { onClick(status) }
     ) {
         icon?.let {
             Icon(
@@ -292,43 +301,41 @@ private fun AgendaItemInListPreview() {
 
     Surface(modifier = Modifier.fillMaxSize()) {
         Column {
-            for (task in tasks) {
+            for (routine in routines) {
                 AgendaItem(
                     modifier = Modifier.padding(vertical = 12.dp),
-                    name = task.name,
-                    status = task.status,
-                    completionTime = task.completionTime,
+                    routine = routine,
+                    onRoutineClick = {},
+                    onStatusCheckmarkClick = {},
                 )
             }
         }
     }
 }
 
-private data class Task(
-    val name: String,
-    val status: RoutineStatus,
-    val completionTime: LocalTime?,
-)
-
-private val tasks = listOf(
-    Task(
+private val routines = listOf(
+    RoutineListElement(
         name = "Do sports",
         status = HistoricalStatus.Completed,
-        completionTime = kotlinx.datetime.LocalTime(hour = 9, minute = 0).toJavaLocalTime(),
+        completionTime = kotlinx.datetime.LocalTime(hour = 9, minute = 0),
+        id = 1,
     ),
-    Task(
+    RoutineListElement(
         name = "Learn new English words",
         status = PlanningStatus.Planned,
         completionTime = null,
+        id = 2,
     ),
-    Task(
+    RoutineListElement(
         name = "Spend time outside",
         status = HistoricalStatus.NotCompleted,
-        completionTime = kotlinx.datetime.LocalTime(hour = 12, minute = 30).toJavaLocalTime(),
+        completionTime = kotlinx.datetime.LocalTime(hour = 12, minute = 30),
+        id = 3,
     ),
-    Task(
+    RoutineListElement(
         name = "Make my app",
         status = HistoricalStatus.CompletedLater,
-        completionTime = kotlinx.datetime.LocalTime(hour = 17, minute = 0).toJavaLocalTime(),
+        completionTime = kotlinx.datetime.LocalTime(hour = 17, minute = 0),
+        id = 4,
     )
 )

@@ -12,7 +12,7 @@ import com.rendox.routinetracker.core.model.Schedule
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
 
-class InsertRoutineStatusIntoHistoryUseCase(
+class InsertRoutineStatusUseCase(
     private val completionHistoryRepository: CompletionHistoryRepository,
     private val routineRepository: RoutineRepository,
 ) {
@@ -43,9 +43,15 @@ class InsertRoutineStatusIntoHistoryUseCase(
         currentDate: LocalDate,
         completedOnCurrentDate: Boolean,
     ) {
-        val planningStatus = routine.computePlanningStatus(currentDate)!!
-        println("$currentDate: $planningStatus")
-        val historicalStatusData = when (planningStatus) {
+        val lastHistoryEntry = completionHistoryRepository.getLastHistoryEntry(routine.id!!)
+        val currentScheduleDeviation = lastHistoryEntry?.currentScheduleDeviation ?: 0
+        val historicalStatusData = when (
+            routine.computePlanningStatus(
+                validationDate = currentDate,
+                currentScheduleDeviation = currentScheduleDeviation,
+                dateScheduleDeviationIsActualFor = lastHistoryEntry?.date,
+            )!!
+        ) {
             PlanningStatus.Planned -> deriveHistoricalStatusFromPlannedStatus(
                 routine.schedule,
                 completedOnCurrentDate,
@@ -67,16 +73,32 @@ class InsertRoutineStatusIntoHistoryUseCase(
 
             PlanningStatus.OnVacation ->
                 deriveHistoricalStatusFromOnVacationStatus(
-                    completedOnCurrentDate, routine.id!!, routine.scheduleDeviation
+                    completedOnCurrentDate, routine.id!!, currentScheduleDeviation
                 )
+        }
+
+        val schedule = routine.schedule
+        val currentDateIsPeriodEnd = if (schedule is Schedule.PeriodicSchedule) {
+            currentDate == schedule.getPeriodRange(currentDate).endInclusive
+        } else false
+        val shouldNullifyScheduleDeviation =
+            currentDateIsPeriodEnd && (schedule as Schedule.PeriodicSchedule).periodSeparationEnabled
+        val scheduleDeviation = if (shouldNullifyScheduleDeviation) {
+            0
+        } else {
+            completionHistoryRepository
+                .getLastHistoryEntry(routineId = routine.id!!)
+                ?.currentScheduleDeviation
+                ?.plus(historicalStatusData.scheduleDeviationIncrementAmount) ?: 0
         }
 
         completionHistoryRepository.insertHistoryEntry(
             routineId = routine.id!!,
             entry = CompletionHistoryEntry(
-                currentDate, historicalStatusData.historicalStatus
+                date = currentDate,
+                status = historicalStatusData.historicalStatus,
+                currentScheduleDeviation = scheduleDeviation,
             ),
-            scheduleDeviationIncrementAmount = historicalStatusData.scheduleDeviationIncrementAmount,
         )
     }
 
@@ -89,14 +111,19 @@ class InsertRoutineStatusIntoHistoryUseCase(
             currentDate == schedule.getPeriodRange(currentDate).endInclusive
 
         if (currentDateIsPeriodEnd && schedule.periodSeparationEnabled) {
-            routineRepository.updateScheduleDeviation(0, routineId)
+            val lastInsertedEntry = completionHistoryRepository.getLastHistoryEntry(routineId)!!
+            completionHistoryRepository.updateHistoryEntryStatusByDate(
+                routineId = routineId,
+                date = lastInsertedEntry.date,
+                newStatus = lastInsertedEntry.status,
+                newScheduleDeviation = 0,
+            )
         }
     }
 
     private fun deriveHistoricalStatusFromPlannedStatus(
         schedule: Schedule, completed: Boolean, currentDate: LocalDate, backlogEnabled: Boolean
     ): HistoricalStatusData = if (completed) {
-        println("was planned and fully completed")
         HistoricalStatusData(
             scheduleDeviationIncrementAmount = 0,
             historicalStatus = HistoricalStatus.Completed,
@@ -150,7 +177,7 @@ class InsertRoutineStatusIntoHistoryUseCase(
     private suspend fun deriveHistoricalStatusFromBacklogStatus(
         completed: Boolean, routineId: Long
     ): HistoricalStatusData = if (completed) {
-        sortOutBacklog(routineId)
+        sortOutBacklog(routineId, completionHistoryRepository)
 
         HistoricalStatusData(
             scheduleDeviationIncrementAmount = 1,
@@ -197,7 +224,7 @@ class InsertRoutineStatusIntoHistoryUseCase(
         currentScheduleDeviation: Int,
     ): HistoricalStatusData = if (completed) {
         if (currentScheduleDeviation < 0) {
-            sortOutBacklog(routineId)
+            sortOutBacklog(routineId, completionHistoryRepository)
             HistoricalStatusData(
                 scheduleDeviationIncrementAmount = 1,
                 historicalStatus = HistoricalStatus.SortedOutBacklogOnVacation,
@@ -212,15 +239,6 @@ class InsertRoutineStatusIntoHistoryUseCase(
         HistoricalStatusData(
             scheduleDeviationIncrementAmount = 0,
             historicalStatus = HistoricalStatus.NotCompletedOnVacation,
-        )
-    }
-
-    private suspend fun sortOutBacklog(routineId: Long) {
-        completionHistoryRepository.updateHistoryEntryStatusByStatus(
-            routineId = routineId,
-            newStatus = HistoricalStatus.CompletedLater,
-            scheduleDeviationIncrementAmount = 0,
-            matchingStatuses = listOf(HistoricalStatus.NotCompleted),
         )
     }
 

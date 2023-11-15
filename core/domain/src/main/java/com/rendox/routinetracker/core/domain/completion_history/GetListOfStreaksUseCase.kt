@@ -29,7 +29,7 @@ class GetListOfStreaksUseCase(
 
     suspend operator fun invoke(routineId: Long): List<Streak> {
         val routineStartDate =
-            completionHistoryRepository.getFirstHistoryEntryDate(routineId) ?: return emptyList()
+            completionHistoryRepository.getFirstHistoryEntry(routineId)?.date ?: return emptyList()
 
         val schedule = routineRepository.getRoutineById(routineId).schedule
         if (schedule is Schedule.CustomDateSchedule) return emptyList()
@@ -38,9 +38,8 @@ class GetListOfStreaksUseCase(
         var streakStart: LocalDate
         var dateStartLookingFrom: LocalDate = routineStartDate
 
-        println("schedule = $schedule")
-
         while (true) {
+            println("GetListOfStreaksUseCase infinite while loop")
             streakStart = findNextPositiveStatus(routineId, dateStartLookingFrom) ?: return streaks
 
             var nextNegativeStatusDate: LocalDate?
@@ -90,26 +89,4 @@ class GetListOfStreaksUseCase(
             matchingStatuses = positiveHistoricalStatuses,
         )
     }
-}
-
-fun deriveDatesIncludedInStreak(
-    streaks: List<Streak>, dateRange: LocalDateRange
-): List<LocalDate> {
-    val streakDates = mutableListOf<LocalDate>()
-    for (streak in streaks) {
-        val streakEnd = streak.end
-        val streakStartNotGreaterThanLastDate = streak.start <= dateRange.endInclusive
-        val streakEndNotLessThanFirstDate = (streakEnd == null) || streakEnd >= dateRange.start
-        val streakIncludesPartOfGivenRange =
-            streakStartNotGreaterThanLastDate && streakEndNotLessThanFirstDate
-        if (streakIncludesPartOfGivenRange) {
-            val startDateWithinRange: LocalDate =
-                if (streak.start <= dateRange.start) dateRange.start else streak.start
-            val endDateWithinRange: LocalDate =
-                if (streakEnd == null || streakEnd >= dateRange.endInclusive) dateRange.endInclusive
-                else streakEnd
-            for (date in startDateWithinRange..endDateWithinRange) streakDates.add(date)
-        }
-    }
-    return streakDates
 }

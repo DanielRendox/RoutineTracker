@@ -2,6 +2,7 @@ package com.rendox.routinetracker.core.data.routine
 
 import com.rendox.routinetracker.core.database.routine.RoutineLocalDataSource
 import com.rendox.routinetracker.core.model.Routine
+import kotlinx.coroutines.flow.Flow
 
 class RoutineRepositoryImpl(
     private val localDataSource: RoutineLocalDataSource,
@@ -15,7 +16,7 @@ class RoutineRepositoryImpl(
         localDataSource.insertRoutine(routine)
     }
 
-    override suspend fun updateScheduleDeviation(newValue: Int, routineId: Long) {
-        localDataSource.updateScheduleDeviation(newValue, routineId)
+    override suspend fun getAllRoutines(): List<Routine> {
+        return localDataSource.getAllRoutines()
     }
 }

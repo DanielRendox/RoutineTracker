@@ -5,7 +5,7 @@ import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryR
 import com.rendox.routinetracker.core.data.di.completionHistoryDataModule
 import com.rendox.routinetracker.core.data.di.routineDataModule
 import com.rendox.routinetracker.core.data.routine.RoutineRepository
-import com.rendox.routinetracker.core.database.localDataSourceModule
+import com.rendox.routinetracker.core.database.di.localDataSourceModule
 import com.rendox.routinetracker.core.logic.time.generateRandomDateRange
 import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo

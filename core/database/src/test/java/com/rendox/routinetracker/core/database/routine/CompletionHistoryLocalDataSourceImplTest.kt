@@ -5,7 +5,7 @@ import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.google.common.truth.Truth.assertThat
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
 import com.rendox.routinetracker.core.database.completion_history.CompletionHistoryLocalDataSourceImpl
-import com.rendox.routinetracker.core.database.localDataSourceModule
+import com.rendox.routinetracker.core.database.di.localDataSourceModule
 import com.rendox.routinetracker.core.logic.time.generateRandomDateRange
 import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo

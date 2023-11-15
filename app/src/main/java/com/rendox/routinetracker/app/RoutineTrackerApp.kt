@@ -2,8 +2,14 @@ package com.rendox.routinetracker.app
 
 import android.app.Application
 import com.rendox.routinetracker.core.data.di.completionHistoryDataModule
+import com.rendox.routinetracker.core.data.di.completionTimeDataModule
 import com.rendox.routinetracker.core.data.di.routineDataModule
-import com.rendox.routinetracker.core.database.localDataSourceModule
+import com.rendox.routinetracker.core.data.di.scheduleDueDatesCompletionTimeDataModule
+import com.rendox.routinetracker.core.database.di.localDataSourceModule
+import com.rendox.routinetracker.core.domain.di.completionHistoryDomainModule
+import com.rendox.routinetracker.core.domain.di.routineDomainModule
+import com.rendox.routinetracker.feature.agenda.di.agendaScreenModule
+import com.rendox.routinetracker.routine_details.di.routineDetailsModule
 //import com.rendox.routinetracker.feature.routinedetails.routineViewModelModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
@@ -16,8 +22,13 @@ class RoutineTrackerApp: Application() {
             modules(
                 localDataSourceModule,
                 routineDataModule,
-//                routineViewModelModule,
                 completionHistoryDataModule,
+                completionTimeDataModule,
+                scheduleDueDatesCompletionTimeDataModule,
+                routineDomainModule,
+                completionHistoryDomainModule,
+                agendaScreenModule,
+                routineDetailsModule,
             )
         }
     }

@@ -35,6 +35,8 @@ internal fun Project.configureAndroidCompose(
             add("implementation", "androidx.compose.ui:ui-tooling-preview")
             add("implementation", libs.findLibrary("androidx-lifecycle-runtime-compose").get())
             add("implementation", libs.findLibrary("androidx-lifecycle-viewmodel-compose").get())
+            add("implementation", libs.findLibrary("androidx-navigation").get())
+            add("implementation", "io.insert-koin:koin-androidx-compose")
 
             add("androidTestImplementation", platform(bom))
             add("androidTestImplementation", "androidx.compose.ui:ui-test")

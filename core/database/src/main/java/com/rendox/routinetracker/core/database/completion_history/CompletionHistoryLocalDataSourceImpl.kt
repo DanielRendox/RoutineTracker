@@ -27,14 +27,16 @@ class CompletionHistoryLocalDataSourceImpl(
         }
     }
 
-    private fun CompletionHistoryEntity.toExternalModel() =
-        CompletionHistoryEntry(date = date, status = status)
+    private fun CompletionHistoryEntity.toExternalModel() = CompletionHistoryEntry(
+        date = date,
+        status = status,
+        currentScheduleDeviation = currentScheduleDeviation
+    )
 
     override suspend fun insertHistoryEntry(
         id: Long?,
         routineId: Long,
         entry: CompletionHistoryEntry,
-        scheduleDeviationIncrementAmount: Int,
     ) {
         withContext(dispatcher) {
             db.routineEntityQueries.transaction {
@@ -43,11 +45,15 @@ class CompletionHistoryLocalDataSourceImpl(
                     routineId = routineId,
                     date = entry.date,
                     status = entry.status,
+                    currentScheduleDeviation = entry.currentScheduleDeviation,
                 )
-                db.routineEntityQueries.incrementScheduleDeviation(
-                    incrementAmount = scheduleDeviationIncrementAmount,
-                    routineId = routineId,
-                )
+                if (entry.status == HistoricalStatus.CompletedLater) {
+                    db.completedLaterHistoryEntityQueries.insertCompletedLaterDate(
+                        id = null,
+                        routineId = routineId,
+                        date = entry.date,
+                    )
+                }
             }
         }
     }
@@ -55,20 +61,24 @@ class CompletionHistoryLocalDataSourceImpl(
     override suspend fun updateHistoryEntryStatusByDate(
         routineId: Long,
         date: LocalDate,
-        status: HistoricalStatus,
-        scheduleDeviationIncrementAmount: Int,
-    ) {
+        newStatus: HistoricalStatus,
+        newScheduleDeviation: Int,
+        ) {
         withContext(dispatcher) {
             db.routineEntityQueries.transaction {
                 db.completionHistoryEntityQueries.updateHistoryEntryStatusByDate(
-                    status = status,
+                    status = newStatus,
                     routineId = routineId,
-                    date = date
+                    date = date,
+                    currentScheduleDeviation = newScheduleDeviation,
                 )
-                db.routineEntityQueries.incrementScheduleDeviation(
-                    incrementAmount = scheduleDeviationIncrementAmount,
-                    routineId = routineId,
-                )
+                if (newStatus == HistoricalStatus.CompletedLater) {
+                    db.completedLaterHistoryEntityQueries.insertCompletedLaterDate(
+                        id = null,
+                        routineId = routineId,
+                        date = date,
+                    )
+                }
             }
         }
     }
@@ -76,35 +86,44 @@ class CompletionHistoryLocalDataSourceImpl(
     override suspend fun updateHistoryEntryStatusByStatus(
         routineId: Long,
         newStatus: HistoricalStatus,
-        scheduleDeviationIncrementAmount: Int,
+        newScheduleDeviation: Int,
         matchingStatuses: List<HistoricalStatus>,
     ) {
         withContext(dispatcher) {
             db.routineEntityQueries.transaction {
+                val updatedDate =
+                    db.completionHistoryEntityQueries.findLastHistoryEntryByStatus(
+                        routineId = routineId,
+                        statusPredicate = matchingStatuses,
+                    ).executeAsOne()
                 db.completionHistoryEntityQueries.updateLastHistoryEntryStatusByStatus(
                     newStatus = newStatus,
                     routineId = routineId,
                     statusPredicate = matchingStatuses,
+                    currentScheduleDeviation = newScheduleDeviation,
                 )
-                db.routineEntityQueries.incrementScheduleDeviation(
-                    incrementAmount = scheduleDeviationIncrementAmount,
-                    routineId = routineId,
-                )
+                if (updatedDate.status == HistoricalStatus.CompletedLater) {
+                    db.completedLaterHistoryEntityQueries.insertCompletedLaterDate(
+                        id = null,
+                        routineId = routineId,
+                        date = updatedDate.date,
+                    )
+                }
             }
         }
     }
 
-    override suspend fun getFirstHistoryEntryDate(routineId: Long): LocalDate? {
+    override suspend fun getFirstHistoryEntry(routineId: Long): CompletionHistoryEntry? {
         return withContext(dispatcher) {
-            db.completionHistoryEntityQueries.getFirstHistoryEntryDate(routineId)
-                .executeAsOneOrNull()
+            db.completionHistoryEntityQueries.getFirstHistoryEntry(routineId)
+                .executeAsOneOrNull()?.toExternalModel()
         }
     }
 
-    override suspend fun getLastHistoryEntryDate(routineId: Long): LocalDate? {
+    override suspend fun getLastHistoryEntry(routineId: Long): CompletionHistoryEntry? {
         return withContext(dispatcher) {
-            db.completionHistoryEntityQueries.getLastHistoryEntryDate(routineId)
-                .executeAsOneOrNull()
+            db.completionHistoryEntityQueries.getLastHistoryEntry(routineId)
+                .executeAsOneOrNull()?.toExternalModel()
         }
     }
 
@@ -117,6 +136,42 @@ class CompletionHistoryLocalDataSourceImpl(
             db.completionHistoryEntityQueries.getFirstHistoryEntryDateByStatus(
                 routineId, startingFromDate, matchingStatuses
             ).executeAsOneOrNull()
+        }
+    }
+
+    override suspend fun checkIfStatusWasCompletedLater(routineId: Long, date: LocalDate): Boolean {
+        return withContext(dispatcher) {
+            db.completedLaterHistoryEntityQueries.getEntityByDate(
+                routineId, date
+            ).executeAsOneOrNull() != null
+        }
+    }
+
+    override suspend fun insertCompletedLaterDate(id: Long?, routineId: Long, date: LocalDate) {
+        withContext(dispatcher) {
+            db.completedLaterHistoryEntityQueries.insertCompletedLaterDate(id, routineId, date)
+        }
+    }
+
+    override suspend fun deleteCompletedLaterDate(routineId: Long, date: LocalDate) {
+        withContext(dispatcher) {
+            db.completedLaterHistoryEntityQueries.deleteCompletedLaterDate(routineId, date)
+        }
+    }
+
+    override suspend fun findLastHistoryEntryDateByStatus(
+        routineId: Long, matchingStatuses: List<HistoricalStatus>
+    ): CompletionHistoryEntry? {
+        return withContext(dispatcher) {
+            db.completionHistoryEntityQueries.findLastHistoryEntryByStatus(
+                routineId, matchingStatuses
+            ).executeAsOneOrNull()?.toExternalModel()
+        }
+    }
+
+    override suspend fun deleteHistoryEntry(routineId: Long, date: LocalDate) {
+        return withContext(dispatcher) {
+            db.completionHistoryEntityQueries.deleteHistoryEntry(routineId, date)
         }
     }
 }

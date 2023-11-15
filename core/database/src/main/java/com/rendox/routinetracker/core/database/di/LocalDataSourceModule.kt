@@ -1,4 +1,4 @@
-package com.rendox.routinetracker.core.database
+package com.rendox.routinetracker.core.database.di
 
 import app.cash.sqldelight.ColumnAdapter
 import app.cash.sqldelight.EnumColumnAdapter
@@ -6,6 +6,10 @@ import app.cash.sqldelight.adapter.primitive.FloatColumnAdapter
 import app.cash.sqldelight.adapter.primitive.IntColumnAdapter
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
+import com.rendox.routinetracker.core.database.CompletedLaterHistoryEntity
+import com.rendox.routinetracker.core.database.CompletionHistoryEntity
+import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
+import com.rendox.routinetracker.core.database.SpecificDateCustomCompletionTime
 import com.rendox.routinetracker.core.database.routine.RoutineEntity
 import com.rendox.routinetracker.core.database.schedule.DueDateEntity
 import com.rendox.routinetracker.core.database.schedule.ScheduleEntity
@@ -30,6 +34,7 @@ val localDataSourceModule = module {
         AndroidSqliteDriver(
             schema = RoutineTrackerDatabase.Schema,
             context = get(),
+            name = "routinetracker.db"
         )
     }
 
@@ -38,7 +43,6 @@ val localDataSourceModule = module {
             driver = get(),
             routineEntityAdapter = RoutineEntity.Adapter(
                 typeAdapter = EnumColumnAdapter(),
-                scheduleDeviationAdapter = IntColumnAdapter,
                 sessionDurationMinutesAdapter = IntColumnAdapter,
                 progressAdapter = FloatColumnAdapter,
                 defaultCompletionTimeHourAdapter = IntColumnAdapter,
@@ -68,11 +72,15 @@ val localDataSourceModule = module {
             completionHistoryEntityAdapter = CompletionHistoryEntity.Adapter(
                 statusAdapter = EnumColumnAdapter(),
                 dateAdapter = localDateAdapter,
+                currentScheduleDeviationAdapter = IntColumnAdapter,
             ),
             specificDateCustomCompletionTimeAdapter = SpecificDateCustomCompletionTime.Adapter(
                 dateAdapter = localDateAdapter,
                 completionTimeHourAdapter = IntColumnAdapter,
                 completionTimeMinuteAdapter = IntColumnAdapter,
+            ),
+            completedLaterHistoryEntityAdapter = CompletedLaterHistoryEntity.Adapter(
+                dateAdapter = localDateAdapter,
             )
         )
     }

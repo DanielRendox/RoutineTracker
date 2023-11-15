@@ -77,7 +77,7 @@ enum class HistoricalStatus : RoutineStatus {
 
     /**
      * Although the routine was due on this day, the user skipped it
-     * because they had over completed one of the days earlier.
+     * because they had over completed it earlier or completed it later.
      */
     AlreadyCompleted,
 }

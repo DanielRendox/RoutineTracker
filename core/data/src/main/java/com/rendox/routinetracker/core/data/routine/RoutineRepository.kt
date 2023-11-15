@@ -1,6 +1,7 @@
 package com.rendox.routinetracker.core.data.routine
 
 import com.rendox.routinetracker.core.model.Routine
+import kotlinx.coroutines.flow.Flow
 
 interface RoutineRepository {
 
@@ -8,5 +9,5 @@ interface RoutineRepository {
 
     suspend fun insertRoutine(routine: Routine)
 
-    suspend fun updateScheduleDeviation(newValue: Int, routineId: Long)
+    suspend fun getAllRoutines(): List<Routine>
 }

@@ -3,7 +3,7 @@ package com.rendox.routinetracker.core.domain.routine
 import com.rendox.routinetracker.core.data.completion_time.CompletionTimeRepository
 import com.rendox.routinetracker.core.data.routine.RoutineRepository
 import com.rendox.routinetracker.core.data.routine.schedule.due_dates_completion_time.ScheduleDueDatesCompletionTimeRepository
-import com.rendox.routinetracker.core.database.toInt
+import com.rendox.routinetracker.core.database.di.toInt
 import com.rendox.routinetracker.core.logic.time.AnnualDate
 import com.rendox.routinetracker.core.model.Schedule
 import kotlinx.datetime.LocalDate
@@ -14,13 +14,13 @@ class GetRoutineCompletionTimeUseCase(
     private val completionTimeRepository: CompletionTimeRepository,
     private val scheduleDueDatesCompletionTimeRepository: ScheduleDueDatesCompletionTimeRepository,
 ) {
-    suspend operator fun invoke(routineId: Long, currentDate: LocalDate): LocalTime? {
+    suspend operator fun invoke(routineId: Long, date: LocalDate): LocalTime? {
         val completionTimeFromSpecificDate =
-            completionTimeRepository.getCompletionTime(routineId, currentDate)
+            completionTimeRepository.getCompletionTime(routineId, date)
         completionTimeFromSpecificDate?.let { return it }
 
         val routine = routineRepository.getRoutineById(routineId)
-        val completionTimeFromSchedule = currentDate.getIndex(routine.schedule)?.let {
+        val completionTimeFromSchedule = date.getIndex(routine.schedule)?.let {
             scheduleDueDatesCompletionTimeRepository.getDueDateCompletionTime(
                 routineId = routineId, dueDateNumber = it
             )

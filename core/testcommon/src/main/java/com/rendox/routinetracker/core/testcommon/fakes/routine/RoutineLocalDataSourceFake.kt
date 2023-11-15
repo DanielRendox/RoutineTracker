@@ -3,6 +3,8 @@ package com.rendox.routinetracker.core.testcommon.fakes.routine
 import com.rendox.routinetracker.core.database.routine.RoutineLocalDataSource
 import com.rendox.routinetracker.core.model.Routine
 import com.rendox.routinetracker.core.model.Schedule
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.datetime.LocalDate
 
 class RoutineLocalDataSourceFake(
@@ -69,5 +71,9 @@ class RoutineLocalDataSourceFake(
         return when (this) {
             is Routine.YesNoRoutine -> copy(schedule = schedule)
         }
+    }
+
+    override fun getAllRoutines(): Flow<List<Routine>> {
+        TODO()
     }
 }

@@ -1,6 +1,8 @@
 package com.rendox.routinetracker.core.database.routine
 
 import app.cash.sqldelight.TransactionWithoutReturn
+import app.cash.sqldelight.coroutines.asFlow
+import app.cash.sqldelight.coroutines.mapToList
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
 import com.rendox.routinetracker.core.database.routine.model.RoutineType
 import com.rendox.routinetracker.core.database.routine.model.ScheduleType
@@ -15,12 +17,14 @@ import com.rendox.routinetracker.core.database.routine.model.toWeeklyScheduleByD
 import com.rendox.routinetracker.core.database.routine.model.toWeeklyScheduleByNumOfDueDays
 import com.rendox.routinetracker.core.database.routine.model.toYesNoRoutine
 import com.rendox.routinetracker.core.database.schedule.ScheduleEntity
-import com.rendox.routinetracker.core.database.toDayOfWeek
-import com.rendox.routinetracker.core.database.toInt
+import com.rendox.routinetracker.core.database.di.toDayOfWeek
+import com.rendox.routinetracker.core.database.di.toInt
 import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
 import com.rendox.routinetracker.core.model.Routine
 import com.rendox.routinetracker.core.model.Schedule
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
 
@@ -32,11 +36,7 @@ class RoutineLocalDataSourceImpl(
     override suspend fun getRoutineById(routineId: Long): Routine {
         return withContext(dispatcher) {
             db.routineEntityQueries.transactionWithResult {
-                val lastDateInHistory: LocalDate? = db.completionHistoryEntityQueries
-                    .getLastHistoryEntryDate(routineId)
-                    .executeAsOneOrNull()
                 val schedule = getScheduleEntity(routineId).toExternalModel(
-                    lastDateInHistory = lastDateInHistory,
                     dueDatesProvider = { getDueDates(routineId) },
                 )
                 getRoutineEntity(routineId).toExternalModel(schedule)
@@ -54,36 +54,35 @@ class RoutineLocalDataSourceImpl(
         db.dueDateEntityQueries.getDueDates(scheduleId).executeAsList()
 
     private fun ScheduleEntity.toExternalModel(
-        lastDateInHistory: LocalDate?,
         dueDatesProvider: (Long) -> List<Int>
     ): Schedule {
         return when (type) {
-            ScheduleType.EveryDaySchedule -> toEveryDaySchedule(lastDateInHistory)
+            ScheduleType.EveryDaySchedule -> toEveryDaySchedule()
             ScheduleType.WeeklyScheduleByDueDaysOfWeek ->
-                toWeeklyScheduleByDueDaysOfWeek(dueDatesProvider(id), lastDateInHistory)
+                toWeeklyScheduleByDueDaysOfWeek(dueDatesProvider(id))
 
             ScheduleType.WeeklyScheduleByNumOfDueDays ->
-                toWeeklyScheduleByNumOfDueDays(lastDateInHistory)
+                toWeeklyScheduleByNumOfDueDays()
 
             ScheduleType.MonthlyScheduleByDueDatesIndices -> {
                 val weekDaysMonthRelated = getWeekDayMonthRelatedDays(id)
                 toMonthlyScheduleByDueDatesIndices(
-                    dueDatesProvider(id), weekDaysMonthRelated, lastDateInHistory
+                    dueDatesProvider(id), weekDaysMonthRelated
                 )
             }
 
             ScheduleType.MonthlyScheduleByNumOfDueDays ->
-                toMonthlyScheduleByNumOfDueDays(lastDateInHistory)
+                toMonthlyScheduleByNumOfDueDays()
 
-            ScheduleType.PeriodicCustomSchedule -> toPeriodicCustomSchedule(lastDateInHistory)
+            ScheduleType.PeriodicCustomSchedule -> toPeriodicCustomSchedule()
             ScheduleType.CustomDateSchedule ->
-                toCustomDateSchedule(dueDatesProvider(id), lastDateInHistory)
+                toCustomDateSchedule(dueDatesProvider(id))
 
             ScheduleType.AnnualScheduleByDueDates ->
-                toAnnualScheduleByDueDates(dueDatesProvider(id), lastDateInHistory)
+                toAnnualScheduleByDueDates(dueDatesProvider(id))
 
             ScheduleType.AnnualScheduleByNumOfDueDays ->
-                toAnnualScheduleByNumOfDueDays(lastDateInHistory)
+                toAnnualScheduleByNumOfDueDays()
         }
     }
 
@@ -126,7 +125,6 @@ class RoutineLocalDataSourceImpl(
             description = routine.description,
             sessionDurationMinutes = routine.sessionDurationMinutes,
             progress = routine.progress,
-            scheduleDeviation = routine.scheduleDeviation,
             defaultCompletionTimeHour = routine.defaultCompletionTime?.hour,
             defaultCompletionTimeMinute = routine.defaultCompletionTime?.minute,
         )
@@ -382,9 +380,16 @@ class RoutineLocalDataSourceImpl(
         }
     }
 
-    override suspend fun updateScheduleDeviation(newValue: Int, routineId: Long) {
-        withContext(dispatcher) {
-            db.routineEntityQueries.updateScheduleDeviation(newValue, routineId)
+    override suspend fun getAllRoutines(): List<Routine> {
+        return withContext(dispatcher) {
+            db.routineEntityQueries.getAllRoutines()
+                .executeAsList()
+                .map { routineEntity ->
+                    val schedule = getScheduleEntity(routineEntity.id).toExternalModel(
+                        dueDatesProvider = { getDueDates(routineEntity.id) },
+                    )
+                    routineEntity.toExternalModel(schedule)
+                }
         }
     }
 }

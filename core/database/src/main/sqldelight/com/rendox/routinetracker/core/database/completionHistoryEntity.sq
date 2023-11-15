@@ -1,4 +1,5 @@
 import com.rendox.routinetracker.core.model.HistoricalStatus;
+import kotlin.Int;
 import kotlinx.datetime.LocalDate;
 
 CREATE TABLE completionHistoryEntity (
@@ -6,6 +7,7 @@ CREATE TABLE completionHistoryEntity (
     routineId INTEGER NOT NULL,
     date INTEGER AS LocalDate NOT NULL,
     status TEXT AS HistoricalStatus NOT NULL,
+    currentScheduleDeviation INTEGER AS Int NOT NULL,
     FOREIGN KEY(routineId) REFERENCES routineEntity(id)
 );
 
@@ -19,16 +21,18 @@ ORDER BY
 
 insertHistoryEntry:
 INSERT INTO completionHistoryEntity
-VALUES (?, ?, ?, ?);
+VALUES (?, ?, ?, ?, ?);
 
 updateHistoryEntryStatusByDate:
 UPDATE completionHistoryEntity
-SET status = ?
+SET status = ?,
+currentScheduleDeviation = ?
 WHERE routineId = ? AND date = ?;
 
 updateLastHistoryEntryStatusByStatus:
 UPDATE completionHistoryEntity
-SET status = :newStatus
+SET status = :newStatus,
+currentScheduleDeviation = :currentScheduleDeviation
 WHERE id = (
     SELECT id
     FROM completionHistoryEntity
@@ -36,6 +40,13 @@ WHERE id = (
     ORDER BY date DESC
     LIMIT 1
 );
+
+findLastHistoryEntryByStatus:
+SELECT *
+FROM completionHistoryEntity
+WHERE routineId = :routineId AND status IN :statusPredicate
+ORDER BY date DESC
+LIMIT 1;
 
 getFirstHistoryEntryDateByStatus:
 SELECT date
@@ -46,16 +57,20 @@ WHERE routineId = :routineId
 ORDER BY date ASC
 LIMIT 1;
 
-getFirstHistoryEntryDate:
-SELECT date
+getFirstHistoryEntry:
+SELECT *
 FROM completionHistoryEntity
 WHERE routineId = ?
 ORDER BY date ASC
 LIMIT 1;
 
-getLastHistoryEntryDate:
-SELECT date
+getLastHistoryEntry:
+SELECT *
 FROM completionHistoryEntity
 WHERE routineId = ?
 ORDER BY date DESC
 LIMIT 1;
+
+deleteHistoryEntry:
+DELETE FROM completionHistoryEntity
+WHERE routineId = ? AND date = ?;

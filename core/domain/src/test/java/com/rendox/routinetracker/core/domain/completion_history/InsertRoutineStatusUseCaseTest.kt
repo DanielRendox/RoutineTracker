@@ -26,7 +26,7 @@ import kotlinx.datetime.plus
 import org.junit.Test
 import kotlin.test.assertFailsWith
 
-class InsertRoutineStatusIntoHistoryUseCaseTest {
+class InsertRoutineStatusUseCaseTest {
 
     private val routineData = RoutineData()
     private val routineLocalDataSource = RoutineLocalDataSourceFake(routineData)
@@ -38,7 +38,7 @@ class InsertRoutineStatusIntoHistoryUseCaseTest {
     private val routineRepository: RoutineRepository = RoutineRepositoryImpl(
         localDataSource = routineLocalDataSource,
     )
-    private val insertRoutineStatusIntoHistory = InsertRoutineStatusIntoHistoryUseCase(
+    private val insertRoutineStatusIntoHistory = InsertRoutineStatusUseCase(
         completionHistoryRepository = completionHistoryRepository,
         routineRepository = routineRepository,
     )

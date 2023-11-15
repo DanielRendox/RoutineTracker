@@ -10,8 +10,7 @@ CREATE TABLE routineEntity (
     sessionDurationMinutes INTEGER AS Int,
     progress REAL AS Float,
     defaultCompletionTimeHour INTEGER AS Int,
-    defaultCompletionTimeMinute INTEGER AS Int,
-    scheduleDeviation INTEGER AS Int
+    defaultCompletionTimeMinute INTEGER AS Int
 );
 
 getRoutineById:
@@ -19,16 +18,11 @@ SELECT *
 FROM routineEntity
 WHERE id = ?;
 
+getAllRoutines:
+SELECT *
+FROM routineEntity
+ORDER BY id;
+
 insertRoutine:
 INSERT INTO routineEntity
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
-
-incrementScheduleDeviation:
-UPDATE routineEntity
-SET scheduleDeviation = scheduleDeviation + :incrementAmount
-WHERE id = :routineId;
-
-updateScheduleDeviation:
-UPDATE routineEntity
-SET scheduleDeviation = :newValue
-WHERE id = :routineId;
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);

@@ -9,6 +9,7 @@ import kotlinx.datetime.daysUntil
 
 fun Schedule.isDue(
     validationDate: LocalDate,
+    dateScheduleDeviationIsActualFor: LocalDate?,
 ): Boolean {
     if (validationDate < routineStartDate) {
         throw IllegalArgumentException(
@@ -31,6 +32,7 @@ fun Schedule.isDue(
                 validationDatePeriod = period,
                 numOfDueDays = getNumOfDueDatesInPeriod(period),
                 numOfCompletedDays = numOfCompletedDaysInCurrentPeriod,
+                dateScheduleDeviationIsActualFor = dateScheduleDeviationIsActualFor,
             )
         }
 
@@ -43,6 +45,7 @@ fun Schedule.isDue(
                 validationDatePeriod = period,
                 numOfDueDays = getNumOfDueDatesInPeriod(period),
                 numOfCompletedDays = numOfCompletedDaysInCurrentPeriod,
+                dateScheduleDeviationIsActualFor = dateScheduleDeviationIsActualFor,
             )
         }
 
@@ -53,6 +56,7 @@ fun Schedule.isDue(
                 validationDatePeriod = period,
                 numOfDueDays = getNumOfDueDatesInPeriod(period),
                 numOfCompletedDays = numOfCompletedDaysInCurrentPeriod,
+                dateScheduleDeviationIsActualFor = dateScheduleDeviationIsActualFor,
             )
         }
 
@@ -67,6 +71,7 @@ fun Schedule.isDue(
                 validationDatePeriod = period,
                 numOfDueDays = getNumOfDueDatesInPeriod(period),
                 numOfCompletedDays = numOfCompletedDaysInCurrentPeriod,
+                dateScheduleDeviationIsActualFor = dateScheduleDeviationIsActualFor,
             )
         }
     }
@@ -109,11 +114,12 @@ private fun Schedule.PeriodicSchedule.scheduleByNumOfDueDaysIsDue(
     validationDatePeriod: LocalDateRange,
     numOfDueDays: Int,
     numOfCompletedDays: Int,
+    dateScheduleDeviationIsActualFor: LocalDate?,
 ): Boolean {
     val validationDateNumberInPeriod = validationDatePeriod.start.daysUntil(validationDate) + 1
     if (validationDateNumberInPeriod <= numOfDueDays) return true
 
-    lastDateInHistory?.let {
+    dateScheduleDeviationIsActualFor?.let {
         val daysBetweenLastDateInHistoryAndValidationDate = it.daysUntil(validationDate) - 1
         val daysExpectedToBeCompletedTillThatTime =
             numOfCompletedDays + daysBetweenLastDateInHistoryAndValidationDate

@@ -26,11 +26,25 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
+import com.rendox.routinetracker.routine_details.navigation.RoutineDetailsNavHost
+import com.rendox.routinetracker.routine_details.navigation.calendarNavRoute
+
+@Composable
+internal fun RoutineDetailsRoute(
+    modifier: Modifier = Modifier,
+    routineId: Long,
+    navigateToPreviousScreen: () -> Unit,
+) {
+    RoutineDetailsScreen(modifier, routineId, navigateToPreviousScreen)
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RoutineDetailsScreen(
+internal fun RoutineDetailsScreen(
     modifier: Modifier = Modifier,
+    routineId: Long,
     navigateToPreviousScreen: () -> Unit,
 ) {
     val scrollBehavior =
@@ -71,15 +85,11 @@ fun RoutineDetailsScreen(
         Column(
             modifier = Modifier
                 .padding(paddingValues)
-                .padding(start = 16.dp, end = 16.dp)
-                .verticalScroll(state = rememberScrollState()),
+                .padding(horizontal = 16.dp),
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(32.dp)
-                    .background(color = MaterialTheme.colorScheme.secondary)
-                    .padding(bottom = 24.dp)
+            RoutineDetailsNavHost(
+                startDestination = calendarNavRoute,
+                routineId = routineId,
             )
         }
     }
