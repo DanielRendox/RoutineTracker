@@ -12,7 +12,7 @@ interface RoutineLocalDataSource {
     suspend fun getAllRoutines(): List<Routine>
 
     suspend fun updateDueDateSpecificCompletionTime(
-        time: LocalTime, routineId: Long, dueDateNumber: Int
+        newTime: LocalTime, routineId: Long, dueDateNumber: Int
     )
 
     suspend fun getDueDateSpecificCompletionTime(

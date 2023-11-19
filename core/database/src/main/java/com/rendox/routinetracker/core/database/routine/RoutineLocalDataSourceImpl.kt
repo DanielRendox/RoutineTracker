@@ -351,12 +351,12 @@ class RoutineLocalDataSourceImpl(
     }
 
     override suspend fun updateDueDateSpecificCompletionTime(
-        time: LocalTime, routineId: Long, dueDateNumber: Int
+        newTime: LocalTime, routineId: Long, dueDateNumber: Int
     ) {
         withContext(dispatcher) {
             db.dueDateEntityQueries.updateCompletionTime(
-                completionTimeHour = time.hour,
-                completionTimeMinute = time.minute,
+                completionTimeHour = newTime.hour,
+                completionTimeMinute = newTime.minute,
                 scheduleId = routineId,
                 dueDateNumber = dueDateNumber,
             )
