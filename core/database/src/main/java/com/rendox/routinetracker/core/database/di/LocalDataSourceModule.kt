@@ -6,10 +6,10 @@ import app.cash.sqldelight.adapter.primitive.FloatColumnAdapter
 import app.cash.sqldelight.adapter.primitive.IntColumnAdapter
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
-import com.rendox.routinetracker.core.database.CompletedLaterHistoryEntity
-import com.rendox.routinetracker.core.database.CompletionHistoryEntity
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
-import com.rendox.routinetracker.core.database.SpecificDateCustomCompletionTime
+import com.rendox.routinetracker.core.database.completionhistory.CompletedLaterHistoryEntity
+import com.rendox.routinetracker.core.database.completionhistory.CompletionHistoryEntity
+import com.rendox.routinetracker.core.database.completiontime.SpecificDateCustomCompletionTime
 import com.rendox.routinetracker.core.database.routine.RoutineEntity
 import com.rendox.routinetracker.core.database.schedule.DueDateEntity
 import com.rendox.routinetracker.core.database.schedule.ScheduleEntity
@@ -101,11 +101,6 @@ val localDateAdapter = object : ColumnAdapter<LocalDate, Long> {
 
 fun Int.toLocalDate() = epochDate.plusDays(this)
 fun LocalDate.toInt() = epochDate.daysUntil(this)
-
-val annualDateAdapter = object : ColumnAdapter<AnnualDate, Long> {
-    override fun decode(databaseValue: Long) = databaseValue.toInt().toAnnualDate()
-    override fun encode(value: AnnualDate) = value.toInt().toLong()
-}
 
 fun Int.toAnnualDate(): AnnualDate {
     if (this == 366) {

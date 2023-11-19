@@ -1,7 +1,6 @@
-package com.rendox.routinetracker.core.domain.routine.schedule_util
+package com.rendox.routinetracker.core.domain.routine.schedule
 
 import com.google.common.truth.Truth.assertThat
-import com.rendox.routinetracker.core.domain.routine.schedule.getPeriodRange
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.atEndOfMonth
 import com.rendox.routinetracker.core.logic.time.plusDays

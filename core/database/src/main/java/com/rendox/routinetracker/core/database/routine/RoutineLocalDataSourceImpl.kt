@@ -1,32 +1,20 @@
 package com.rendox.routinetracker.core.database.routine
 
 import app.cash.sqldelight.TransactionWithoutReturn
-import app.cash.sqldelight.coroutines.asFlow
-import app.cash.sqldelight.coroutines.mapToList
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
-import com.rendox.routinetracker.core.database.routine.model.RoutineType
-import com.rendox.routinetracker.core.database.routine.model.ScheduleType
-import com.rendox.routinetracker.core.database.routine.model.toAnnualScheduleByDueDates
-import com.rendox.routinetracker.core.database.routine.model.toAnnualScheduleByNumOfDueDays
-import com.rendox.routinetracker.core.database.routine.model.toCustomDateSchedule
-import com.rendox.routinetracker.core.database.routine.model.toEveryDaySchedule
-import com.rendox.routinetracker.core.database.routine.model.toMonthlyScheduleByDueDatesIndices
-import com.rendox.routinetracker.core.database.routine.model.toMonthlyScheduleByNumOfDueDays
-import com.rendox.routinetracker.core.database.routine.model.toPeriodicCustomSchedule
-import com.rendox.routinetracker.core.database.routine.model.toWeeklyScheduleByDueDaysOfWeek
-import com.rendox.routinetracker.core.database.routine.model.toWeeklyScheduleByNumOfDueDays
-import com.rendox.routinetracker.core.database.routine.model.toYesNoRoutine
-import com.rendox.routinetracker.core.database.schedule.ScheduleEntity
 import com.rendox.routinetracker.core.database.di.toDayOfWeek
 import com.rendox.routinetracker.core.database.di.toInt
+import com.rendox.routinetracker.core.database.routine.model.RoutineType
+import com.rendox.routinetracker.core.database.routine.model.ScheduleType
+import com.rendox.routinetracker.core.database.routine.model.toExternalModel
+import com.rendox.routinetracker.core.database.schedule.GetCompletionTime
+import com.rendox.routinetracker.core.database.schedule.ScheduleEntity
 import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
 import com.rendox.routinetracker.core.model.Routine
 import com.rendox.routinetracker.core.model.Schedule
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 
 class RoutineLocalDataSourceImpl(
     private val db: RoutineTrackerDatabase,
@@ -37,7 +25,8 @@ class RoutineLocalDataSourceImpl(
         return withContext(dispatcher) {
             db.routineEntityQueries.transactionWithResult {
                 val schedule = getScheduleEntity(routineId).toExternalModel(
-                    dueDatesProvider = { getDueDates(routineId) },
+                    dueDatesProvider = { getDueDates(it) },
+                    weekDaysMonthRelatedProvider = { getWeekDayMonthRelatedDays(it) }
                 )
                 getRoutineEntity(routineId).toExternalModel(schedule)
             }
@@ -52,45 +41,6 @@ class RoutineLocalDataSourceImpl(
 
     private fun getDueDates(scheduleId: Long): List<Int> =
         db.dueDateEntityQueries.getDueDates(scheduleId).executeAsList()
-
-    private fun ScheduleEntity.toExternalModel(
-        dueDatesProvider: (Long) -> List<Int>
-    ): Schedule {
-        return when (type) {
-            ScheduleType.EveryDaySchedule -> toEveryDaySchedule()
-            ScheduleType.WeeklyScheduleByDueDaysOfWeek ->
-                toWeeklyScheduleByDueDaysOfWeek(dueDatesProvider(id))
-
-            ScheduleType.WeeklyScheduleByNumOfDueDays ->
-                toWeeklyScheduleByNumOfDueDays()
-
-            ScheduleType.MonthlyScheduleByDueDatesIndices -> {
-                val weekDaysMonthRelated = getWeekDayMonthRelatedDays(id)
-                toMonthlyScheduleByDueDatesIndices(
-                    dueDatesProvider(id), weekDaysMonthRelated
-                )
-            }
-
-            ScheduleType.MonthlyScheduleByNumOfDueDays ->
-                toMonthlyScheduleByNumOfDueDays()
-
-            ScheduleType.PeriodicCustomSchedule -> toPeriodicCustomSchedule()
-            ScheduleType.CustomDateSchedule ->
-                toCustomDateSchedule(dueDatesProvider(id))
-
-            ScheduleType.AnnualScheduleByDueDates ->
-                toAnnualScheduleByDueDates(dueDatesProvider(id))
-
-            ScheduleType.AnnualScheduleByNumOfDueDays ->
-                toAnnualScheduleByNumOfDueDays()
-        }
-    }
-
-    private fun RoutineEntity.toExternalModel(schedule: Schedule) = when (this.type) {
-        RoutineType.YesNoRoutine -> this.toYesNoRoutine(
-            schedule = schedule,
-        )
-    }
 
     private fun getWeekDayMonthRelatedDays(scheduleId: Long): List<WeekDayMonthRelated> =
         db.weekDayMonthRelatedEntityQueries
@@ -132,13 +82,16 @@ class RoutineLocalDataSourceImpl(
 
     private fun insertSchedule(schedule: Schedule) {
         when (schedule) {
-            is Schedule.EveryDaySchedule -> insertEveryDaySchedule(schedule)
+            is Schedule.EveryDaySchedule ->
+                insertEveryDaySchedule(schedule)
+
             is Schedule.WeeklyScheduleByDueDaysOfWeek -> {
                 insertWeeklyScheduleByDueDaysOfWeek(schedule)
                 insertDueDates(schedule.dueDaysOfWeek.map { it.toInt() })
             }
 
-            is Schedule.WeeklyScheduleByNumOfDueDays -> insertWeeklyScheduleByNumOfDueDays(schedule)
+            is Schedule.WeeklyScheduleByNumOfDueDays ->
+                insertWeeklyScheduleByNumOfDueDays(schedule)
 
             is Schedule.MonthlyScheduleByDueDatesIndices -> {
                 insertMonthlyScheduleByDueDatesIndices(schedule)
@@ -147,11 +100,13 @@ class RoutineLocalDataSourceImpl(
                 insertWeekDaysMonthRelated(insertedScheduleId, schedule.weekDaysMonthRelated)
             }
 
-            is Schedule.MonthlyScheduleByNumOfDueDays -> insertMonthlyScheduleByNumOfDueDays(
-                schedule
-            )
+            is Schedule.MonthlyScheduleByNumOfDueDays ->
+                insertMonthlyScheduleByNumOfDueDays(
+                    schedule
+                )
 
-            is Schedule.PeriodicCustomSchedule -> insertPeriodicCustomSchedule(schedule)
+            is Schedule.PeriodicCustomSchedule ->
+                insertPeriodicCustomSchedule(schedule)
 
             is Schedule.CustomDateSchedule -> {
                 insertCustomDateSchedule(schedule)
@@ -163,7 +118,8 @@ class RoutineLocalDataSourceImpl(
                 insertDueDates(schedule.dueDates.map { it.toInt() })
             }
 
-            is Schedule.AnnualScheduleByNumOfDueDays -> insertAnnualScheduleByNumOfDueDays(schedule)
+            is Schedule.AnnualScheduleByNumOfDueDays ->
+                insertAnnualScheduleByNumOfDueDays(schedule)
         }
     }
 
@@ -386,10 +342,41 @@ class RoutineLocalDataSourceImpl(
                 .executeAsList()
                 .map { routineEntity ->
                     val schedule = getScheduleEntity(routineEntity.id).toExternalModel(
-                        dueDatesProvider = { getDueDates(routineEntity.id) },
+                        dueDatesProvider = { getDueDates(it) },
+                        weekDaysMonthRelatedProvider = { getWeekDayMonthRelatedDays(it) }
                     )
                     routineEntity.toExternalModel(schedule)
                 }
         }
+    }
+
+    override suspend fun updateDueDateSpecificCompletionTime(
+        time: LocalTime, routineId: Long, dueDateNumber: Int
+    ) {
+        withContext(dispatcher) {
+            db.dueDateEntityQueries.updateCompletionTime(
+                completionTimeHour = time.hour,
+                completionTimeMinute = time.minute,
+                scheduleId = routineId,
+                dueDateNumber = dueDateNumber,
+            )
+        }
+    }
+
+    override suspend fun getDueDateSpecificCompletionTime(
+        routineId: Long, dueDateNumber: Int
+    ): LocalTime? {
+        return withContext(dispatcher) {
+            db.dueDateEntityQueries
+                .getCompletionTime(routineId, dueDateNumber)
+                .executeAsOneOrNull()
+                ?.toExternalModel()
+        }
+    }
+
+    private fun GetCompletionTime.toExternalModel(): LocalTime? {
+        return if (completionTimeHour != null && completionTimeMinute != null) {
+            LocalTime(hour = completionTimeHour, minute = completionTimeMinute)
+        } else null
     }
 }

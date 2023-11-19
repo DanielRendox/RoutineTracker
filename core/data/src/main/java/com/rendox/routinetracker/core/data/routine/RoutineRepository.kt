@@ -1,7 +1,7 @@
 package com.rendox.routinetracker.core.data.routine
 
 import com.rendox.routinetracker.core.model.Routine
-import kotlinx.coroutines.flow.Flow
+import kotlinx.datetime.LocalTime
 
 interface RoutineRepository {
 
@@ -10,4 +10,12 @@ interface RoutineRepository {
     suspend fun insertRoutine(routine: Routine)
 
     suspend fun getAllRoutines(): List<Routine>
+
+    suspend fun updateDueDateSpecificCompletionTime(
+        time: LocalTime, routineId: Long, dueDateNumber: Int
+    )
+
+    suspend fun getDueDateSpecificCompletionTime(
+        routineId: Long, dueDateNumber: Int
+    ): LocalTime?
 }

@@ -1,7 +1,7 @@
 package com.rendox.routinetracker.core.database.completion_time
 
-import com.rendox.routinetracker.core.database.GetCompletionTime
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
+import com.rendox.routinetracker.core.database.completiontime.GetCompletionTime
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate

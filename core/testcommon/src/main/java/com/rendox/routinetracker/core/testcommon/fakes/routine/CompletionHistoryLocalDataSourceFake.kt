@@ -7,9 +7,9 @@ import com.rendox.routinetracker.core.model.HistoricalStatus
 import com.rendox.routinetracker.core.model.Routine
 import kotlinx.datetime.LocalDate
 
-class CompletionHistoryLocalDataSourceFake(
-    private val routineData: RoutineData
-) : CompletionHistoryLocalDataSource {
+//class CompletionHistoryLocalDataSourceFake(
+//    private val routineData: RoutineData
+//) : CompletionHistoryLocalDataSource {
 
 //    private fun addToCompletionHistory(routineId: Long, entry: CompletionHistoryEntry) {
 //        routineData.completionHistory =
@@ -129,72 +129,4 @@ class CompletionHistoryLocalDataSourceFake(
 //    ): LocalDate? {
 //        TODO("Not yet implemented")
 //    }
-
-    override suspend fun getHistoryEntries(
-        routineId: Long,
-        dates: LocalDateRange
-    ): List<CompletionHistoryEntry> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun insertHistoryEntry(
-        id: Long?,
-        routineId: Long,
-        entry: CompletionHistoryEntry
-    ) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun updateHistoryEntryStatusByDate(
-        routineId: Long,
-        date: LocalDate,
-        newStatus: HistoricalStatus,
-        newScheduleDeviation: Int
-    ) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun updateHistoryEntryStatusByStatus(
-        routineId: Long,
-        newStatus: HistoricalStatus,
-        newScheduleDeviation: Int,
-        matchingStatuses: List<HistoricalStatus>
-    ) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getFirstHistoryEntry(routineId: Long): CompletionHistoryEntry? {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getLastHistoryEntry(routineId: Long): CompletionHistoryEntry? {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getFirstHistoryEntryDateByStatus(
-        routineId: Long,
-        startingFromDate: LocalDate,
-        matchingStatuses: List<HistoricalStatus>
-    ): LocalDate? {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun checkIfStatusWasCompletedLater(routineId: Long, date: LocalDate): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun insertCompletedLaterDate(id: Long?, routineId: Long, date: LocalDate) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun deleteCompletedLaterDate(routineId: Long, date: LocalDate) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun findLastHistoryEntryDateByStatus(
-        routineId: Long,
-        matchingStatuses: List<HistoricalStatus>
-    ): CompletionHistoryEntry? {
-        TODO("Not yet implemented")
-    }
-}
+//}

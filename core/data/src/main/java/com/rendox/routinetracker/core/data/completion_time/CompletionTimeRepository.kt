@@ -14,6 +14,4 @@ interface CompletionTimeRepository {
     )
 
     suspend fun deleteCompletionTime(routineId: Long, date: LocalDate)
-
-    suspend fun deleteHistoryEntry(routineId: Long, date: LocalDate)
 }

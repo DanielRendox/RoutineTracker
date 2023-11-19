@@ -41,19 +41,17 @@ WHERE id = (
     LIMIT 1
 );
 
-findLastHistoryEntryByStatus:
+getLastHistoryEntryByStatus:
 SELECT *
 FROM completionHistoryEntity
 WHERE routineId = :routineId AND status IN :statusPredicate
 ORDER BY date DESC
 LIMIT 1;
 
-getFirstHistoryEntryDateByStatus:
-SELECT date
+getFirstHistoryEntryByStatus:
+SELECT *
 FROM completionHistoryEntity
-WHERE routineId = :routineId
-    AND (date >= :startDate)
-    AND status IN :matchingStatuses
+WHERE routineId = :routineId AND status IN :matchingStatuses
 ORDER BY date ASC
 LIMIT 1;
 

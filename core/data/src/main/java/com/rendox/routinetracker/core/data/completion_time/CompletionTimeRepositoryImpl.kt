@@ -23,8 +23,4 @@ class CompletionTimeRepositoryImpl(
     override suspend fun deleteCompletionTime(routineId: Long, date: LocalDate) {
         localDataSource.deleteCompletionTime(routineId, date)
     }
-
-    override suspend fun deleteHistoryEntry(routineId: Long, date: LocalDate) {
-        localDataSource.deleteCompletionTime(routineId, date)
-    }
 }

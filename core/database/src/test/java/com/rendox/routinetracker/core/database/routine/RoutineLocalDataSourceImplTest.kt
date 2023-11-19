@@ -10,8 +10,6 @@ import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
 import com.rendox.routinetracker.core.logic.time.WeekDayNumberMonthRelated
 import com.rendox.routinetracker.core.model.Routine
 import com.rendox.routinetracker.core.model.Schedule
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
@@ -26,10 +24,10 @@ import org.koin.dsl.module
 import org.koin.test.KoinTest
 import org.koin.test.get
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class RoutineLocalDataSourceImplTest : KoinTest {
 
     private lateinit var sqlDriver: SqlDriver
+    private lateinit var routineLocalDataSource: RoutineLocalDataSource
 
     private val testModule = module {
         single {
@@ -48,6 +46,10 @@ class RoutineLocalDataSourceImplTest : KoinTest {
 
         sqlDriver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         RoutineTrackerDatabase.Schema.create(sqlDriver)
+
+        routineLocalDataSource = RoutineLocalDataSourceImpl(
+            db = get(), dispatcher = get()
+        )
     }
 
     @After
@@ -57,10 +59,6 @@ class RoutineLocalDataSourceImplTest : KoinTest {
 
     @Test
     fun getInsertYesNoRoutine() = runTest {
-        val routineLocalDataSource = RoutineLocalDataSourceImpl(
-            db = get(), dispatcher = UnconfinedTestDispatcher(testScheduler)
-        )
-
         val routine = Routine.YesNoRoutine(
             id = 1,
             name = "Programming",
@@ -82,10 +80,6 @@ class RoutineLocalDataSourceImplTest : KoinTest {
 
     @Test
     fun getInsertRoutineWithWeeklySchedule() = runTest {
-        val routineLocalDataSource = RoutineLocalDataSourceImpl(
-            db = get(), dispatcher = UnconfinedTestDispatcher(testScheduler)
-        )
-
         val dueDaysOfWeek = listOf(
             DayOfWeek.MONDAY,
             DayOfWeek.WEDNESDAY,
@@ -117,10 +111,6 @@ class RoutineLocalDataSourceImplTest : KoinTest {
 
     @Test
     fun getInsertRoutineWithPeriodicCustomSchedule() = runTest {
-        val routineLocalDataSource = RoutineLocalDataSourceImpl(
-            db = get(), dispatcher = UnconfinedTestDispatcher(testScheduler)
-        )
-
         val dueDatesIndices = listOf(1, 3, 4, 5, 18, 31, 30, 21, 8)
         val weekDaysMonthRelated = listOf(
             WeekDayMonthRelated(DayOfWeek.MONDAY, WeekDayNumberMonthRelated.First),
@@ -154,14 +144,19 @@ class RoutineLocalDataSourceImplTest : KoinTest {
 
     @Test
     fun getInsertRoutineWithMonthlyScheduleOnlyLastDayOfMonth() = runTest {
-        val routineLocalDataSource = RoutineLocalDataSourceImpl(
-            db = get(), dispatcher = UnconfinedTestDispatcher(testScheduler)
-        )
-
         val schedule = Schedule.MonthlyScheduleByDueDatesIndices(
-            dueDatesIndices = emptyList(),
+            dueDatesIndices = listOf(1, 3, 5, 6, 8, 11, 25),
             includeLastDayOfMonth = true,
-            weekDaysMonthRelated = emptyList(),
+            weekDaysMonthRelated = listOf(
+                WeekDayMonthRelated(
+                    dayOfWeek = DayOfWeek.TUESDAY,
+                    weekDayNumberMonthRelated = WeekDayNumberMonthRelated.Last,
+                ),
+                WeekDayMonthRelated(
+                    dayOfWeek = DayOfWeek.TUESDAY,
+                    weekDayNumberMonthRelated = WeekDayNumberMonthRelated.Third,
+                )
+            ),
             startFromRoutineStart = true,
             routineStartDate = LocalDate(2023, Month.SEPTEMBER, 1),
             vacationStartDate = LocalDate(2023, Month.SEPTEMBER, 10),
@@ -183,10 +178,6 @@ class RoutineLocalDataSourceImplTest : KoinTest {
 
     @Test
     fun getInsertRoutineWithCustomDateSchedule() = runTest {
-        val routineLocalDataSource = RoutineLocalDataSourceImpl(
-            db = get(), dispatcher = UnconfinedTestDispatcher(testScheduler)
-        )
-
         val dueDates = listOf(
             LocalDate(2023, Month.OCTOBER, 4),
             LocalDate(2023, Month.OCTOBER, 15),
@@ -216,10 +207,6 @@ class RoutineLocalDataSourceImplTest : KoinTest {
 
     @Test
     fun getInsertRoutineWithAnnualSchedule() = runTest {
-        val routineLocalDataSource = RoutineLocalDataSourceImpl(
-            db = get(), dispatcher = UnconfinedTestDispatcher(testScheduler)
-        )
-
         val dueDates = listOf(
             AnnualDate(Month.JANUARY, 1),
             AnnualDate(Month.FEBRUARY, 29),

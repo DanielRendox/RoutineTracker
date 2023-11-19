@@ -1,7 +1,8 @@
 package com.rendox.routinetracker.core.database.completion_history
 
-import com.rendox.routinetracker.core.database.CompletionHistoryEntity
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
+import com.rendox.routinetracker.core.database.completionhistory.CompletedLaterHistoryEntity
+import com.rendox.routinetracker.core.database.completionhistory.CompletionHistoryEntity
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.model.CompletionHistoryEntry
 import com.rendox.routinetracker.core.model.HistoricalStatus
@@ -48,13 +49,15 @@ class CompletionHistoryLocalDataSourceImpl(
                     currentScheduleDeviation = entry.currentScheduleDeviation,
                 )
                 if (entry.status == HistoricalStatus.CompletedLater) {
-                    db.completedLaterHistoryEntityQueries.insertCompletedLaterDate(
-                        id = null,
-                        routineId = routineId,
-                        date = entry.date,
-                    )
+                    insertCompletedLaterDate(routineId, entry.date)
                 }
             }
+        }
+    }
+
+    override suspend fun deleteHistoryEntry(routineId: Long, date: LocalDate) {
+        return withContext(dispatcher) {
+            db.completionHistoryEntityQueries.deleteHistoryEntry(routineId, date)
         }
     }
 
@@ -63,7 +66,7 @@ class CompletionHistoryLocalDataSourceImpl(
         date: LocalDate,
         newStatus: HistoricalStatus,
         newScheduleDeviation: Int,
-        ) {
+    ) {
         withContext(dispatcher) {
             db.routineEntityQueries.transaction {
                 db.completionHistoryEntityQueries.updateHistoryEntryStatusByDate(
@@ -73,41 +76,7 @@ class CompletionHistoryLocalDataSourceImpl(
                     currentScheduleDeviation = newScheduleDeviation,
                 )
                 if (newStatus == HistoricalStatus.CompletedLater) {
-                    db.completedLaterHistoryEntityQueries.insertCompletedLaterDate(
-                        id = null,
-                        routineId = routineId,
-                        date = date,
-                    )
-                }
-            }
-        }
-    }
-
-    override suspend fun updateHistoryEntryStatusByStatus(
-        routineId: Long,
-        newStatus: HistoricalStatus,
-        newScheduleDeviation: Int,
-        matchingStatuses: List<HistoricalStatus>,
-    ) {
-        withContext(dispatcher) {
-            db.routineEntityQueries.transaction {
-                val updatedDate =
-                    db.completionHistoryEntityQueries.findLastHistoryEntryByStatus(
-                        routineId = routineId,
-                        statusPredicate = matchingStatuses,
-                    ).executeAsOne()
-                db.completionHistoryEntityQueries.updateLastHistoryEntryStatusByStatus(
-                    newStatus = newStatus,
-                    routineId = routineId,
-                    statusPredicate = matchingStatuses,
-                    currentScheduleDeviation = newScheduleDeviation,
-                )
-                if (updatedDate.status == HistoricalStatus.CompletedLater) {
-                    db.completedLaterHistoryEntityQueries.insertCompletedLaterDate(
-                        id = null,
-                        routineId = routineId,
-                        date = updatedDate.date,
-                    )
+                    insertCompletedLaterDate(routineId, date)
                 }
             }
         }
@@ -127,51 +96,59 @@ class CompletionHistoryLocalDataSourceImpl(
         }
     }
 
-    override suspend fun getFirstHistoryEntryDateByStatus(
+    override suspend fun getFirstHistoryEntryByStatus(
         routineId: Long,
-        startingFromDate: LocalDate,
         matchingStatuses: List<HistoricalStatus>,
-    ): LocalDate? {
-        return withContext(dispatcher) {
-            db.completionHistoryEntityQueries.getFirstHistoryEntryDateByStatus(
-                routineId, startingFromDate, matchingStatuses
-            ).executeAsOneOrNull()
-        }
-    }
-
-    override suspend fun checkIfStatusWasCompletedLater(routineId: Long, date: LocalDate): Boolean {
-        return withContext(dispatcher) {
-            db.completedLaterHistoryEntityQueries.getEntityByDate(
-                routineId, date
-            ).executeAsOneOrNull() != null
-        }
-    }
-
-    override suspend fun insertCompletedLaterDate(id: Long?, routineId: Long, date: LocalDate) {
-        withContext(dispatcher) {
-            db.completedLaterHistoryEntityQueries.insertCompletedLaterDate(id, routineId, date)
-        }
-    }
-
-    override suspend fun deleteCompletedLaterDate(routineId: Long, date: LocalDate) {
-        withContext(dispatcher) {
-            db.completedLaterHistoryEntityQueries.deleteCompletedLaterDate(routineId, date)
-        }
-    }
-
-    override suspend fun findLastHistoryEntryDateByStatus(
-        routineId: Long, matchingStatuses: List<HistoricalStatus>
     ): CompletionHistoryEntry? {
         return withContext(dispatcher) {
-            db.completionHistoryEntityQueries.findLastHistoryEntryByStatus(
+            db.completionHistoryEntityQueries.getFirstHistoryEntryByStatus(
                 routineId, matchingStatuses
             ).executeAsOneOrNull()?.toExternalModel()
         }
     }
 
-    override suspend fun deleteHistoryEntry(routineId: Long, date: LocalDate) {
+    override suspend fun getLastHistoryEntryByStatus(
+        routineId: Long, matchingStatuses: List<HistoricalStatus>
+    ): CompletionHistoryEntry? {
         return withContext(dispatcher) {
-            db.completionHistoryEntityQueries.deleteHistoryEntry(routineId, date)
+            db.completionHistoryEntityQueries.getLastHistoryEntryByStatus(
+                routineId, matchingStatuses
+            ).executeAsOneOrNull()?.toExternalModel()
+        }
+    }
+
+    override suspend fun checkIfStatusWasCompletedLater(routineId: Long, date: LocalDate): Boolean {
+        return withContext(dispatcher) {
+            checkCompletedLater(routineId, date)
+        }
+    }
+
+    override suspend fun deleteCompletedLaterBackupEntry(
+        routineId: Long, date: LocalDate
+    ) {
+        withContext(dispatcher) {
+            db.completedLaterHistoryEntityQueries.deleteCompletedLaterDate(
+                routineId, date
+            )
+        }
+    }
+
+    private fun checkCompletedLater(routineId: Long, date: LocalDate): Boolean {
+        val completedLaterEntity: CompletedLaterHistoryEntity? =
+            db.completedLaterHistoryEntityQueries.getEntityByDate(
+                routineId, date
+            ).executeAsOneOrNull()
+        return completedLaterEntity != null
+    }
+
+    private fun insertCompletedLaterDate(routineId: Long, date: LocalDate) {
+        val alreadyInserted = checkCompletedLater(routineId, date)
+        if (!alreadyInserted) {
+            db.completedLaterHistoryEntityQueries.insertCompletedLaterDate(
+                id = null,
+                routineId = routineId,
+                date = date,
+            )
         }
     }
 }

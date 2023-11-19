@@ -5,6 +5,18 @@ import com.rendox.routinetracker.core.model.Routine
 import com.rendox.routinetracker.core.model.Schedule
 import kotlinx.datetime.LocalTime
 
+enum class RoutineType {
+    YesNoRoutine,
+//    MeasurableRoutine,
+//    TasksRoutine,
+}
+
+fun RoutineEntity.toExternalModel(schedule: Schedule) = when (this.type) {
+    RoutineType.YesNoRoutine -> this.toYesNoRoutine(
+        schedule = schedule,
+    )
+}
+
 internal fun RoutineEntity.toYesNoRoutine(
     schedule: Schedule,
 ): Routine {

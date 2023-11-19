@@ -60,7 +60,7 @@ fun deriveDatesIncludedInStreak(
 }
 
 suspend fun sortOutBacklog(routineId: Long, completionHistoryRepository: CompletionHistoryRepository) {
-    val lastNotCompleted = completionHistoryRepository.findLastHistoryEntryDateByStatus(
+    val lastNotCompleted = completionHistoryRepository.getLastHistoryEntryDateByStatus(
         routineId = routineId,
         matchingStatuses = listOf(HistoricalStatus.NotCompleted),
     )!!
@@ -77,7 +77,7 @@ suspend fun undoSortingOutBacklog(
     routineId: Long,
     completionHistoryRepository: CompletionHistoryRepository,
 ) {
-    val completedLaterEntry = completionHistoryRepository.findLastHistoryEntryDateByStatus(
+    val completedLaterEntry = completionHistoryRepository.getLastHistoryEntryDateByStatus(
         routineId = routineId,
         matchingStatuses = listOf(HistoricalStatus.CompletedLater),
     )!!
@@ -88,5 +88,4 @@ suspend fun undoSortingOutBacklog(
         date = completedLaterEntry.date,
         newScheduleDeviation = completedLaterEntry.currentScheduleDeviation,
     )
-    completionHistoryRepository.deleteCompletedLaterDate(routineId, completedLaterEntry.date)
 }

@@ -24,10 +24,14 @@ import org.koin.dsl.module
 import org.koin.test.KoinTest
 import org.koin.test.get
 import kotlin.random.Random
-import kotlin.random.nextInt
 
 class CompletionHistoryLocalDataSourceImplTest : KoinTest {
     private lateinit var sqlDriver: SqlDriver
+    private lateinit var completionHistoryLocalDataSource: CompletionHistoryLocalDataSourceImpl
+    private lateinit var completionHistory: List<CompletionHistoryEntry>
+    private val routineId = 1L
+    private val startDate = LocalDate(2023, Month.OCTOBER, 1)
+    private lateinit var endDate: LocalDate
 
     private val testModule = module {
         single {
@@ -36,7 +40,7 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
     }
 
     @Before
-    fun setUp() {
+    fun setUp() = runTest {
         startKoin {
             modules(
                 localDataSourceModule,
@@ -46,6 +50,55 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
 
         sqlDriver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         RoutineTrackerDatabase.Schema.create(sqlDriver)
+
+        completionHistoryLocalDataSource = CompletionHistoryLocalDataSourceImpl(
+            db = get(), dispatcher = get()
+        )
+
+        val history = mutableListOf<CompletionHistoryEntry>()
+        var dateCounter = startDate
+        var scheduleDeviation = 0
+
+        for (status in HistoricalStatus.values().toList()) {
+            val scheduleDeviationIncrementAmount = when (status) {
+                HistoricalStatus.NotCompleted -> -1
+                HistoricalStatus.Completed -> 0
+                HistoricalStatus.OverCompleted -> 1
+                HistoricalStatus.OverCompletedOnVacation -> 1
+                HistoricalStatus.SortedOutBacklogOnVacation -> 1
+                HistoricalStatus.Skipped -> 0
+                HistoricalStatus.NotCompletedOnVacation -> 0
+                HistoricalStatus.CompletedLater -> 0
+                HistoricalStatus.SortedOutBacklog -> 1
+                HistoricalStatus.AlreadyCompleted -> 0
+            }
+            repeat(50) {
+                scheduleDeviation += scheduleDeviationIncrementAmount
+                dateCounter = dateCounter.plusDays(1)
+                history.add(
+                    CompletionHistoryEntry(
+                        date = dateCounter,
+                        status = status,
+                        currentScheduleDeviation = scheduleDeviation,
+                    )
+                )
+            }
+        }
+
+        history.shuffle()
+        history.forEachIndexed { index, entry ->
+            history[index] = entry.copy(date = startDate.plusDays(index))
+        }
+
+        completionHistory = history
+        endDate = dateCounter
+
+        for (historyEntry in history) {
+            completionHistoryLocalDataSource.insertHistoryEntry(
+                routineId = routineId,
+                entry = historyEntry,
+            )
+        }
     }
 
     @After
@@ -54,216 +107,189 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
     }
 
     @Test
-    fun getInsertCompletionHistoryEntry() = runTest {
-        val completionHistoryLocalDataSource = CompletionHistoryLocalDataSourceImpl(
-            db = get(), dispatcher = get()
+    fun assertAllHistoryIsEqualToExpected() = runTest {
+        val wholeHistory = completionHistoryLocalDataSource.getHistoryEntries(
+            routineId = routineId,
+            dates = startDate..startDate.plusDays(completionHistory.lastIndex),
         )
+        assertThat(wholeHistory).isEqualTo(completionHistory)
+    }
 
-        val history = mutableListOf<CompletionHistoryEntry>()
-        val startDate = LocalDate(2023, Month.OCTOBER, 1)
-        var dateCounter = startDate
-        repeat(50) { index ->
-            history.add(
-                CompletionHistoryEntry(
-                    date = dateCounter.plusDays(index),
-                    status = HistoricalStatus.Completed,
-                )
-            )
-        }
-        dateCounter = dateCounter.plusDays(50)
-        repeat(50) { index ->
-            history.add(
-                CompletionHistoryEntry(
-                    date = dateCounter.plusDays(index),
-                    status = HistoricalStatus.NotCompletedOnVacation,
-                )
-            )
-        }
-        dateCounter = dateCounter.plusDays(50)
-        repeat(50) { index ->
-            history.add(
-                CompletionHistoryEntry(
-                    date = dateCounter.plusDays(index),
-                    status = HistoricalStatus.NotCompleted,
-                )
-            )
-        }
-        dateCounter = dateCounter.plusDays(50)
-
-        history.forEach { entry ->
-            completionHistoryLocalDataSource.insertHistoryEntry(
-                id = null,
-                routineId = 1,
-                entry = entry,
-                scheduleDeviationIncrementAmount = 0,
-            )
-        }
-
-        val wholeHistory = completionHistoryLocalDataSource
-            .getHistoryEntries(
-                routineId = 1,
-                dates = startDate..startDate.plusDays(history.lastIndex),
-            )
-        assertThat(wholeHistory).isEqualTo(history)
-
+    @Test
+    fun assertReturnsCorrectEntriesForDateRange() = runTest {
         val randomDateRange = generateRandomDateRange(
             minDate = startDate,
-            maxDateInclusive = dateCounter,
+            maxDateInclusive = endDate,
         )
         val randomDateRangeIndices =
             startDate.daysUntil(randomDateRange.start)..startDate.daysUntil(randomDateRange.endInclusive)
-        val randomPeriodInHistory = completionHistoryLocalDataSource
-            .getHistoryEntries(
-                routineId = 1,
-                dates = randomDateRange,
-            )
-        val expectedPeriodInHistory = history.slice(randomDateRangeIndices)
+        val randomPeriodInHistory = completionHistoryLocalDataSource.getHistoryEntries(
+            routineId = routineId,
+            dates = randomDateRange,
+        )
+        val expectedPeriodInHistory = completionHistory.slice(randomDateRangeIndices)
         assertThat(randomPeriodInHistory).isEqualTo(expectedPeriodInHistory)
+    }
 
-        val randomDate = startDate.plusDays(Random.nextInt(history.size))
+    @Test
+    fun assertReturnsCorrectEntryForSingleDate() = runTest {
+        val randomDate = startDate.plusDays(Random.nextInt(completionHistory.size))
         val singleDateRange = randomDate..randomDate
         assertThat(
             completionHistoryLocalDataSource.getHistoryEntries(
-                routineId = 1,
+                routineId = routineId,
                 dates = singleDateRange,
             )
-        ).isEqualTo(listOf(history[startDate.daysUntil(randomDate)]))
+        ).isEqualTo(listOf(completionHistory[startDate.daysUntil(randomDate)]))
     }
 
     @Test
-    fun insertEntriesAndUpdateStatusByDate() = runTest {
-        val completionHistoryLocalDataSource = CompletionHistoryLocalDataSourceImpl(
-            db = get(), dispatcher = get()
-        )
+    fun assertReturnsCorrectFirstHistoryEntry() = runTest {
+        assertThat(
+            completionHistoryLocalDataSource.getFirstHistoryEntry(routineId)
+        ).isEqualTo(completionHistory.firstOrNull())
+    }
 
-        val routineId = 1L
-        val routineStartDate = LocalDate(2023, Month.OCTOBER, 1)
+    @Test
+    fun assertReturnsCorrectLastHistoryEntry() = runTest {
+        assertThat(
+            completionHistoryLocalDataSource.getLastHistoryEntry(routineId)
+        ).isEqualTo(completionHistory.lastOrNull())
+    }
 
-        val history = listOf(
-            CompletionHistoryEntry(routineStartDate, HistoricalStatus.Completed),
-            CompletionHistoryEntry(routineStartDate.plusDays(1), HistoricalStatus.Skipped),
-            CompletionHistoryEntry(routineStartDate.plusDays(2), HistoricalStatus.Completed),
-            CompletionHistoryEntry(routineStartDate.plusDays(3), HistoricalStatus.NotCompleted),
-            CompletionHistoryEntry(routineStartDate.plusDays(4), HistoricalStatus.Completed),
-        )
-
-        for (entry in history) {
-            completionHistoryLocalDataSource.insertHistoryEntry(
+    @Test
+    fun assertReturnsCorrectLastHistoryEntryDateByStatus() = runTest {
+        val desiredStatuses = listOf(HistoricalStatus.NotCompleted, HistoricalStatus.Skipped)
+        assertThat(
+            completionHistoryLocalDataSource.getLastHistoryEntryByStatus(
                 routineId = routineId,
-                entry = entry,
-                scheduleDeviationIncrementAmount = 0,
+                matchingStatuses = desiredStatuses,
             )
+        ).isEqualTo(completionHistory.findLast { it.status in desiredStatuses })
+    }
+
+    @Test
+    fun assertReturnsCorrectFirstHistoryEntryDateByStatus() = runTest {
+        val desiredStatuses = listOf(HistoricalStatus.Completed, HistoricalStatus.OverCompleted)
+        assertThat(
+            completionHistoryLocalDataSource.getFirstHistoryEntryByStatus(
+                routineId = routineId,
+                matchingStatuses = desiredStatuses,
+            )
+        ).isEqualTo(completionHistory.find { it.status in desiredStatuses })
+    }
+
+    @Test
+    fun assertInsertsCompletedLaterStatusesIntoSeparateTableOnInsert() = runTest {
+        val completedLaterEntries = completionHistory.filter {
+            it.status == HistoricalStatus.CompletedLater
         }
 
-        val newEntry = CompletionHistoryEntry(
-            date = routineStartDate.plusDays(2),
-            status = HistoricalStatus.Completed,
-        )
+        for (entry in completedLaterEntries) {
+            assertThat(
+                completionHistoryLocalDataSource.checkIfStatusWasCompletedLater(
+                    routineId = routineId,
+                    date = entry.date,
+                )
+            ).isTrue()
+        }
+    }
+
+    @Test
+    fun assertInsertsCompletedLaterStatusesIntoSeparateTableOnUpdate() = runTest {
+        val notCompletedLaterEntry = completionHistory.find {
+            it.status != HistoricalStatus.CompletedLater
+        }!!
+
+        assertThat(
+            completionHistoryLocalDataSource.checkIfStatusWasCompletedLater(
+                routineId = routineId,
+                date = notCompletedLaterEntry.date,
+            )
+        ).isFalse()
 
         completionHistoryLocalDataSource.updateHistoryEntryStatusByDate(
             routineId = routineId,
-            date = newEntry.date,
-            status = newEntry.status,
-            scheduleDeviationIncrementAmount = 0,
+            date = notCompletedLaterEntry.date,
+            newStatus = HistoricalStatus.CompletedLater,
+            newScheduleDeviation = notCompletedLaterEntry.currentScheduleDeviation,
         )
 
-        val updatedDateValue = completionHistoryLocalDataSource.getHistoryEntries(
-            routineId = routineId,
-            dates = newEntry.date..newEntry.date,
-        )[0]
 
-        assertThat(updatedDateValue).isEqualTo(newEntry)
+        assertThat(
+            completionHistoryLocalDataSource.checkIfStatusWasCompletedLater(
+                routineId = routineId,
+                date = notCompletedLaterEntry.date,
+            )
+        ).isTrue()
     }
 
     @Test
-    fun insertEntriesAndUpdateStatusByStatus() = runTest {
-        val completionHistoryLocalDataSource = CompletionHistoryLocalDataSourceImpl(
-            db = get(), dispatcher = get()
-        )
-
-        val routineId = 1L
-        val routineStartDate = LocalDate(2023, Month.OCTOBER, 1)
-
-        val history = listOf(
-            CompletionHistoryEntry(routineStartDate, HistoricalStatus.Completed),
-            CompletionHistoryEntry(routineStartDate.plusDays(1), HistoricalStatus.Skipped),
-            CompletionHistoryEntry(routineStartDate.plusDays(2), HistoricalStatus.Completed),
-            CompletionHistoryEntry(routineStartDate.plusDays(3), HistoricalStatus.NotCompleted),
-            CompletionHistoryEntry(routineStartDate.plusDays(4), HistoricalStatus.Completed),
-        )
-
-        for (entry in history) {
-            completionHistoryLocalDataSource.insertHistoryEntry(
-                routineId = routineId,
-                entry = entry,
-                scheduleDeviationIncrementAmount = 0,
-            )
+    fun assertDoesNotRecordOtherEntriesExceptCompletedLaterIntoSeparateTable() = runTest {
+        val notCompletedLaterEntries = completionHistory.filter {
+            it.status != HistoricalStatus.CompletedLater
         }
 
-        val notCompletedUpdatedEntry = CompletionHistoryEntry(
-            date = routineStartDate.plusDays(3),
-            status = HistoricalStatus.Completed,
-        )
-
-        val backlogStatuses = listOf(
-            HistoricalStatus.NotCompleted,
-        )
-
-        completionHistoryLocalDataSource.updateHistoryEntryStatusByStatus(
-            routineId = routineId,
-            scheduleDeviationIncrementAmount = 0,
-            newStatus = notCompletedUpdatedEntry.status,
-            matchingStatuses = backlogStatuses,
-        )
-
-        val notCompletedUpdatedEntryDbValue = completionHistoryLocalDataSource.getHistoryEntries(
-            routineId = routineId,
-            dates = notCompletedUpdatedEntry.date..notCompletedUpdatedEntry.date,
-        )[0]
-        assertThat(notCompletedUpdatedEntryDbValue).isEqualTo(notCompletedUpdatedEntry)
+        for (entry in notCompletedLaterEntries) {
+            assertThat(
+                completionHistoryLocalDataSource.checkIfStatusWasCompletedLater(
+                    routineId = routineId,
+                    date = entry.date,
+                )
+            ).isFalse()
+        }
     }
 
     @Test
-    fun getFirstHistoryEntryDateByStatus() = runTest {
-        val completionHistoryLocalDataSource = CompletionHistoryLocalDataSourceImpl(
-            db = get(), dispatcher = get()
+    fun assertDeletesHistoryEntries() = runTest {
+        val randomEntryIndex = Random.nextInt(completionHistory.size)
+        val randomEntry = completionHistory[randomEntryIndex]
+        completionHistoryLocalDataSource.deleteHistoryEntry(
+            routineId = routineId,
+            date = randomEntry.date,
         )
-
-        val historicalStatusValues = HistoricalStatus.values()
-
-        val statuses = mutableListOf<HistoricalStatus>()
-        repeat(Random.nextInt(3..10)) { statuses.addAll(historicalStatusValues) }
-        statuses.shuffle()
-
-        val routineId = 1L
-        val routineStartDate = LocalDate(2023, Month.JANUARY, 1)
-        val history = statuses.mapIndexed { index, status ->
-            CompletionHistoryEntry(
-                date = routineStartDate.plusDays(index),
-                status = status,
-            )
-        }
-
-        for (entry in history) {
-            completionHistoryLocalDataSource.insertHistoryEntry(
+        val newHistory = completionHistory.toMutableList().apply { removeAt(randomEntryIndex) }
+        assertThat(
+            completionHistoryLocalDataSource.getHistoryEntries(
                 routineId = routineId,
-                entry = entry,
-                scheduleDeviationIncrementAmount = 0,
+                dates = startDate..startDate.plusDays(completionHistory.lastIndex),
             )
-        }
+        ).isEqualTo(newHistory)
+    }
 
-        for (matchingStatus in historicalStatusValues) {
-            val matchingStatuses = listOf(matchingStatus, historicalStatusValues.random())
-            val startDate = routineStartDate.plusDays(Random.nextInt(0..19))
-            val result: LocalDate? = completionHistoryLocalDataSource.getFirstHistoryEntryDateByStatus(
+    @Test
+    fun assertDoesNotDeleteCompletedLaterBackupEntriesOnStatusUpdate() = runTest {
+        val completedLaterStatus = completionHistory.find {
+            it.status == HistoricalStatus.CompletedLater
+        }!!
+        completionHistoryLocalDataSource.updateHistoryEntryStatusByDate(
+            routineId = routineId,
+            date = completedLaterStatus.date,
+            newStatus = HistoricalStatus.NotCompleted,
+            newScheduleDeviation = completedLaterStatus.currentScheduleDeviation - 1,
+        )
+        assertThat(
+            completionHistoryLocalDataSource.checkIfStatusWasCompletedLater(
                 routineId = routineId,
-                startingFromDate = startDate,
-                matchingStatuses = matchingStatuses,
+                date = completedLaterStatus.date,
             )
-            val expectedResult: LocalDate? = history.firstOrNull {
-                it.date >= startDate && it.status in matchingStatuses
-            }?.date
-            assertThat(result).isEqualTo(expectedResult)
-        }
+        ).isTrue()
+    }
+
+    @Test
+    fun assertDoesNotDeleteCompletedLaterBackupEntriesOnStatusDelete() = runTest {
+        val completedLaterStatus = completionHistory.find {
+            it.status == HistoricalStatus.CompletedLater
+        }!!
+        completionHistoryLocalDataSource.deleteHistoryEntry(
+            routineId = routineId,
+            date = completedLaterStatus.date,
+        )
+        assertThat(
+            completionHistoryLocalDataSource.checkIfStatusWasCompletedLater(
+                routineId = routineId,
+                date = completedLaterStatus.date,
+            )
+        ).isTrue()
     }
 }

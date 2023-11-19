@@ -47,20 +47,6 @@ class CompletionHistoryRepositoryImpl(
         )
     }
 
-    override suspend fun updateHistoryEntryStatusByStatus(
-        routineId: Long,
-        newStatus: HistoricalStatus,
-        newScheduleDeviation: Int,
-        matchingStatuses: List<HistoricalStatus>,
-    ) {
-        localDataSource.updateHistoryEntryStatusByStatus(
-            routineId = routineId,
-            newStatus = newStatus,
-            newScheduleDeviation = newScheduleDeviation,
-            matchingStatuses = matchingStatuses,
-        )
-    }
-
     override suspend fun getFirstHistoryEntry(routineId: Long): CompletionHistoryEntry? {
         return localDataSource.getFirstHistoryEntry(routineId)
     }
@@ -69,29 +55,15 @@ class CompletionHistoryRepositoryImpl(
         return localDataSource.getLastHistoryEntry(routineId)
     }
 
-    override suspend fun getFirstHistoryEntryDateByStatus(
-        routineId: Long,
-        startingFromDate: LocalDate,
-        matchingStatuses: List<HistoricalStatus>
-    ): LocalDate? {
-        return localDataSource.getFirstHistoryEntryDateByStatus(
-            routineId, startingFromDate, matchingStatuses
-        )
-    }
-
     override suspend fun checkIfStatusWasCompletedLater(routineId: Long, date: LocalDate): Boolean {
         return localDataSource.checkIfStatusWasCompletedLater(routineId, date)
     }
 
-    override suspend fun insertCompletedLaterDate(id: Long?, routineId: Long, date: LocalDate) {
-        localDataSource.insertCompletedLaterDate(id, routineId, date)
+    override suspend fun deleteCompletedLaterBackupEntry(routineId: Long, date: LocalDate) {
+        localDataSource.deleteCompletedLaterBackupEntry(routineId, date)
     }
 
-    override suspend fun deleteCompletedLaterDate(routineId: Long, date: LocalDate) {
-        localDataSource.deleteCompletedLaterDate(routineId, date)
-    }
-
-    override suspend fun findLastHistoryEntryDateByStatus(
+    override suspend fun getLastHistoryEntryDateByStatus(
         routineId: Long, matchingStatuses: List<HistoricalStatus>
-    ): CompletionHistoryEntry? = localDataSource.findLastHistoryEntryDateByStatus(routineId, matchingStatuses)
+    ): CompletionHistoryEntry? = localDataSource.getLastHistoryEntryByStatus(routineId, matchingStatuses)
 }
