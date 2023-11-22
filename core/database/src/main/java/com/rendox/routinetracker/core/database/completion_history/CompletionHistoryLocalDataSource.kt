@@ -20,11 +20,12 @@ interface CompletionHistoryLocalDataSource {
 
     suspend fun deleteHistoryEntry(routineId: Long, date: LocalDate)
 
-    suspend fun updateHistoryEntryStatusByDate(
+    suspend fun updateHistoryEntryByDate(
         routineId: Long,
         date: LocalDate,
-        newStatus: HistoricalStatus,
-        newScheduleDeviation: Int,
+        newStatus: HistoricalStatus?,
+        newScheduleDeviation: Float?,
+        newTimesCompleted: Float?,
     )
 
     suspend fun getFirstHistoryEntry(routineId: Long): CompletionHistoryEntry?
@@ -41,4 +42,12 @@ interface CompletionHistoryLocalDataSource {
 
     suspend fun checkIfStatusWasCompletedLater(routineId: Long, date: LocalDate): Boolean
     suspend fun deleteCompletedLaterBackupEntry(routineId: Long, date: LocalDate)
+
+    suspend fun getTotalTimesCompletedInPeriod(
+        routineId: Long, startDate: LocalDate, endDate: LocalDate
+    ): Double
+
+    suspend fun getScheduleDeviationInPeriod(
+        routineId: Long, startDate: LocalDate, endDate: LocalDate
+    ): Double
 }

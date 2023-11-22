@@ -12,7 +12,7 @@ val agendaScreenModule = module {
             getRoutineStatus = get(),
             getRoutineCompletionTime = get(),
             insertRoutineStatus = get(),
-            toggleRoutineStatus = get(),
+            toggleHistoricalStatus = get(),
         )
     }
 }

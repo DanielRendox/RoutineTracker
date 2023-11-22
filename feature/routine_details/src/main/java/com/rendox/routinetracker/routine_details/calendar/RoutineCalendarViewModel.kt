@@ -5,13 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.kizitonwose.calendar.core.atStartOfMonth
 import com.kizitonwose.calendar.core.yearMonth
 import com.rendox.routinetracker.core.data.routine.RoutineRepository
-import com.rendox.routinetracker.core.domain.completion_history.GetListOfStreaksUseCase
-import com.rendox.routinetracker.core.domain.completion_history.GetRoutineStatusUseCase
-import com.rendox.routinetracker.core.domain.completion_history.InsertRoutineStatusUseCase
-import com.rendox.routinetracker.core.domain.completion_history.ToggleRoutineStatusUseCase
-import com.rendox.routinetracker.core.domain.completion_history.deriveDatesIncludedInStreak
-import com.rendox.routinetracker.core.domain.completion_history.getCurrentStreakDurationInDays
-import com.rendox.routinetracker.core.domain.completion_history.getLongestStreakDurationInDays
+import com.rendox.routinetracker.core.domain.completion_history.use_cases.GetRoutineStatusUseCase
+import com.rendox.routinetracker.core.domain.completion_history.use_cases.InsertRoutineStatusUseCase
+import com.rendox.routinetracker.core.domain.completion_history.use_cases.ToggleHistoricalStatusUseCase
+import com.rendox.routinetracker.core.domain.streaks.deriveDatesIncludedInStreak
+import com.rendox.routinetracker.core.domain.streaks.getCurrentStreakDurationInDays
+import com.rendox.routinetracker.core.domain.streaks.getLongestStreakDurationInDays
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.PlanningStatus
@@ -36,9 +35,8 @@ class RoutineCalendarViewModel(
     private val routineId: Long,
     private val routineRepository: RoutineRepository,
     private val getRoutineStatusList: GetRoutineStatusUseCase,
-    private val getListOfStreaks: GetListOfStreaksUseCase,
     private val insertRoutineStatus: InsertRoutineStatusUseCase,
-    private val toggleRoutineStatus: ToggleRoutineStatusUseCase,
+    private val toggleRoutineStatus: ToggleHistoricalStatusUseCase,
 ) : ViewModel() {
 
     private val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
@@ -68,11 +66,9 @@ class RoutineCalendarViewModel(
             println("RoutineCalendarViewModel 2")
             val monthEnd = _currentMonthFlow.value.atEndOfMonth().toKotlinLocalDate()
             println("RoutineCalendarViewModel 3")
-            val streaks = getListOfStreaks(routineId)
             println("RoutineCalendarViewModel 4")
             val initialCalendarDates = fetchAndDeriveCalendarDates(
                 period = monthStart..monthEnd,
-                streaksProvider = { streaks },
             )
 
             println("RoutineCalendarViewModel cashed dates flow updated")
@@ -86,18 +82,6 @@ class RoutineCalendarViewModel(
             }
 
             routine = routineRepository.getRoutineById(routineId)
-            val currentStreakDuration = getCurrentStreakDurationInDays(
-                lastStreak = streaks.lastOrNull(),
-                today = today,
-                schedule = routine.schedule,
-            )
-            _currentStreakDurationInDays.update { currentStreakDuration }
-            val longestStreakDuration = getLongestStreakDurationInDays(
-                allStreaks = streaks,
-                today = today,
-                schedule = routine.schedule,
-            )
-            _longestStreakDurationInDays.update { longestStreakDuration }
         }
     }
 
@@ -117,7 +101,6 @@ class RoutineCalendarViewModel(
                 )
             }
 
-            val newStreaks = getListOfStreaks(routineId)
 
             cashedDatesFlow.update { cashedDates ->
                 val newValue = cashedDates.toMutableMap()
@@ -126,7 +109,7 @@ class RoutineCalendarViewModel(
                         val monthStart = cashedDates[month]!!.first().date
                         val monthEnd = cashedDates[month]!!.last().date
                         newValue[month] =
-                            fetchAndDeriveCalendarDates(monthStart..monthEnd) { newStreaks }
+                            fetchAndDeriveCalendarDates(monthStart..monthEnd)
                     }
                 }
                 newValue
@@ -135,19 +118,6 @@ class RoutineCalendarViewModel(
             _visibleDatesFlow.update {
                 cashedDatesFlow.value[_currentMonthFlow.value]!!
             }
-
-            val currentStreakDuration = getCurrentStreakDurationInDays(
-                lastStreak = newStreaks.lastOrNull(),
-                today = today,
-                schedule = routine.schedule,
-            )
-            _currentStreakDurationInDays.update { currentStreakDuration }
-            val longestStreakDuration = getLongestStreakDurationInDays(
-                allStreaks = newStreaks,
-                today = today,
-                schedule = routine.schedule,
-            )
-            _longestStreakDurationInDays.update { longestStreakDuration }
         }
     }
 
@@ -172,20 +142,17 @@ class RoutineCalendarViewModel(
 
     private suspend fun fetchAndDeriveCalendarDates(
         period: LocalDateRange,
-        streaksProvider: suspend () -> List<Streak> = { getListOfStreaks(routineId) }
     ): List<RoutineCalendarDate> {
         val routineStatusesForCurrentMonth: List<StatusEntry> = getRoutineStatusList(
             routineId = routineId,
             dates = period,
             today = Clock.System.todayIn(TimeZone.currentSystemDefault()),
         )
-        val streaks: List<Streak> = streaksProvider()
-        val streakDates = deriveDatesIncludedInStreak(streaks, period)
         return routineStatusesForCurrentMonth.map {
             RoutineCalendarDate(
                 date = it.date,
                 status = it.status,
-                includedInStreak = streakDates.contains(it.date),
+                includedInStreak = true,
             )
         }
     }

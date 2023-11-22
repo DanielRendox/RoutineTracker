@@ -1,5 +1,5 @@
 import com.rendox.routinetracker.core.model.HistoricalStatus;
-import kotlin.Int;
+import kotlin.Float;
 import kotlinx.datetime.LocalDate;
 
 CREATE TABLE completionHistoryEntity (
@@ -7,7 +7,8 @@ CREATE TABLE completionHistoryEntity (
     routineId INTEGER NOT NULL,
     date INTEGER AS LocalDate NOT NULL,
     status TEXT AS HistoricalStatus NOT NULL,
-    currentScheduleDeviation INTEGER AS Int NOT NULL,
+    scheduleDeviation REAL AS Float NOT NULL,
+    timesCompleted REAL AS Float NOT NULL,
     FOREIGN KEY(routineId) REFERENCES routineEntity(id)
 );
 
@@ -21,18 +22,19 @@ ORDER BY
 
 insertHistoryEntry:
 INSERT INTO completionHistoryEntity
-VALUES (?, ?, ?, ?, ?);
+VALUES (?, ?, ?, ?, ?, ?);
 
 updateHistoryEntryStatusByDate:
 UPDATE completionHistoryEntity
 SET status = ?,
-currentScheduleDeviation = ?
+scheduleDeviation = ?,
+timesCompleted = ?
 WHERE routineId = ? AND date = ?;
 
 updateLastHistoryEntryStatusByStatus:
 UPDATE completionHistoryEntity
 SET status = :newStatus,
-currentScheduleDeviation = :currentScheduleDeviation
+scheduleDeviation = :currentScheduleDeviation
 WHERE id = (
     SELECT id
     FROM completionHistoryEntity
@@ -72,3 +74,13 @@ LIMIT 1;
 deleteHistoryEntry:
 DELETE FROM completionHistoryEntity
 WHERE routineId = ? AND date = ?;
+
+getTotalTimesCompletedAtTheMomentOfDate:
+SELECT TOTAL(timesCompleted)
+FROM completionHistoryEntity
+WHERE routineId = :routineId AND date >= :startDate AND date <= :endDate;
+
+getScheduleDeviationAtTheMomentOfDate:
+SELECT TOTAL(scheduleDeviation)
+FROM completionHistoryEntity
+WHERE routineId = :routineId AND date >= :startDate AND date <= :endDate;

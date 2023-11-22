@@ -10,7 +10,8 @@ data class StatusEntry(
 data class CompletionHistoryEntry(
     val date: LocalDate,
     val status: HistoricalStatus,
-    val currentScheduleDeviation: Int,
+    val scheduleDeviation: Float,
+    val timesCompleted: Float,
 )
 
 fun CompletionHistoryEntry.toStatusEntry() = StatusEntry(

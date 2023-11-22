@@ -5,6 +5,7 @@ import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryR
 import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepositoryImpl
 import com.rendox.routinetracker.core.data.routine.RoutineRepository
 import com.rendox.routinetracker.core.data.routine.RoutineRepositoryImpl
+import com.rendox.routinetracker.core.domain.completion_history.use_cases.InsertRoutineStatusUseCase
 import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
 import com.rendox.routinetracker.core.logic.time.WeekDayNumberMonthRelated
 import com.rendox.routinetracker.core.logic.time.plusDays
@@ -58,15 +59,43 @@ class InsertRoutineStatusUseCaseTest {
         )
 
         val expectedHistory = listOf(
-            HistoricalStatus.Completed,
-            HistoricalStatus.Completed,
-            HistoricalStatus.NotCompleted,
-            HistoricalStatus.NotCompletedOnVacation,
-            HistoricalStatus.Completed,
-            HistoricalStatus.NotCompleted,
-        ).mapIndexed { index, status ->
-            CompletionHistoryEntry(routineStartDate.plusDays(index), status)
-        }
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 1),
+                status = HistoricalStatus.Completed,
+                scheduleDeviation = 0F,
+                timesCompleted = 1F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 2),
+                status = HistoricalStatus.Completed,
+                scheduleDeviation = 0F,
+                timesCompleted = 1F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 3),
+                status = HistoricalStatus.NotCompleted,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 4),
+                status = HistoricalStatus.NotCompletedOnVacation,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 5),
+                status = HistoricalStatus.Completed,
+                scheduleDeviation = 0F,
+                timesCompleted = 1F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 6),
+                status = HistoricalStatus.NotCompleted,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            ),
+        )
 
         val routine = Routine.YesNoRoutine(
             id = routineId,
@@ -113,12 +142,6 @@ class InsertRoutineStatusUseCaseTest {
                 dates = routineStartDate..routineEndDate,
             )
         ).isEqualTo(expectedHistory)
-
-        val expectedResultingSchedule =
-            schedule.copy(lastDateInHistory = routineEndDate)
-        val expectedResultingRoutine =
-            routine.copy(scheduleDeviation = 0, schedule = expectedResultingSchedule)
-        assertThat(routineRepository.getRoutineById(routineId)).isEqualTo(expectedResultingRoutine)
 
         assertFailsWith<NullPointerException> {
             insertRoutineStatusIntoHistory(
@@ -186,15 +209,43 @@ class InsertRoutineStatusUseCaseTest {
         )
 
         val firstSixDaysOfFirstWeek = listOf(
-            HistoricalStatus.Skipped,
-            HistoricalStatus.Completed,
-            HistoricalStatus.Completed,
-            HistoricalStatus.Skipped,
-            HistoricalStatus.NotCompleted,
-            HistoricalStatus.NotCompleted,
-        ).mapIndexed { index, status ->
-            CompletionHistoryEntry(routineStartDate.plusDays(index), status)
-        }
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 2),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 3),
+                status = HistoricalStatus.Completed,
+                scheduleDeviation = 0F,
+                timesCompleted = 1F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 4),
+                status = HistoricalStatus.Completed,
+                scheduleDeviation = 0F,
+                timesCompleted = 1F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 5),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 6),
+                status = HistoricalStatus.NotCompleted,
+                scheduleDeviation = -1F,
+                timesCompleted = 0F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 7),
+                status = HistoricalStatus.NotCompleted,
+                scheduleDeviation = -1F,
+                timesCompleted = 0F,
+            ),
+        )
 
         completionHistory.slice(0..5).forEachIndexed { index, isCompleted ->
             insertRoutineStatusIntoHistory(
@@ -212,7 +263,7 @@ class InsertRoutineStatusUseCaseTest {
 
         insertRoutineStatusIntoHistory(
             routineId = routineId,
-            currentDate = routineStartDate.plusDays(6),
+            currentDate = LocalDate(2023, Month.OCTOBER, 8),
             completedOnCurrentDate = completionHistory[6],
         )
 
@@ -220,10 +271,17 @@ class InsertRoutineStatusUseCaseTest {
         firstWeek.addAll(firstSixDaysOfFirstWeek)
         firstWeek.add(
             CompletionHistoryEntry(
-                routineStartDate.plusDays(6), HistoricalStatus.SortedOutBacklog
+                date = LocalDate(2023, Month.OCTOBER, 8),
+                status = HistoricalStatus.SortedOutBacklog,
+                scheduleDeviation = 1F,
+                timesCompleted = 1F,
             )
         )
-        firstWeek[5] = firstWeek[5].copy(status = HistoricalStatus.CompletedLater)
+        firstWeek[5] = firstWeek[5].copy(
+            status = HistoricalStatus.CompletedLater,
+            scheduleDeviation = -1F,
+            timesCompleted = 0F,
+        )
 
         assertThat(
             completionHistoryRepository.getHistoryEntries(
@@ -232,16 +290,49 @@ class InsertRoutineStatusUseCaseTest {
         ).isEqualTo(firstWeek)
 
         val secondWeek = listOf(
-            HistoricalStatus.Skipped,           // Monday
-            HistoricalStatus.Completed,         // Tuesday
-            HistoricalStatus.Completed,         // Wednesday
-            HistoricalStatus.OverCompleted,     // Thursday
-            HistoricalStatus.AlreadyCompleted,  // Friday
-            HistoricalStatus.Completed,         // Saturday
-            HistoricalStatus.OverCompleted,     // Sunday
-        ).mapIndexed { index, status ->
-            CompletionHistoryEntry(routineStartDate.plusDays(7 + index), status)
-        }
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 9),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 10),
+                status = HistoricalStatus.Completed,
+                scheduleDeviation = 0F,
+                timesCompleted = 1F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 11),
+                status = HistoricalStatus.Completed,
+                scheduleDeviation = 0F,
+                timesCompleted = 1F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 12),
+                status = HistoricalStatus.OverCompleted,
+                scheduleDeviation = 1F,
+                timesCompleted = 1F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 13),
+                status = HistoricalStatus.AlreadyCompleted,
+                scheduleDeviation = -1F,
+                timesCompleted = 0F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 14),
+                status = HistoricalStatus.Completed,
+                scheduleDeviation = 0F,
+                timesCompleted = 1F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 15),
+                status = HistoricalStatus.OverCompleted,
+                scheduleDeviation = 1F,
+                timesCompleted = 1F,
+            ),
+        )
 
         completionHistory.slice(7..13).forEachIndexed { index, isCompleted ->
             insertRoutineStatusIntoHistory(
@@ -261,11 +352,19 @@ class InsertRoutineStatusUseCaseTest {
         ).isEqualTo(fullHistorySoFar)
 
         val lastTwoDays = listOf(
-            HistoricalStatus.Skipped,
-            HistoricalStatus.NotCompleted,
-        ).mapIndexed { index, status ->
-            CompletionHistoryEntry(routineStartDate.plusDays(14 + index), status)
-        }
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 16),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 17),
+                status = HistoricalStatus.NotCompleted,
+                scheduleDeviation = -1F,
+                timesCompleted = 0F,
+            ),
+        )
         fullHistorySoFar.addAll(lastTwoDays)
 
         completionHistory.slice(14..15).forEachIndexed { index, isCompleted ->
@@ -281,13 +380,6 @@ class InsertRoutineStatusUseCaseTest {
                 routineId, routineStartDate..fullHistorySoFar.last().date
             )
         ).isEqualTo(fullHistorySoFar)
-
-        val expectedResultingSchedule =
-            schedule.copy(lastDateInHistory = fullHistorySoFar.last().date)
-        val expectedResultingRoutine =
-            routine.copy(scheduleDeviation = -1, schedule = expectedResultingSchedule)
-
-        assertThat(routineRepository.getRoutineById(routineId)).isEqualTo(expectedResultingRoutine)
     }
 
     @Test
@@ -339,15 +431,43 @@ class InsertRoutineStatusUseCaseTest {
         )
 
         val firstSixDaysOfFirstWeek = listOf(
-            HistoricalStatus.Skipped,
-            HistoricalStatus.Completed,
-            HistoricalStatus.Completed,
-            HistoricalStatus.Skipped,
-            HistoricalStatus.NotCompleted,
-            HistoricalStatus.NotCompleted,
-        ).mapIndexed { index, status ->
-            CompletionHistoryEntry(routineStartDate.plusDays(index), status)
-        }
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 2),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 3),
+                status = HistoricalStatus.Completed,
+                scheduleDeviation = 0F,
+                timesCompleted = 1F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 4),
+                status = HistoricalStatus.Completed,
+                scheduleDeviation = 0F,
+                timesCompleted = 1F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 5),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 6),
+                status = HistoricalStatus.NotCompleted,
+                scheduleDeviation = -1F,
+                timesCompleted = 0F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 7),
+                status = HistoricalStatus.NotCompleted,
+                scheduleDeviation = -1F,
+                timesCompleted = 0F,
+            ),
+        )
 
         completionHistory.slice(0..5).forEachIndexed { index, isCompleted ->
             insertRoutineStatusIntoHistory(
@@ -365,7 +485,7 @@ class InsertRoutineStatusUseCaseTest {
 
         insertRoutineStatusIntoHistory(
             routineId = routineId,
-            currentDate = routineStartDate.plusDays(6),
+            currentDate = LocalDate(2023, Month.OCTOBER, 8),
             completedOnCurrentDate = completionHistory[6],
         )
 
@@ -373,7 +493,10 @@ class InsertRoutineStatusUseCaseTest {
         firstWeek.addAll(firstSixDaysOfFirstWeek)
         firstWeek.add(
             CompletionHistoryEntry(
-                routineStartDate.plusDays(6), HistoricalStatus.SortedOutBacklog
+                date = LocalDate(2023, Month.OCTOBER, 8),
+                status = HistoricalStatus.SortedOutBacklog,
+                scheduleDeviation = 1F,
+                timesCompleted = 1F,
             )
         )
         firstWeek[5] = firstWeek[5].copy(status = HistoricalStatus.CompletedLater)
@@ -385,16 +508,49 @@ class InsertRoutineStatusUseCaseTest {
         ).isEqualTo(firstWeek)
 
         val secondWeek = listOf(
-            HistoricalStatus.Skipped,           // Monday
-            HistoricalStatus.Completed,         // Tuesday
-            HistoricalStatus.Completed,         // Wednesday
-            HistoricalStatus.SortedOutBacklog,  // Thursday
-            HistoricalStatus.CompletedLater,    // Friday
-            HistoricalStatus.Completed,         // Saturday
-            HistoricalStatus.SortedOutBacklog,  // Sunday
-        ).mapIndexed { index, status ->
-            CompletionHistoryEntry(routineStartDate.plusDays(7 + index), status)
-        }
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 9),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 10),
+                status = HistoricalStatus.Completed,
+                scheduleDeviation = 0F,
+                timesCompleted = 1F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 11),
+                status = HistoricalStatus.Completed,
+                scheduleDeviation = 0F,
+                timesCompleted = 1F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 12),
+                status = HistoricalStatus.SortedOutBacklog,
+                scheduleDeviation = 1F,
+                timesCompleted = 1F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 13),
+                status = HistoricalStatus.CompletedLater,
+                scheduleDeviation = -1F,
+                timesCompleted = 0F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 14),
+                status = HistoricalStatus.Completed,
+                scheduleDeviation = 0F,
+                timesCompleted = 1F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 15),
+                status = HistoricalStatus.SortedOutBacklog,
+                scheduleDeviation = 1F,
+                timesCompleted = 1F,
+            ),
+        )
 
         completionHistory.slice(7..13).forEachIndexed { index, isCompleted ->
             insertRoutineStatusIntoHistory(
@@ -415,11 +571,19 @@ class InsertRoutineStatusUseCaseTest {
         ).isEqualTo(fullHistorySoFar)
 
         val lastTwoDays = listOf(
-            HistoricalStatus.Skipped,
-            HistoricalStatus.NotCompleted,
-        ).mapIndexed { index, status ->
-            CompletionHistoryEntry(routineStartDate.plusDays(14 + index), status)
-        }
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 16),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 17),
+                status = HistoricalStatus.NotCompleted,
+                scheduleDeviation = -1F,
+                timesCompleted = 0F,
+            ),
+        )
         fullHistorySoFar.addAll(lastTwoDays)
 
         completionHistory.slice(14..15).forEachIndexed { index, isCompleted ->
@@ -435,13 +599,6 @@ class InsertRoutineStatusUseCaseTest {
                 routineId, routineStartDate..fullHistorySoFar.last().date
             )
         ).isEqualTo(fullHistorySoFar)
-
-        val expectedResultingSchedule =
-            schedule.copy(lastDateInHistory = fullHistorySoFar.last().date)
-        val expectedResultingRoutine =
-            routine.copy(scheduleDeviation = -1, schedule = expectedResultingSchedule)
-
-        assertThat(routineRepository.getRoutineById(routineId)).isEqualTo(expectedResultingRoutine)
     }
 
     @Test
@@ -497,25 +654,58 @@ class InsertRoutineStatusUseCaseTest {
         }
 
         val expectedEntriesList = mutableListOf(
-            HistoricalStatus.Skipped,
-            HistoricalStatus.Completed,
-            HistoricalStatus.NotCompleted,
-            HistoricalStatus.Skipped,
-            HistoricalStatus.Skipped,
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 2),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 3),
+                status = HistoricalStatus.Completed,
+                scheduleDeviation = 0F,
+                timesCompleted = 1F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 4),
+                status = HistoricalStatus.NotCompleted,
+                scheduleDeviation = -1F,
+                timesCompleted = 0F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 5),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 6),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            ),
         )
 
         assertThat(
             completionHistoryRepository.getHistoryEntries(
                 routineId, routineStartDate..routineStartDate.plusDays(4)
             )
-        ).isEqualTo(
-            expectedEntriesList.mapIndexed { index, status ->
-                CompletionHistoryEntry(routineStartDate.plusDays(index), status)
-            }
-        )
+        ).isEqualTo(expectedEntriesList)
 
-        expectedEntriesList.add(HistoricalStatus.SortedOutBacklog)
-        expectedEntriesList[2] = HistoricalStatus.CompletedLater
+        expectedEntriesList.add(
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 7),
+                status = HistoricalStatus.SortedOutBacklog,
+                scheduleDeviation = 1F,
+                timesCompleted = 1F,
+            ),
+        )
+        expectedEntriesList[2] = CompletionHistoryEntry(
+            date = LocalDate(2023, Month.OCTOBER, 4),
+            status = HistoricalStatus.CompletedLater,
+            scheduleDeviation = -1F,
+            timesCompleted = 0F,
+        )
 
         completionHistory.slice(5..14).forEachIndexed { index, isCompleted ->
             insertRoutineStatusIntoHistory(
@@ -525,33 +715,85 @@ class InsertRoutineStatusUseCaseTest {
             )
         }
 
-        expectedEntriesList.add(HistoricalStatus.Skipped)
-        expectedEntriesList.add(HistoricalStatus.Completed)
-        expectedEntriesList.add(HistoricalStatus.Skipped)
-        expectedEntriesList.add(HistoricalStatus.OverCompleted)
-        expectedEntriesList.add(HistoricalStatus.Skipped)
-        expectedEntriesList.add(HistoricalStatus.Skipped)
-        expectedEntriesList.add(HistoricalStatus.NotCompleted)
-        expectedEntriesList.add(HistoricalStatus.Skipped)
-        expectedEntriesList.add(HistoricalStatus.Completed)
+        expectedEntriesList.add(
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 8),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            )
+        )
+        expectedEntriesList.add(
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 9),
+                status = HistoricalStatus.Completed,
+                scheduleDeviation = 0F,
+                timesCompleted = 1F,
+            )
+        )
+        expectedEntriesList.add(
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 10),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            )
+        )
+        expectedEntriesList.add(
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 11),
+                status = HistoricalStatus.OverCompleted,
+                scheduleDeviation = 0F,
+                timesCompleted = 1F,
+            )
+        )
+        expectedEntriesList.add(
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 12),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            )
+        )
+        expectedEntriesList.add(
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 13),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            )
+        )
+        expectedEntriesList.add(
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 14),
+                status = HistoricalStatus.NotCompleted,
+                scheduleDeviation = -1F,
+                timesCompleted = 0F,
+            )
+        )
+        expectedEntriesList.add(
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 15),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            )
+        )
+        expectedEntriesList.add(
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 16),
+                status = HistoricalStatus.Completed,
+                scheduleDeviation = 0F,
+                timesCompleted = 1F,
+            )
+        )
 
         assertThat(
             completionHistoryRepository.getHistoryEntries(
-                routineId,
-                routineStartDate..routineStartDate.plusDays(14)
+                routineId = routineId,
+                dates = routineStartDate..routineStartDate.plusDays(14)
             )
-        ).isEqualTo(
-            expectedEntriesList.mapIndexed { index, status ->
-                CompletionHistoryEntry(routineStartDate.plusDays(index), status)
-            }
-        )
-
-        val expectedResultingSchedule =
-            schedule.copy(lastDateInHistory = routineStartDate.plusDays(14))
-        val expectedResultingRoutine =
-            routine.copy(scheduleDeviation = -1, schedule = expectedResultingSchedule)
-
-        assertThat(routineRepository.getRoutineById(routineId)).isEqualTo(expectedResultingRoutine)
+        ).isEqualTo(expectedEntriesList)
     }
 
     @Test
@@ -607,21 +849,96 @@ class InsertRoutineStatusUseCaseTest {
         }
 
         val expectedEntriesList = listOf(
-            HistoricalStatus.Skipped,
-            HistoricalStatus.Completed,
-            HistoricalStatus.NotCompleted,
-            HistoricalStatus.Skipped,
-            HistoricalStatus.Skipped,
-            HistoricalStatus.OverCompleted,
-            HistoricalStatus.Skipped,
-            HistoricalStatus.Completed,
-            HistoricalStatus.Skipped,
-            HistoricalStatus.OverCompleted,
-            HistoricalStatus.Skipped,
-            HistoricalStatus.Skipped,
-            HistoricalStatus.AlreadyCompleted,
-            HistoricalStatus.Skipped,
-            HistoricalStatus.Completed,
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 2),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 3),
+                status = HistoricalStatus.Completed,
+                scheduleDeviation = 0F,
+                timesCompleted = 1F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 4),
+                status = HistoricalStatus.NotCompleted,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 5),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 6),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 7),
+                status = HistoricalStatus.OverCompleted,
+                scheduleDeviation = 1F,
+                timesCompleted = 1F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 8),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 9),
+                status = HistoricalStatus.Completed,
+                scheduleDeviation = 0F,
+                timesCompleted = 1F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 10),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 11),
+                status = HistoricalStatus.OverCompleted,
+                scheduleDeviation = 1F,
+                timesCompleted = 1F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 12),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 13),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 14),
+                status = HistoricalStatus.AlreadyCompleted,
+                scheduleDeviation = -1F,
+                timesCompleted = 0F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 15),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            ),
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 16),
+                status = HistoricalStatus.Completed,
+                scheduleDeviation = 0F,
+                timesCompleted = 1F,
+            ),
         )
 
         assertThat(
@@ -629,18 +946,7 @@ class InsertRoutineStatusUseCaseTest {
                 routineId,
                 routineStartDate..routineStartDate.plusDays(14)
             )
-        ).isEqualTo(
-            expectedEntriesList.mapIndexed { index, status ->
-                CompletionHistoryEntry(routineStartDate.plusDays(index), status)
-            }
-        )
-
-        val expectedResultingSchedule =
-            schedule.copy(lastDateInHistory = routineStartDate.plusDays(14))
-        val expectedResultingRoutine =
-            routine.copy(scheduleDeviation = 1, schedule = expectedResultingSchedule)
-
-        assertThat(routineRepository.getRoutineById(routineId)).isEqualTo(expectedResultingRoutine)
+        ).isEqualTo(expectedEntriesList)
     }
 
     @Test
@@ -685,42 +991,167 @@ class InsertRoutineStatusUseCaseTest {
             )
         }
 
-        val expectedEntriesList = mutableListOf<HistoricalStatus>()
-        repeat(4) { expectedEntriesList.add(HistoricalStatus.Skipped) }
-        expectedEntriesList.add(HistoricalStatus.NotCompleted)
-        repeat(2) { expectedEntriesList.add(HistoricalStatus.Skipped) }
-        expectedEntriesList.add(HistoricalStatus.CompletedLater)
-        expectedEntriesList.add(HistoricalStatus.Skipped)
-        expectedEntriesList.add(HistoricalStatus.CompletedLater)
-        repeat(4) { expectedEntriesList.add(HistoricalStatus.Skipped) }
-        repeat(3) { expectedEntriesList.add(HistoricalStatus.NotCompletedOnVacation) }
-        expectedEntriesList.add(HistoricalStatus.SortedOutBacklogOnVacation)
-        expectedEntriesList.add(HistoricalStatus.SortedOutBacklogOnVacation)
-        repeat(2) { expectedEntriesList.add(HistoricalStatus.NotCompletedOnVacation) }
-        expectedEntriesList.add(HistoricalStatus.Skipped)
-        expectedEntriesList.add(HistoricalStatus.NotCompleted)
-        expectedEntriesList.add(HistoricalStatus.Skipped)
-        expectedEntriesList.add(HistoricalStatus.NotCompleted)
-        repeat(3) { expectedEntriesList.add(HistoricalStatus.Skipped) }
-        repeat(3) { expectedEntriesList.add(HistoricalStatus.NotCompleted) }
-        repeat(3) { expectedEntriesList.add(HistoricalStatus.Skipped) }
+        val expectedEntriesList = mutableListOf<CompletionHistoryEntry>()
+        repeat(4) {
+            expectedEntriesList.add(
+                CompletionHistoryEntry(
+                    date = LocalDate(2023, Month.OCTOBER, it + 2),
+                    status = HistoricalStatus.Skipped,
+                    scheduleDeviation = 0F,
+                    timesCompleted = 0F,
+                )
+            )
+        }
+        expectedEntriesList.add(
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 6),
+                status = HistoricalStatus.NotCompleted,
+                scheduleDeviation = -1F,
+                timesCompleted = 0F,
+            )
+        )
+        repeat(2) {
+            expectedEntriesList.add(
+                CompletionHistoryEntry(
+                    date = LocalDate(2023, Month.OCTOBER, it + 7),
+                    status = HistoricalStatus.Skipped,
+                    scheduleDeviation = 0F,
+                    timesCompleted = 0F,
+                )
+            )
+        }
+        expectedEntriesList.add(
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 9),
+                status = HistoricalStatus.CompletedLater,
+                scheduleDeviation = -1F,
+                timesCompleted = 0F,
+            )
+        )
+        expectedEntriesList.add(
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 10),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            )
+        )
+        expectedEntriesList.add(
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 11),
+                status = HistoricalStatus.CompletedLater,
+                scheduleDeviation = -1F,
+                timesCompleted = 0F,
+            )
+        )
+        repeat(4) {
+            expectedEntriesList.add(
+                CompletionHistoryEntry(
+                    date = LocalDate(2023, Month.OCTOBER, it + 12),
+                    status = HistoricalStatus.Skipped,
+                    scheduleDeviation = 0F,
+                    timesCompleted = 0F,
+                )
+            )
+        }
+        repeat(3) {
+            expectedEntriesList.add(
+                CompletionHistoryEntry(
+                    date = LocalDate(2023, Month.OCTOBER, it + 16),
+                    status = HistoricalStatus.NotCompletedOnVacation,
+                    scheduleDeviation = 0F,
+                    timesCompleted = 0F,
+                )
+            )
+        }
+        repeat(2) {
+            expectedEntriesList.add(
+                CompletionHistoryEntry(
+                    date = LocalDate(2023, Month.OCTOBER, it + 19),
+                    status = HistoricalStatus.SortedOutBacklogOnVacation,
+                    scheduleDeviation = 1F,
+                    timesCompleted = 1F,
+                )
+            )
+        }
+        repeat(2) {
+            expectedEntriesList.add(
+                CompletionHistoryEntry(
+                    date = LocalDate(2023, Month.OCTOBER, it + 21),
+                    status = HistoricalStatus.NotCompletedOnVacation,
+                    scheduleDeviation = 0F,
+                    timesCompleted = 0F,
+                )
+            )
+        }
+        expectedEntriesList.add(
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 23),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            )
+        )
+        expectedEntriesList.add(
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 24),
+                status = HistoricalStatus.NotCompleted,
+                scheduleDeviation = -1F,
+                timesCompleted = 0F,
+            )
+        )
+        expectedEntriesList.add(
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 25),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            )
+        )
+        expectedEntriesList.add(
+            CompletionHistoryEntry(
+                date = LocalDate(2023, Month.OCTOBER, 26),
+                status = HistoricalStatus.NotCompleted,
+                scheduleDeviation = -1F,
+                timesCompleted = 0F,
+            )
+        )
+        repeat(3) {
+            expectedEntriesList.add(
+                CompletionHistoryEntry(
+                    date = LocalDate(2023, Month.OCTOBER, it + 27),
+                    status = HistoricalStatus.Skipped,
+                    scheduleDeviation = 0F,
+                    timesCompleted = 0F,
+                )
+            )
+        }
+        repeat(3) {
+            expectedEntriesList.add(
+                CompletionHistoryEntry(
+                    date = routineStartDate.plusDays(it + 28),
+                    status = HistoricalStatus.NotCompleted,
+                    scheduleDeviation = -1F,
+                    timesCompleted = 0F,
+                )
+            )
+        }
+        repeat(3) {
+            expectedEntriesList.add(
+                CompletionHistoryEntry(
+                    date = routineStartDate.plusDays(it + 31),
+                    status = HistoricalStatus.Skipped,
+                    scheduleDeviation = 0F,
+                    timesCompleted = 0F,
+                )
+            )
+        }
 
         assertThat(
             completionHistoryRepository.getHistoryEntries(
                 routineId,
                 routineStartDate..routineStartDate.plusDays(33)
             )
-        ).isEqualTo(
-            expectedEntriesList.mapIndexed { index, status ->
-                CompletionHistoryEntry(routineStartDate.plusDays(index), status)
-            }
-        )
-
-        val expectedResultingSchedule =
-            schedule.copy(lastDateInHistory = routineStartDate.plusDays(33))
-        val expectedResultingRoutine =
-            routine.copy(scheduleDeviation = -6, schedule = expectedResultingSchedule)
-
-        assertThat(routineRepository.getRoutineById(routineId)).isEqualTo(expectedResultingRoutine)
+        ).isEqualTo(expectedEntriesList)
     }
 }

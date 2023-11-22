@@ -2,6 +2,7 @@ package com.rendox.routinetracker.core.testcommon.fakes.routine
 
 import com.rendox.routinetracker.core.database.completion_history.CompletionHistoryLocalDataSource
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
+import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.CompletionHistoryEntry
 import com.rendox.routinetracker.core.model.HistoricalStatus
 import kotlinx.datetime.LocalDate
@@ -38,18 +39,24 @@ class CompletionHistoryLocalDataSourceFake(
             routineData.completionHistory.toMutableList().apply { remove(elementToRemove) }
     }
 
-    override suspend fun updateHistoryEntryStatusByDate(
+    override suspend fun updateHistoryEntryByDate(
         routineId: Long,
         date: LocalDate,
-        newStatus: HistoricalStatus,
-        newScheduleDeviation: Int,
+        newStatus: HistoricalStatus?,
+        newScheduleDeviation: Float?,
+        newTimesCompleted: Float?,
     ) {
         val elementToUpdate = routineData.completionHistory.find {
             it.first == routineId && it.second.date == date
         }
-        val elementToUpdateIndex = routineData.completionHistory.indexOf(elementToUpdate)
-        val newValue = routineId to CompletionHistoryEntry(date, newStatus, newScheduleDeviation)
         elementToUpdate?.let {
+            val elementToUpdateIndex = routineData.completionHistory.indexOf(it)
+            val newValue = routineId to CompletionHistoryEntry(
+                date = date,
+                status = newStatus ?: it.second.status,
+                scheduleDeviation = newScheduleDeviation ?: it.second.scheduleDeviation,
+                timesCompleted = newTimesCompleted ?: it.second.timesCompleted,
+            )
             routineData.completionHistory =
                 routineData.completionHistory.toMutableList().apply {
                     set(elementToUpdateIndex, newValue)
@@ -103,4 +110,22 @@ class CompletionHistoryLocalDataSourceFake(
                 }
         }
     }
+
+    override suspend fun getTotalTimesCompletedInPeriod(
+        routineId: Long,
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): Double = routineData.completionHistory
+        .filter { it.second.date in startDate..endDate }
+        .map { it.second.timesCompleted }
+        .sum().toDouble()
+
+    override suspend fun getScheduleDeviationInPeriod(
+        routineId: Long,
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): Double = routineData.completionHistory
+        .filter { it.second.date in startDate..endDate }
+        .map { it.second.scheduleDeviation }
+        .sum().toDouble()
 }

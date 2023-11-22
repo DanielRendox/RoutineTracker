@@ -139,7 +139,6 @@ class RoutineLocalDataSourceImpl(
             periodicSeparationEnabledInPeriodicSchedule = null,
             numOfDueDaysInByNumOfDueDaysSchedule = null,
             numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule = null,
-            numOfCompletedDaysInCurrentPeriodInByNumOfDueDaysSchedule = null,
             numOfDaysInPeriodicCustomSchedule = null,
         )
     }
@@ -160,7 +159,6 @@ class RoutineLocalDataSourceImpl(
             periodicSeparationEnabledInPeriodicSchedule = schedule.periodSeparationEnabled,
             numOfDueDaysInByNumOfDueDaysSchedule = null,
             numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule = null,
-            numOfCompletedDaysInCurrentPeriodInByNumOfDueDaysSchedule = null,
             numOfDaysInPeriodicCustomSchedule = null,
         )
     }
@@ -181,7 +179,6 @@ class RoutineLocalDataSourceImpl(
             periodicSeparationEnabledInPeriodicSchedule = schedule.periodSeparationEnabled,
             numOfDueDaysInByNumOfDueDaysSchedule = schedule.numOfDueDays,
             numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule = schedule.numOfDueDaysInFirstPeriod,
-            numOfCompletedDaysInCurrentPeriodInByNumOfDueDaysSchedule = schedule.numOfCompletedDaysInCurrentPeriod,
             numOfDaysInPeriodicCustomSchedule = null,
         )
     }
@@ -202,7 +199,6 @@ class RoutineLocalDataSourceImpl(
             periodicSeparationEnabledInPeriodicSchedule = schedule.periodSeparationEnabled,
             numOfDueDaysInByNumOfDueDaysSchedule = null,
             numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule = null,
-            numOfCompletedDaysInCurrentPeriodInByNumOfDueDaysSchedule = null,
             numOfDaysInPeriodicCustomSchedule = null,
         )
     }
@@ -223,7 +219,6 @@ class RoutineLocalDataSourceImpl(
             periodicSeparationEnabledInPeriodicSchedule = schedule.periodSeparationEnabled,
             numOfDueDaysInByNumOfDueDaysSchedule = schedule.numOfDueDays,
             numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule = schedule.numOfDueDaysInFirstPeriod,
-            numOfCompletedDaysInCurrentPeriodInByNumOfDueDaysSchedule = schedule.numOfCompletedDaysInCurrentPeriod,
             numOfDaysInPeriodicCustomSchedule = null,
         )
     }
@@ -255,7 +250,6 @@ class RoutineLocalDataSourceImpl(
             periodicSeparationEnabledInPeriodicSchedule = schedule.periodSeparationEnabled,
             numOfDueDaysInByNumOfDueDaysSchedule = schedule.numOfDueDays,
             numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule = null,
-            numOfCompletedDaysInCurrentPeriodInByNumOfDueDaysSchedule = schedule.numOfCompletedDaysInCurrentPeriod,
             numOfDaysInPeriodicCustomSchedule = schedule.numOfDaysInPeriod,
         )
     }
@@ -276,7 +270,6 @@ class RoutineLocalDataSourceImpl(
             periodicSeparationEnabledInPeriodicSchedule = null,
             numOfDueDaysInByNumOfDueDaysSchedule = null,
             numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule = null,
-            numOfCompletedDaysInCurrentPeriodInByNumOfDueDaysSchedule = null,
             numOfDaysInPeriodicCustomSchedule = null,
         )
     }
@@ -297,7 +290,6 @@ class RoutineLocalDataSourceImpl(
             periodicSeparationEnabledInPeriodicSchedule = schedule.periodSeparationEnabled,
             numOfDueDaysInByNumOfDueDaysSchedule = null,
             numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule = null,
-            numOfCompletedDaysInCurrentPeriodInByNumOfDueDaysSchedule = null,
             numOfDaysInPeriodicCustomSchedule = null,
         )
     }
@@ -318,7 +310,6 @@ class RoutineLocalDataSourceImpl(
             periodicSeparationEnabledInPeriodicSchedule = schedule.periodSeparationEnabled,
             numOfDueDaysInByNumOfDueDaysSchedule = schedule.numOfDueDays,
             numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule = schedule.numOfDueDaysInFirstPeriod,
-            numOfCompletedDaysInCurrentPeriodInByNumOfDueDaysSchedule = schedule.numOfCompletedDaysInCurrentPeriod,
             numOfDaysInPeriodicCustomSchedule = null,
         )
     }

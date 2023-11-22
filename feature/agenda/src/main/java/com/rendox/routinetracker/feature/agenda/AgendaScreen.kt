@@ -43,24 +43,40 @@ internal fun AgendaRoute(
     modifier: Modifier = Modifier,
     onRoutineClick: (Long) -> Unit,
     onAddRoutineClick: () -> Unit,
-    viewModel: AgendaScreenViewModel = koinViewModel(),
+//    viewModel: AgendaScreenViewModel = koinViewModel(),
 ) {
-    val currentDate by viewModel.currentDateFlow.collectAsStateWithLifecycle()
-    val visibleRoutines by viewModel.visibleRoutinesFlow.collectAsStateWithLifecycle()
+//    val currentDate by viewModel.currentDateFlow.collectAsStateWithLifecycle()
+//    val visibleRoutines by viewModel.visibleRoutinesFlow.collectAsStateWithLifecycle()
+
+//    AgendaScreen(
+//        modifier = modifier,
+//        currentDate = currentDate.toJavaLocalDate(),
+//        routineList = visibleRoutines,
+//        today = LocalDate.now(),
+//        onAddRoutineClick = { viewModel.onAddRoutineClick() },
+//        onRoutineClick = onRoutineClick,
+//        onStatusCheckmarkClick = { routineId, status ->
+//            viewModel.onRoutineStatusCheckmarkClick(routineId, currentDate, status)
+//        },
+//        onDateChange = { viewModel.onDateChange(it.toKotlinLocalDate()) },
+//        onNotDueRoutinesVisibilityToggle = {
+//            viewModel.onNotDueRoutinesVisibilityToggle()
+//        },
+//    )
 
     AgendaScreen(
         modifier = modifier,
-        currentDate = currentDate.toJavaLocalDate(),
-        routineList = visibleRoutines,
+        currentDate = LocalDate.now(),
+        routineList = emptyList(),
         today = LocalDate.now(),
-        onAddRoutineClick = { viewModel.onAddRoutineClick() },
+        onAddRoutineClick = { },
         onRoutineClick = onRoutineClick,
         onStatusCheckmarkClick = { routineId, status ->
-            viewModel.onRoutineStatusCheckmarkClick(routineId, currentDate, status)
+
         },
-        onDateChange = { viewModel.onDateChange(it.toKotlinLocalDate()) },
+        onDateChange = {  },
         onNotDueRoutinesVisibilityToggle = {
-            viewModel.onNotDueRoutinesVisibilityToggle()
+
         },
     )
 }

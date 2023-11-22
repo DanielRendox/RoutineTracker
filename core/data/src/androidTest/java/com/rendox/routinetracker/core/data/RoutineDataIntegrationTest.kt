@@ -126,7 +126,7 @@ class RoutineDataIntegrationTest : KoinTest {
 
         val randomDateRange = generateRandomDateRange(
             minDate = startDate,
-            maxDateInclusive = dateCounter,
+            maxDate = dateCounter,
         )
         val randomDateRangeIndices =
             startDate.daysUntil(randomDateRange.start)..startDate.daysUntil(randomDateRange.endInclusive)

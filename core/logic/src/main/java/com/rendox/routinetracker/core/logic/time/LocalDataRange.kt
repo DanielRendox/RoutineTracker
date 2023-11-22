@@ -33,8 +33,8 @@ class LocalDateIterator(
 
 operator fun LocalDate.rangeTo(that: LocalDate) = LocalDateRange(this, that)
 
-fun generateRandomDateRange(minDate: LocalDate, maxDateInclusive: LocalDate): LocalDateRange {
-    val maxNumOfDays = minDate.daysUntil(maxDateInclusive) + 1
+fun generateRandomDateRange(minDate: LocalDate, maxDate: LocalDate): LocalDateRange {
+    val maxNumOfDays = minDate.daysUntil(maxDate) + 1
     val firstNumber = Random.nextInt(until = maxNumOfDays)
     val secondNumber = Random.nextInt(until = maxNumOfDays)
     val periodStartDate: LocalDate

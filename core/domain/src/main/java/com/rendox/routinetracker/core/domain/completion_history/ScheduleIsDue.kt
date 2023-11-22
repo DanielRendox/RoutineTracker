@@ -1,4 +1,4 @@
-package com.rendox.routinetracker.core.domain.routine.schedule
+package com.rendox.routinetracker.core.domain.completion_history
 
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.atEndOfMonth
@@ -9,14 +9,11 @@ import kotlinx.datetime.daysUntil
 
 fun Schedule.isDue(
     validationDate: LocalDate,
-    dateScheduleDeviationIsActualFor: LocalDate?,
+    actualDate: LocalDate?,
+    numOfTimesCompletedInCurrentPeriod: Double,
 ): Boolean {
-    if (validationDate < routineStartDate) {
-        throw IllegalArgumentException(
-            "This function shouldn't be called for dates that are prior to routine start date.\n" +
-                    "validationDate = $validationDate; routineStartDate = $routineStartDate"
-        )
-    }
+    if (validationDate < routineStartDate) return false
+    routineEndDate?.let { if (validationDate > it) return false }
 
     return when (this) {
         is Schedule.EveryDaySchedule -> everyDayScheduleIsDue()
@@ -31,8 +28,8 @@ fun Schedule.isDue(
                 validationDate = validationDate,
                 validationDatePeriod = period,
                 numOfDueDays = getNumOfDueDatesInPeriod(period),
-                numOfCompletedDays = numOfCompletedDaysInCurrentPeriod,
-                dateScheduleDeviationIsActualFor = dateScheduleDeviationIsActualFor,
+                numOfCompletedDays = numOfTimesCompletedInCurrentPeriod,
+                dateScheduleDeviationIsActualFor = actualDate,
             )
         }
 
@@ -44,8 +41,8 @@ fun Schedule.isDue(
                 validationDate = validationDate,
                 validationDatePeriod = period,
                 numOfDueDays = getNumOfDueDatesInPeriod(period),
-                numOfCompletedDays = numOfCompletedDaysInCurrentPeriod,
-                dateScheduleDeviationIsActualFor = dateScheduleDeviationIsActualFor,
+                numOfCompletedDays = numOfTimesCompletedInCurrentPeriod,
+                dateScheduleDeviationIsActualFor = actualDate,
             )
         }
 
@@ -55,8 +52,8 @@ fun Schedule.isDue(
                 validationDate = validationDate,
                 validationDatePeriod = period,
                 numOfDueDays = getNumOfDueDatesInPeriod(period),
-                numOfCompletedDays = numOfCompletedDaysInCurrentPeriod,
-                dateScheduleDeviationIsActualFor = dateScheduleDeviationIsActualFor,
+                numOfCompletedDays = numOfTimesCompletedInCurrentPeriod,
+                dateScheduleDeviationIsActualFor = actualDate,
             )
         }
 
@@ -70,8 +67,8 @@ fun Schedule.isDue(
                 validationDate = validationDate,
                 validationDatePeriod = period,
                 numOfDueDays = getNumOfDueDatesInPeriod(period),
-                numOfCompletedDays = numOfCompletedDaysInCurrentPeriod,
-                dateScheduleDeviationIsActualFor = dateScheduleDeviationIsActualFor,
+                numOfCompletedDays = numOfTimesCompletedInCurrentPeriod,
+                dateScheduleDeviationIsActualFor = actualDate,
             )
         }
     }
@@ -109,11 +106,12 @@ private fun Schedule.AnnualScheduleByDueDates.annualScheduleIsDue(
     return false
 }
 
-private fun Schedule.PeriodicSchedule.scheduleByNumOfDueDaysIsDue(
+@Suppress("UnusedReceiverParameter")
+private fun Schedule.ByNumOfDueDays.scheduleByNumOfDueDaysIsDue(
     validationDate: LocalDate,
     validationDatePeriod: LocalDateRange,
     numOfDueDays: Int,
-    numOfCompletedDays: Int,
+    numOfCompletedDays: Double,
     dateScheduleDeviationIsActualFor: LocalDate?,
 ): Boolean {
     val validationDateNumberInPeriod = validationDatePeriod.start.daysUntil(validationDate) + 1
@@ -122,8 +120,8 @@ private fun Schedule.PeriodicSchedule.scheduleByNumOfDueDaysIsDue(
     dateScheduleDeviationIsActualFor?.let {
         val daysBetweenLastDateInHistoryAndValidationDate = it.daysUntil(validationDate) - 1
         val daysExpectedToBeCompletedTillThatTime =
-            numOfCompletedDays + daysBetweenLastDateInHistoryAndValidationDate
-        if (daysExpectedToBeCompletedTillThatTime < numOfDueDays) return true
+            numOfCompletedDays + daysBetweenLastDateInHistoryAndValidationDate.toDouble()
+        if (daysExpectedToBeCompletedTillThatTime < (numOfDueDays.toDouble())) return true
     }
 
     return false

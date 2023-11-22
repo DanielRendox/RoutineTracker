@@ -3,10 +3,10 @@ package com.rendox.routinetracker.feature.agenda
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rendox.routinetracker.core.data.routine.RoutineRepository
-import com.rendox.routinetracker.core.domain.completion_history.ToggleRoutineStatusUseCase
-import com.rendox.routinetracker.core.domain.completion_history.GetRoutineStatusUseCase
-import com.rendox.routinetracker.core.domain.completion_history.InsertRoutineStatusUseCase
-import com.rendox.routinetracker.core.domain.routine.GetRoutineCompletionTimeUseCase
+import com.rendox.routinetracker.core.domain.completion_history.use_cases.ToggleHistoricalStatusUseCase
+import com.rendox.routinetracker.core.domain.completion_history.use_cases.GetRoutineStatusUseCase
+import com.rendox.routinetracker.core.domain.completion_history.use_cases.InsertRoutineStatusUseCase
+import com.rendox.routinetracker.core.domain.completion_time.GetRoutineCompletionTimeUseCase
 import com.rendox.routinetracker.core.model.HistoricalStatus
 import com.rendox.routinetracker.core.model.PlanningStatus
 import com.rendox.routinetracker.core.model.Routine
@@ -29,7 +29,7 @@ class AgendaScreenViewModel(
     private val routineRepository: RoutineRepository,
     private val getRoutineStatus: GetRoutineStatusUseCase,
     private val insertRoutineStatus: InsertRoutineStatusUseCase,
-    private val toggleRoutineStatus: ToggleRoutineStatusUseCase,
+    private val toggleHistoricalStatus: ToggleHistoricalStatusUseCase,
     private val getRoutineCompletionTime: GetRoutineCompletionTimeUseCase,
 ) : ViewModel() {
 
@@ -143,7 +143,7 @@ class AgendaScreenViewModel(
                     completedOnCurrentDate = true,
                 )
             } else {
-                toggleRoutineStatus(
+                toggleHistoricalStatus(
                     routineId = routineId,
                     date = currentDate,
                     today = Clock.System.todayIn(TimeZone.currentSystemDefault())

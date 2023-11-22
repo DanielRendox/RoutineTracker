@@ -57,7 +57,6 @@ val localDataSourceModule = module {
                 startDayOfWeekInWeeklyScheduleAdapter = dayOfWeekAdapter,
                 numOfDueDaysInByNumOfDueDaysScheduleAdapter = IntColumnAdapter,
                 numOfDueDaysInFirstPeriodInByNumOfDueDaysScheduleAdapter = IntColumnAdapter,
-                numOfCompletedDaysInCurrentPeriodInByNumOfDueDaysScheduleAdapter = IntColumnAdapter,
                 numOfDaysInPeriodicCustomScheduleAdapter = IntColumnAdapter,
             ),
             dueDateEntityAdapter = DueDateEntity.Adapter(
@@ -72,7 +71,8 @@ val localDataSourceModule = module {
             completionHistoryEntityAdapter = CompletionHistoryEntity.Adapter(
                 statusAdapter = EnumColumnAdapter(),
                 dateAdapter = localDateAdapter,
-                currentScheduleDeviationAdapter = IntColumnAdapter,
+                scheduleDeviationAdapter = FloatColumnAdapter,
+                timesCompletedAdapter = FloatColumnAdapter,
             ),
             specificDateCustomCompletionTimeAdapter = SpecificDateCustomCompletionTime.Adapter(
                 dateAdapter = localDateAdapter,

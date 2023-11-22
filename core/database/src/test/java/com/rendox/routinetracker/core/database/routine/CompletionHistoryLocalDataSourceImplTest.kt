@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
 import com.rendox.routinetracker.core.database.completion_history.CompletionHistoryLocalDataSourceImpl
 import com.rendox.routinetracker.core.database.di.localDataSourceModule
+import com.rendox.routinetracker.core.logic.time.epochDate
 import com.rendox.routinetracker.core.logic.time.generateRandomDateRange
 import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo
@@ -57,29 +58,36 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
 
         val history = mutableListOf<CompletionHistoryEntry>()
         var dateCounter = startDate
-        var scheduleDeviation = 0
 
         for (status in HistoricalStatus.values().toList()) {
-            val scheduleDeviationIncrementAmount = when (status) {
-                HistoricalStatus.NotCompleted -> -1
-                HistoricalStatus.Completed -> 0
-                HistoricalStatus.OverCompleted -> 1
-                HistoricalStatus.OverCompletedOnVacation -> 1
-                HistoricalStatus.SortedOutBacklogOnVacation -> 1
-                HistoricalStatus.Skipped -> 0
-                HistoricalStatus.NotCompletedOnVacation -> 0
-                HistoricalStatus.CompletedLater -> 0
-                HistoricalStatus.SortedOutBacklog -> 1
-                HistoricalStatus.AlreadyCompleted -> 0
+            val scheduleDeviation = when (status) {
+                HistoricalStatus.NotCompleted -> -1F
+                HistoricalStatus.Completed -> 0F
+                HistoricalStatus.OverCompleted -> 1F
+                HistoricalStatus.OverCompletedOnVacation -> 1F
+                HistoricalStatus.SortedOutBacklogOnVacation -> 1F
+                HistoricalStatus.Skipped -> 0F
+                HistoricalStatus.NotCompletedOnVacation -> 0F
+                HistoricalStatus.CompletedLater -> 0F
+                HistoricalStatus.SortedOutBacklog -> 1F
+                HistoricalStatus.AlreadyCompleted -> 0F
+            }
+            val timesCompleted = when (status) {
+                HistoricalStatus.Completed,
+                HistoricalStatus.OverCompleted,
+                HistoricalStatus.OverCompletedOnVacation,
+                HistoricalStatus.SortedOutBacklog,
+                HistoricalStatus.SortedOutBacklogOnVacation -> 1F
+                else -> 0F
             }
             repeat(50) {
-                scheduleDeviation += scheduleDeviationIncrementAmount
                 dateCounter = dateCounter.plusDays(1)
                 history.add(
                     CompletionHistoryEntry(
                         date = dateCounter,
                         status = status,
-                        currentScheduleDeviation = scheduleDeviation,
+                        scheduleDeviation = scheduleDeviation,
+                        timesCompleted = timesCompleted,
                     )
                 )
             }
@@ -119,7 +127,7 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
     fun assertReturnsCorrectEntriesForDateRange() = runTest {
         val randomDateRange = generateRandomDateRange(
             minDate = startDate,
-            maxDateInclusive = endDate,
+            maxDate = endDate,
         )
         val randomDateRangeIndices =
             startDate.daysUntil(randomDateRange.start)..startDate.daysUntil(randomDateRange.endInclusive)
@@ -208,11 +216,12 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
             )
         ).isFalse()
 
-        completionHistoryLocalDataSource.updateHistoryEntryStatusByDate(
+        completionHistoryLocalDataSource.updateHistoryEntryByDate(
             routineId = routineId,
             date = notCompletedLaterEntry.date,
             newStatus = HistoricalStatus.CompletedLater,
-            newScheduleDeviation = notCompletedLaterEntry.currentScheduleDeviation,
+            newScheduleDeviation = notCompletedLaterEntry.scheduleDeviation,
+            newTimesCompleted = notCompletedLaterEntry.timesCompleted,
         )
 
 
@@ -262,11 +271,12 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
         val completedLaterStatus = completionHistory.find {
             it.status == HistoricalStatus.CompletedLater
         }!!
-        completionHistoryLocalDataSource.updateHistoryEntryStatusByDate(
+        completionHistoryLocalDataSource.updateHistoryEntryByDate(
             routineId = routineId,
             date = completedLaterStatus.date,
             newStatus = HistoricalStatus.NotCompleted,
-            newScheduleDeviation = completedLaterStatus.currentScheduleDeviation - 1,
+            newScheduleDeviation = -1F,
+            newTimesCompleted = 0F,
         )
         assertThat(
             completionHistoryLocalDataSource.checkIfStatusWasCompletedLater(
@@ -291,5 +301,67 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
                 date = completedLaterStatus.date,
             )
         ).isTrue()
+    }
+
+    @Test
+    fun assertTotalTimesCompletedInPeriodReturnsCorrectValue() = runTest {
+        val datePeriod = generateRandomDateRange(
+            minDate = completionHistory.first().date,
+            maxDate = completionHistory.last().date,
+        )
+        val expectedValue = completionHistory
+            .filter { it.date >= datePeriod.start && it.date <= datePeriod.endInclusive }
+            .map { it.timesCompleted }
+            .sum().toDouble()
+        assertThat(
+            completionHistoryLocalDataSource.getTotalTimesCompletedInPeriod(
+                routineId = routineId,
+                startDate = datePeriod.start,
+                endDate = datePeriod.endInclusive,
+            )
+        ).isEqualTo(expectedValue)
+    }
+
+    @Test
+    fun assertTotalTimesCompletedInPeriodReturnsZeroIfPeriodIsNotPresent() = runTest {
+        val datePeriod = epochDate..epochDate
+        assertThat(
+            completionHistoryLocalDataSource.getScheduleDeviationInPeriod(
+                routineId = routineId,
+                startDate = datePeriod.start,
+                endDate = datePeriod.endInclusive,
+            )
+        ).isZero()
+    }
+
+    @Test
+    fun assertScheduleDeviationInPeriodReturnsCorrectValue() = runTest {
+        val datePeriod = generateRandomDateRange(
+            minDate = completionHistory.first().date,
+            maxDate = completionHistory.last().date,
+        )
+        val expectedValue = completionHistory
+            .filter { it.date >= datePeriod.start && it.date <= datePeriod.endInclusive }
+            .map { it.scheduleDeviation }
+            .sum().toDouble()
+        assertThat(
+            completionHistoryLocalDataSource.getScheduleDeviationInPeriod(
+                routineId = routineId,
+                startDate = datePeriod.start,
+                endDate = datePeriod.endInclusive,
+            )
+        ).isEqualTo(expectedValue)
+    }
+
+    @Test
+    fun assertScheduleDeviationInPeriodReturnsZeroIfPeriodIsNotPresent() = runTest {
+        val datePeriod = epochDate..epochDate
+        assertThat(
+            completionHistoryLocalDataSource.getScheduleDeviationInPeriod(
+                routineId = routineId,
+                startDate = datePeriod.start,
+                endDate = datePeriod.endInclusive,
+            )
+        ).isZero()
     }
 }

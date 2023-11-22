@@ -1,13 +1,17 @@
 package com.rendox.routinetracker.core.domain.completion_history
 
 import com.google.common.truth.Truth.assertThat
+import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
 import com.rendox.routinetracker.core.data.di.completionHistoryDataModule
-import com.rendox.routinetracker.core.data.routine.RoutineRepository
 import com.rendox.routinetracker.core.data.di.routineDataModule
+import com.rendox.routinetracker.core.data.routine.RoutineRepository
 import com.rendox.routinetracker.core.database.completion_history.CompletionHistoryLocalDataSource
 import com.rendox.routinetracker.core.database.routine.RoutineLocalDataSource
+import com.rendox.routinetracker.core.domain.completion_history.use_cases.GetRoutineStatusUseCase
+import com.rendox.routinetracker.core.domain.completion_history.use_cases.InsertRoutineStatusUseCase
 import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo
+import com.rendox.routinetracker.core.model.CompletionHistoryEntry
 import com.rendox.routinetracker.core.model.HistoricalStatus
 import com.rendox.routinetracker.core.model.PlanningStatus
 import com.rendox.routinetracker.core.model.Routine
@@ -39,6 +43,7 @@ class GetRoutineStatusUseCaseTest : KoinTest {
     private lateinit var insertRoutineStatusIntoHistory: InsertRoutineStatusUseCase
     private lateinit var getRoutineStatusList: GetRoutineStatusUseCase
     private lateinit var routineRepository: RoutineRepository
+    private lateinit var completionHistoryRepository: CompletionHistoryRepository
 
     private val routineId = 1L
     private val routineStartDate = LocalDate(2023, Month.OCTOBER, 11)
@@ -81,6 +86,7 @@ class GetRoutineStatusUseCaseTest : KoinTest {
         }
 
         routineRepository = get()
+        completionHistoryRepository = get()
 
         insertRoutineStatusIntoHistory = InsertRoutineStatusUseCase(
             completionHistoryRepository = get(),
@@ -196,12 +202,6 @@ class GetRoutineStatusUseCaseTest : KoinTest {
         val forthWeekPeriod =
             LocalDate(2023, Month.OCTOBER, 30)..LocalDate(2023, Month.NOVEMBER, 5)
 
-        getRoutineStatusList(
-            routineId = routineId,
-            dates = forthWeekPeriod,
-            today = LocalDate(2023, Month.OCTOBER, 28),
-        ) // to prepopulate history with backlog
-
         val expectedStatusesOnForthWeek = mutableListOf<PlanningStatus>()
         repeat(5) { expectedStatusesOnForthWeek.add(PlanningStatus.Planned) }
         repeat(2) { expectedStatusesOnForthWeek.add(PlanningStatus.Backlog) }
@@ -221,39 +221,63 @@ class GetRoutineStatusUseCaseTest : KoinTest {
 
     @Test
     fun `WeeklyScheduleByNumOfDueDays, test cancelDuenessIfDoneAhead`() = runTest {
+        val schedule = Schedule.WeeklyScheduleByNumOfDueDays(
+            numOfDueDays = 4,
+            numOfDueDaysInFirstPeriod = null,
+            periodSeparationEnabled = false,
+            backlogEnabled = true,
+            cancelDuenessIfDoneAhead = true,
+            routineStartDate = LocalDate(2023, Month.NOVEMBER, 6),
+        )
         val routine = Routine.YesNoRoutine(
             id = routineId,
             name = "",
-            schedule = weeklyScheduleByNumOfDueDays,
+            schedule = schedule,
         )
-
         routineRepository.insertRoutine(routine)
 
-        val sixWeekPeriod =
-            LocalDate(2023, Month.NOVEMBER, 6)..LocalDate(2023, Month.NOVEMBER, 12)
+        val completedDays =
+            LocalDate(2023, Month.NOVEMBER, 6)..LocalDate(2023, Month.NOVEMBER, 9)
+        completedDays.forEachIndexed { _, date ->
+            completionHistoryRepository.insertHistoryEntry(
+                routineId = routineId,
+                entry = CompletionHistoryEntry(
+                    date = date,
+                    status = HistoricalStatus.Completed,
+                    scheduleDeviation = 0F,
+                    timesCompleted = 1F,
+                )
+            )
+        }
 
-        getRoutineStatusList(
-            routineId = routineId,
-            dates = sixWeekPeriod,
-            today = LocalDate(2023, Month.NOVEMBER, 6),
-        ) // to populate the completion history
-
-        routineRepository.updateScheduleDeviation(2, routineId)
+        val overCompletedDays =
+            LocalDate(2023, Month.NOVEMBER, 10)..LocalDate(2023, Month.NOVEMBER, 12)
+        overCompletedDays.forEachIndexed { _, date ->
+            completionHistoryRepository.insertHistoryEntry(
+                routineId = routineId,
+                entry = CompletionHistoryEntry(
+                    date = date,
+                    status = HistoricalStatus.OverCompleted,
+                    scheduleDeviation = 1F,
+                    timesCompleted = 1F,
+                )
+            )
+        }
 
         val expectedStatusesOnSixthsWeek = mutableListOf<RoutineStatus>()
-        repeat(2) { expectedStatusesOnSixthsWeek.add(PlanningStatus.AlreadyCompleted) }
-        repeat(3) { expectedStatusesOnSixthsWeek.add(PlanningStatus.Planned) }
-        repeat(2) { expectedStatusesOnSixthsWeek.add(PlanningStatus.NotDue) }
+        repeat(3) { expectedStatusesOnSixthsWeek.add(PlanningStatus.AlreadyCompleted) }
+        expectedStatusesOnSixthsWeek.add(PlanningStatus.Planned)
+        repeat(3) { expectedStatusesOnSixthsWeek.add(PlanningStatus.NotDue) }
 
         assertThat(
             getRoutineStatusList(
                 routineId = routineId,
-                dates = sixWeekPeriod,
-                today = LocalDate(2023, Month.NOVEMBER, 6),
+                dates = LocalDate(2023, Month.NOVEMBER, 13)..LocalDate(2023, Month.NOVEMBER, 19),
+                today = LocalDate(2023, Month.NOVEMBER, 13),
             )
         ).isEqualTo(
             expectedStatusesOnSixthsWeek.mapIndexed { index, status ->
-                StatusEntry(sixWeekPeriod.first().plusDays(index), status)
+                StatusEntry(LocalDate(2023, Month.NOVEMBER, 13).plusDays(index), status)
             }
         )
     }

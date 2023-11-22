@@ -33,17 +33,19 @@ class CompletionHistoryRepositoryImpl(
         localDataSource.deleteHistoryEntry(routineId, date)
     }
 
-    override suspend fun updateHistoryEntryStatusByDate(
+    override suspend fun updateHistoryEntryByDate(
         routineId: Long,
         date: LocalDate,
-        newStatus: HistoricalStatus,
-        newScheduleDeviation: Int,
+        newStatus: HistoricalStatus?,
+        newScheduleDeviation: Float?,
+        newTimesCompleted: Float?,
     ) {
-        localDataSource.updateHistoryEntryStatusByDate(
+        localDataSource.updateHistoryEntryByDate(
             routineId = routineId,
             date = date,
             newStatus = newStatus,
             newScheduleDeviation = newScheduleDeviation,
+            newTimesCompleted = newTimesCompleted,
         )
     }
 
@@ -63,7 +65,23 @@ class CompletionHistoryRepositoryImpl(
         localDataSource.deleteCompletedLaterBackupEntry(routineId, date)
     }
 
-    override suspend fun getLastHistoryEntryDateByStatus(
+    override suspend fun getLastHistoryEntryByStatus(
         routineId: Long, matchingStatuses: List<HistoricalStatus>
     ): CompletionHistoryEntry? = localDataSource.getLastHistoryEntryByStatus(routineId, matchingStatuses)
+
+    override suspend fun getTotalTimesCompletedInPeriod(
+        routineId: Long, startDate: LocalDate, endDate: LocalDate
+    ): Double {
+        return localDataSource.getTotalTimesCompletedInPeriod(
+            routineId, startDate, endDate
+        )
+    }
+
+    override suspend fun getScheduleDeviationInPeriod(
+        routineId: Long, startDate: LocalDate, endDate: LocalDate
+    ): Double {
+        return localDataSource.getScheduleDeviationInPeriod(
+            routineId, startDate, endDate
+        )
+    }
 }

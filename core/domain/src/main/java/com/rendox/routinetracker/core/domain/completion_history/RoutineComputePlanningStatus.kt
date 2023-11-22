@@ -1,6 +1,5 @@
-package com.rendox.routinetracker.core.domain.routine
+package com.rendox.routinetracker.core.domain.completion_history
 
-import com.rendox.routinetracker.core.domain.routine.schedule.isDue
 import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.PlanningStatus
@@ -9,8 +8,9 @@ import kotlinx.datetime.LocalDate
 
 fun Routine.computePlanningStatus(
     validationDate: LocalDate,
-    currentScheduleDeviation: Int,
-    dateScheduleDeviationIsActualFor: LocalDate?,
+    currentScheduleDeviation: Double,
+    actualDate: LocalDate?,
+    numOfTimesCompletedInCurrentPeriod: Double,
 ): PlanningStatus? {
     if (validationDate < schedule.routineStartDate) return null
     schedule.routineEndDate?.let { if (validationDate > it) return null }
@@ -18,7 +18,10 @@ fun Routine.computePlanningStatus(
 
     return when (this) {
         is Routine.YesNoRoutine -> yesNoRoutineComputePlanningStatus(
-            validationDate, currentScheduleDeviation, dateScheduleDeviationIsActualFor
+            validationDate,
+            currentScheduleDeviation,
+            actualDate,
+            numOfTimesCompletedInCurrentPeriod,
         )
     }
 }
@@ -35,16 +38,17 @@ private fun Routine.isCurrentlyOnVacation(validationDate: LocalDate): Boolean {
 
 private fun Routine.YesNoRoutine.yesNoRoutineComputePlanningStatus(
     validationDate: LocalDate,
-    currentScheduleDeviation: Int,
-    dateScheduleDeviationIsActualFor: LocalDate?,
+    currentScheduleDeviation: Double,
+    actualDate: LocalDate?,
+    numOfTimesCompletedInCurrentPeriod: Double,
 ): PlanningStatus {
-    if (schedule.isDue(validationDate, dateScheduleDeviationIsActualFor)) {
-        if (currentScheduleDeviation > 0) {
-            dateScheduleDeviationIsActualFor?.let {
+    if (schedule.isDue(validationDate, actualDate, numOfTimesCompletedInCurrentPeriod)) {
+        if (currentScheduleDeviation > 0 && schedule.cancelDuenessIfDoneAhead) {
+            actualDate?.let {
                 var dueDaysCounter = 0
                 for (day in it.plusDays(1)..validationDate) {
                     if (
-                        schedule.isDue(validationDate, it)
+                        schedule.isDue(validationDate, it, numOfTimesCompletedInCurrentPeriod)
                     ) dueDaysCounter++
                 }
                 if (currentScheduleDeviation >= dueDaysCounter)
@@ -55,11 +59,13 @@ private fun Routine.YesNoRoutine.yesNoRoutineComputePlanningStatus(
         return PlanningStatus.Planned
     }
 
-    if (currentScheduleDeviation < 0) {
-        dateScheduleDeviationIsActualFor?.let {
+    if (currentScheduleDeviation < 0 && schedule.backlogEnabled) {
+        actualDate?.let {
             var notDueDaysCounter = 0
             for (day in it.plusDays(1)..validationDate) {
-                if (!schedule.isDue(day, it)) notDueDaysCounter++
+                if (
+                    !schedule.isDue(day, it, numOfTimesCompletedInCurrentPeriod)
+                ) notDueDaysCounter++
             }
             if (currentScheduleDeviation <= -notDueDaysCounter) {
                 return PlanningStatus.Backlog

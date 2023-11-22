@@ -1,19 +1,11 @@
 package com.rendox.routinetracker.core.domain.di
 
-import com.rendox.routinetracker.core.domain.completion_history.ToggleRoutineStatusUseCase
-import com.rendox.routinetracker.core.domain.completion_history.GetListOfStreaksUseCase
-import com.rendox.routinetracker.core.domain.completion_history.GetRoutineStatusUseCase
-import com.rendox.routinetracker.core.domain.completion_history.InsertRoutineStatusUseCase
+import com.rendox.routinetracker.core.domain.completion_history.use_cases.ToggleHistoricalStatusUseCase
+import com.rendox.routinetracker.core.domain.completion_history.use_cases.GetRoutineStatusUseCase
+import com.rendox.routinetracker.core.domain.completion_history.use_cases.InsertRoutineStatusUseCase
 import org.koin.dsl.module
 
 val completionHistoryDomainModule = module {
-
-    single {
-        GetListOfStreaksUseCase(
-            completionHistoryRepository = get(),
-            routineRepository = get(),
-        )
-    }
 
     single {
         InsertRoutineStatusUseCase(
@@ -31,7 +23,7 @@ val completionHistoryDomainModule = module {
     }
 
     single {
-        ToggleRoutineStatusUseCase(
+        ToggleHistoricalStatusUseCase(
             completionHistoryRepository = get(),
             routineRepository = get(),
         )

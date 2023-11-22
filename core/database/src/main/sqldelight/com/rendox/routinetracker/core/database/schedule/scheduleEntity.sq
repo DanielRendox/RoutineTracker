@@ -19,7 +19,6 @@ CREATE TABLE scheduleEntity (
     periodicSeparationEnabledInPeriodicSchedule INTEGER AS Boolean,
     numOfDueDaysInByNumOfDueDaysSchedule INTEGER AS Int,
     numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule INTEGER AS Int,
-    numOfCompletedDaysInCurrentPeriodInByNumOfDueDaysSchedule INTEGER AS Int,
     numOfDaysInPeriodicCustomSchedule INTEGER AS Int,
     FOREIGN KEY(id) REFERENCES routineEntity(id)
 );
@@ -31,7 +30,7 @@ WHERE id = ?;
 
 insertSchedule:
 INSERT INTO scheduleEntity
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 lastInsertRowId:
 SELECT last_insert_rowid();

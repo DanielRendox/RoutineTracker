@@ -31,7 +31,8 @@ class CompletionHistoryLocalDataSourceImpl(
     private fun CompletionHistoryEntity.toExternalModel() = CompletionHistoryEntry(
         date = date,
         status = status,
-        currentScheduleDeviation = currentScheduleDeviation
+        scheduleDeviation = scheduleDeviation,
+        timesCompleted = timesCompleted,
     )
 
     override suspend fun insertHistoryEntry(
@@ -46,7 +47,8 @@ class CompletionHistoryLocalDataSourceImpl(
                     routineId = routineId,
                     date = entry.date,
                     status = entry.status,
-                    currentScheduleDeviation = entry.currentScheduleDeviation,
+                    scheduleDeviation = entry.scheduleDeviation,
+                    timesCompleted = entry.timesCompleted,
                 )
                 if (entry.status == HistoricalStatus.CompletedLater) {
                     insertCompletedLaterDate(routineId, entry.date)
@@ -61,19 +63,24 @@ class CompletionHistoryLocalDataSourceImpl(
         }
     }
 
-    override suspend fun updateHistoryEntryStatusByDate(
+    override suspend fun updateHistoryEntryByDate(
         routineId: Long,
         date: LocalDate,
-        newStatus: HistoricalStatus,
-        newScheduleDeviation: Int,
+        newStatus: HistoricalStatus?,
+        newScheduleDeviation: Float?,
+        newTimesCompleted: Float?,
     ) {
         withContext(dispatcher) {
             db.routineEntityQueries.transaction {
+                val oldValue = db.completionHistoryEntityQueries.getHistoryEntriesByIndices(
+                    routineId, date, date
+                ).executeAsOne()
                 db.completionHistoryEntityQueries.updateHistoryEntryStatusByDate(
-                    status = newStatus,
+                    status = newStatus ?: oldValue.status,
                     routineId = routineId,
                     date = date,
-                    currentScheduleDeviation = newScheduleDeviation,
+                    scheduleDeviation = newScheduleDeviation ?: oldValue.scheduleDeviation,
+                    timesCompleted = newTimesCompleted ?: oldValue.timesCompleted,
                 )
                 if (newStatus == HistoricalStatus.CompletedLater) {
                     insertCompletedLaterDate(routineId, date)
@@ -149,6 +156,26 @@ class CompletionHistoryLocalDataSourceImpl(
                 routineId = routineId,
                 date = date,
             )
+        }
+    }
+
+    override suspend fun getTotalTimesCompletedInPeriod(
+        routineId: Long, startDate: LocalDate, endDate: LocalDate
+    ): Double {
+        return withContext(dispatcher) {
+            db.completionHistoryEntityQueries
+                .getTotalTimesCompletedAtTheMomentOfDate(routineId, startDate, endDate)
+                .executeAsOne()
+        }
+    }
+
+    override suspend fun getScheduleDeviationInPeriod(
+        routineId: Long, startDate: LocalDate, endDate: LocalDate
+    ): Double {
+        return withContext(dispatcher) {
+            db.completionHistoryEntityQueries
+                .getScheduleDeviationAtTheMomentOfDate(routineId, startDate, endDate)
+                .executeAsOne()
         }
     }
 }

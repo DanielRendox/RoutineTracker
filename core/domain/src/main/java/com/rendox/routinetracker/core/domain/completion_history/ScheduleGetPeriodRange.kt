@@ -1,4 +1,4 @@
-package com.rendox.routinetracker.core.domain.routine.schedule
+package com.rendox.routinetracker.core.domain.completion_history
 
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.atEndOfMonth

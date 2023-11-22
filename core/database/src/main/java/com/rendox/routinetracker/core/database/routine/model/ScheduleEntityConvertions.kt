@@ -77,7 +77,6 @@ internal fun ScheduleEntity.toWeeklyScheduleByDueDaysOfWeek(
 internal fun ScheduleEntity.toWeeklyScheduleByNumOfDueDays() = Schedule.WeeklyScheduleByNumOfDueDays(
     numOfDueDays = numOfDueDaysInByNumOfDueDaysSchedule!!,
     numOfDueDaysInFirstPeriod = numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule,
-    numOfCompletedDaysInCurrentPeriod = numOfCompletedDaysInCurrentPeriodInByNumOfDueDaysSchedule!!,
     routineStartDate = routineStartDate,
     routineEndDate = routineEndDate,
     vacationStartDate = vacationStartDate,
@@ -106,7 +105,6 @@ internal fun ScheduleEntity.toMonthlyScheduleByDueDatesIndices(
 internal fun ScheduleEntity.toMonthlyScheduleByNumOfDueDays() = Schedule.MonthlyScheduleByNumOfDueDays(
     numOfDueDays = numOfDueDaysInByNumOfDueDaysSchedule!!,
     numOfDueDaysInFirstPeriod = numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule,
-    numOfCompletedDaysInCurrentPeriod = numOfCompletedDaysInCurrentPeriodInByNumOfDueDaysSchedule!!,
     startFromRoutineStart = startFromRoutineStartInMonthlyAndAnnualSchedule!!,
     periodSeparationEnabled = periodicSeparationEnabledInPeriodicSchedule!!,
     routineStartDate = routineStartDate,
@@ -120,7 +118,6 @@ internal fun ScheduleEntity.toMonthlyScheduleByNumOfDueDays() = Schedule.Monthly
 internal fun ScheduleEntity.toPeriodicCustomSchedule() = Schedule.PeriodicCustomSchedule (
     numOfDueDays = numOfDueDaysInByNumOfDueDaysSchedule!!,
     numOfDaysInPeriod = numOfDaysInPeriodicCustomSchedule!!,
-    numOfCompletedDaysInCurrentPeriod = numOfCompletedDaysInCurrentPeriodInByNumOfDueDaysSchedule!!,
     routineStartDate = routineStartDate,
     routineEndDate = routineEndDate,
     vacationStartDate = vacationStartDate,
@@ -158,7 +155,6 @@ internal fun ScheduleEntity.toAnnualScheduleByDueDates(
 internal fun ScheduleEntity.toAnnualScheduleByNumOfDueDays() = Schedule.AnnualScheduleByNumOfDueDays(
     numOfDueDays = numOfDueDaysInByNumOfDueDaysSchedule!!,
     numOfDueDaysInFirstPeriod = numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule,
-    numOfCompletedDaysInCurrentPeriod = numOfCompletedDaysInCurrentPeriodInByNumOfDueDaysSchedule!!,
     startFromRoutineStart = startFromRoutineStartInMonthlyAndAnnualSchedule!!,
     routineStartDate = routineStartDate,
     routineEndDate = routineEndDate,

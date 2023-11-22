@@ -73,7 +73,6 @@ sealed class Schedule {
     data class WeeklyScheduleByNumOfDueDays(
         val numOfDueDays: Int,
         val numOfDueDaysInFirstPeriod: Int?,
-        val numOfCompletedDaysInCurrentPeriod: Int = 0,
         override val startDayOfWeek: DayOfWeek? = null,
 
         override val periodSeparationEnabled: Boolean = false,
@@ -149,7 +148,6 @@ sealed class Schedule {
     data class MonthlyScheduleByNumOfDueDays(
         val numOfDueDays: Int,
         val numOfDueDaysInFirstPeriod: Int?,
-        val numOfCompletedDaysInCurrentPeriod: Int = 0,
         override val startFromRoutineStart: Boolean,
 
         override val periodSeparationEnabled: Boolean = false,
@@ -194,7 +192,6 @@ sealed class Schedule {
     data class PeriodicCustomSchedule(
         val numOfDueDays: Int,
         val numOfDaysInPeriod: Int,
-        val numOfCompletedDaysInCurrentPeriod: Int = 0,
 
         override val periodSeparationEnabled: Boolean = false,
         override val backlogEnabled: Boolean = false,
@@ -253,7 +250,6 @@ sealed class Schedule {
     data class AnnualScheduleByNumOfDueDays(
         val numOfDueDays: Int,
         val numOfDueDaysInFirstPeriod: Int?,
-        val numOfCompletedDaysInCurrentPeriod: Int = 0,
         override val startFromRoutineStart: Boolean,
 
         override val periodSeparationEnabled: Boolean = false,
