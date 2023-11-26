@@ -20,6 +20,11 @@ WHERE routineId = :routineId
 ORDER BY
         date ASC;
 
+getHistoryEntryByDate:
+SELECT *
+FROM completionHistoryEntity
+WHERE routineId = ? AND date = ?;
+
 insertHistoryEntry:
 INSERT INTO completionHistoryEntity
 VALUES (?, ?, ?, ?, ?, ?);
@@ -27,14 +32,14 @@ VALUES (?, ?, ?, ?, ?, ?);
 updateHistoryEntryStatusByDate:
 UPDATE completionHistoryEntity
 SET status = ?,
-scheduleDeviation = ?,
-timesCompleted = ?
+    scheduleDeviation = ?,
+    timesCompleted = ?
 WHERE routineId = ? AND date = ?;
 
 updateLastHistoryEntryStatusByStatus:
 UPDATE completionHistoryEntity
 SET status = :newStatus,
-scheduleDeviation = :currentScheduleDeviation
+    scheduleDeviation = :currentScheduleDeviation
 WHERE id = (
     SELECT id
     FROM completionHistoryEntity
@@ -46,14 +51,20 @@ WHERE id = (
 getLastHistoryEntryByStatus:
 SELECT *
 FROM completionHistoryEntity
-WHERE routineId = :routineId AND status IN :statusPredicate
+WHERE routineId = :routineId
+    AND status IN :matchingStatuses
+    AND (:minDate IS NULL OR :minDate <= date)
+    AND (:maxDate IS NULL OR date <= :maxDate)
 ORDER BY date DESC
 LIMIT 1;
 
 getFirstHistoryEntryByStatus:
 SELECT *
 FROM completionHistoryEntity
-WHERE routineId = :routineId AND status IN :matchingStatuses
+WHERE routineId = :routineId
+    AND status IN :matchingStatuses
+    AND (:minDate IS NULL OR :minDate <= date)
+    AND (:maxDate IS NULL OR date <= :maxDate)
 ORDER BY date ASC
 LIMIT 1;
 

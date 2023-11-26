@@ -582,6 +582,7 @@ class ScheduleIsDueTest {
                     ),
                     actualDate = null,
                     numOfTimesCompletedInCurrentPeriod = 0.0,
+                    scheduleDeviationInCurrentPeriod = 0.0,
                 )
             ).isTrue()
         }
@@ -598,6 +599,7 @@ class ScheduleIsDueTest {
                     ),
                     actualDate = null,
                     numOfTimesCompletedInCurrentPeriod = 0.0,
+                    scheduleDeviationInCurrentPeriod = 0.0,
                 )
             ).isFalse()
         }

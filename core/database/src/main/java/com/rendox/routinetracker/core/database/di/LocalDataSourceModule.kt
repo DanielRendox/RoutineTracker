@@ -14,6 +14,7 @@ import com.rendox.routinetracker.core.database.routine.RoutineEntity
 import com.rendox.routinetracker.core.database.schedule.DueDateEntity
 import com.rendox.routinetracker.core.database.schedule.ScheduleEntity
 import com.rendox.routinetracker.core.database.schedule.WeekDayMonthRelatedEntity
+import com.rendox.routinetracker.core.database.streak.StreakEntity
 import com.rendox.routinetracker.core.logic.time.AnnualDate
 import com.rendox.routinetracker.core.logic.time.epochDate
 import com.rendox.routinetracker.core.logic.time.plusDays
@@ -81,7 +82,11 @@ val localDataSourceModule = module {
             ),
             completedLaterHistoryEntityAdapter = CompletedLaterHistoryEntity.Adapter(
                 dateAdapter = localDateAdapter,
-            )
+            ),
+            streakEntityAdapter = StreakEntity.Adapter(
+                startDateAdapter = localDateAdapter,
+                endDateAdapter = localDateAdapter,
+            ),
         )
     }
 }

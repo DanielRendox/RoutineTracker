@@ -11,9 +11,15 @@ fun Schedule.isDue(
     validationDate: LocalDate,
     actualDate: LocalDate?,
     numOfTimesCompletedInCurrentPeriod: Double,
+    scheduleDeviationInCurrentPeriod: Double? = null,
+    lastVacationEndDate: LocalDate? = null,
 ): Boolean {
+    println("check if schedule is due on $validationDate")
     if (validationDate < routineStartDate) return false
     routineEndDate?.let { if (validationDate > it) return false }
+
+    println("check if schedule is due 2 on $validationDate")
+
 
     return when (this) {
         is Schedule.EveryDaySchedule -> everyDayScheduleIsDue()
@@ -30,6 +36,7 @@ fun Schedule.isDue(
                 numOfDueDays = getNumOfDueDatesInPeriod(period),
                 numOfCompletedDays = numOfTimesCompletedInCurrentPeriod,
                 dateScheduleDeviationIsActualFor = actualDate,
+                scheduleDeviationInCurrentPeriod = scheduleDeviationInCurrentPeriod ?: 0.0,
             )
         }
 
@@ -43,17 +50,19 @@ fun Schedule.isDue(
                 numOfDueDays = getNumOfDueDatesInPeriod(period),
                 numOfCompletedDays = numOfTimesCompletedInCurrentPeriod,
                 dateScheduleDeviationIsActualFor = actualDate,
+                scheduleDeviationInCurrentPeriod = scheduleDeviationInCurrentPeriod ?: 0.0,
             )
         }
 
         is Schedule.PeriodicCustomSchedule -> {
-            val period = getPeriodRange(validationDate)
+            val period = getPeriodRange(validationDate, lastVacationEndDate)
             scheduleByNumOfDueDaysIsDue(
                 validationDate = validationDate,
                 validationDatePeriod = period,
                 numOfDueDays = getNumOfDueDatesInPeriod(period),
                 numOfCompletedDays = numOfTimesCompletedInCurrentPeriod,
                 dateScheduleDeviationIsActualFor = actualDate,
+                scheduleDeviationInCurrentPeriod = scheduleDeviationInCurrentPeriod ?: 0.0,
             )
         }
 
@@ -69,6 +78,7 @@ fun Schedule.isDue(
                 numOfDueDays = getNumOfDueDatesInPeriod(period),
                 numOfCompletedDays = numOfTimesCompletedInCurrentPeriod,
                 dateScheduleDeviationIsActualFor = actualDate,
+                scheduleDeviationInCurrentPeriod = scheduleDeviationInCurrentPeriod ?: 0.0,
             )
         }
     }
@@ -113,14 +123,28 @@ private fun Schedule.ByNumOfDueDays.scheduleByNumOfDueDaysIsDue(
     numOfDueDays: Int,
     numOfCompletedDays: Double,
     dateScheduleDeviationIsActualFor: LocalDate?,
+    scheduleDeviationInCurrentPeriod: Double,
 ): Boolean {
     val validationDateNumberInPeriod = validationDatePeriod.start.daysUntil(validationDate) + 1
+    println("validation date = $validationDate")
+    println("validation date period = $validationDatePeriod")
+    println("validationDateNumberInPeriod = $validationDateNumberInPeriod")
+    println("num of due days = $numOfDueDays")
     if (validationDateNumberInPeriod <= numOfDueDays) return true
 
+    println("dateScheduleDeviationIsActualFor = $dateScheduleDeviationIsActualFor")
+
     dateScheduleDeviationIsActualFor?.let {
-        val daysBetweenLastDateInHistoryAndValidationDate = it.daysUntil(validationDate) - 1
+        val daysBetweenLastDateAndValidationDate = it.daysUntil(validationDate) - 1
+        val nonNegativeScheduleDeviation =
+            if (scheduleDeviationInCurrentPeriod < 0) -scheduleDeviationInCurrentPeriod else 0.0
         val daysExpectedToBeCompletedTillThatTime =
-            numOfCompletedDays + daysBetweenLastDateInHistoryAndValidationDate.toDouble()
+            numOfCompletedDays + nonNegativeScheduleDeviation + daysBetweenLastDateAndValidationDate.toDouble()
+        println("validationDate = $validationDate")
+        println("numOfCompletedDays = $numOfCompletedDays")
+        println("nonNegativeScheduleDeviation = $nonNegativeScheduleDeviation")
+        println("daysBetweenLastDateAndValidationDate = $daysBetweenLastDateAndValidationDate")
+        println()
         if (daysExpectedToBeCompletedTillThatTime < (numOfDueDays.toDouble())) return true
     }
 

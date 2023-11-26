@@ -4,6 +4,11 @@ import kotlinx.datetime.LocalDate
 
 data class Streak(
     val id: Long? = null,
-    val start: LocalDate,
-    val end: LocalDate?,
+    val startDate: LocalDate,
+    val endDate: LocalDate?,
+)
+
+data class DisplayStreak(
+    val startDate: LocalDate,
+    val endDate: LocalDate,
 )

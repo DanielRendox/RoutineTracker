@@ -48,7 +48,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 class AgendaListAdapter(
-    private val routineList: List<RoutineListElement>,
+    private val routineList: List<DisplayRoutine>,
     private val onRoutineClick: (Long) -> Unit,
     private val onStatusCheckmarkClick: (Long, RoutineStatus) -> Unit,
 ) : RecyclerView.Adapter<AgendaListViewHolder>() {
@@ -75,7 +75,7 @@ class AgendaListViewHolder(
     private val composeView: ComposeView
 ) : RecyclerView.ViewHolder(composeView) {
     fun bind(
-        routine: RoutineListElement,
+        routine: DisplayRoutine,
         onRoutineClick: () -> Unit,
         onStatusCheckmarkClick: (RoutineStatus) -> Unit,
     ) {
@@ -97,7 +97,7 @@ class AgendaListViewHolder(
 @Composable
 fun AgendaItem(
     modifier: Modifier = Modifier,
-    routine: RoutineListElement,
+    routine: DisplayRoutine,
     onRoutineClick: () -> Unit,
     onStatusCheckmarkClick: (RoutineStatus) -> Unit,
 ) {
@@ -314,25 +314,25 @@ private fun AgendaItemInListPreview() {
 }
 
 private val routines = listOf(
-    RoutineListElement(
+    DisplayRoutine(
         name = "Do sports",
         status = HistoricalStatus.Completed,
         completionTime = kotlinx.datetime.LocalTime(hour = 9, minute = 0),
         id = 1,
     ),
-    RoutineListElement(
+    DisplayRoutine(
         name = "Learn new English words",
         status = PlanningStatus.Planned,
         completionTime = null,
         id = 2,
     ),
-    RoutineListElement(
+    DisplayRoutine(
         name = "Spend time outside",
         status = HistoricalStatus.NotCompleted,
         completionTime = kotlinx.datetime.LocalTime(hour = 12, minute = 30),
         id = 3,
     ),
-    RoutineListElement(
+    DisplayRoutine(
         name = "Make my app",
         status = HistoricalStatus.CompletedLater,
         completionTime = kotlinx.datetime.LocalTime(hour = 17, minute = 0),

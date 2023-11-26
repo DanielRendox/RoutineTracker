@@ -1,0 +1,45 @@
+import kotlinx.datetime.LocalDate;
+
+CREATE TABLE streakEntity (
+    id INTEGER NOT NULL PRIMARY KEY,
+    routineId INTEGER NOT NULL,
+    startDate INTEGER AS LocalDate NOT NULL,
+    endDate INTEGER AS LocalDate,
+    FOREIGN KEY(routineId) REFERENCES routineEntity(id)
+);
+
+getAllStreaks:
+SELECT *
+FROM streakEntity
+WHERE routineId = :routineId
+    AND (:afterDateInclusive IS NULL OR endDate IS NULL OR endDate >= :afterDateInclusive)
+    AND (:beforeDateInclusive IS NULL OR startDate <= :beforeDateInclusive)
+ORDER BY startDate ASC;
+
+getStreakByDate:
+SELECT *
+FROM streakEntity
+WHERE routineId = :routineId
+    AND startDate <= :dateWithinStreak
+    AND (endDate IS NULL OR :dateWithinStreak <= endDate);
+
+getLastStreak:
+SELECT *
+FROM streakEntity
+WHERE routineId = :routineId
+ORDER BY startDate DESC
+LIMIT 1;
+
+insertStreak:
+INSERT INTO streakEntity
+VALUES (?, ?, ?, ?);
+
+deleteStreakById:
+DELETE FROM streakEntity
+WHERE id = ?;
+
+updateStreakById:
+UPDATE streakEntity
+SET startDate = ?,
+    endDate = ?
+WHERE id = ?;

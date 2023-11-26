@@ -4,9 +4,11 @@ import com.google.common.truth.Truth.assertThat
 import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
 import com.rendox.routinetracker.core.data.di.completionHistoryDataModule
 import com.rendox.routinetracker.core.data.di.routineDataModule
+import com.rendox.routinetracker.core.data.di.streakDataModule
 import com.rendox.routinetracker.core.data.routine.RoutineRepository
 import com.rendox.routinetracker.core.database.completion_history.CompletionHistoryLocalDataSource
 import com.rendox.routinetracker.core.database.routine.RoutineLocalDataSource
+import com.rendox.routinetracker.core.database.streak.StreakLocalDataSource
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.GetRoutineStatusUseCase
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.InsertRoutineStatusUseCase
 import com.rendox.routinetracker.core.logic.time.plusDays
@@ -21,6 +23,7 @@ import com.rendox.routinetracker.core.model.StatusEntry
 import com.rendox.routinetracker.core.testcommon.fakes.routine.CompletionHistoryLocalDataSourceFake
 import com.rendox.routinetracker.core.testcommon.fakes.routine.RoutineData
 import com.rendox.routinetracker.core.testcommon.fakes.routine.RoutineLocalDataSourceFake
+import com.rendox.routinetracker.core.testcommon.fakes.routine.StreakLocalDataSourceFake
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DayOfWeek
@@ -73,6 +76,10 @@ class GetRoutineStatusUseCaseTest : KoinTest {
         single<CompletionHistoryLocalDataSource> {
             CompletionHistoryLocalDataSourceFake(routineData = get())
         }
+
+        single<StreakLocalDataSource> {
+            StreakLocalDataSourceFake(routineData = get())
+        }
     }
 
     @Before
@@ -81,6 +88,7 @@ class GetRoutineStatusUseCaseTest : KoinTest {
             modules(
                 routineDataModule,
                 completionHistoryDataModule,
+                streakDataModule,
                 testModule,
             )
         }
@@ -91,6 +99,7 @@ class GetRoutineStatusUseCaseTest : KoinTest {
         insertRoutineStatusIntoHistory = InsertRoutineStatusUseCase(
             completionHistoryRepository = get(),
             routineRepository = get(),
+            streakRepository = get(),
         )
 
         getRoutineStatusList = GetRoutineStatusUseCase(

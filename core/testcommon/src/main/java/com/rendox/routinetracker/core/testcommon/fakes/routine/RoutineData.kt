@@ -2,6 +2,7 @@ package com.rendox.routinetracker.core.testcommon.fakes.routine
 
 import com.rendox.routinetracker.core.model.CompletionHistoryEntry
 import com.rendox.routinetracker.core.model.Routine
+import com.rendox.routinetracker.core.model.Streak
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 
@@ -54,6 +55,19 @@ class RoutineData {
         }
         set(value) {
             synchronized(dueDateCompletionTimeLock) {
+                field = value
+            }
+        }
+
+    private val listOfStreaksLock = Any()
+    var listOfStreaks = emptyList<Pair<Long, Streak>>()
+        get() {
+            synchronized(listOfStreaksLock) {
+                return field
+            }
+        }
+        set(value) {
+            synchronized(listOfStreaksLock) {
                 field = value
             }
         }

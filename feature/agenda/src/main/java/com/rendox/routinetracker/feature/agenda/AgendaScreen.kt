@@ -43,40 +43,24 @@ internal fun AgendaRoute(
     modifier: Modifier = Modifier,
     onRoutineClick: (Long) -> Unit,
     onAddRoutineClick: () -> Unit,
-//    viewModel: AgendaScreenViewModel = koinViewModel(),
+    viewModel: AgendaScreenViewModel = koinViewModel(),
 ) {
-//    val currentDate by viewModel.currentDateFlow.collectAsStateWithLifecycle()
-//    val visibleRoutines by viewModel.visibleRoutinesFlow.collectAsStateWithLifecycle()
-
-//    AgendaScreen(
-//        modifier = modifier,
-//        currentDate = currentDate.toJavaLocalDate(),
-//        routineList = visibleRoutines,
-//        today = LocalDate.now(),
-//        onAddRoutineClick = { viewModel.onAddRoutineClick() },
-//        onRoutineClick = onRoutineClick,
-//        onStatusCheckmarkClick = { routineId, status ->
-//            viewModel.onRoutineStatusCheckmarkClick(routineId, currentDate, status)
-//        },
-//        onDateChange = { viewModel.onDateChange(it.toKotlinLocalDate()) },
-//        onNotDueRoutinesVisibilityToggle = {
-//            viewModel.onNotDueRoutinesVisibilityToggle()
-//        },
-//    )
+    val currentDate by viewModel.currentDateFlow.collectAsStateWithLifecycle()
+    val visibleRoutines by viewModel.visibleRoutinesFlow.collectAsStateWithLifecycle()
 
     AgendaScreen(
         modifier = modifier,
-        currentDate = LocalDate.now(),
-        routineList = emptyList(),
+        currentDate = currentDate.toJavaLocalDate(),
+        routineList = visibleRoutines,
         today = LocalDate.now(),
-        onAddRoutineClick = { },
+        onAddRoutineClick = { viewModel.onAddRoutineClick() },
         onRoutineClick = onRoutineClick,
         onStatusCheckmarkClick = { routineId, status ->
-
+            viewModel.onRoutineStatusCheckmarkClick(routineId, currentDate, status)
         },
-        onDateChange = {  },
+        onDateChange = { viewModel.onDateChange(it.toKotlinLocalDate()) },
         onNotDueRoutinesVisibilityToggle = {
-
+            viewModel.onNotDueRoutinesVisibilityToggle()
         },
     )
 }
@@ -86,7 +70,7 @@ internal fun AgendaRoute(
 internal fun AgendaScreen(
     modifier: Modifier = Modifier,
     currentDate: LocalDate,
-    routineList: List<RoutineListElement>,
+    routineList: List<DisplayRoutine>,
     today: LocalDate,
     onAddRoutineClick: () -> Unit,
     onRoutineClick: (Long) -> Unit,
@@ -159,7 +143,7 @@ internal fun AgendaScreen(
 
 @Composable
 private fun AgendaList(
-    routineList: List<RoutineListElement>,
+    routineList: List<DisplayRoutine>,
     onRoutineClick: (Long) -> Unit,
     onStatusCheckmarkClick: (Long, RoutineStatus) -> Unit,
 ) {

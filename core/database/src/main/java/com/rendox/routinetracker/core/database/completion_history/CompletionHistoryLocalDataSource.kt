@@ -12,6 +12,11 @@ interface CompletionHistoryLocalDataSource {
         dates: LocalDateRange,
     ): List<CompletionHistoryEntry>
 
+    suspend fun getHistoryEntryByDate(
+        routineId: Long,
+        date: LocalDate
+    ): CompletionHistoryEntry?
+
     suspend fun insertHistoryEntry(
         id: Long? = null,
         routineId: Long,
@@ -34,10 +39,15 @@ interface CompletionHistoryLocalDataSource {
     suspend fun getFirstHistoryEntryByStatus(
         routineId: Long,
         matchingStatuses: List<HistoricalStatus>,
+        minDate: LocalDate? = null,
+        maxDate: LocalDate? = null,
     ): CompletionHistoryEntry?
 
     suspend fun getLastHistoryEntryByStatus(
-        routineId: Long, matchingStatuses: List<HistoricalStatus>
+        routineId: Long,
+        matchingStatuses: List<HistoricalStatus>,
+        minDate: LocalDate? = null,
+        maxDate: LocalDate? = null,
     ): CompletionHistoryEntry?
 
     suspend fun checkIfStatusWasCompletedLater(routineId: Long, date: LocalDate): Boolean

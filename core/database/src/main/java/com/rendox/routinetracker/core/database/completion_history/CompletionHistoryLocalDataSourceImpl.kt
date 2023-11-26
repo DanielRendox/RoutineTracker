@@ -28,6 +28,18 @@ class CompletionHistoryLocalDataSourceImpl(
         }
     }
 
+    override suspend fun getHistoryEntryByDate(
+        routineId: Long,
+        date: LocalDate
+    ): CompletionHistoryEntry? {
+        return withContext(dispatcher) {
+            db.completionHistoryEntityQueries.getHistoryEntryByDate(
+                routineId = routineId,
+                date = date,
+            ).executeAsOneOrNull()?.toExternalModel()
+        }
+    }
+
     private fun CompletionHistoryEntity.toExternalModel() = CompletionHistoryEntry(
         date = date,
         status = status,
@@ -106,20 +118,31 @@ class CompletionHistoryLocalDataSourceImpl(
     override suspend fun getFirstHistoryEntryByStatus(
         routineId: Long,
         matchingStatuses: List<HistoricalStatus>,
+        minDate: LocalDate?,
+        maxDate: LocalDate?,
     ): CompletionHistoryEntry? {
         return withContext(dispatcher) {
             db.completionHistoryEntityQueries.getFirstHistoryEntryByStatus(
-                routineId, matchingStatuses
+                routineId = routineId,
+                matchingStatuses = matchingStatuses,
+                minDate = minDate,
+                maxDate = maxDate,
             ).executeAsOneOrNull()?.toExternalModel()
         }
     }
 
     override suspend fun getLastHistoryEntryByStatus(
-        routineId: Long, matchingStatuses: List<HistoricalStatus>
+        routineId: Long,
+        matchingStatuses: List<HistoricalStatus>,
+        minDate: LocalDate?,
+        maxDate: LocalDate?,
     ): CompletionHistoryEntry? {
         return withContext(dispatcher) {
             db.completionHistoryEntityQueries.getLastHistoryEntryByStatus(
-                routineId, matchingStatuses
+                routineId = routineId,
+                matchingStatuses = matchingStatuses,
+                minDate = minDate,
+                maxDate = maxDate,
             ).executeAsOneOrNull()?.toExternalModel()
         }
     }

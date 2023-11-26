@@ -30,16 +30,14 @@ class GetRoutineStatusUseCase(
         dates: LocalDateRange,
         today: LocalDate,
     ): List<StatusEntry> {
-        val yesterday = today.minus(DatePeriod(days = 1))
-        prepopulateHistoryWithMissingDates(routineId, yesterday)
+        val routine: Routine = routineRepository.getRoutineById(routineId)
+        prepopulateHistoryWithMissingDates(routine, today)
 
         val resultingStatusList = mutableListOf<StatusEntry>()
 
         val completionHistoryPart =
             completionHistoryRepository.getHistoryEntries(routineId, dates)
         resultingStatusList.addAll(completionHistoryPart.map { it.toStatusEntry() })
-
-        val routine: Routine = routineRepository.getRoutineById(routineId)
 
         if (completionHistoryPart.isEmpty()) {
             resultingStatusList.addAll(computeFutureStatuses(dates, routine))
@@ -52,9 +50,9 @@ class GetRoutineStatusUseCase(
         return resultingStatusList
     }
 
-    private suspend fun prepopulateHistoryWithMissingDates(routineId: Long, yesterday: LocalDate) {
-        val lastDateInHistory = completionHistoryRepository.getLastHistoryEntry(routineId)?.date
-        val routine = routineRepository.getRoutineById(routineId)
+    private suspend fun prepopulateHistoryWithMissingDates(routine: Routine, today: LocalDate) {
+        val yesterday = today.minus(DatePeriod(days = 1))
+        val lastDateInHistory = completionHistoryRepository.getLastHistoryEntry(routine.id!!)?.date
 
         val routineEndDate: LocalDate? = routine.schedule.routineEndDate
         if (routineEndDate != null && yesterday > routineEndDate) return
@@ -62,9 +60,10 @@ class GetRoutineStatusUseCase(
         if (lastDateInHistory == null && routine.schedule.routineStartDate <= yesterday) {
             for (date in routine.schedule.routineStartDate..yesterday) {
                 insertRoutineStatus(
-                    routineId = routineId,
+                    routineId = routine.id!!,
                     currentDate = date,
                     completedOnCurrentDate = false,
+                    today = today,
                 )
             }
             return
@@ -73,9 +72,10 @@ class GetRoutineStatusUseCase(
         if (lastDateInHistory != null && lastDateInHistory < yesterday) {
             for (date in lastDateInHistory.plusDays(1)..yesterday) {
                 insertRoutineStatus(
-                    routineId = routineId,
+                    routineId = routine.id!!,
                     currentDate = date,
                     completedOnCurrentDate = false,
+                    today = today,
                 )
             }
             return
@@ -86,12 +86,19 @@ class GetRoutineStatusUseCase(
         dateRange: LocalDateRange,
         routine: Routine,
     ): List<StatusEntry> {
-        val statusList = mutableListOf<StatusEntry>()
+        val lastVacationStatus = completionHistoryRepository.getLastHistoryEntryByStatus(
+            routineId = routine.id!!,
+            matchingStatuses = onVacationHistoricalStatuses,
+        )
 
+        val statusList = mutableListOf<StatusEntry>()
         val lastHistoryEntry = completionHistoryRepository.getLastHistoryEntry(routine.id!!)
         val schedule = routine.schedule
         val lastPeriod: LocalDateRange? = lastHistoryEntry?.let {
-            if (schedule is Schedule.PeriodicSchedule) schedule.getPeriodRange(it.date)
+            if (schedule is Schedule.PeriodicSchedule) schedule.getPeriodRange(
+                currentDate = it.date,
+                lastVacationEndDate = lastVacationStatus?.date,
+            )
             else null
         }
         val numOfTimesCompletedInLastPeriodAtTheMomentOfLastHistoryEntryDate =
@@ -114,6 +121,13 @@ class GetRoutineStatusUseCase(
                 },
                 endDate = dateRange.start,
             )
+        val scheduleDeviationInCurrentPeriod = lastPeriod?.let {
+            completionHistoryRepository.getScheduleDeviationInPeriod(
+                routineId = routine.id!!,
+                startDate = it.start,
+                endDate = dateRange.start,
+            )
+        }
 
         for (date in dateRange) {
             routine.computePlanningStatus(
@@ -121,6 +135,8 @@ class GetRoutineStatusUseCase(
                 currentScheduleDeviation = scheduleDeviationAtTheMomentOfLastHistoryEntryDate,
                 actualDate = lastHistoryEntry?.date,
                 numOfTimesCompletedInCurrentPeriod = numOfTimesCompletedInLastPeriodAtTheMomentOfLastHistoryEntryDate,
+                scheduleDeviationInCurrentPeriod = scheduleDeviationInCurrentPeriod,
+                lastVacationEndDate = lastVacationStatus?.date,
             )?.let {
                 statusList.add(StatusEntry(date = date, status = it))
             }

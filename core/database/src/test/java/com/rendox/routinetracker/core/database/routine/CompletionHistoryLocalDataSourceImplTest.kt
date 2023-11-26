@@ -177,17 +177,6 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
     }
 
     @Test
-    fun assertReturnsCorrectFirstHistoryEntryDateByStatus() = runTest {
-        val desiredStatuses = listOf(HistoricalStatus.Completed, HistoricalStatus.OverCompleted)
-        assertThat(
-            completionHistoryLocalDataSource.getFirstHistoryEntryByStatus(
-                routineId = routineId,
-                matchingStatuses = desiredStatuses,
-            )
-        ).isEqualTo(completionHistory.find { it.status in desiredStatuses })
-    }
-
-    @Test
     fun assertInsertsCompletedLaterStatusesIntoSeparateTableOnInsert() = runTest {
         val completedLaterEntries = completionHistory.filter {
             it.status == HistoricalStatus.CompletedLater

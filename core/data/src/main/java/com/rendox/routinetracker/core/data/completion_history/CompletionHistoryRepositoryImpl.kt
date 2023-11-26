@@ -17,6 +17,13 @@ class CompletionHistoryRepositoryImpl(
         return localDataSource.getHistoryEntries(routineId, dates)
     }
 
+    override suspend fun getHistoryEntryByDate(
+        routineId: Long,
+        date: LocalDate
+    ): CompletionHistoryEntry? {
+        return localDataSource.getHistoryEntryByDate(routineId, date)
+    }
+
     override suspend fun insertHistoryEntry(
         id: Long?,
         routineId: Long,
@@ -65,9 +72,31 @@ class CompletionHistoryRepositoryImpl(
         localDataSource.deleteCompletedLaterBackupEntry(routineId, date)
     }
 
+    override suspend fun getFirstHistoryEntryByStatus(
+        routineId: Long,
+        matchingStatuses: List<HistoricalStatus>,
+        minDate: LocalDate?,
+        maxDate: LocalDate?,
+    ): CompletionHistoryEntry? {
+        return localDataSource.getFirstHistoryEntryByStatus(
+            routineId = routineId,
+            matchingStatuses = matchingStatuses,
+            minDate = minDate,
+            maxDate = maxDate,
+        )
+    }
+
     override suspend fun getLastHistoryEntryByStatus(
-        routineId: Long, matchingStatuses: List<HistoricalStatus>
-    ): CompletionHistoryEntry? = localDataSource.getLastHistoryEntryByStatus(routineId, matchingStatuses)
+        routineId: Long,
+        matchingStatuses: List<HistoricalStatus>,
+        minDate: LocalDate?,
+        maxDate: LocalDate?,
+    ): CompletionHistoryEntry? = localDataSource.getLastHistoryEntryByStatus(
+        routineId = routineId,
+        matchingStatuses = matchingStatuses,
+        minDate = minDate,
+        maxDate = maxDate,
+    )
 
     override suspend fun getTotalTimesCompletedInPeriod(
         routineId: Long, startDate: LocalDate, endDate: LocalDate

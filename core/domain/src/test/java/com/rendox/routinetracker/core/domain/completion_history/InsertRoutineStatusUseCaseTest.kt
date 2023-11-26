@@ -2,9 +2,14 @@ package com.rendox.routinetracker.core.domain.completion_history
 
 import com.google.common.truth.Truth.assertThat
 import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
-import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepositoryImpl
+import com.rendox.routinetracker.core.data.di.completionHistoryDataModule
+import com.rendox.routinetracker.core.data.di.routineDataModule
+import com.rendox.routinetracker.core.data.di.streakDataModule
 import com.rendox.routinetracker.core.data.routine.RoutineRepository
-import com.rendox.routinetracker.core.data.routine.RoutineRepositoryImpl
+import com.rendox.routinetracker.core.data.streak.StreakRepository
+import com.rendox.routinetracker.core.database.completion_history.CompletionHistoryLocalDataSource
+import com.rendox.routinetracker.core.database.routine.RoutineLocalDataSource
+import com.rendox.routinetracker.core.database.streak.StreakLocalDataSource
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.InsertRoutineStatusUseCase
 import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
 import com.rendox.routinetracker.core.logic.time.WeekDayNumberMonthRelated
@@ -14,9 +19,11 @@ import com.rendox.routinetracker.core.model.CompletionHistoryEntry
 import com.rendox.routinetracker.core.model.HistoricalStatus
 import com.rendox.routinetracker.core.model.Routine
 import com.rendox.routinetracker.core.model.Schedule
+import com.rendox.routinetracker.core.model.Streak
 import com.rendox.routinetracker.core.testcommon.fakes.routine.CompletionHistoryLocalDataSourceFake
 import com.rendox.routinetracker.core.testcommon.fakes.routine.RoutineData
 import com.rendox.routinetracker.core.testcommon.fakes.routine.RoutineLocalDataSourceFake
+import com.rendox.routinetracker.core.testcommon.fakes.routine.StreakLocalDataSourceFake
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DayOfWeek
@@ -24,25 +31,66 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Month
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.dsl.module
+import org.koin.test.KoinTest
+import org.koin.test.get
 import kotlin.test.assertFailsWith
 
-class InsertRoutineStatusUseCaseTest {
+class InsertRoutineStatusUseCaseTest : KoinTest {
 
-    private val routineData = RoutineData()
-    private val routineLocalDataSource = RoutineLocalDataSourceFake(routineData)
-    private val completionHistoryLocalDataSource = CompletionHistoryLocalDataSourceFake(routineData)
-    private val completionHistoryRepository: CompletionHistoryRepository =
-        CompletionHistoryRepositoryImpl(
-            localDataSource = completionHistoryLocalDataSource,
+    private lateinit var routineRepository: RoutineRepository
+    private lateinit var completionHistoryRepository: CompletionHistoryRepository
+    private lateinit var insertRoutineStatus: InsertRoutineStatusUseCase
+    private lateinit var streakRepository: StreakRepository
+    private val today = LocalDate(2030, Month.JANUARY, 1)
+
+    private val testModule = module {
+        single { RoutineData() }
+
+        single<RoutineLocalDataSource> {
+            RoutineLocalDataSourceFake(routineData = get())
+        }
+
+        single<CompletionHistoryLocalDataSource> {
+            CompletionHistoryLocalDataSourceFake(routineData = get())
+        }
+
+        single<StreakLocalDataSource> {
+            StreakLocalDataSourceFake(routineData = get())
+        }
+    }
+
+    @Before
+    fun setUp() {
+        startKoin {
+            modules(
+                routineDataModule,
+                completionHistoryDataModule,
+                streakDataModule,
+                testModule,
+            )
+        }
+
+        routineRepository = get()
+        completionHistoryRepository = get()
+        streakRepository = get()
+
+        insertRoutineStatus = InsertRoutineStatusUseCase(
+            completionHistoryRepository = completionHistoryRepository,
+            routineRepository = routineRepository,
+            streakRepository = streakRepository,
         )
-    private val routineRepository: RoutineRepository = RoutineRepositoryImpl(
-        localDataSource = routineLocalDataSource,
-    )
-    private val insertRoutineStatusIntoHistory = InsertRoutineStatusUseCase(
-        completionHistoryRepository = completionHistoryRepository,
-        routineRepository = routineRepository,
-    )
+    }
+
+    @After
+    fun tearDown() {
+        stopKoin()
+    }
 
     @Test
     fun `every day schedule, standard check`() = runTest {
@@ -105,35 +153,128 @@ class InsertRoutineStatusUseCaseTest {
 
         routineRepository.insertRoutine(routine)
 
-        insertRoutineStatusIntoHistory(
+        insertRoutineStatus(
             routineId = routineId,
             currentDate = expectedHistory[0].date,
             completedOnCurrentDate = true,
+            today = today,
         )
-        insertRoutineStatusIntoHistory(
+
+        assertThat(
+            streakRepository.getAllStreaks(routineId)
+        ).isEqualTo(
+            listOf(
+                Streak(
+                    id = 1,
+                    startDate = LocalDate(2023, Month.OCTOBER, 1),
+                    endDate = null,
+                )
+            )
+        )
+
+        insertRoutineStatus(
             routineId = routineId,
             currentDate = expectedHistory[1].date,
             completedOnCurrentDate = true,
+            today = today,
         )
-        insertRoutineStatusIntoHistory(
+
+        assertThat(
+            streakRepository.getAllStreaks(routineId)
+        ).isEqualTo(
+            listOf(
+                Streak(
+                    id = 1,
+                    startDate = LocalDate(2023, Month.OCTOBER, 1),
+                    endDate = null,
+                )
+            )
+        )
+
+        insertRoutineStatus(
             routineId = routineId,
             currentDate = expectedHistory[2].date,
             completedOnCurrentDate = false,
+            today = today,
         )
-        insertRoutineStatusIntoHistory(
+
+        assertThat(
+            streakRepository.getAllStreaks(routineId)
+        ).isEqualTo(
+            listOf(
+                Streak(
+                    id = 1,
+                    startDate = LocalDate(2023, Month.OCTOBER, 1),
+                    endDate = LocalDate(2023, Month.OCTOBER, 2),
+                )
+            )
+        )
+
+        insertRoutineStatus(
             routineId = routineId,
             currentDate = expectedHistory[3].date,
             completedOnCurrentDate = false,
+            today = today,
         )
-        insertRoutineStatusIntoHistory(
+
+        assertThat(
+            streakRepository.getAllStreaks(routineId)
+        ).isEqualTo(
+            listOf(
+                Streak(
+                    id = 1,
+                    startDate = LocalDate(2023, Month.OCTOBER, 1),
+                    endDate = LocalDate(2023, Month.OCTOBER, 2),
+                )
+            )
+        )
+
+        insertRoutineStatus(
             routineId = routineId,
             currentDate = expectedHistory[4].date,
             completedOnCurrentDate = true,
+            today = today,
         )
-        insertRoutineStatusIntoHistory(
+
+        assertThat(
+            streakRepository.getAllStreaks(routineId)
+        ).isEqualTo(
+            listOf(
+                Streak(
+                    id = 1,
+                    startDate = LocalDate(2023, Month.OCTOBER, 1),
+                    endDate = LocalDate(2023, Month.OCTOBER, 2),
+                ),
+                Streak(
+                    id = 2,
+                    startDate = LocalDate(2023, Month.OCTOBER, 5),
+                    endDate = null,
+                )
+            )
+        )
+
+        insertRoutineStatus(
             routineId = routineId,
             currentDate = expectedHistory[5].date,
             completedOnCurrentDate = false,
+            today = today,
+        )
+
+        assertThat(
+            streakRepository.getAllStreaks(routineId)
+        ).isEqualTo(
+            listOf(
+                Streak(
+                    id = 1,
+                    startDate = LocalDate(2023, Month.OCTOBER, 1),
+                    endDate = LocalDate(2023, Month.OCTOBER, 2),
+                ),
+                Streak(
+                    id = 2,
+                    startDate = LocalDate(2023, Month.OCTOBER, 5),
+                    endDate = LocalDate(2023, Month.OCTOBER, 5),
+                )
+            )
         )
 
         assertThat(
@@ -144,18 +285,20 @@ class InsertRoutineStatusUseCaseTest {
         ).isEqualTo(expectedHistory)
 
         assertFailsWith<NullPointerException> {
-            insertRoutineStatusIntoHistory(
+            insertRoutineStatus(
                 routineId = routineId,
                 currentDate = routineStartDate.minus(DatePeriod(days = 1)),
                 completedOnCurrentDate = false,
+                today = today,
             )
         }
 
         assertFailsWith<NullPointerException> {
-            insertRoutineStatusIntoHistory(
+            insertRoutineStatus(
                 routineId = routineId,
                 currentDate = routineEndDate.plus(DatePeriod(days = 1)),
                 completedOnCurrentDate = false,
+                today = today,
             )
         }
     }
@@ -248,23 +391,36 @@ class InsertRoutineStatusUseCaseTest {
         )
 
         completionHistory.slice(0..5).forEachIndexed { index, isCompleted ->
-            insertRoutineStatusIntoHistory(
+            insertRoutineStatus(
                 routineId = routineId,
                 currentDate = routineStartDate.plusDays(index),
                 completedOnCurrentDate = isCompleted,
+                today = today,
             )
         }
 
         assertThat(
             completionHistoryRepository.getHistoryEntries(
-                routineId, firstSixDaysOfFirstWeek.first().date..firstSixDaysOfFirstWeek.last().date
+                routineId = routineId,
+                dates = firstSixDaysOfFirstWeek.first().date..firstSixDaysOfFirstWeek.last().date,
             )
         ).isEqualTo(firstSixDaysOfFirstWeek)
 
-        insertRoutineStatusIntoHistory(
+        val firstSixDaysOfFirstWeekExpectedStreaks = listOf(
+            Streak(
+                id = 1,
+                startDate = LocalDate(2023, Month.OCTOBER, 2),
+                endDate = LocalDate(2023, Month.OCTOBER, 5),
+            )
+        )
+        assertThat(streakRepository.getAllStreaks(routineId))
+            .isEqualTo(firstSixDaysOfFirstWeekExpectedStreaks)
+
+        insertRoutineStatus(
             routineId = routineId,
             currentDate = LocalDate(2023, Month.OCTOBER, 8),
             completedOnCurrentDate = completionHistory[6],
+            today = today,
         )
 
         val firstWeek = mutableListOf<CompletionHistoryEntry>()
@@ -288,6 +444,20 @@ class InsertRoutineStatusUseCaseTest {
                 routineId, firstWeek.first().date..firstWeek.last().date
             )
         ).isEqualTo(firstWeek)
+
+        val firstWeekExpectedSteaks = listOf(
+            Streak(
+                id = 1,
+                startDate = LocalDate(2023, Month.OCTOBER, 2),
+                endDate = LocalDate(2023, Month.OCTOBER, 5),
+            ),
+            Streak(
+                id = 2,
+                startDate = LocalDate(2023, Month.OCTOBER, 7),
+                endDate = null,
+            )
+        )
+        assertThat(streakRepository.getAllStreaks(routineId)).isEqualTo(firstWeekExpectedSteaks)
 
         val secondWeek = listOf(
             CompletionHistoryEntry(
@@ -335,10 +505,11 @@ class InsertRoutineStatusUseCaseTest {
         )
 
         completionHistory.slice(7..13).forEachIndexed { index, isCompleted ->
-            insertRoutineStatusIntoHistory(
+            insertRoutineStatus(
                 routineId = routineId,
                 currentDate = routineStartDate.plusDays(7 + index),
                 completedOnCurrentDate = isCompleted,
+                today = today,
             )
         }
 
@@ -368,10 +539,11 @@ class InsertRoutineStatusUseCaseTest {
         fullHistorySoFar.addAll(lastTwoDays)
 
         completionHistory.slice(14..15).forEachIndexed { index, isCompleted ->
-            insertRoutineStatusIntoHistory(
+            insertRoutineStatus(
                 routineId = routineId,
                 currentDate = routineStartDate.plusDays(14 + index),
                 completedOnCurrentDate = isCompleted,
+                today = today,
             )
         }
 
@@ -380,6 +552,23 @@ class InsertRoutineStatusUseCaseTest {
                 routineId, routineStartDate..fullHistorySoFar.last().date
             )
         ).isEqualTo(fullHistorySoFar)
+
+        val fullStreakHistory = listOf(
+            Streak(
+                id = 1,
+                startDate = LocalDate(2023, Month.OCTOBER, 2),
+                endDate = LocalDate(2023, Month.OCTOBER, 5),
+            ),
+            Streak(
+                id = 2,
+                startDate = LocalDate(2023, Month.OCTOBER, 7),
+                endDate = LocalDate(2023, Month.OCTOBER, 16),
+            )
+        )
+
+        assertThat(
+            streakRepository.getAllStreaks(routineId)
+        ).isEqualTo(fullStreakHistory)
     }
 
     @Test
@@ -470,23 +659,36 @@ class InsertRoutineStatusUseCaseTest {
         )
 
         completionHistory.slice(0..5).forEachIndexed { index, isCompleted ->
-            insertRoutineStatusIntoHistory(
+            insertRoutineStatus(
                 routineId = routineId,
                 currentDate = routineStartDate.plusDays(index),
                 completedOnCurrentDate = isCompleted,
+                today = today,
             )
         }
 
         assertThat(
             completionHistoryRepository.getHistoryEntries(
-                routineId, firstSixDaysOfFirstWeek.first().date..firstSixDaysOfFirstWeek.last().date
+                routineId = routineId,
+                dates = firstSixDaysOfFirstWeek.first().date..firstSixDaysOfFirstWeek.last().date,
             )
         ).isEqualTo(firstSixDaysOfFirstWeek)
 
-        insertRoutineStatusIntoHistory(
+        val firstSixDaysOfFirstWeekStreaks = listOf(
+            Streak(
+                id = 1,
+                startDate = LocalDate(2023, Month.OCTOBER, 2),
+                endDate = LocalDate(2023, Month.OCTOBER, 5),
+            )
+        )
+        assertThat(streakRepository.getAllStreaks(routineId))
+            .isEqualTo(firstSixDaysOfFirstWeekStreaks)
+
+        insertRoutineStatus(
             routineId = routineId,
             currentDate = LocalDate(2023, Month.OCTOBER, 8),
             completedOnCurrentDate = completionHistory[6],
+            today = today,
         )
 
         val firstWeek = mutableListOf<CompletionHistoryEntry>()
@@ -506,6 +708,20 @@ class InsertRoutineStatusUseCaseTest {
                 routineId, firstWeek.first().date..firstWeek.last().date
             )
         ).isEqualTo(firstWeek)
+
+        val firstWeekStreaks = listOf(
+            Streak(
+                id = 1,
+                startDate = LocalDate(2023, Month.OCTOBER, 2),
+                endDate = LocalDate(2023, Month.OCTOBER, 5),
+            ),
+            Streak(
+                id = 2,
+                startDate = LocalDate(2023, Month.OCTOBER, 7),
+                endDate = null,
+            )
+        )
+        assertThat(streakRepository.getAllStreaks(routineId)).isEqualTo(firstWeekStreaks)
 
         val secondWeek = listOf(
             CompletionHistoryEntry(
@@ -553,10 +769,11 @@ class InsertRoutineStatusUseCaseTest {
         )
 
         completionHistory.slice(7..13).forEachIndexed { index, isCompleted ->
-            insertRoutineStatusIntoHistory(
+            insertRoutineStatus(
                 routineId = routineId,
                 currentDate = routineStartDate.plusDays(7 + index),
                 completedOnCurrentDate = isCompleted,
+                today = today,
             )
         }
 
@@ -564,11 +781,21 @@ class InsertRoutineStatusUseCaseTest {
         fullHistorySoFar.addAll(firstWeek)
         fullHistorySoFar.addAll(secondWeek)
         fullHistorySoFar[4] = fullHistorySoFar[4].copy(status = HistoricalStatus.CompletedLater)
+
         assertThat(
             completionHistoryRepository.getHistoryEntries(
                 routineId, routineStartDate..fullHistorySoFar.last().date
             )
         ).isEqualTo(fullHistorySoFar)
+
+        val secondWeekStreaks = listOf(
+            Streak(
+                id = 1,
+                startDate = LocalDate(2023, Month.OCTOBER, 2),
+                endDate = null,
+            ),
+        )
+        assertThat(streakRepository.getAllStreaks(routineId)).isEqualTo(secondWeekStreaks)
 
         val lastTwoDays = listOf(
             CompletionHistoryEntry(
@@ -587,18 +814,31 @@ class InsertRoutineStatusUseCaseTest {
         fullHistorySoFar.addAll(lastTwoDays)
 
         completionHistory.slice(14..15).forEachIndexed { index, isCompleted ->
-            insertRoutineStatusIntoHistory(
+            insertRoutineStatus(
                 routineId = routineId,
                 currentDate = routineStartDate.plusDays(14 + index),
                 completedOnCurrentDate = isCompleted,
+                today = today,
             )
         }
 
         assertThat(
             completionHistoryRepository.getHistoryEntries(
-                routineId, routineStartDate..fullHistorySoFar.last().date
+                routineId = routineId,
+                dates = routineStartDate..fullHistorySoFar.last().date,
             )
         ).isEqualTo(fullHistorySoFar)
+
+        println(fullHistorySoFar)
+
+        val expectedStreaks = listOf(
+            Streak(
+                id = 1,
+                startDate = LocalDate(2023, Month.OCTOBER, 2),
+                endDate = LocalDate(2023, Month.OCTOBER, 16),
+            )
+        )
+        assertThat(streakRepository.getAllStreaks(routineId)).isEqualTo(expectedStreaks)
     }
 
     @Test
@@ -646,10 +886,11 @@ class InsertRoutineStatusUseCaseTest {
         )
 
         completionHistory.slice(0..4).forEachIndexed { index, isCompleted ->
-            insertRoutineStatusIntoHistory(
+            insertRoutineStatus(
                 routineId = routineId,
                 currentDate = routineStartDate.plusDays(index),
                 completedOnCurrentDate = isCompleted,
+                today = today,
             )
         }
 
@@ -708,10 +949,11 @@ class InsertRoutineStatusUseCaseTest {
         )
 
         completionHistory.slice(5..14).forEachIndexed { index, isCompleted ->
-            insertRoutineStatusIntoHistory(
+            insertRoutineStatus(
                 routineId = routineId,
                 currentDate = routineStartDate.plusDays(5 + index),
                 completedOnCurrentDate = isCompleted,
+                today = today,
             )
         }
 
@@ -794,6 +1036,20 @@ class InsertRoutineStatusUseCaseTest {
                 dates = routineStartDate..routineStartDate.plusDays(14)
             )
         ).isEqualTo(expectedEntriesList)
+
+        val expectedStreaks = listOf(
+            Streak(
+                id = 1,
+                startDate = LocalDate(2023, Month.OCTOBER, 2),
+                endDate = LocalDate(2023, Month.OCTOBER, 13),
+            ),
+            Streak(
+                id = 2,
+                startDate = LocalDate(2023, Month.OCTOBER, 16),
+                endDate = null,
+            )
+        )
+        assertThat(streakRepository.getAllStreaks(routineId)).isEqualTo(expectedStreaks)
     }
 
     @Test
@@ -841,10 +1097,11 @@ class InsertRoutineStatusUseCaseTest {
         )
 
         completionHistory.slice(0..14).forEachIndexed { index, isCompleted ->
-            insertRoutineStatusIntoHistory(
+            insertRoutineStatus(
                 routineId = routineId,
                 currentDate = routineStartDate.plusDays(index),
                 completedOnCurrentDate = isCompleted,
+                today = today,
             )
         }
 
@@ -947,6 +1204,20 @@ class InsertRoutineStatusUseCaseTest {
                 routineStartDate..routineStartDate.plusDays(14)
             )
         ).isEqualTo(expectedEntriesList)
+
+        val expectedStreaks = listOf(
+            Streak(
+                id = 1,
+                startDate = LocalDate(2023, Month.OCTOBER, 2),
+                endDate = LocalDate(2023, Month.OCTOBER, 3),
+            ),
+            Streak(
+                id = 2,
+                startDate = LocalDate(2023, Month.OCTOBER, 7),
+                endDate = null,
+            )
+        )
+        assertThat(streakRepository.getAllStreaks(routineId)).isEqualTo(expectedStreaks)
     }
 
     @Test
@@ -984,10 +1255,11 @@ class InsertRoutineStatusUseCaseTest {
         repeat(2) { completionHistory.add(true) }
         repeat(15) { completionHistory.add(false) }
         completionHistory.forEachIndexed { index, isCompleted ->
-            insertRoutineStatusIntoHistory(
+            insertRoutineStatus(
                 routineId = routineId,
                 currentDate = routineStartDate.plusDays(index),
                 completedOnCurrentDate = isCompleted,
+                today = today,
             )
         }
 
@@ -1153,5 +1425,261 @@ class InsertRoutineStatusUseCaseTest {
                 routineStartDate..routineStartDate.plusDays(33)
             )
         ).isEqualTo(expectedEntriesList)
+
+        val expectedStreaks = listOf(
+            Streak(
+                id = 1,
+                startDate = LocalDate(2023, Month.OCTOBER, 9),
+                endDate = LocalDate(2023, Month.OCTOBER, 23),
+            )
+        )
+        assertThat(streakRepository.getAllStreaks(routineId)).isEqualTo(expectedStreaks)
+    }
+
+    @Test
+    fun testPeriodicCustomSchedule() = runTest {
+        val routineId = 1L
+        val routineStartDate = LocalDate(2023, Month.NOVEMBER, 1)
+
+        val schedule = Schedule.PeriodicCustomSchedule(
+            numOfDueDays = 1,
+            numOfDaysInPeriod = 2,
+            periodSeparationEnabled = false,
+            backlogEnabled = true,
+            cancelDuenessIfDoneAhead = true,
+            routineStartDate = routineStartDate,
+            vacationStartDate = routineStartDate.plusDays(8),
+            vacationEndDate = routineStartDate.plusDays(10),
+        )
+
+        val routine = Routine.YesNoRoutine(
+            id = routineId,
+            name = "",
+            schedule = schedule,
+        )
+
+        routineRepository.insertRoutine(routine)
+
+        val history = mutableListOf<CompletionHistoryEntry>()
+
+        history.add(
+            CompletionHistoryEntry(
+                date = routineStartDate,
+                status = HistoricalStatus.Completed,
+                scheduleDeviation = 0F,
+                timesCompleted = 1F,
+            )
+        )
+        history.add(
+            CompletionHistoryEntry(
+                date = routineStartDate.plusDays(1),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            )
+        )
+        history.add(
+            CompletionHistoryEntry(
+                date = routineStartDate.plusDays(2),
+                status = HistoricalStatus.Completed,
+                scheduleDeviation = 0F,
+                timesCompleted = 1F,
+            )
+        )
+        history.add(
+            CompletionHistoryEntry(
+                date = routineStartDate.plusDays(3),
+                status = HistoricalStatus.OverCompleted,
+                scheduleDeviation = 1F,
+                timesCompleted = 1F,
+            )
+        )
+        history.add(
+            CompletionHistoryEntry(
+                date = routineStartDate.plusDays(4),
+                status = HistoricalStatus.AlreadyCompleted,
+                scheduleDeviation = -1F,
+                timesCompleted = 0F,
+            )
+        )
+        history.add(
+            CompletionHistoryEntry(
+                date = routineStartDate.plusDays(5),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            )
+        )
+        history.add(
+            CompletionHistoryEntry(
+                date = routineStartDate.plusDays(6),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            )
+        )
+        history.add(
+            CompletionHistoryEntry(
+                date = routineStartDate.plusDays(7),
+                status = HistoricalStatus.CompletedLater,
+                scheduleDeviation = -1F,
+                timesCompleted = 0F,
+            )
+        )
+        history.add(
+            CompletionHistoryEntry(
+                date = routineStartDate.plusDays(8),
+                status = HistoricalStatus.NotCompletedOnVacation,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            )
+        )
+        history.add(
+            CompletionHistoryEntry(
+                date = routineStartDate.plusDays(9),
+                status = HistoricalStatus.SortedOutBacklogOnVacation,
+                scheduleDeviation = 1F,
+                timesCompleted = 1F,
+            )
+        )
+        history.add(
+            CompletionHistoryEntry(
+                date = routineStartDate.plusDays(10),
+                status = HistoricalStatus.OverCompletedOnVacation,
+                scheduleDeviation = 1F,
+                timesCompleted = 1F,
+            )
+        )
+        history.add(
+            CompletionHistoryEntry(
+                date = routineStartDate.plusDays(11),
+                status = HistoricalStatus.AlreadyCompleted,
+                scheduleDeviation = -1F,
+                timesCompleted = 0F,
+            )
+        )
+        history.add(
+            CompletionHistoryEntry(
+                date = routineStartDate.plusDays(12),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            )
+        )
+        history.add(
+            CompletionHistoryEntry(
+                date = routineStartDate.plusDays(13),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            )
+        )
+        history.add(
+            CompletionHistoryEntry(
+                date = routineStartDate.plusDays(14),
+                status = HistoricalStatus.CompletedLater,
+                scheduleDeviation = -1F,
+                timesCompleted = 0F,
+            )
+        )
+        history.add(
+            CompletionHistoryEntry(
+                date = routineStartDate.plusDays(15),
+                status = HistoricalStatus.Completed,
+                scheduleDeviation = 0F,
+                timesCompleted = 1F,
+            )
+        )
+        history.add(
+            CompletionHistoryEntry(
+                date = routineStartDate.plusDays(16),
+                status = HistoricalStatus.SortedOutBacklog,
+                scheduleDeviation = 1F,
+                timesCompleted = 1F,
+            )
+        )
+        history.add(
+            CompletionHistoryEntry(
+                date = routineStartDate.plusDays(17),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            )
+        )
+        history.add(
+            CompletionHistoryEntry(
+                date = routineStartDate.plusDays(18),
+                status = HistoricalStatus.NotCompleted,
+                scheduleDeviation = -1F,
+                timesCompleted = 0F,
+            )
+        )
+        history.add(
+            CompletionHistoryEntry(
+                date = routineStartDate.plusDays(19),
+                status = HistoricalStatus.Skipped,
+                scheduleDeviation = 0F,
+                timesCompleted = 0F,
+            )
+        )
+        history.add(
+            CompletionHistoryEntry(
+                date = routineStartDate.plusDays(20),
+                status = HistoricalStatus.NotCompleted,
+                scheduleDeviation = -1F,
+                timesCompleted = 0F,
+            )
+        )
+
+        val completion = listOf(
+            true,
+            false,
+            true,
+            true,
+            false,
+            false,
+            false,
+            false,
+            false,
+            true,
+            true,
+            false,
+            false,
+            false,
+            false,
+            true,
+            true,
+            false,
+            false,
+            false,
+            false,
+        )
+
+        val today = routineStartDate.plusDays(22)
+        completion.forEachIndexed { index, completed ->
+            insertRoutineStatus(
+                routineId = routineId,
+                currentDate = routineStartDate.plusDays(index),
+                completedOnCurrentDate = completed,
+                today = today,
+            )
+        }
+
+        assertThat(
+            completionHistoryRepository.getHistoryEntries(
+                routineId = routineId,
+                dates = routineStartDate..routineStartDate.plusDays(21),
+            )
+        ).containsExactlyElementsIn(history)
+
+        val expectedStreaks = listOf(
+            Streak(
+                id = 1,
+                startDate = routineStartDate,
+                endDate = routineStartDate.plusDays(17),
+            )
+        )
+        assertThat(streakRepository.getAllStreaks(routineId))
+            .containsExactlyElementsIn(expectedStreaks)
     }
 }

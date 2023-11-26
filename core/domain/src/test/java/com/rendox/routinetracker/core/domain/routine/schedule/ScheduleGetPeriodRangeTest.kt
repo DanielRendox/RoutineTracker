@@ -207,6 +207,59 @@ class ScheduleGetPeriodRangeTest {
         assertEachDateOfRangeIsInExpectedRange(schedule, secondPeriod)
     }
 
+    @Test
+    fun assertPeriodicCustomScheduleRestartsPeriodAfterVacation() {
+        val routineStartDate = LocalDate(2023, Month.NOVEMBER, 1)
+
+        val schedule = Schedule.PeriodicCustomSchedule(
+            routineStartDate = routineStartDate,
+            numOfDueDays = 1,
+            numOfDaysInPeriod = 2,
+            vacationStartDate = LocalDate(2023, Month.NOVEMBER, 3),
+            vacationEndDate = LocalDate(2023, Month.NOVEMBER, 5),
+        )
+
+        val expectedRangeRightAfterVacation =
+            LocalDate(2023, Month.NOVEMBER, 6)..LocalDate(2023, Month.NOVEMBER, 7)
+        assertThat(
+            schedule.getPeriodRange(
+                currentDate = LocalDate(2023, Month.NOVEMBER, 6),
+                lastVacationEndDate = LocalDate(2023, Month.NOVEMBER, 5),
+            )
+        ).isEqualTo(expectedRangeRightAfterVacation)
+
+        val expectedRangeAfterVacation =
+            LocalDate(2023, Month.NOVEMBER, 8)..LocalDate(2023, Month.NOVEMBER, 9)
+        assertThat(
+            schedule.getPeriodRange(
+                currentDate = LocalDate(2023, Month.NOVEMBER, 9),
+                lastVacationEndDate = LocalDate(2023, Month.NOVEMBER, 7),
+            )
+        ).isEqualTo(expectedRangeAfterVacation)
+    }
+
+    @Test
+    fun assertPeriodicScheduleDoesNotRestartPeriodBeforeVacation() {
+        val routineStartDate = LocalDate(2023, Month.NOVEMBER, 1)
+
+        val schedule = Schedule.PeriodicCustomSchedule(
+            routineStartDate = routineStartDate,
+            numOfDueDays = 1,
+            numOfDaysInPeriod = 2,
+            vacationStartDate = LocalDate(2023, Month.NOVEMBER, 3),
+            vacationEndDate = LocalDate(2023, Month.NOVEMBER, 5),
+        )
+
+        val expectedRangeBeforeVacation =
+            LocalDate(2023, Month.NOVEMBER, 1)..LocalDate(2023, Month.NOVEMBER, 2)
+        assertThat(
+            schedule.getPeriodRange(
+                currentDate = LocalDate(2023, Month.NOVEMBER, 1),
+                lastVacationEndDate = LocalDate(2023, Month.NOVEMBER, 5),
+            )
+        ).isEqualTo(expectedRangeBeforeVacation)
+    }
+
     private fun assertEachDateOfRangeIsInExpectedRange(
         schedule: Schedule.PeriodicSchedule, range: LocalDateRange
     ) {

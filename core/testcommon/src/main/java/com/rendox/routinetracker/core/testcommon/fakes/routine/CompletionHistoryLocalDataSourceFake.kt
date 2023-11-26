@@ -18,6 +18,16 @@ class CompletionHistoryLocalDataSourceFake(
         routineData.completionHistory
             .filter { it.first == routineId && it.second.date in dates }
             .map { it.second }
+            .sortedBy { it.date }
+
+    override suspend fun getHistoryEntryByDate(
+        routineId: Long,
+        date: LocalDate
+    ): CompletionHistoryEntry? {
+        return routineData.completionHistory.firstOrNull {
+            it.first == routineId && it.second.date == date
+        }?.second
+    }
 
     override suspend fun insertHistoryEntry(
         id: Long?,
@@ -74,18 +84,30 @@ class CompletionHistoryLocalDataSourceFake(
         routineData.completionHistory.lastOrNull()?.second
 
     override suspend fun getFirstHistoryEntryByStatus(
-        routineId: Long, matchingStatuses: List<HistoricalStatus>
+        routineId: Long,
+        matchingStatuses: List<HistoricalStatus>,
+        minDate: LocalDate?,
+        maxDate: LocalDate?,
     ): CompletionHistoryEntry? {
         return routineData.completionHistory.firstOrNull {
-            it.first == routineId && it.second.status in matchingStatuses
+            it.first == routineId
+                    && it.second.status in matchingStatuses
+                    && (minDate == null || minDate <= it.second.date)
+                    && (maxDate == null || it.second.date <= maxDate)
         }?.second
     }
 
     override suspend fun getLastHistoryEntryByStatus(
-        routineId: Long, matchingStatuses: List<HistoricalStatus>
+        routineId: Long,
+        matchingStatuses: List<HistoricalStatus>,
+        minDate: LocalDate?,
+        maxDate: LocalDate?,
     ): CompletionHistoryEntry? {
         return routineData.completionHistory.lastOrNull {
-            it.first == routineId && it.second.status in matchingStatuses
+            it.first == routineId
+                    && it.second.status in matchingStatuses
+                    && (minDate == null || minDate <= it.second.date)
+                    && (maxDate == null || it.second.date <= maxDate)
         }?.second
     }
 
@@ -124,8 +146,10 @@ class CompletionHistoryLocalDataSourceFake(
         routineId: Long,
         startDate: LocalDate,
         endDate: LocalDate
-    ): Double = routineData.completionHistory
-        .filter { it.second.date in startDate..endDate }
-        .map { it.second.scheduleDeviation }
-        .sum().toDouble()
+    ): Double {
+        return routineData.completionHistory
+            .filter { it.first == routineId && it.second.date in startDate..endDate }
+            .map { it.second.scheduleDeviation }
+            .sum().toDouble()
+    }
 }

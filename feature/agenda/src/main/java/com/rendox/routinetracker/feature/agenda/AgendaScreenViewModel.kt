@@ -26,6 +26,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
 
 class AgendaScreenViewModel(
+    today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
     private val routineRepository: RoutineRepository,
     private val getRoutineStatus: GetRoutineStatusUseCase,
     private val insertRoutineStatus: InsertRoutineStatusUseCase,
@@ -33,40 +34,27 @@ class AgendaScreenViewModel(
     private val getRoutineCompletionTime: GetRoutineCompletionTimeUseCase,
 ) : ViewModel() {
 
+    private val todayFlow = MutableStateFlow(today)
     private val allRoutinesFlow = MutableStateFlow(emptyList<Routine>())
-    private val cashedRoutinesFlow =
-        MutableStateFlow(emptyMap<LocalDate, List<RoutineListElement>>())
-
+    private val cashedRoutinesFlow = MutableStateFlow(emptyMap<LocalDate, List<DisplayRoutine>>())
     private val _hideNotDueRoutinesFlow = MutableStateFlow(false)
-//    val hideNotDueRoutinesFlow = _hideNotDueRoutinesFlow.asStateFlow()
 
-    private val _currentDateFlow =
-        MutableStateFlow(Clock.System.todayIn(TimeZone.currentSystemDefault()))
+    private val _currentDateFlow = MutableStateFlow(today)
     val currentDateFlow = _currentDateFlow.asStateFlow()
 
-    val visibleRoutinesFlow: StateFlow<List<RoutineListElement>> =
-        cashedRoutinesFlow.combine(_currentDateFlow) { cashedRoutinesMap, currentDate ->
-            println("AgendaScreenViewModel combine cashedRoutinesMap and currentDate: cashedRoutines = $cashedRoutinesMap, currentDate = $currentDate")
-            if (cashedRoutinesMap.contains(currentDate)) {
-                cashedRoutinesMap[currentDate]!!
-            } else {
-                val newValue = getRoutineElementsListForDate(currentDate, allRoutinesFlow.value)
-                cashedRoutinesFlow.update {
-                    it.toMutableMap().apply {
-                        put(currentDate, newValue)
-                    }
-                }
-                newValue
-            }
-        }.combine(_hideNotDueRoutinesFlow) { routinesForCurrentDate, hideNotDueRoutines ->
-            println("AgendaScreenViewModel hide not due routines: routinesForCurrentDate = $routinesForCurrentDate, hideNotDueRoutines = $hideNotDueRoutines")
-            if (hideNotDueRoutines) {
-                routinesForCurrentDate.filter { it.status in dueRoutineStatuses }
-            } else routinesForCurrentDate
+    val visibleRoutinesFlow: StateFlow<List<DisplayRoutine>> =
+        combine(
+            _currentDateFlow,
+            cashedRoutinesFlow,
+            _hideNotDueRoutinesFlow
+        ) { currentDate, cashedRoutines, hideNotDueRoutines ->
+            val currentDateRoutines = cashedRoutines[currentDate] ?: emptyList()
+            if (hideNotDueRoutines) currentDateRoutines.filter { it.status in dueRoutineStatuses }
+            else currentDateRoutines
         }.stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
             initialValue = emptyList(),
+            started = SharingStarted.WhileSubscribed(5_000),
         )
 
     private val dueRoutineStatuses = listOf<RoutineStatus>(
@@ -83,39 +71,27 @@ class AgendaScreenViewModel(
     init {
         viewModelScope.launch {
             allRoutinesFlow.update { routineRepository.getAllRoutines() }
-            allRoutinesFlow.collect { allRoutines ->
-                println("AgendaScreenViewModel collect allRoutinesFlow (allRoutines = $allRoutines)")
-                cashedRoutinesFlow.update { cashedRoutinesMap ->
-                    if (cashedRoutinesMap.isEmpty()) {
-                        val currentDate: LocalDate = _currentDateFlow.value
-                        val routinesForCurrentDate: List<RoutineListElement> =
-                            getRoutineElementsListForDate(currentDate, allRoutines)
-                        mapOf(currentDate to routinesForCurrentDate)
-                    } else {
-                        cashedRoutinesMap.toMutableMap().also {
-                            for (currentDate in it.keys) {
-                                it[currentDate] =
-                                    getRoutineElementsListForDate(currentDate, allRoutines)
-                            }
-                        }
-                    }
+
+            val currentDate = _currentDateFlow.value
+            val currentDateRoutines = getRoutinesForDate(currentDate)
+            cashedRoutinesFlow.update {
+                it.toMutableMap().apply {
+                    put(currentDate, currentDateRoutines)
                 }
             }
         }
     }
 
-    private suspend fun getRoutineElementsListForDate(
-        date: LocalDate, allRoutines: List<Routine>
-    ): List<RoutineListElement> {
-        val cashedRoutines = mutableListOf<RoutineListElement>()
-        for (routine in allRoutines) {
-            val newElementStatus: RoutineStatus? = getRoutineStatus(
+    private suspend fun getRoutinesForDate(date: LocalDate): List<DisplayRoutine> {
+        val routines = mutableListOf<DisplayRoutine>()
+        for (routine in allRoutinesFlow.value) {
+            val routineStatus: RoutineStatus? = getRoutineStatus(
                 routineId = routine.id!!,
                 date = date,
-                today = Clock.System.todayIn(TimeZone.currentSystemDefault()),
+                today = todayFlow.value,
             )
-            val newElement: RoutineListElement? = newElementStatus?.let {
-                RoutineListElement(
+            val newRoutine: DisplayRoutine? = routineStatus?.let {
+                DisplayRoutine(
                     name = routine.name,
                     id = routine.id!!,
                     status = it,
@@ -125,9 +101,9 @@ class AgendaScreenViewModel(
                     )
                 )
             }
-            newElement?.let { cashedRoutines.add(it) }
+            newRoutine?.let { routines.add(it) }
         }
-        return cashedRoutines
+        return routines
     }
 
     fun onRoutineStatusCheckmarkClick(
@@ -141,45 +117,29 @@ class AgendaScreenViewModel(
                     routineId = routineId,
                     currentDate = currentDate,
                     completedOnCurrentDate = true,
+                    today = todayFlow.value
                 )
             } else {
                 toggleHistoricalStatus(
                     routineId = routineId,
-                    date = currentDate,
-                    today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+                    currentDate = currentDate,
+                    today = todayFlow.value,
                 )
             }
 
-            println("AgendaScreenViewModel: routineListElements before update: ${cashedRoutinesFlow.value}")
-
+            val currentDateRoutines = getRoutinesForDate(_currentDateFlow.value)
             cashedRoutinesFlow.update {
-                val newRoutineListElements = it.toMutableMap()
-                for ((date, routineElementsList) in it) {
-                    val newRoutineElementsList = routineElementsList.toMutableList()
-                    val elementIndex = routineElementsList.indexOfFirst { element ->
-                        element.id == routineId
-                    }
-                    val newStatus: RoutineStatus? = getRoutineStatus(
-                        routineId = routineId,
-                        date = date,
-                        today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-                    )
-                    if (newStatus == null) {
-                        newRoutineElementsList.removeAt(elementIndex)
-                    } else {
-                        val oldValue = routineElementsList[elementIndex]
-                        newRoutineElementsList[elementIndex] = oldValue.copy(status = newStatus)
-                    }
-                    newRoutineListElements[date] = newRoutineElementsList
-                }
-                newRoutineListElements
+                mapOf(_currentDateFlow.value to currentDateRoutines)
             }
-
-            println("AgendaScreenViewModel: routineListElements after update: ${cashedRoutinesFlow.value}")
         }
     }
 
-    fun onDateChange(newDate: LocalDate) {
+    fun onDateChange(newDate: LocalDate) = viewModelScope.launch {
+        cashedRoutinesFlow.update {
+            it.toMutableMap().apply {
+                put(newDate, getRoutinesForDate(newDate))
+            }
+        }
         _currentDateFlow.update { newDate }
     }
 
@@ -191,11 +151,17 @@ class AgendaScreenViewModel(
         viewModelScope.launch {
             routineRepository.insertRoutine(routineList.first())
             allRoutinesFlow.update { routineRepository.getAllRoutines() }
+            val currentDateRoutines = getRoutinesForDate(_currentDateFlow.value)
+            cashedRoutinesFlow.update {
+                mapOf(_currentDateFlow.value to currentDateRoutines)
+            }
+            println("current date = ${_currentDateFlow.value}")
+            println("cashed routines flow = $cashedRoutinesFlow")
         }
     }
 }
 
-data class RoutineListElement(
+data class DisplayRoutine(
     val name: String,
     val id: Long,
     val status: RoutineStatus,

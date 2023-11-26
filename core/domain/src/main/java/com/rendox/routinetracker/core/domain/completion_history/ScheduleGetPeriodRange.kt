@@ -19,7 +19,10 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.until
 import kotlinx.datetime.yearsUntil
 
-fun Schedule.PeriodicSchedule.getPeriodRange(currentDate: LocalDate): LocalDateRange {
+fun Schedule.PeriodicSchedule.getPeriodRange(
+    currentDate: LocalDate,
+    lastVacationEndDate: LocalDate? = null,
+): LocalDateRange {
     if (currentDate < routineStartDate) {
         throw IllegalArgumentException(
             "This function shouldn't be called for dates that are prior to routine start date."
@@ -33,7 +36,9 @@ fun Schedule.PeriodicSchedule.getPeriodRange(currentDate: LocalDate): LocalDateR
         is Schedule.MonthlyScheduleByNumOfDueDays -> monthlyScheduleGetPeriodDateRange(currentDate)
         is Schedule.AnnualScheduleByDueDates -> annualScheduleGetPeriodDateRange(currentDate)
         is Schedule.AnnualScheduleByNumOfDueDays -> annualScheduleGetPeriodDateRange(currentDate)
-        is Schedule.PeriodicCustomSchedule -> periodicCustomScheduleGetPeriodDateRange(currentDate)
+        is Schedule.PeriodicCustomSchedule -> periodicCustomScheduleGetPeriodDateRange(
+            currentDate, lastVacationEndDate
+        )
     }
 
     routineEndDate?.let {
@@ -131,18 +136,25 @@ private fun Schedule.AnnualSchedule.annualScheduleGetPeriodDateRange(
 
 private fun Schedule.PeriodicCustomSchedule.periodicCustomScheduleGetPeriodDateRange(
     currentDate: LocalDate,
-): LocalDateRange {
+    lastVacationEndDate: LocalDate?,
+    ): LocalDateRange {
     check(correspondingPeriod.days != 0) {
         "Corresponding period of a schedule this function operates on shouldn't have zero days " +
                 "value. For weekly, monthly, or annual schedules use different functions."
     }
 
-    var startPeriodDateIndex = routineStartDate.daysUntil(currentDate)
+    // when vacation ends, the user will expect the period to be restarted
+    val scheduleStartDate = if (lastVacationEndDate != null && lastVacationEndDate <= currentDate) {
+        lastVacationEndDate.plusDays(1)
+    } else {
+        routineStartDate
+    }
+    var startPeriodDateIndex = scheduleStartDate.daysUntil(currentDate)
     while (startPeriodDateIndex % correspondingPeriod.days != 0) {
         startPeriodDateIndex--
     }
 
-    val startPeriodDate = routineStartDate.plusDays(startPeriodDateIndex)
+    val startPeriodDate = scheduleStartDate.plusDays(startPeriodDateIndex)
     val endPeriodDate = atEndOfPeriod(startPeriodDate, correspondingPeriod)
 
     return startPeriodDate..endPeriodDate

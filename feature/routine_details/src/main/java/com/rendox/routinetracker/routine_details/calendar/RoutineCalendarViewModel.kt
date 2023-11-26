@@ -8,16 +8,12 @@ import com.rendox.routinetracker.core.data.routine.RoutineRepository
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.GetRoutineStatusUseCase
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.InsertRoutineStatusUseCase
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.ToggleHistoricalStatusUseCase
-import com.rendox.routinetracker.core.domain.streaks.deriveDatesIncludedInStreak
-import com.rendox.routinetracker.core.domain.streaks.getCurrentStreakDurationInDays
-import com.rendox.routinetracker.core.domain.streaks.getLongestStreakDurationInDays
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.PlanningStatus
 import com.rendox.routinetracker.core.model.Routine
 import com.rendox.routinetracker.core.model.RoutineStatus
 import com.rendox.routinetracker.core.model.StatusEntry
-import com.rendox.routinetracker.core.model.Streak
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

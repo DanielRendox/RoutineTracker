@@ -11,6 +11,8 @@ fun Routine.computePlanningStatus(
     currentScheduleDeviation: Double,
     actualDate: LocalDate?,
     numOfTimesCompletedInCurrentPeriod: Double,
+    scheduleDeviationInCurrentPeriod: Double?,
+    lastVacationEndDate: LocalDate?,
 ): PlanningStatus? {
     if (validationDate < schedule.routineStartDate) return null
     schedule.routineEndDate?.let { if (validationDate > it) return null }
@@ -22,6 +24,8 @@ fun Routine.computePlanningStatus(
             currentScheduleDeviation,
             actualDate,
             numOfTimesCompletedInCurrentPeriod,
+            scheduleDeviationInCurrentPeriod,
+            lastVacationEndDate,
         )
     }
 }
@@ -41,14 +45,29 @@ private fun Routine.YesNoRoutine.yesNoRoutineComputePlanningStatus(
     currentScheduleDeviation: Double,
     actualDate: LocalDate?,
     numOfTimesCompletedInCurrentPeriod: Double,
-): PlanningStatus {
-    if (schedule.isDue(validationDate, actualDate, numOfTimesCompletedInCurrentPeriod)) {
+    scheduleDeviationInCurrentPeriod: Double?,
+    lastVacationEndDate: LocalDate?,
+    ): PlanningStatus {
+    if (
+        schedule.isDue(
+            validationDate,
+            actualDate,
+            numOfTimesCompletedInCurrentPeriod,
+            scheduleDeviationInCurrentPeriod,
+            lastVacationEndDate,
+        )
+    ) {
         if (currentScheduleDeviation > 0 && schedule.cancelDuenessIfDoneAhead) {
             actualDate?.let {
                 var dueDaysCounter = 0
                 for (day in it.plusDays(1)..validationDate) {
                     if (
-                        schedule.isDue(validationDate, it, numOfTimesCompletedInCurrentPeriod)
+                        schedule.isDue(
+                            validationDate,
+                            it,
+                            numOfTimesCompletedInCurrentPeriod,
+                            scheduleDeviationInCurrentPeriod
+                        )
                     ) dueDaysCounter++
                 }
                 if (currentScheduleDeviation >= dueDaysCounter)
@@ -64,7 +83,12 @@ private fun Routine.YesNoRoutine.yesNoRoutineComputePlanningStatus(
             var notDueDaysCounter = 0
             for (day in it.plusDays(1)..validationDate) {
                 if (
-                    !schedule.isDue(day, it, numOfTimesCompletedInCurrentPeriod)
+                    !schedule.isDue(
+                        day,
+                        it,
+                        numOfTimesCompletedInCurrentPeriod,
+                        scheduleDeviationInCurrentPeriod
+                    )
                 ) notDueDaysCounter++
             }
             if (currentScheduleDeviation <= -notDueDaysCounter) {
