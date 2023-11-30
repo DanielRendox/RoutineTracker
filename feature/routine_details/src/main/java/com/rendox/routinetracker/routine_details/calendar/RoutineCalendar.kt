@@ -22,6 +22,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -48,7 +49,6 @@ import com.rendox.routinetracker.core.ui.theme.routineStatusColors
 import com.rendox.routinetracker.feature.routine_details.R
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.Month
 import kotlinx.datetime.toKotlinLocalDate
 import java.text.SimpleDateFormat
 import java.time.DayOfWeek
@@ -106,6 +106,10 @@ private fun CalendarMonthlyPaged(
         outDateStyle = OutDateStyle.EndOfGrid,
     )
 
+    LaunchedEffect(calendarState.firstVisibleMonth) {
+        onScrolledToNewMonth(calendarState.firstVisibleMonth.yearMonth)
+    }
+
     val coroutineScope = rememberCoroutineScope()
     Column(modifier = modifier) {
         CalendarTitle(
@@ -118,14 +122,12 @@ private fun CalendarMonthlyPaged(
                 coroutineScope.launch {
                     calendarState.animateScrollToMonth(newMonth)
                 }
-                onScrolledToNewMonth(newMonth)
             },
             navigateToNext = {
                 val newMonth = calendarState.firstVisibleMonth.yearMonth.nextMonth
                 coroutineScope.launch {
                     calendarState.animateScrollToMonth(newMonth)
                 }
-                onScrolledToNewMonth(newMonth)
             },
         )
         HorizontalCalendar(
@@ -170,8 +172,8 @@ private fun RoutineStatusDay(
             null -> Color.Transparent
 
             is PlanningStatus -> when (routineStatus) {
-                PlanningStatus.Planned -> MaterialTheme.colorScheme.outlineVariant
-                PlanningStatus.Backlog -> MaterialTheme.colorScheme.outlineVariant
+                PlanningStatus.Planned -> MaterialTheme.routineStatusColors.pending
+                PlanningStatus.Backlog -> MaterialTheme.routineStatusColors.pending
                 PlanningStatus.AlreadyCompleted -> Color.Transparent
                 PlanningStatus.NotDue -> Color.Transparent
                 PlanningStatus.OnVacation -> Color.Transparent
@@ -196,8 +198,8 @@ private fun RoutineStatusDay(
             null -> Color.Transparent
 
             is PlanningStatus -> when (routineStatus) {
-                PlanningStatus.Planned -> MaterialTheme.colorScheme.outlineVariant
-                PlanningStatus.Backlog -> MaterialTheme.colorScheme.outlineVariant
+                PlanningStatus.Planned -> MaterialTheme.routineStatusColors.pendingStroke
+                PlanningStatus.Backlog -> MaterialTheme.routineStatusColors.pendingStroke
                 PlanningStatus.AlreadyCompleted -> Color.Transparent
                 PlanningStatus.NotDue -> Color.Transparent
                 PlanningStatus.OnVacation -> Color.Transparent

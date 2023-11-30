@@ -49,11 +49,11 @@ class StreakUtilTest {
     @Test
     fun getCurrentStreakTest() {
         assertThat(
-            streaks.getCurrentStreakTest(LocalDate(2023, 4, 11))
+            streaks.getCurrentStreak(LocalDate(2023, 4, 11))
         ).isEqualTo(streaks.last())
 
         assertThat(
-            streaks.take(3).getCurrentStreakTest(LocalDate(2023, 3, 5))
+            streaks.take(3).getCurrentStreak(LocalDate(2023, 3, 5))
         ).isEqualTo(streaks[2])
     }
 
@@ -95,10 +95,11 @@ class StreakUtilTest {
             LocalDate(2023, 1, 21) to false,
         )
 
-        assertThat(
-            streaks.mapDateToInclusionStatusInDateRange(
-                dateRange = startDate..endDate
-            )
-        ).containsExactlyEntriesIn(expectedMap)
+        val dateToInclusionStatusMap = mutableMapOf<LocalDate, Boolean>()
+        for (date in startDate..endDate) {
+            dateToInclusionStatusMap[date] = streaks.checkIfContainDate(date)
+        }
+
+        assertThat(dateToInclusionStatusMap).containsExactlyEntriesIn(expectedMap)
     }
 }

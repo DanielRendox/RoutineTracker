@@ -2,7 +2,6 @@ package com.rendox.routinetracker.feature.agenda.navigation
 
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptions
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.composable
 import com.rendox.routinetracker.feature.agenda.AgendaRoute

@@ -12,6 +12,7 @@ val routineDetailsModule = module {
             getRoutineStatusList = get(),
             insertRoutineStatus = get(),
             toggleRoutineStatus = get(),
+            getAllStreaks = get(),
         )
     }
 }

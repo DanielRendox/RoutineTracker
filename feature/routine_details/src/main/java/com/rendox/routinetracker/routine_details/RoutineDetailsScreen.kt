@@ -1,14 +1,8 @@
 package com.rendox.routinetracker.routine_details
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,8 +20,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.rememberNavController
 import com.rendox.routinetracker.routine_details.navigation.RoutineDetailsNavHost
 import com.rendox.routinetracker.routine_details.navigation.calendarNavRoute
 
@@ -35,9 +27,9 @@ import com.rendox.routinetracker.routine_details.navigation.calendarNavRoute
 internal fun RoutineDetailsRoute(
     modifier: Modifier = Modifier,
     routineId: Long,
-    navigateToPreviousScreen: () -> Unit,
+    popBackStack: () -> Unit,
 ) {
-    RoutineDetailsScreen(modifier, routineId, navigateToPreviousScreen)
+    RoutineDetailsScreen(modifier, routineId, popBackStack)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,7 +37,7 @@ internal fun RoutineDetailsRoute(
 internal fun RoutineDetailsScreen(
     modifier: Modifier = Modifier,
     routineId: Long,
-    navigateToPreviousScreen: () -> Unit,
+    popBackStack: () -> Unit,
 ) {
     val scrollBehavior =
         TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
@@ -71,7 +63,7 @@ internal fun RoutineDetailsScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navigateToPreviousScreen() }) {
+                    IconButton(onClick = { popBackStack() }) {
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
                             contentDescription = iconDescription,

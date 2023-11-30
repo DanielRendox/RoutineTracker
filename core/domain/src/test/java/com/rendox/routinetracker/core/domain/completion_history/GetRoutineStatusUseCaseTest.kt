@@ -11,6 +11,7 @@ import com.rendox.routinetracker.core.database.routine.RoutineLocalDataSource
 import com.rendox.routinetracker.core.database.streak.StreakLocalDataSource
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.GetRoutineStatusUseCase
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.InsertRoutineStatusUseCase
+import com.rendox.routinetracker.core.domain.di.streakDomainModule
 import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.CompletionHistoryEntry
@@ -89,6 +90,7 @@ class GetRoutineStatusUseCaseTest : KoinTest {
                 routineDataModule,
                 completionHistoryDataModule,
                 streakDataModule,
+                streakDomainModule,
                 testModule,
             )
         }
@@ -99,7 +101,8 @@ class GetRoutineStatusUseCaseTest : KoinTest {
         insertRoutineStatusIntoHistory = InsertRoutineStatusUseCase(
             completionHistoryRepository = get(),
             routineRepository = get(),
-            streakRepository = get(),
+            startStreakOrJoinStreaks = get(),
+            breakStreak = get(),
         )
 
         getRoutineStatusList = GetRoutineStatusUseCase(

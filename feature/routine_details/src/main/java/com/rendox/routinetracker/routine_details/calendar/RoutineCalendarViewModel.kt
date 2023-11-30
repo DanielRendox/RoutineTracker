@@ -8,15 +8,25 @@ import com.rendox.routinetracker.core.data.routine.RoutineRepository
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.GetRoutineStatusUseCase
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.InsertRoutineStatusUseCase
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.ToggleHistoricalStatusUseCase
+import com.rendox.routinetracker.core.domain.streak.GetDisplayStreaksUseCase
+import com.rendox.routinetracker.core.domain.streak.checkIfContainDate
+import com.rendox.routinetracker.core.domain.streak.getCurrentStreak
+import com.rendox.routinetracker.core.domain.streak.getDurationInDays
+import com.rendox.routinetracker.core.domain.streak.getLongestStreak
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.rangeTo
+import com.rendox.routinetracker.core.model.DisplayStreak
 import com.rendox.routinetracker.core.model.PlanningStatus
 import com.rendox.routinetracker.core.model.Routine
 import com.rendox.routinetracker.core.model.RoutineStatus
 import com.rendox.routinetracker.core.model.StatusEntry
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -28,56 +38,100 @@ import kotlinx.datetime.todayIn
 import java.time.YearMonth
 
 class RoutineCalendarViewModel(
+    private val today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
     private val routineId: Long,
     private val routineRepository: RoutineRepository,
     private val getRoutineStatusList: GetRoutineStatusUseCase,
     private val insertRoutineStatus: InsertRoutineStatusUseCase,
     private val toggleRoutineStatus: ToggleHistoricalStatusUseCase,
+    private val getAllStreaks: GetDisplayStreaksUseCase
 ) : ViewModel() {
-
-    private val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
     private lateinit var routine: Routine
+
+    private val cashedDatesFlow: MutableStateFlow<Map<YearMonth, List<RoutineCalendarDate>>> =
+        MutableStateFlow(emptyMap())
+    private val streaksFlow = MutableStateFlow(emptyList<DisplayStreak>())
+
     private val _currentMonthFlow: MutableStateFlow<YearMonth> =
         MutableStateFlow(today.toJavaLocalDate().yearMonth)
     val currentMonthFlow: StateFlow<YearMonth> = _currentMonthFlow.asStateFlow()
 
-    private val cashedDatesFlow: MutableStateFlow<Map<YearMonth, List<RoutineCalendarDate>>> =
-        MutableStateFlow(emptyMap())
+    val visibleDatesFlow: StateFlow<List<RoutineCalendarDate>> =
+        combine(_currentMonthFlow, cashedDatesFlow) { currentMonth, cashedDates ->
+            cashedDates[currentMonth] ?: emptyList()
+        }.stateIn(
+            scope = viewModelScope,
+            initialValue = emptyList(),
+            started = SharingStarted.WhileSubscribed(5_000),
+        )
 
-    private val _visibleDatesFlow: MutableStateFlow<List<RoutineCalendarDate>> =
-        MutableStateFlow(emptyList())
-    val visibleDatesFlow: StateFlow<List<RoutineCalendarDate>> = _visibleDatesFlow.asStateFlow()
+    val currentStreakDurationInDays: StateFlow<Int> = streaksFlow.map { streaks ->
+        streaks.getCurrentStreak(today)?.getDurationInDays() ?: 0
+    }.stateIn(
+        scope = viewModelScope,
+        initialValue = 0,
+        started = SharingStarted.WhileSubscribed(5_000),
+    )
 
-    private val _currentStreakDurationInDays: MutableStateFlow<Int?> = MutableStateFlow(null)
-    val currentStreakDurationInDays: StateFlow<Int?> = _currentStreakDurationInDays.asStateFlow()
-
-    private val _longestStreakDurationInDays: MutableStateFlow<Int?> = MutableStateFlow(null)
-    val longestStreakDurationInDays: StateFlow<Int?> = _longestStreakDurationInDays.asStateFlow()
+    val longestStreakDurationInDays: StateFlow<Int> = streaksFlow.map { streaks ->
+        streaks.getLongestStreak()?.getDurationInDays() ?: 0
+    }.stateIn(
+        scope = viewModelScope,
+        initialValue = 0,
+        started = SharingStarted.WhileSubscribed(5_000),
+    )
 
     init {
-        println("View model initialized")
         viewModelScope.launch {
-            println("RoutineCalendarViewModel 1")
-            val monthStart = _currentMonthFlow.value.atStartOfMonth().toKotlinLocalDate()
-            println("RoutineCalendarViewModel 2")
-            val monthEnd = _currentMonthFlow.value.atEndOfMonth().toKotlinLocalDate()
-            println("RoutineCalendarViewModel 3")
-            println("RoutineCalendarViewModel 4")
-            val initialCalendarDates = fetchAndDeriveCalendarDates(
-                period = monthStart..monthEnd,
-            )
-
-            println("RoutineCalendarViewModel cashed dates flow updated")
-            cashedDatesFlow.update {
-                it.toMutableMap().apply { put(_currentMonthFlow.value, initialCalendarDates) }
-            }
-
-            println("RoutineCalendarViewModel visible dates flow updated")
-            _visibleDatesFlow.update {
-                cashedDatesFlow.value[_currentMonthFlow.value]!!
-            }
-
             routine = routineRepository.getRoutineById(routineId)
+            streaksFlow.update {
+                val streaks = getAllStreaks(routineId = routineId, today = today)
+                println("all streaks = $streaks")
+                streaks
+            }
+        }
+        viewModelScope.launch {
+            val monthStart = _currentMonthFlow.value.atStartOfMonth().toKotlinLocalDate()
+            val monthEnd = _currentMonthFlow.value.atEndOfMonth().toKotlinLocalDate()
+            val initialMonthPeriod = fetchAndDeriveCalendarDates(period = monthStart..monthEnd)
+            cashedDatesFlow.update {
+                it.toMutableMap().apply { put(_currentMonthFlow.value, initialMonthPeriod) }
+            }
+        }
+    }
+
+    private suspend fun fetchAndDeriveCalendarDates(
+        period: LocalDateRange
+    ): List<RoutineCalendarDate> {
+        val routineStatusesForCurrentMonth: List<StatusEntry> = getRoutineStatusList(
+            routineId = routineId,
+            dates = period,
+            today = today,
+        )
+        return routineStatusesForCurrentMonth.map {
+            val includedInStreak = streaksFlow.value.checkIfContainDate(it.date)
+            println("${it.date} included in streak = $includedInStreak")
+            RoutineCalendarDate(
+                date = it.date,
+                status = it.status,
+                includedInStreak = includedInStreak,
+            )
+        }
+    }
+
+    fun onScrolledToNewMonth(newMonth: YearMonth) {
+        println("newMonth = $newMonth")
+        _currentMonthFlow.update { newMonth }
+
+        if (!cashedDatesFlow.value.contains(newMonth)) {
+            viewModelScope.launch {
+                val monthStart = newMonth.atStartOfMonth().toKotlinLocalDate()
+                val monthEnd = newMonth.atEndOfMonth().toKotlinLocalDate()
+                val currentMonthDates = fetchAndDeriveCalendarDates(monthStart..monthEnd)
+                cashedDatesFlow.update {
+                    it.toMutableMap().apply { put(newMonth, currentMonthDates) }
+                }
+            }
         }
     }
 
@@ -88,68 +142,26 @@ class RoutineCalendarViewModel(
                     routineId = routineId,
                     currentDate = date,
                     completedOnCurrentDate = true,
+                    today = today,
                 )
             } else {
                 toggleRoutineStatus(
                     routineId = routineId,
-                    date = date,
+                    currentDate = date,
                     today = today,
                 )
             }
 
-
-            cashedDatesFlow.update { cashedDates ->
-                val newValue = cashedDates.toMutableMap()
-                for (month in cashedDates.keys) {
-                    if (cashedDates[month]!!.isNotEmpty()) {
-                        val monthStart = cashedDates[month]!!.first().date
-                        val monthEnd = cashedDates[month]!!.last().date
-                        newValue[month] =
-                            fetchAndDeriveCalendarDates(monthStart..monthEnd)
-                    }
-                }
-                newValue
+            streaksFlow.update {
+                getAllStreaks(routineId = routineId, today = today)
             }
 
-            _visibleDatesFlow.update {
-                cashedDatesFlow.value[_currentMonthFlow.value]!!
+            val monthStart = _currentMonthFlow.value.atStartOfMonth().toKotlinLocalDate()
+            val monthEnd = _currentMonthFlow.value.atEndOfMonth().toKotlinLocalDate()
+            val initialMonthPeriod = fetchAndDeriveCalendarDates(period = monthStart..monthEnd)
+            cashedDatesFlow.update {
+                it.toMutableMap().apply { put(_currentMonthFlow.value, initialMonthPeriod) }
             }
-        }
-    }
-
-    fun onScrolledToNewMonth(month: YearMonth) {
-        _currentMonthFlow.update { month }
-
-        viewModelScope.launch {
-            if (!cashedDatesFlow.value.contains(month)) {
-                val monthStart = month.atStartOfMonth().toKotlinLocalDate()
-                val monthEnd = month.atEndOfMonth().toKotlinLocalDate()
-                val currentMonthDates = fetchAndDeriveCalendarDates(monthStart..monthEnd)
-                cashedDatesFlow.update {
-                    it.toMutableMap().apply { put(month, currentMonthDates) }
-                }
-            }
-
-            _visibleDatesFlow.update {
-                cashedDatesFlow.value[month]!!
-            }
-        }
-    }
-
-    private suspend fun fetchAndDeriveCalendarDates(
-        period: LocalDateRange,
-    ): List<RoutineCalendarDate> {
-        val routineStatusesForCurrentMonth: List<StatusEntry> = getRoutineStatusList(
-            routineId = routineId,
-            dates = period,
-            today = Clock.System.todayIn(TimeZone.currentSystemDefault()),
-        )
-        return routineStatusesForCurrentMonth.map {
-            RoutineCalendarDate(
-                date = it.date,
-                status = it.status,
-                includedInStreak = true,
-            )
         }
     }
 }

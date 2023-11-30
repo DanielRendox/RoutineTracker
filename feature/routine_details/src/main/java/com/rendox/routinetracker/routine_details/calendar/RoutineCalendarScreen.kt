@@ -67,8 +67,8 @@ fun RoutineCalendarScreen(
     modifier: Modifier = Modifier,
     routineCalendarDates: List<RoutineCalendarDate>,
     currentMonth: YearMonth,
-    currentStreakDurationInDays: Int?,
-    longestStreakDurationInDays: Int?,
+    currentStreakDurationInDays: Int,
+    longestStreakDurationInDays: Int,
     onCalendarDateClick: (LocalDate, RoutineStatus) -> Unit,
     onScrolledToNewMonth: (YearMonth) -> Unit,
 ) {
@@ -94,33 +94,33 @@ fun RoutineCalendarScreen(
                 .height(IntrinsicSize.Max),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            currentStreakDurationInDays?.let {
-                RoutineStreakCard(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(1f)
-                        .padding(top = 24.dp),
-                    icon = painterResource(R.drawable.baseline_commit_24),
-                    title = pluralStringResource(
-                        id = R.plurals.num_of_days, count = it, it,
-                    ),
-                    bodyText = stringResource(id = R.string.current_streak)
-                )
-            }
+            RoutineStreakCard(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(1f)
+                    .padding(top = 24.dp),
+                icon = painterResource(R.drawable.baseline_commit_24),
+                title = pluralStringResource(
+                    id = R.plurals.num_of_days,
+                    count = currentStreakDurationInDays,
+                    currentStreakDurationInDays,
+                ),
+                bodyText = stringResource(id = R.string.current_streak)
+            )
             Spacer(modifier = Modifier.width(16.dp))
-            longestStreakDurationInDays?.let {
-                RoutineStreakCard(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .weight(1f)
-                        .padding(top = 24.dp),
-                    icon = painterResource(R.drawable.trophy_24),
-                    title = pluralStringResource(
-                        id = R.plurals.num_of_days, count = it, it
-                    ),
-                    bodyText = stringResource(id = R.string.longest_streak)
-                )
-            }
+            RoutineStreakCard(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(1f)
+                    .padding(top = 24.dp),
+                icon = painterResource(R.drawable.trophy_24),
+                title = pluralStringResource(
+                    id = R.plurals.num_of_days,
+                    count = longestStreakDurationInDays,
+                    longestStreakDurationInDays,
+                ),
+                bodyText = stringResource(id = R.string.longest_streak)
+            )
         }
     }
 }

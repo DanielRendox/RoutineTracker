@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -34,6 +35,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.recyclerview.widget.RecyclerView
@@ -105,21 +107,9 @@ fun AgendaItem(
     val timeFormatter =
         remember { DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale) }
 
-    val notDueStatuses = remember {
-        listOf(
-            PlanningStatus.AlreadyCompleted,
-            PlanningStatus.NotDue,
-            PlanningStatus.OnVacation,
-            HistoricalStatus.Skipped,
-            HistoricalStatus.NotCompletedOnVacation,
-            HistoricalStatus.CompletedLater,
-            HistoricalStatus.AlreadyCompleted,
-        )
-    }
-
     Row(
         modifier = modifier.alpha(
-            if (notDueStatuses.contains(routine.status)) 0.5f else 1f
+            if (routine.hasGrayedOutLook) 0.5f else 1f
         ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -140,6 +130,7 @@ fun AgendaItem(
                 .padding(end = 15.dp),
             status = routine.status,
             onClick = onStatusCheckmarkClick,
+            statusToggleIsDisabled = routine.statusToggleIsDisabled,
         )
 
         Box(modifier = Modifier
@@ -178,10 +169,11 @@ private fun StatusCheckmark(
     modifier: Modifier = Modifier,
     status: RoutineStatus,
     onClick: (RoutineStatus) -> Unit,
+    statusToggleIsDisabled: Boolean,
 ) {
     val backgroundColor: Color
-    val icon: ImageVector?
-    val iconColor: Color?
+    var icon: ImageVector?
+    var iconColor: Color?
 
     when (status) {
         HistoricalStatus.NotCompleted -> {
@@ -191,55 +183,55 @@ private fun StatusCheckmark(
         }
 
         PlanningStatus.Planned -> {
-            backgroundColor = MaterialTheme.routineStatusColors.pending
+            backgroundColor = MaterialTheme.colorScheme.surfaceVariant
             icon = null
             iconColor = null
         }
 
         PlanningStatus.Backlog -> {
-            backgroundColor = MaterialTheme.routineStatusColors.pending
+            backgroundColor = MaterialTheme.routineStatusColors.pendingAgenda
             icon = null
             iconColor = null
         }
 
         PlanningStatus.AlreadyCompleted -> {
-            backgroundColor = MaterialTheme.routineStatusColors.pending
+            backgroundColor = MaterialTheme.routineStatusColors.pendingAgenda
             icon = null
             iconColor = null
         }
 
         PlanningStatus.NotDue -> {
-            backgroundColor = MaterialTheme.routineStatusColors.pending
+            backgroundColor = MaterialTheme.routineStatusColors.pendingAgenda
             icon = null
             iconColor = null
         }
 
         PlanningStatus.OnVacation -> {
-            backgroundColor = MaterialTheme.routineStatusColors.pending
+            backgroundColor = MaterialTheme.routineStatusColors.pendingAgenda
             icon = null
             iconColor = null
         }
 
         HistoricalStatus.Skipped -> {
-            backgroundColor = MaterialTheme.routineStatusColors.pending
+            backgroundColor = MaterialTheme.routineStatusColors.pendingAgenda
             icon = null
             iconColor = null
         }
 
         HistoricalStatus.NotCompletedOnVacation -> {
-            backgroundColor = MaterialTheme.routineStatusColors.pending
+            backgroundColor = MaterialTheme.routineStatusColors.pendingAgenda
             icon = null
             iconColor = null
         }
 
         HistoricalStatus.CompletedLater -> {
-            backgroundColor = MaterialTheme.routineStatusColors.pending
+            backgroundColor = MaterialTheme.routineStatusColors.pendingAgenda
             icon = null
             iconColor = null
         }
 
         HistoricalStatus.AlreadyCompleted -> {
-            backgroundColor = MaterialTheme.routineStatusColors.pending
+            backgroundColor = MaterialTheme.routineStatusColors.pendingAgenda
             icon = null
             iconColor = null
         }
@@ -275,17 +267,29 @@ private fun StatusCheckmark(
         }
     }
 
+    val iconSize: Dp
+    if (statusToggleIsDisabled) {
+        icon = Icons.Outlined.Lock
+        iconColor = MaterialTheme.routineStatusColors.pendingStrokeAgenda
+        iconSize = 18.dp
+    } else {
+        iconSize = 24.dp
+    }
+
     Box(
         modifier = modifier
             .size(28.dp)
             .clip(CircleShape)
             .background(backgroundColor)
-            .clickable { onClick(status) }
+            .then(
+                if (statusToggleIsDisabled) Modifier
+                else Modifier.clickable { onClick(status) }
+            )
     ) {
         icon?.let {
             Icon(
                 modifier = Modifier
-                    .size(24.dp)
+                    .size(iconSize)
                     .align(Alignment.Center),
                 imageVector = it,
                 contentDescription = null,
@@ -319,23 +323,31 @@ private val routines = listOf(
         status = HistoricalStatus.Completed,
         completionTime = kotlinx.datetime.LocalTime(hour = 9, minute = 0),
         id = 1,
+        hasGrayedOutLook = false,
+        statusToggleIsDisabled = false,
     ),
     DisplayRoutine(
         name = "Learn new English words",
         status = PlanningStatus.Planned,
         completionTime = null,
         id = 2,
+        hasGrayedOutLook = false,
+        statusToggleIsDisabled = false,
     ),
     DisplayRoutine(
         name = "Spend time outside",
         status = HistoricalStatus.NotCompleted,
         completionTime = kotlinx.datetime.LocalTime(hour = 12, minute = 30),
         id = 3,
+        hasGrayedOutLook = false,
+        statusToggleIsDisabled = true,
     ),
     DisplayRoutine(
         name = "Make my app",
         status = HistoricalStatus.CompletedLater,
         completionTime = kotlinx.datetime.LocalTime(hour = 17, minute = 0),
         id = 4,
+        hasGrayedOutLook = true,
+        statusToggleIsDisabled = false,
     )
 )

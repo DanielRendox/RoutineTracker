@@ -35,6 +35,7 @@
             <option value="$PROJECT_DIR$/core/testcommon" />
             <option value="$PROJECT_DIR$/core/ui" />
             <option value="$PROJECT_DIR$/feature" />
+            <option value="$PROJECT_DIR$/feature/add_edit_routine" />
             <option value="$PROJECT_DIR$/feature/agenda" />
             <option value="$PROJECT_DIR$/feature/routine_details" />
           </set>

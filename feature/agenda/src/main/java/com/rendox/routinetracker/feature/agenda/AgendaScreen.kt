@@ -53,7 +53,7 @@ internal fun AgendaRoute(
         currentDate = currentDate.toJavaLocalDate(),
         routineList = visibleRoutines,
         today = LocalDate.now(),
-        onAddRoutineClick = { viewModel.onAddRoutineClick() },
+        onAddRoutineClick = onAddRoutineClick,
         onRoutineClick = onRoutineClick,
         onStatusCheckmarkClick = { routineId, status ->
             viewModel.onRoutineStatusCheckmarkClick(routineId, currentDate, status)
@@ -90,7 +90,13 @@ internal fun AgendaScreen(
                     containerColor = MaterialTheme.colorScheme.background
                 ),
                 title = {
-                    Text(text = currentDate.format(dateFormatter))
+                    Text(
+                        text = if (currentDate == today) {
+                            stringResource(id = R.string.agenda_date_title_today)
+                        } else {
+                            currentDate.format(dateFormatter)
+                        }
+                    )
                 },
                 actions = {
                     Row {

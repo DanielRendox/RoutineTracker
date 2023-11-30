@@ -2,9 +2,12 @@ package com.rendox.routinetracker.core.domain.completion_history.use_cases
 
 import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
 import com.rendox.routinetracker.core.data.routine.RoutineRepository
-import com.rendox.routinetracker.core.data.streak.StreakRepository
 import com.rendox.routinetracker.core.domain.completion_history.computePlanningStatus
 import com.rendox.routinetracker.core.domain.completion_history.getPeriodRange
+import com.rendox.routinetracker.core.domain.streak.BreakStreakUseCase
+import com.rendox.routinetracker.core.domain.streak.ContinueStreakIfEndedUseCase
+import com.rendox.routinetracker.core.domain.streak.StartStreakOrJoinStreaksUseCase
+import com.rendox.routinetracker.core.domain.streak.DeleteStreakIfStartedUseCase
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo
@@ -12,6 +15,9 @@ import com.rendox.routinetracker.core.model.HistoricalStatus
 import com.rendox.routinetracker.core.model.PlanningStatus
 import com.rendox.routinetracker.core.model.Routine
 import com.rendox.routinetracker.core.model.Schedule
+import com.rendox.routinetracker.core.model.onVacationHistoricalStatuses
+import com.rendox.routinetracker.core.model.overCompletedStatuses
+import com.rendox.routinetracker.core.model.sortedOutBacklogStatuses
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
@@ -19,33 +25,26 @@ import kotlinx.datetime.minus
 class ToggleHistoricalStatusUseCase(
     private val completionHistoryRepository: CompletionHistoryRepository,
     private val routineRepository: RoutineRepository,
-    private val streakRepository: StreakRepository,
+    private val startStreakOrJoinStreaks: StartStreakOrJoinStreaksUseCase,
+    private val breakStreak: BreakStreakUseCase,
+    private val deleteStreakIfStarted: DeleteStreakIfStartedUseCase,
+    private val continueStreakIfEnded: ContinueStreakIfEndedUseCase
 ) {
     suspend operator fun invoke(
         routineId: Long,
         currentDate: LocalDate,
         today: LocalDate,
     ) {
-        check(currentDate <= today)
+        if (currentDate > today) return
+
         val routine = routineRepository.getRoutineById(routineId)
         val oldEntry =
             completionHistoryRepository.getHistoryEntries(routineId, currentDate..currentDate)
                 .first()
 
         if (currentDate == today) {
-            val latestStreak = streakRepository.getLastStreak(routineId)
-            println("latestStreak = $latestStreak")
-            println("currentDate = $currentDate")
-            if (latestStreak?.startDate == currentDate) {
-                streakRepository.deleteStreakById(latestStreak.id!!)
-            }
-            if (latestStreak?.endDate == currentDate) {
-                streakRepository.updateStreakById(
-                    id = latestStreak.id!!,
-                    start = latestStreak.startDate,
-                    end = null,
-                )
-            }
+            deleteStreakIfStarted(routineId, currentDate)
+            continueStreakIfEnded(routineId, currentDate)
 
             if (oldEntry.status in sortedOutBacklogStatuses) {
                 undoSortingOutBacklog(routineId = routineId, currentDate = currentDate)
@@ -98,8 +97,6 @@ class ToggleHistoricalStatusUseCase(
                             breakStreak(
                                 routineId = routineId,
                                 date = currentDate,
-                                completionHistoryRepository = completionHistoryRepository,
-                                streakRepository = streakRepository,
                             )
 
                             val newScheduleDeviation =
@@ -167,8 +164,6 @@ class ToggleHistoricalStatusUseCase(
             HistoricalStatus.NotCompleted -> {
                 startStreakOrJoinStreaks(
                     routine = routine,
-                    streakRepository = streakRepository,
-                    completionHistoryRepository = completionHistoryRepository,
                     date = currentDate,
                 )
 
@@ -193,7 +188,12 @@ class ToggleHistoricalStatusUseCase(
             HistoricalStatus.Skipped -> {
                 when (computeCurrentDatePlanningStatus(routine, currentDate)) {
                     PlanningStatus.Backlog -> {
-                        sortOutBacklog(routine, completionHistoryRepository, streakRepository, currentDate)
+                        sortOutBacklog(
+                            routine = routine,
+                            completionHistoryRepository = completionHistoryRepository,
+                            startStreakOrJoinStreaks = startStreakOrJoinStreaks,
+                            currentDate = currentDate,
+                        )
                         completionHistoryRepository.updateHistoryEntryByDate(
                             routineId = routineId,
                             date = currentDate,
@@ -206,8 +206,6 @@ class ToggleHistoricalStatusUseCase(
                     PlanningStatus.NotDue -> {
                         startStreakOrJoinStreaks(
                             routine = routine,
-                            streakRepository = streakRepository,
-                            completionHistoryRepository = completionHistoryRepository,
                             date = currentDate,
                         )
 
@@ -257,7 +255,12 @@ class ToggleHistoricalStatusUseCase(
                     maxDate = currentDate.minus(DatePeriod(days = 1)),
                 )
                 if (scheduleDeviation < 0 && lastNotCompleted != null) {
-                    sortOutBacklog(routine, completionHistoryRepository, streakRepository, currentDate)
+                    sortOutBacklog(
+                        routine = routine,
+                        completionHistoryRepository = completionHistoryRepository,
+                        startStreakOrJoinStreaks = startStreakOrJoinStreaks,
+                        currentDate = currentDate,
+                    )
                     completionHistoryRepository.updateHistoryEntryByDate(
                         routineId = routineId,
                         date = currentDate,
@@ -268,8 +271,6 @@ class ToggleHistoricalStatusUseCase(
                 } else {
                     startStreakOrJoinStreaks(
                         routine = routine,
-                        streakRepository = streakRepository,
-                        completionHistoryRepository = completionHistoryRepository,
                         date = currentDate,
                     )
 
@@ -398,8 +399,6 @@ class ToggleHistoricalStatusUseCase(
         breakStreak(
             routineId = routineId,
             date = completedLaterEntry.date,
-            streakRepository = streakRepository,
-            completionHistoryRepository = completionHistoryRepository,
         )
 
         completionHistoryRepository.updateHistoryEntryByDate(
@@ -414,15 +413,5 @@ class ToggleHistoricalStatusUseCase(
             routineId,
             completedLaterEntry.date
         )
-    }
-
-    private suspend fun deleteStreakIfStarted(routineId: Long, currentDate: LocalDate) {
-        val existingStreak = streakRepository.getStreakByDate(
-            routineId = routineId,
-            dateWithinStreak = currentDate,
-        )
-        if (existingStreak != null && existingStreak.startDate == currentDate) {
-            streakRepository.deleteStreakById(existingStreak.id!!)
-        }
     }
 }

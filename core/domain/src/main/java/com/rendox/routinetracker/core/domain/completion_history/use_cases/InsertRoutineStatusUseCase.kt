@@ -2,22 +2,25 @@ package com.rendox.routinetracker.core.domain.completion_history.use_cases
 
 import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
 import com.rendox.routinetracker.core.data.routine.RoutineRepository
-import com.rendox.routinetracker.core.data.streak.StreakRepository
 import com.rendox.routinetracker.core.domain.completion_history.computePlanningStatus
 import com.rendox.routinetracker.core.domain.completion_history.getPeriodRange
+import com.rendox.routinetracker.core.domain.streak.BreakStreakUseCase
+import com.rendox.routinetracker.core.domain.streak.StartStreakOrJoinStreaksUseCase
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.model.CompletionHistoryEntry
 import com.rendox.routinetracker.core.model.HistoricalStatus
 import com.rendox.routinetracker.core.model.PlanningStatus
 import com.rendox.routinetracker.core.model.Routine
 import com.rendox.routinetracker.core.model.Schedule
+import com.rendox.routinetracker.core.model.onVacationHistoricalStatuses
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
 
 class InsertRoutineStatusUseCase(
     private val completionHistoryRepository: CompletionHistoryRepository,
     private val routineRepository: RoutineRepository,
-    private val streakRepository: StreakRepository,
+    private val startStreakOrJoinStreaks: StartStreakOrJoinStreaksUseCase,
+    private val breakStreak: BreakStreakUseCase,
 ) {
 
     suspend operator fun invoke(
@@ -26,7 +29,7 @@ class InsertRoutineStatusUseCase(
         completedOnCurrentDate: Boolean,
         today: LocalDate,
     ) {
-        check(currentDate <= today)
+        if (currentDate > today) return
 
         when (val routine = routineRepository.getRoutineById(routineId)) {
             is Routine.YesNoRoutine -> insertYesNoRoutineStatus(
@@ -148,8 +151,6 @@ class InsertRoutineStatusUseCase(
         startStreakOrJoinStreaks(
             routine = routine,
             date = currentDate,
-            streakRepository = streakRepository,
-            completionHistoryRepository = completionHistoryRepository,
         )
         HistoricalStatusData(
             scheduleDeviation = 0F,
@@ -186,8 +187,6 @@ class InsertRoutineStatusUseCase(
                 breakStreak(
                     routineId = routine.id!!,
                     date = currentDate,
-                    completionHistoryRepository = completionHistoryRepository,
-                    streakRepository = streakRepository,
                 )
                 HistoricalStatusData(
                     scheduleDeviation = if (backlogEnabled) -1F else 0F,
@@ -198,8 +197,6 @@ class InsertRoutineStatusUseCase(
             breakStreak(
                 routineId = routine.id!!,
                 date = currentDate,
-                completionHistoryRepository = completionHistoryRepository,
-                streakRepository = streakRepository,
             )
             HistoricalStatusData(
                 scheduleDeviation = if (backlogEnabled) -1F else 0F,
@@ -211,7 +208,12 @@ class InsertRoutineStatusUseCase(
     private suspend fun deriveHistoricalStatusFromBacklogStatus(
         completed: Boolean, routineId: Routine, currentDate: LocalDate
     ): HistoricalStatusData = if (completed) {
-        sortOutBacklog(routineId, completionHistoryRepository, streakRepository, currentDate)
+        sortOutBacklog(
+            routine = routineId,
+            completionHistoryRepository = completionHistoryRepository,
+            startStreakOrJoinStreaks = startStreakOrJoinStreaks,
+            currentDate = currentDate,
+        )
         HistoricalStatusData(
             scheduleDeviation = 1F,
             historicalStatus = HistoricalStatus.SortedOutBacklog,
@@ -246,8 +248,6 @@ class InsertRoutineStatusUseCase(
         startStreakOrJoinStreaks(
             routine = routine,
             date = currentDate,
-            streakRepository = streakRepository,
-            completionHistoryRepository = completionHistoryRepository,
         )
         HistoricalStatusData(
             scheduleDeviation = if (cancelDuenessIfDoneAhead) 1F else 0F,
@@ -268,7 +268,12 @@ class InsertRoutineStatusUseCase(
         currentDate: LocalDate,
     ): HistoricalStatusData = if (completed) {
         if (currentScheduleDeviation < 0) {
-            sortOutBacklog(routine, completionHistoryRepository, streakRepository, currentDate)
+            sortOutBacklog(
+                routine = routine,
+                completionHistoryRepository = completionHistoryRepository,
+                startStreakOrJoinStreaks = startStreakOrJoinStreaks,
+                currentDate = currentDate,
+            )
             HistoricalStatusData(
                 scheduleDeviation = 1F,
                 historicalStatus = HistoricalStatus.SortedOutBacklogOnVacation,

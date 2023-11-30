@@ -46,7 +46,7 @@ class AgendaScreenViewModel(
         combine(
             _currentDateFlow,
             cashedRoutinesFlow,
-            _hideNotDueRoutinesFlow
+            _hideNotDueRoutinesFlow,
         ) { currentDate, cashedRoutines, hideNotDueRoutines ->
             val currentDateRoutines = cashedRoutines[currentDate] ?: emptyList()
             if (hideNotDueRoutines) currentDateRoutines.filter { it.status in dueRoutineStatuses }
@@ -85,25 +85,30 @@ class AgendaScreenViewModel(
     private suspend fun getRoutinesForDate(date: LocalDate): List<DisplayRoutine> {
         val routines = mutableListOf<DisplayRoutine>()
         for (routine in allRoutinesFlow.value) {
-            val routineStatus: RoutineStatus? = getRoutineStatus(
-                routineId = routine.id!!,
-                date = date,
-                today = todayFlow.value,
-            )
-            val newRoutine: DisplayRoutine? = routineStatus?.let {
-                DisplayRoutine(
-                    name = routine.name,
-                    id = routine.id!!,
-                    status = it,
-                    completionTime = getRoutineCompletionTime(
-                        routineId = routine.id!!,
-                        date = date,
-                    )
-                )
-            }
-            newRoutine?.let { routines.add(it) }
+            getDisplayRoutine(routine, date)?.let { routines.add(it) }
         }
         return routines
+    }
+
+    private suspend fun getDisplayRoutine(routine: Routine, date: LocalDate): DisplayRoutine? {
+        val routineStatus: RoutineStatus? = getRoutineStatus(
+            routineId = routine.id!!,
+            date = date,
+            today = todayFlow.value,
+        )
+        return routineStatus?.let {
+            DisplayRoutine(
+                name = routine.name,
+                id = routine.id!!,
+                status = it,
+                completionTime = getRoutineCompletionTime(
+                    routineId = routine.id!!,
+                    date = date,
+                ),
+                hasGrayedOutLook = it !in dueRoutineStatuses,
+                statusToggleIsDisabled = date > todayFlow.value,
+            )
+        }
     }
 
     fun onRoutineStatusCheckmarkClick(
@@ -127,20 +132,35 @@ class AgendaScreenViewModel(
                 )
             }
 
-            val currentDateRoutines = getRoutinesForDate(_currentDateFlow.value)
-            cashedRoutinesFlow.update {
-                mapOf(_currentDateFlow.value to currentDateRoutines)
+            cashedRoutinesFlow.update { cashedRoutines ->
+                val newCashedRoutinesValue = cashedRoutines.toMutableMap()
+                for ((date, oldRoutineList) in cashedRoutines) {
+                    val routine = allRoutinesFlow.value.find { it.id == routineId }?.let {
+                        getDisplayRoutine(
+                            routine = it,
+                            date = date,
+                        )
+                    }
+                    newCashedRoutinesValue[date] = oldRoutineList.toMutableList().apply {
+                        val routineToUpdateIndex = indexOf(find { it.id == routineId })
+                        if (routine == null) removeAt(routineToUpdateIndex)
+                        else set(routineToUpdateIndex, routine)
+                    }
+                }
+                newCashedRoutinesValue
             }
         }
     }
 
     fun onDateChange(newDate: LocalDate) = viewModelScope.launch {
-        cashedRoutinesFlow.update {
-            it.toMutableMap().apply {
-                put(newDate, getRoutinesForDate(newDate))
+        _currentDateFlow.update { newDate }
+        if (!cashedRoutinesFlow.value.contains(newDate)) {
+            cashedRoutinesFlow.update {
+                it.toMutableMap().apply {
+                    put(newDate, getRoutinesForDate(newDate))
+                }
             }
         }
-        _currentDateFlow.update { newDate }
     }
 
     fun onNotDueRoutinesVisibilityToggle() {
@@ -166,4 +186,6 @@ data class DisplayRoutine(
     val id: Long,
     val status: RoutineStatus,
     val completionTime: LocalTime?,
+    val hasGrayedOutLook: Boolean,
+    val statusToggleIsDisabled: Boolean,
 )

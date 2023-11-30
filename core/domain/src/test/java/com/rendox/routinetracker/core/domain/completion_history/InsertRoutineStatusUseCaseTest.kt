@@ -11,6 +11,7 @@ import com.rendox.routinetracker.core.database.completion_history.CompletionHist
 import com.rendox.routinetracker.core.database.routine.RoutineLocalDataSource
 import com.rendox.routinetracker.core.database.streak.StreakLocalDataSource
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.InsertRoutineStatusUseCase
+import com.rendox.routinetracker.core.domain.di.streakDomainModule
 import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
 import com.rendox.routinetracker.core.logic.time.WeekDayNumberMonthRelated
 import com.rendox.routinetracker.core.logic.time.plusDays
@@ -72,6 +73,7 @@ class InsertRoutineStatusUseCaseTest : KoinTest {
                 routineDataModule,
                 completionHistoryDataModule,
                 streakDataModule,
+                streakDomainModule,
                 testModule,
             )
         }
@@ -83,7 +85,8 @@ class InsertRoutineStatusUseCaseTest : KoinTest {
         insertRoutineStatus = InsertRoutineStatusUseCase(
             completionHistoryRepository = completionHistoryRepository,
             routineRepository = routineRepository,
-            streakRepository = streakRepository,
+            startStreakOrJoinStreaks = get(),
+            breakStreak = get(),
         )
     }
 
@@ -842,7 +845,7 @@ class InsertRoutineStatusUseCaseTest : KoinTest {
     }
 
     @Test
-    fun `periodic custom schedule, backlog enabled, completing ahead disabled`() = runTest {
+    fun `custom date schedule, backlog enabled, completing ahead disabled`() = runTest {
         val routineId = 1L
         val routineStartDate = LocalDate(2023, Month.OCTOBER, 2) // Monday
 
@@ -1036,24 +1039,10 @@ class InsertRoutineStatusUseCaseTest : KoinTest {
                 dates = routineStartDate..routineStartDate.plusDays(14)
             )
         ).isEqualTo(expectedEntriesList)
-
-        val expectedStreaks = listOf(
-            Streak(
-                id = 1,
-                startDate = LocalDate(2023, Month.OCTOBER, 2),
-                endDate = LocalDate(2023, Month.OCTOBER, 13),
-            ),
-            Streak(
-                id = 2,
-                startDate = LocalDate(2023, Month.OCTOBER, 16),
-                endDate = null,
-            )
-        )
-        assertThat(streakRepository.getAllStreaks(routineId)).isEqualTo(expectedStreaks)
     }
 
     @Test
-    fun `periodic custom schedule, backlog disabled, completing ahead enabled`() = runTest {
+    fun `custom date schedule, backlog disabled, completing ahead enabled`() = runTest {
         val routineId = 1L
         val routineStartDate = LocalDate(2023, Month.OCTOBER, 2) // Monday
 
@@ -1204,20 +1193,6 @@ class InsertRoutineStatusUseCaseTest : KoinTest {
                 routineStartDate..routineStartDate.plusDays(14)
             )
         ).isEqualTo(expectedEntriesList)
-
-        val expectedStreaks = listOf(
-            Streak(
-                id = 1,
-                startDate = LocalDate(2023, Month.OCTOBER, 2),
-                endDate = LocalDate(2023, Month.OCTOBER, 3),
-            ),
-            Streak(
-                id = 2,
-                startDate = LocalDate(2023, Month.OCTOBER, 7),
-                endDate = null,
-            )
-        )
-        assertThat(streakRepository.getAllStreaks(routineId)).isEqualTo(expectedStreaks)
     }
 
     @Test

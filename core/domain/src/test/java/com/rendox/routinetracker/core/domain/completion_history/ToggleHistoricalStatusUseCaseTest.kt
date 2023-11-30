@@ -11,6 +11,7 @@ import com.rendox.routinetracker.core.database.completion_history.CompletionHist
 import com.rendox.routinetracker.core.database.routine.RoutineLocalDataSource
 import com.rendox.routinetracker.core.database.streak.StreakLocalDataSource
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.ToggleHistoricalStatusUseCase
+import com.rendox.routinetracker.core.domain.di.streakDomainModule
 import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.CompletionHistoryEntry
@@ -87,6 +88,7 @@ class ToggleHistoricalStatusUseCaseTest : KoinTest {
                 routineDataModule,
                 completionHistoryDataModule,
                 streakDataModule,
+                streakDomainModule,
                 testModule,
             )
         }
@@ -98,7 +100,10 @@ class ToggleHistoricalStatusUseCaseTest : KoinTest {
         toggleHistoricalStatus = ToggleHistoricalStatusUseCase(
             completionHistoryRepository = completionHistoryRepository,
             routineRepository = routineRepository,
-            streakRepository = streakRepository,
+            startStreakOrJoinStreaks = get(),
+            breakStreak = get(),
+            deleteStreakIfStarted = get(),
+            continueStreakIfEnded = get(),
         )
 
         routineRepository.insertRoutine(routine)

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="choose_routine_type_page_name">How do you want to record your progress?</string>
+    <string name="set_goal_page_name">Set up a goal</string>
+    <string name="choose_schedule_page_name">Which days work best for your schedule?</string>
+    <string name="tweak_routine_page_name">Fine-tune your habit</string>
+
+    <string name="navigate_back_button_text">back</string>
+    <string name="navigate_forward_button_text">next</string>
+    <string name="save">save</string>
+
+    <string name="yes_no_routine_title">Yes or No</string>
+    <string name="yes_no_routine_description">Click a checkmark when you complete the habit.</string>
+    <string name="measurable_routine_title">Measurable</string>
+    <string name="measurable_routine_description">
+        Establish a daily goal for a habit. E.g. read 10 pages of the book.
+    </string>
+
+    <string name="in_development">Currently in development</string>
+
+    <string name="set_goal_page_routine_name_text_field_label">Habit name</string>
+    <string name="set_goal_page_routine_description_text_field_label">Description (Optional)</string>
+    <string name="set_goal_page_empty_routine_name_error_message">Name is empty</string>
+    
+    <string name="choose_schedule_page_schedule_type_label_every_day">Every day</string>
+    <string name="choose_schedule_page_schedule_type_label_weekly">Weekly</string>
+    <string name="choose_schedule_page_schedule_type_label_monthly">Monthly</string>
+    <string name="choose_schedule_page_schedule_type_label_annually">Annually</string>
+    <string name="choose_schedule_page_schedule_type_label_custom_period">Custom period</string>
+    <string name="choose_schedule_page_schedule_type_label_custom_dates">Custom dates</string>
+</resources>

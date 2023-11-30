@@ -81,3 +81,31 @@ enum class HistoricalStatus : RoutineStatus {
      */
     AlreadyCompleted,
 }
+
+val completedStatuses = listOf(
+    HistoricalStatus.Completed,
+    HistoricalStatus.OverCompleted,
+    HistoricalStatus.OverCompletedOnVacation,
+    HistoricalStatus.SortedOutBacklog,
+    HistoricalStatus.SortedOutBacklogOnVacation,
+)
+
+val onVacationHistoricalStatuses = listOf(
+    HistoricalStatus.NotCompletedOnVacation,
+    HistoricalStatus.OverCompletedOnVacation,
+    HistoricalStatus.SortedOutBacklogOnVacation,
+)
+
+val sortedOutBacklogStatuses = listOf(
+    HistoricalStatus.SortedOutBacklog,
+    HistoricalStatus.SortedOutBacklogOnVacation,
+)
+
+val overCompletedStatuses = listOf(
+    HistoricalStatus.OverCompleted,
+    HistoricalStatus.OverCompletedOnVacation,
+)
+
+val failedStatuses = listOf(
+    HistoricalStatus.NotCompleted
+)

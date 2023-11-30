@@ -11,6 +11,7 @@ import com.rendox.routinetracker.core.model.Routine
 import com.rendox.routinetracker.core.model.RoutineStatus
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.model.StatusEntry
+import com.rendox.routinetracker.core.model.onVacationHistoricalStatuses
 import com.rendox.routinetracker.core.model.toStatusEntry
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate

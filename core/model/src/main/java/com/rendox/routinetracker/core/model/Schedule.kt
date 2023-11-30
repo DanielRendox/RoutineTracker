@@ -43,7 +43,6 @@ sealed class Schedule {
 
     sealed class WeeklySchedule : PeriodicSchedule() {
         abstract val startDayOfWeek: DayOfWeek?
-
         override val correspondingPeriod: DatePeriod
             get() = DatePeriod(days = DateTimeUnit.WEEK.days)
     }
@@ -62,7 +61,6 @@ sealed class Schedule {
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
     ) : WeeklySchedule() {
-
         init {
             check(dueDaysOfWeek.size <= DateTimeUnit.WEEK.days) {
                 "The number of due dates shouldn't be higher than the number of days in week."
@@ -85,7 +83,6 @@ sealed class Schedule {
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
     ) : WeeklySchedule(), ByNumOfDueDays {
-
         private val firstPeriodIsShort
             get() = startDayOfWeek != null && routineStartDate.dayOfWeek != startDayOfWeek
 
@@ -137,7 +134,6 @@ sealed class Schedule {
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
     ) : MonthlySchedule() {
-
         init {
             check(dueDatesIndices.size <= 31) {
                 "The number of due dates shouldn't be higher than max num of days in month (31)."
@@ -160,7 +156,6 @@ sealed class Schedule {
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
     ) : MonthlySchedule(), ByNumOfDueDays {
-
         private val firstPeriodIsShort
             get() = !startFromRoutineStart && routineStartDate.dayOfMonth != 1
 
@@ -203,7 +198,6 @@ sealed class Schedule {
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
     ) : PeriodicSchedule(), ByNumOfDueDays {
-
         override val correspondingPeriod: DatePeriod
             get() = DatePeriod(days = numOfDaysInPeriod)
 
