@@ -59,7 +59,6 @@ class GetRoutineStatusUseCaseTest : KoinTest {
         startDayOfWeek = DayOfWeek.MONDAY,
         backlogEnabled = true,
         cancelDuenessIfDoneAhead = true,
-        periodSeparationEnabled = false,
         routineStartDate = routineStartDate,
         routineEndDate = routineEndDate,
     )
@@ -236,7 +235,6 @@ class GetRoutineStatusUseCaseTest : KoinTest {
         val schedule = Schedule.WeeklyScheduleByNumOfDueDays(
             numOfDueDays = 4,
             numOfDueDaysInFirstPeriod = null,
-            periodSeparationEnabled = false,
             backlogEnabled = true,
             cancelDuenessIfDoneAhead = true,
             routineStartDate = LocalDate(2023, Month.NOVEMBER, 6),

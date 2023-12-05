@@ -26,7 +26,7 @@ import com.rendox.routinetracker.core.model.Routine
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.ui.components.WrapTextContent
 import com.rendox.routinetracker.core.ui.helpers.LocalLocale
-import com.rendox.routinetracker.feature.routine_details.R
+import com.rendox.routinetracker.core.ui.R
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.toJavaLocalTime
@@ -88,7 +88,9 @@ fun RoutineProperties(
             frequencyString?.let {
                 RoutineDetailLabel(
                     modifier = Modifier.weight(weight = 3.7f, fill = false),
-                    icon = painterResource(id = R.drawable.baseline_calendar_month_24),
+                    icon = painterResource(
+                        id = com.rendox.routinetracker.feature.routine_details.R.drawable.baseline_calendar_month_24
+                    ),
                     text = it,
                 )
             }
@@ -96,7 +98,9 @@ fun RoutineProperties(
             sessionDurationString?.let {
                 RoutineDetailLabel(
                     modifier = Modifier.weight(weight = 3.3f, fill = false),
-                    icon = painterResource(id = R.drawable.baseline_access_time_filled_24),
+                    icon = painterResource(
+                        id = com.rendox.routinetracker.feature.routine_details.R.drawable.baseline_access_time_filled_24
+                    ),
                     text = it,
                 )
             }
@@ -105,14 +109,20 @@ fun RoutineProperties(
             val routineTimeIconContentDescription: String
 
             if (reminderEnabled) {
-                routineTimeIcon = painterResource(id = R.drawable.baseline_notifications_enabled_24)
+                routineTimeIcon = painterResource(
+                    id = com.rendox.routinetracker.feature.routine_details.R.drawable.baseline_notifications_enabled_24
+                )
                 routineTimeIconContentDescription =
-                    stringResource(id = R.string.detail_label_notifications_enabled_icon_description)
+                    stringResource(id = com.rendox.routinetracker.feature.routine_details.R.string.detail_label_notifications_enabled_icon_description)
             } else {
                 routineTimeIcon =
-                    painterResource(id = R.drawable.baseline_notifications_disabled_24)
+                    painterResource(
+                        id = com.rendox.routinetracker.feature.routine_details.R.drawable.baseline_notifications_disabled_24
+                    )
                 routineTimeIconContentDescription =
-                    stringResource(id = R.string.detail_label_notifications_disabled_icon_description)
+                    stringResource(
+                        id = com.rendox.routinetracker.feature.routine_details.R.string.detail_label_notifications_disabled_icon_description
+                    )
             }
 
             val locale = LocalLocale.current
@@ -133,7 +143,9 @@ fun RoutineProperties(
             numericalValueRoutineUnit?.let {
                 RoutineDetailLabel(
                     modifier = Modifier.weight(weight = 3.7f, fill = false),
-                    icon = painterResource(id = R.drawable.baseline_check_circle_24),
+                    icon = painterResource(
+                        id = com.rendox.routinetracker.feature.routine_details.R.drawable.baseline_check_circle_24
+                    ),
                     text = deriveAmountOfWorkPerSession(
                         numOfUnitsPerSession = it.numOfUnitsPerSession,
                         unitsOfMeasure = it.unitsOfMeasure,
@@ -217,10 +229,10 @@ private fun deriveRoutineSessionDuration(sessionDurationMinutes: Int): String {
     val minutes = sessionDurationMinutes.rem(60)
 
     val hoursString = if (hours == 0) "" else stringResource(
-        id = R.string.detail_label_session_duration_hours, hours
+        id = com.rendox.routinetracker.feature.routine_details.R.string.detail_label_session_duration_hours, hours
     )
     val minutesString = if (minutes == 0) "" else stringResource(
-        id = R.string.detail_label_session_duration_minutes, minutes
+        id = com.rendox.routinetracker.feature.routine_details.R.string.detail_label_session_duration_minutes, minutes
     )
     return "$hoursString $minutesString"
 }

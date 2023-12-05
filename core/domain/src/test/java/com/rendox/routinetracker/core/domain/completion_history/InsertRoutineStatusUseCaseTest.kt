@@ -1419,7 +1419,6 @@ class InsertRoutineStatusUseCaseTest : KoinTest {
         val schedule = Schedule.PeriodicCustomSchedule(
             numOfDueDays = 1,
             numOfDaysInPeriod = 2,
-            periodSeparationEnabled = false,
             backlogEnabled = true,
             cancelDuenessIfDoneAhead = true,
             routineStartDate = routineStartDate,

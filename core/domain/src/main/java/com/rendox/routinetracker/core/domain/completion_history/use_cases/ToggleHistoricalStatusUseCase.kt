@@ -11,6 +11,7 @@ import com.rendox.routinetracker.core.domain.streak.DeleteStreakIfStartedUseCase
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo
+import com.rendox.routinetracker.core.model.CompletionHistoryEntry
 import com.rendox.routinetracker.core.model.HistoricalStatus
 import com.rendox.routinetracker.core.model.PlanningStatus
 import com.rendox.routinetracker.core.model.Routine
@@ -30,6 +31,9 @@ class ToggleHistoricalStatusUseCase(
     private val deleteStreakIfStarted: DeleteStreakIfStartedUseCase,
     private val continueStreakIfEnded: ContinueStreakIfEndedUseCase
 ) {
+    private var currentPeriod: LocalDateRange? = null
+    private var lastVacationStatus: CompletionHistoryEntry? = null
+
     suspend operator fun invoke(
         routineId: Long,
         currentDate: LocalDate,
@@ -54,6 +58,20 @@ class ToggleHistoricalStatusUseCase(
             return
         }
 
+        lastVacationStatus = completionHistoryRepository.getLastHistoryEntryByStatus(
+            routineId = routine.id!!,
+            matchingStatuses = onVacationHistoricalStatuses,
+        )
+
+        val schedule = routine.schedule
+        currentPeriod =
+            if (schedule is Schedule.PeriodicSchedule) schedule.getPeriodRange(
+                currentDate = currentDate,
+                lastVacationEndDate = lastVacationStatus?.date,
+            )
+            else null
+
+        println("ToggleHistoricalStatusUseCase oldStatus = ${oldEntry.status}")
         when (oldEntry.status) {
             HistoricalStatus.Completed -> {
                 val wasCompletedLater = completionHistoryRepository.checkIfStatusWasCompletedLater(
@@ -118,6 +136,7 @@ class ToggleHistoricalStatusUseCase(
                                 newScheduleDeviation = -1F,
                                 newTimesCompleted = 0F,
                             )
+                            undoCompletingAhead(routine, currentDate)
                         }
 
                         else -> throw IllegalArgumentException()
@@ -176,7 +195,7 @@ class ToggleHistoricalStatusUseCase(
                 )
             }
 
-            HistoricalStatus.AlreadyCompleted ->
+            HistoricalStatus.AlreadyCompleted -> {
                 completionHistoryRepository.updateHistoryEntryByDate(
                     routineId = routineId,
                     date = currentDate,
@@ -184,6 +203,8 @@ class ToggleHistoricalStatusUseCase(
                     newScheduleDeviation = 0F,
                     newTimesCompleted = 1F,
                 )
+                completeAhead(routine, currentDate)
+            }
 
             HistoricalStatus.Skipped -> {
                 when (computeCurrentDatePlanningStatus(routine, currentDate)) {
@@ -203,12 +224,8 @@ class ToggleHistoricalStatusUseCase(
                         )
                     }
 
-                    PlanningStatus.NotDue -> {
-                        startStreakOrJoinStreaks(
-                            routine = routine,
-                            date = currentDate,
-                        )
 
+                    PlanningStatus.NotDue -> {
                         val newScheduleDeviation =
                             if (routine.schedule.cancelDuenessIfDoneAhead) 1F else 0F
                         completionHistoryRepository.updateHistoryEntryByDate(
@@ -217,6 +234,16 @@ class ToggleHistoricalStatusUseCase(
                             newStatus = HistoricalStatus.OverCompleted,
                             newScheduleDeviation = newScheduleDeviation,
                             newTimesCompleted = 1F,
+                        )
+
+                        println("ToggleHistoricalStatusUseCase newScheduleDeviation = $newScheduleDeviation")
+                        completeAhead(
+                            routine, currentDate
+                        )
+
+                        startStreakOrJoinStreaks(
+                            routine = routine,
+                            date = currentDate,
                         )
                     }
 
@@ -238,6 +265,7 @@ class ToggleHistoricalStatusUseCase(
             HistoricalStatus.OverCompleted -> {
                 deleteStreakIfStarted(routineId, currentDate)
 
+                undoCompletingAhead(routine, currentDate)
                 completionHistoryRepository.updateHistoryEntryByDate(
                     routineId = routineId,
                     date = currentDate,
@@ -315,35 +343,26 @@ class ToggleHistoricalStatusUseCase(
     private suspend fun computeCurrentDatePlanningStatus(
         routine: Routine, date: LocalDate
     ): PlanningStatus? {
-        val lastVacationStatus = completionHistoryRepository.getLastHistoryEntryByStatus(
-            routineId = routine.id!!,
-            matchingStatuses = onVacationHistoricalStatuses,
-        )
-
         val dateBeforeCurrent = date.minus(DatePeriod(days = 1))
         val schedule = routine.schedule
-        val periodRange: LocalDateRange? =
-            if (schedule is Schedule.PeriodicSchedule) schedule.getPeriodRange(
-                currentDate = date,
-                lastVacationEndDate = lastVacationStatus?.date,
-            )
-            else null
         val numOfTimesCompletedInCurrentPeriod =
             completionHistoryRepository.getTotalTimesCompletedInPeriod(
                 routineId = routine.id!!,
-                startDate = periodRange?.start ?: schedule.routineStartDate,
+                startDate = currentPeriod?.start ?: schedule.routineStartDate,
                 endDate = dateBeforeCurrent,
             )
         val periodSeparationEnabled =
             schedule is Schedule.PeriodicSchedule && schedule.periodSeparationEnabled
+        val periodRange = currentPeriod
+        val startDate = if (periodSeparationEnabled && periodRange != null) {
+            periodRange.start
+        } else {
+            schedule.routineStartDate
+        }
         val currentScheduleDeviation =
             completionHistoryRepository.getScheduleDeviationInPeriod(
                 routineId = routine.id!!,
-                startDate = if (periodSeparationEnabled && periodRange != null) {
-                    periodRange.start
-                } else {
-                    schedule.routineStartDate
-                },
+                startDate = startDate,
                 endDate = date,
             )
         val scheduleDeviationInCurrentPeriod = periodRange?.let {
@@ -353,6 +372,8 @@ class ToggleHistoricalStatusUseCase(
                 endDate = date,
             )
         }
+        println("period = $startDate..$date")
+        println("currentScheduleDeviation = $currentScheduleDeviation")
 
         return routine.computePlanningStatus(
             validationDate = date,
@@ -365,19 +386,10 @@ class ToggleHistoricalStatusUseCase(
     }
 
     private suspend fun getCurrentScheduleDeviation(routine: Routine, date: LocalDate): Double {
-        val lastVacationStatus = completionHistoryRepository.getLastHistoryEntryByStatus(
-            routineId = routine.id!!,
-            matchingStatuses = onVacationHistoricalStatuses,
-        )
         val schedule = routine.schedule
-        val periodRange: LocalDateRange? =
-            if (schedule is Schedule.PeriodicSchedule) schedule.getPeriodRange(
-                currentDate = date,
-                lastVacationEndDate = lastVacationStatus?.date,
-            )
-            else null
         val periodSeparationEnabled =
             schedule is Schedule.PeriodicSchedule && schedule.periodSeparationEnabled
+        val periodRange = currentPeriod
         return completionHistoryRepository.getScheduleDeviationInPeriod(
             routineId = routine.id!!,
             startDate = if (periodSeparationEnabled && periodRange != null) {
@@ -413,5 +425,70 @@ class ToggleHistoricalStatusUseCase(
             routineId,
             completedLaterEntry.date
         )
+    }
+
+    private suspend fun completeAhead(
+        routine: Routine,
+        currentDate: LocalDate,
+    ) {
+        val schedule = routine.schedule
+        val periodSeparationEnabled =
+            schedule is Schedule.PeriodicSchedule && schedule.periodSeparationEnabled
+
+        println("ToggleHistoricalStatusUseCase periodSeparationEnabled = $periodSeparationEnabled")
+        println("ToggleHistoricalStatusUseCase currentPeriod = $currentPeriod")
+
+        if (schedule.cancelDuenessIfDoneAhead) {
+            val nextNotCompletedEntry =
+                completionHistoryRepository.getFirstHistoryEntryByStatus(
+                    routineId = routine.id!!,
+                    matchingStatuses = listOf(HistoricalStatus.NotCompleted),
+                    minDate = currentDate.plusDays(1),
+                )
+            if (nextNotCompletedEntry != null &&
+                (!periodSeparationEnabled
+                        || nextNotCompletedEntry.date in currentPeriod!!)
+            ) {
+                completionHistoryRepository.updateHistoryEntryByDate(
+                    routineId = routine.id!!,
+                    date = nextNotCompletedEntry.date,
+                    newStatus = HistoricalStatus.AlreadyCompleted,
+                    newScheduleDeviation = -1F,
+                    newTimesCompleted = 0F,
+                )
+            }
+        }
+    }
+
+    private suspend fun undoCompletingAhead(
+        routine: Routine,
+        currentDate: LocalDate,
+    ) {
+        val schedule = routine.schedule
+        val periodSeparationEnabled =
+            schedule is Schedule.PeriodicSchedule && schedule.periodSeparationEnabled
+
+        if (schedule.cancelDuenessIfDoneAhead) {
+            val lastCompletedAheadEntry =
+                completionHistoryRepository.getLastHistoryEntryByStatus(
+                    routineId = routine.id!!,
+                    matchingStatuses = listOf(HistoricalStatus.AlreadyCompleted),
+                    minDate = currentDate.plusDays(1),
+                )
+            if (lastCompletedAheadEntry != null &&
+                (!periodSeparationEnabled
+                        || lastCompletedAheadEntry.date in currentPeriod!!)
+            ) {
+                val newScheduleDeviation =
+                    if (routine.schedule.backlogEnabled) -1F else 0F
+                completionHistoryRepository.updateHistoryEntryByDate(
+                    routineId = routine.id!!,
+                    date = lastCompletedAheadEntry.date,
+                    newStatus = HistoricalStatus.NotCompleted,
+                    newScheduleDeviation = newScheduleDeviation,
+                    newTimesCompleted = 0F,
+                )
+            }
+        }
     }
 }

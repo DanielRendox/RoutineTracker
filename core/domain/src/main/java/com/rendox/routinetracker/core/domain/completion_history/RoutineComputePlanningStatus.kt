@@ -48,6 +48,7 @@ private fun Routine.YesNoRoutine.yesNoRoutineComputePlanningStatus(
     scheduleDeviationInCurrentPeriod: Double?,
     lastVacationEndDate: LocalDate?,
     ): PlanningStatus {
+    println("RoutineComputePlanningStatus: validation date = $validationDate")
     if (
         schedule.isDue(
             validationDate,
@@ -57,6 +58,8 @@ private fun Routine.YesNoRoutine.yesNoRoutineComputePlanningStatus(
             lastVacationEndDate,
         )
     ) {
+        println("RoutineComputePlanningStatus: currentScheduleDeviation = $currentScheduleDeviation")
+        println("RoutineComputePlanningStatus: cancelDuenessIfDoneAhead = ${schedule.cancelDuenessIfDoneAhead}")
         if (currentScheduleDeviation > 0 && schedule.cancelDuenessIfDoneAhead) {
             actualDate?.let {
                 var dueDaysCounter = 0
@@ -70,6 +73,7 @@ private fun Routine.YesNoRoutine.yesNoRoutineComputePlanningStatus(
                         )
                     ) dueDaysCounter++
                 }
+                println("due days counter = $dueDaysCounter")
                 if (currentScheduleDeviation >= dueDaysCounter)
                     return PlanningStatus.AlreadyCompleted
             }
@@ -78,6 +82,8 @@ private fun Routine.YesNoRoutine.yesNoRoutineComputePlanningStatus(
         return PlanningStatus.Planned
     }
 
+    println("RoutineComputePlanningStatus: backlog enabled = ${schedule.backlogEnabled}")
+    println()
     if (currentScheduleDeviation < 0 && schedule.backlogEnabled) {
         actualDate?.let {
             var notDueDaysCounter = 0

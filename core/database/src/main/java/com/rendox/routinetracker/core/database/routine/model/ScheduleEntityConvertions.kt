@@ -106,7 +106,6 @@ internal fun ScheduleEntity.toMonthlyScheduleByNumOfDueDays() = Schedule.Monthly
     numOfDueDays = numOfDueDaysInByNumOfDueDaysSchedule!!,
     numOfDueDaysInFirstPeriod = numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule,
     startFromRoutineStart = startFromRoutineStartInMonthlyAndAnnualSchedule!!,
-    periodSeparationEnabled = periodicSeparationEnabledInPeriodicSchedule!!,
     routineStartDate = routineStartDate,
     routineEndDate = routineEndDate,
     vacationStartDate = vacationStartDate,

@@ -15,6 +15,9 @@ class SetGoalPageState(
     routineDescription: String? = null,
     routineNameIsValid: Boolean = true,
 ) {
+    val containsError: Boolean
+        get() = !routineNameIsValid
+
     var routineName by mutableStateOf(routineName)
         private set
 
@@ -24,20 +27,9 @@ class SetGoalPageState(
     var routineNameIsValid by mutableStateOf(routineNameIsValid)
         private set
 
-    var containsError by mutableStateOf(false)
-        private set
-
-    private val _routineNameIsValid
-        get() = routineName != ""
-
-    init {
-        updateContainsErrorState()
-    }
-
     fun updateRoutineName(newName: String) {
         routineName = newName
-        routineNameIsValid = _routineNameIsValid
-        updateContainsErrorState()
+        checkRoutineNameValidity()
     }
 
     fun updateRoutineDescription(newDescription: String) {
@@ -48,14 +40,12 @@ class SetGoalPageState(
         routineDescription = newDescription
     }
 
-    fun checkIfContainsErrors(): Boolean {
-        routineNameIsValid = _routineNameIsValid
-        updateContainsErrorState()
-        return containsError
+    fun triggerErrorsIfAny() {
+        checkRoutineNameValidity()
     }
 
-    private fun updateContainsErrorState() {
-        containsError = !routineNameIsValid
+    private fun checkRoutineNameValidity() {
+        routineNameIsValid = routineName != ""
     }
 
     companion object {
@@ -64,12 +54,14 @@ class SetGoalPageState(
                 listOf(
                     setGoalScreenState.routineName,
                     setGoalScreenState.routineDescription,
+                    setGoalScreenState.routineNameIsValid,
                 )
             },
             restore = { setGoalScreenStateValues ->
                 SetGoalPageState(
                     routineName = setGoalScreenStateValues[0] as String,
-                    routineDescription = setGoalScreenStateValues[1],
+                    routineDescription = setGoalScreenStateValues[1] as String?,
+                    routineNameIsValid = setGoalScreenStateValues[2] as Boolean,
                 )
             }
         )

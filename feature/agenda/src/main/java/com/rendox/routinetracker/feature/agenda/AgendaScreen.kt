@@ -22,6 +22,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -70,7 +71,7 @@ internal fun AgendaRoute(
 internal fun AgendaScreen(
     modifier: Modifier = Modifier,
     currentDate: LocalDate,
-    routineList: List<DisplayRoutine>,
+    routineList: List<DisplayRoutine>?,
     today: LocalDate,
     onAddRoutineClick: () -> Unit,
     onRoutineClick: (Long) -> Unit,
@@ -92,7 +93,7 @@ internal fun AgendaScreen(
                 title = {
                     Text(
                         text = if (currentDate == today) {
-                            stringResource(id = R.string.agenda_date_title_today)
+                            stringResource(id = com.rendox.routinetracker.core.ui.R.string.today)
                         } else {
                             currentDate.format(dateFormatter)
                         }
@@ -123,7 +124,8 @@ internal fun AgendaScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(state = rememberScrollState())
-                .padding(paddingValues)
+                .padding(paddingValues),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             RoutineTrackerWeekCalendar(
                 modifier = Modifier
@@ -136,13 +138,13 @@ internal fun AgendaScreen(
                 dateOnClick = onDateChange,
                 today = today,
             )
-            AgendaList(
-                routineList = routineList,
-                onRoutineClick = onRoutineClick,
-                onStatusCheckmarkClick = { routineId, status ->
-                    onStatusCheckmarkClick(routineId, status)
-                },
-            )
+                AgendaList(
+                    routineList = routineList ?: emptyList(),
+                    onRoutineClick = onRoutineClick,
+                    onStatusCheckmarkClick = { routineId, status ->
+                        onStatusCheckmarkClick(routineId, status)
+                    },
+                )
         }
     }
 }

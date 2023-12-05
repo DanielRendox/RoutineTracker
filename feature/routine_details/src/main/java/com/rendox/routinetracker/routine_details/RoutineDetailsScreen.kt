@@ -15,21 +15,32 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rendox.routinetracker.routine_details.navigation.RoutineDetailsNavHost
 import com.rendox.routinetracker.routine_details.navigation.calendarNavRoute
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 internal fun RoutineDetailsRoute(
     modifier: Modifier = Modifier,
     routineId: Long,
+    routineDetailsViewModel: RoutineDetailsViewModel = koinViewModel(),
     popBackStack: () -> Unit,
 ) {
-    RoutineDetailsScreen(modifier, routineId, popBackStack)
+    val routine by routineDetailsViewModel.routineFlow.collectAsStateWithLifecycle()
+
+    RoutineDetailsScreen(
+        modifier = modifier,
+        routineId = routineId,
+        routineName = routine?.name,
+        popBackStack = popBackStack,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,6 +48,7 @@ internal fun RoutineDetailsRoute(
 internal fun RoutineDetailsScreen(
     modifier: Modifier = Modifier,
     routineId: Long,
+    routineName: String?,
     popBackStack: () -> Unit,
 ) {
     val scrollBehavior =
@@ -57,7 +69,7 @@ internal fun RoutineDetailsScreen(
                 ),
                 title = {
                     Text(
-                        "Routine name",
+                        routineName ?: "",
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )

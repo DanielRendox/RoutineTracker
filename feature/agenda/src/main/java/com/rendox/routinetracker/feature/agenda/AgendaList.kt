@@ -113,21 +113,21 @@ fun AgendaItem(
         ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (routine.completionTime != null) {
-            Text(
-                modifier = Modifier
-                    .width(100.dp)
-                    .padding(end = 10.dp),
-                style = MaterialTheme.typography.labelLarge,
-                text = routine.completionTime.toJavaLocalTime().format(timeFormatter),
-            )
-        } else {
-            Spacer(modifier = Modifier.width(100.dp))
-        }
+//        if (routine.completionTime != null) {
+//            Text(
+//                modifier = Modifier
+//                    .width(100.dp)
+//                    .padding(end = 10.dp),
+//                style = MaterialTheme.typography.labelLarge,
+//                text = routine.completionTime.toJavaLocalTime().format(timeFormatter),
+//            )
+//        } else {
+//            Spacer(modifier = Modifier.width(100.dp))
+//        }
 
         StatusCheckmark(
             modifier = Modifier
-                .padding(end = 15.dp),
+                .padding(start = 36.dp, end = 16.dp),
             status = routine.status,
             onClick = onStatusCheckmarkClick,
             statusToggleIsDisabled = routine.statusToggleIsDisabled,

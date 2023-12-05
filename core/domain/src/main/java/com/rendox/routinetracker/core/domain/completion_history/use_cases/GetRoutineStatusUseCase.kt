@@ -13,6 +13,8 @@ import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.model.StatusEntry
 import com.rendox.routinetracker.core.model.onVacationHistoricalStatuses
 import com.rendox.routinetracker.core.model.toStatusEntry
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
@@ -31,24 +33,26 @@ class GetRoutineStatusUseCase(
         dates: LocalDateRange,
         today: LocalDate,
     ): List<StatusEntry> {
-        val routine: Routine = routineRepository.getRoutineById(routineId)
-        prepopulateHistoryWithMissingDates(routine, today)
+        println("get routine status")
+        return withContext(Dispatchers.Default) {
+            val routine: Routine = routineRepository.getRoutineById(routineId)
+            prepopulateHistoryWithMissingDates(routine, today)
 
-        val resultingStatusList = mutableListOf<StatusEntry>()
+            val resultingStatusList = mutableListOf<StatusEntry>()
 
-        val completionHistoryPart =
-            completionHistoryRepository.getHistoryEntries(routineId, dates)
-        resultingStatusList.addAll(completionHistoryPart.map { it.toStatusEntry() })
+            val completionHistoryPart =
+                completionHistoryRepository.getHistoryEntries(routineId, dates)
+            resultingStatusList.addAll(completionHistoryPart.map { it.toStatusEntry() })
 
-        if (completionHistoryPart.isEmpty()) {
-            resultingStatusList.addAll(computeFutureStatuses(dates, routine))
-        } else if (completionHistoryPart.last().date < dates.endInclusive) {
-            val startDate = completionHistoryPart.last().date.plusDays(1)
-            val endDate = dates.endInclusive
-            resultingStatusList.addAll(computeFutureStatuses(startDate..endDate, routine))
+            if (completionHistoryPart.isEmpty()) {
+                resultingStatusList.addAll(computeFutureStatuses(dates, routine))
+            } else if (completionHistoryPart.last().date < dates.endInclusive) {
+                val startDate = completionHistoryPart.last().date.plusDays(1)
+                val endDate = dates.endInclusive
+                resultingStatusList.addAll(computeFutureStatuses(startDate..endDate, routine))
+            }
+            resultingStatusList
         }
-
-        return resultingStatusList
     }
 
     private suspend fun prepopulateHistoryWithMissingDates(routine: Routine, today: LocalDate) {
@@ -139,7 +143,10 @@ class GetRoutineStatusUseCase(
                 scheduleDeviationInCurrentPeriod = scheduleDeviationInCurrentPeriod,
                 lastVacationEndDate = lastVacationStatus?.date,
             )?.let {
-                statusList.add(StatusEntry(date = date, status = it))
+                statusList.add(StatusEntry(
+                    date = date,
+                    status = it,
+                ))
             }
         }
         return statusList

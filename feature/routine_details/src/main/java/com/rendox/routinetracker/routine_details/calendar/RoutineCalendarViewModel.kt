@@ -108,6 +108,7 @@ class RoutineCalendarViewModel(
             dates = period,
             today = today,
         )
+        println("RoutineCalendarViewModelLog routineStatusesForCurrentMonth = $routineStatusesForCurrentMonth")
         return routineStatusesForCurrentMonth.map {
             val includedInStreak = streaksFlow.value.checkIfContainDate(it.date)
             println("${it.date} included in streak = $includedInStreak")
@@ -120,7 +121,6 @@ class RoutineCalendarViewModel(
     }
 
     fun onScrolledToNewMonth(newMonth: YearMonth) {
-        println("newMonth = $newMonth")
         _currentMonthFlow.update { newMonth }
 
         if (!cashedDatesFlow.value.contains(newMonth)) {
@@ -152,13 +152,16 @@ class RoutineCalendarViewModel(
                 )
             }
 
+            val streaks = getAllStreaks(routineId = routineId, today = today)
             streaksFlow.update {
-                getAllStreaks(routineId = routineId, today = today)
+                streaks
             }
 
             val monthStart = _currentMonthFlow.value.atStartOfMonth().toKotlinLocalDate()
             val monthEnd = _currentMonthFlow.value.atEndOfMonth().toKotlinLocalDate()
             val initialMonthPeriod = fetchAndDeriveCalendarDates(period = monthStart..monthEnd)
+            println("RoutineCalendarViewModelLog current month history: $initialMonthPeriod")
+            println("RoutineCalendarViewModelLog streaks = $streaks")
             cashedDatesFlow.update {
                 it.toMutableMap().apply { put(_currentMonthFlow.value, initialMonthPeriod) }
             }

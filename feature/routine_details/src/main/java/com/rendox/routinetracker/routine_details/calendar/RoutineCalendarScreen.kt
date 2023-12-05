@@ -94,17 +94,23 @@ fun RoutineCalendarScreen(
                 .height(IntrinsicSize.Max),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
+            val currentStreakDurationInDaysString = pluralStringResource(
+                id = com.rendox.routinetracker.core.ui.R.plurals.num_of_days,
+                count = currentStreakDurationInDays,
+            )
+            val longestStreakDurationInDaysString = pluralStringResource(
+                id = com.rendox.routinetracker.core.ui.
+                R.plurals.num_of_days,
+                count = longestStreakDurationInDays,
+            )
+
             RoutineStreakCard(
                 modifier = Modifier
                     .fillMaxHeight()
                     .weight(1f)
                     .padding(top = 24.dp),
                 icon = painterResource(R.drawable.baseline_commit_24),
-                title = pluralStringResource(
-                    id = R.plurals.num_of_days,
-                    count = currentStreakDurationInDays,
-                    currentStreakDurationInDays,
-                ),
+                title = "$currentStreakDurationInDays $currentStreakDurationInDaysString",
                 bodyText = stringResource(id = R.string.current_streak)
             )
             Spacer(modifier = Modifier.width(16.dp))
@@ -114,11 +120,7 @@ fun RoutineCalendarScreen(
                     .weight(1f)
                     .padding(top = 24.dp),
                 icon = painterResource(R.drawable.trophy_24),
-                title = pluralStringResource(
-                    id = R.plurals.num_of_days,
-                    count = longestStreakDurationInDays,
-                    longestStreakDurationInDays,
-                ),
+                title = "$longestStreakDurationInDays $longestStreakDurationInDaysString",
                 bodyText = stringResource(id = R.string.longest_streak)
             )
         }

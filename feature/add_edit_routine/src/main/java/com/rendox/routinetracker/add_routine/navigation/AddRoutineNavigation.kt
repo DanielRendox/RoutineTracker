@@ -14,10 +14,16 @@ fun NavController.navigateToAddRoutine(
     this.navigate(addRoutineRoute, navOptionsBuilder)
 }
 
-fun NavGraphBuilder.addRoutineScreen(popBackStack: () -> Unit) {
+fun NavGraphBuilder.addRoutineScreen(
+    navigateBackAndRecreate: () -> Unit,
+    navigateBack: () -> Unit,
+) {
     composable(
         route = addRoutineRoute,
     ) {
-        AddRoutineRoute(popBackStack = popBackStack)
+        AddRoutineRoute(
+            navigateBackAndRecreate = navigateBackAndRecreate,
+            navigateBack = navigateBack,
+        )
     }
 }

@@ -8,9 +8,6 @@ import kotlinx.datetime.Month
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 
-// TODO replace with user preference
-val DefaultDayStart = LocalTime(0, 0, 0)
-
 val epochDate = LocalDate(1970, 1, 1)
 
 /**

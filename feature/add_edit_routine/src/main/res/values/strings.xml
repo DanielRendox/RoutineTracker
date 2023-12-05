@@ -5,10 +5,6 @@
     <string name="choose_schedule_page_name">Which days work best for your schedule?</string>
     <string name="tweak_routine_page_name">Fine-tune your habit</string>
 
-    <string name="navigate_back_button_text">back</string>
-    <string name="navigate_forward_button_text">next</string>
-    <string name="save">save</string>
-
     <string name="yes_no_routine_title">Yes or No</string>
     <string name="yes_no_routine_description">Click a checkmark when you complete the habit.</string>
     <string name="measurable_routine_title">Measurable</string>
@@ -17,15 +13,35 @@
     </string>
 
     <string name="in_development">Currently in development</string>
+    <string name="error_message_num_of_days_is_not_valid">Number of days is not valid</string>
+    <string name="pick">Pick</string>
 
     <string name="set_goal_page_routine_name_text_field_label">Habit name</string>
     <string name="set_goal_page_routine_description_text_field_label">Description (Optional)</string>
     <string name="set_goal_page_empty_routine_name_error_message">Name is empty</string>
     
-    <string name="choose_schedule_page_schedule_type_label_every_day">Every day</string>
-    <string name="choose_schedule_page_schedule_type_label_weekly">Weekly</string>
-    <string name="choose_schedule_page_schedule_type_label_monthly">Monthly</string>
-    <string name="choose_schedule_page_schedule_type_label_annually">Annually</string>
-    <string name="choose_schedule_page_schedule_type_label_custom_period">Custom period</string>
-    <string name="choose_schedule_page_schedule_type_label_custom_dates">Custom dates</string>
+    <string name="schedule_type_label_every_day">Every day</string>
+    <string name="schedule_type_label_weekly">Weekly</string>
+    <string name="schedule_type_label_monthly">Monthly</string>
+    <string name="schedule_type_label_annually">Annually</string>
+    <string name="schedule_type_label_alternate_days">Alternate days</string>
+    <string name="schedule_type_label_custom_dates">Custom dates</string>
+
+    <string name="weekly_picker_switch_text">Choose specific days</string>
+    <string name="monthly_picker_last_day_of_month_label">Last</string>
+    <string name="alternate_days_picker_activity_text_field_placeholder">Activity</string>
+    <string name="alternate_days_picker_rest_text_field_placeholder">Rest</string>
+
+    <string name="start_date_routine_setting_title">Start date</string>
+    <string name="end_date_routine_setting_title">End date</string>
+    <string name="session_duration_setting_title">Session duration</string>
+    <string name="session_time_setting_title">Time</string>
+    <string name="backlog_setting_title">Backlog</string>
+    <string name="backlog_setting_description">When left uncompleted, the habit will continue to be displayed even on days that are not due.</string>
+    <string name="completing_ahead_setting_title">Completing ahead</string>
+    <string name="completing_ahead_setting_description">When over completed, the habit will not be displayed next time even if it\'s planned for that day.</string>
+    <string name="period_separation_setting_title">Period separation</string>
+    <string name="period_separation_setting_description">When enabled, all the previous backlog (and completed ahead) times will be ignored on the next period start.</string>
+
+    <string name="days_from_start_to_end_description">start – end</string>
 </resources>

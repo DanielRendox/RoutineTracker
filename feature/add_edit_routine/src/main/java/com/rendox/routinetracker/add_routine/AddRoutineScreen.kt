@@ -32,11 +32,21 @@ import com.rendox.routinetracker.add_routine.choose_schedule.rememberChooseSched
 import com.rendox.routinetracker.add_routine.navigation.AddRoutineDestination
 import com.rendox.routinetracker.add_routine.navigation.AddRoutineNavHost
 import com.rendox.routinetracker.add_routine.set_goal.rememberSetGoalPageState
+import com.rendox.routinetracker.add_routine.tweak_routine.rememberTweakRoutinePageState
+import com.rendox.routinetracker.core.data.routine.RoutineRepository
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
+import org.koin.compose.koinInject
 
+@OptIn(DelicateCoroutinesApi::class)
 @Composable
 internal fun AddRoutineRoute(
     modifier: Modifier = Modifier,
-    popBackStack: () -> Unit,
+    navigateBackAndRecreate: () -> Unit,
+    navigateBack: () -> Unit,
+    routineRepository: RoutineRepository = koinInject()
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -47,8 +57,17 @@ internal fun AddRoutineRoute(
         chooseRoutineTypePageState = rememberChooseRoutineTypePageState(),
         setGoalPageState = rememberSetGoalPageState(),
         chooseSchedulePageState = rememberChooseSchedulePageState(),
-        saveRoutine = { TODO() },
-        popOuterBackStack = popBackStack,
+        tweakRoutinePageState = rememberTweakRoutinePageState(),
+        navigateBackAndRecreate = navigateBackAndRecreate,
+        navigateBack = navigateBack,
+        saveRoutine = { routine ->
+            GlobalScope.launch {
+                withTimeout(10_000L) {
+                    println("resulting routine = $routine")
+                    routineRepository.insertRoutine(routine)
+                }
+            }
+        },
     )
 
     AddRoutineScreen(
@@ -69,14 +88,8 @@ internal fun AddRoutineScreen(
                     .fillMaxWidth()
                     .weight(1f),
                 navController = addRoutineScreenState.navController,
-                startDestination = AddRoutineDestination.ChooseRoutineType.route,
                 addRoutineScreenState = addRoutineScreenState,
             )
-
-            val currentRoute = addRoutineScreenState.navBackStackEntry?.destination?.route
-            val navigateForwardButtonIsEnabled =
-                currentRoute != AddRoutineDestination.ChooseRoutineType.route
-                        && !addRoutineScreenState.setGoalPageState.containsError
 
             val navigateBackButtonText =
                 addRoutineScreenState.navigateBackButtonText.asString().uppercase()
@@ -87,7 +100,7 @@ internal fun AddRoutineScreen(
             AddRoutineBottomNavigation(
                 navigateBackButtonText = navigateBackButtonText,
                 navigateForwardButtonText = navigateForwardButtonText,
-                navigateForwardButtonIsEnabled = navigateForwardButtonIsEnabled,
+                navigateForwardButtonIsEnabled = !addRoutineScreenState.containsError,
                 currentScreenNumber = addRoutineScreenState.currentScreenNumber,
                 numOfScreens = addRoutineScreenState.navDestinations.size,
                 navigateBackButtonOnClick = addRoutineScreenState::navigateBackOrCancel,

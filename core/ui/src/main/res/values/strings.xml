@@ -2,4 +2,40 @@
 <resources>
     <string name="top_app_bar_navigation_icon_description">Navigate to the previous screen</string>
     <string name="save">save</string>
+    <string name="today">Today</string>
+    <string name="back">back</string>
+    <string name="next">next</string>
+
+    <plurals name="num_of_days">
+        <item quantity="one">day</item>
+        <item quantity="other">days</item>
+    </plurals>
+
+    <plurals name="num_of_weeks">
+        <item quantity="one">week</item>
+        <item quantity="other">weeks</item>
+    </plurals>
+
+    <plurals name="num_of_months">
+        <item quantity="one">%month</item>
+        <item quantity="other">months</item>
+    </plurals>
+
+    <plurals name="num_of_years">
+        <item quantity="one">year</item>
+        <item quantity="other">years</item>
+    </plurals>
+
+    <string name="frequency_every_day">Every day</string>
+    <string name="frequency_daily">per day</string>
+    <string name="frequency_weekly">per week</string>
+    <string name="frequency_monthly">per month</string>
+    <string name="frequency_annually">per year</string>
+    <string name="frequency_activity">activity</string>
+    <string name="frequency_rest">rest</string>
+
+    <string name="calendar_left_navigation_icon_content_description">Navigate to the previous month</string>
+    <string name="calendar_right_navigation_icon_content_description">Navigate to the next month</string>
+
+    <string name="date_picker_supporting_text">Select date</string>
 </resources>

@@ -26,3 +26,7 @@ android {
         }
     }
 }
+
+dependencies {
+    implementation(libs.kizitonwose.calendar.compose)
+}

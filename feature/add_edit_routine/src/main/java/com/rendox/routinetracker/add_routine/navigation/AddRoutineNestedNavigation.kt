@@ -13,7 +13,7 @@ import com.rendox.routinetracker.add_routine.AddRoutineScreenState
 import com.rendox.routinetracker.add_routine.choose_routine_type.ChooseRoutineTypePage
 import com.rendox.routinetracker.add_routine.choose_schedule.ChooseSchedulePage
 import com.rendox.routinetracker.add_routine.set_goal.SetGoalPage
-import com.rendox.routinetracker.add_routine.tweak_routine.TweakRoutineScreen
+import com.rendox.routinetracker.add_routine.tweak_routine.TweakRoutinePage
 import com.rendox.routinetracker.feature.agenda.R
 
 sealed class AddRoutineDestination(
@@ -58,13 +58,12 @@ internal fun NavController.navigate(
 internal fun AddRoutineNavHost(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    startDestination: String,
     addRoutineScreenState: AddRoutineScreenState,
 ) {
     NavHost(
         modifier = modifier,
         navController = navController,
-        startDestination = startDestination,
+        startDestination = addRoutineScreenState.navDestinations.first().route,
         enterTransition = {
             slideInHorizontally { it }
         },
@@ -95,7 +94,9 @@ internal fun AddRoutineNavHost(
             )
         }
         composable(route = AddRoutineDestination.TweakRoutine.route) {
-            TweakRoutineScreen()
+            TweakRoutinePage(
+                tweakRoutinePageState = addRoutineScreenState.tweakRoutinePageState,
+            )
         }
     }
 }

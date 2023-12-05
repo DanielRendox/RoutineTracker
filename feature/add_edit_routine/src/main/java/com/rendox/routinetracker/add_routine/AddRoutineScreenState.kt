@@ -9,26 +9,43 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import com.rendox.routinetracker.add_routine.choose_routine_type.ChooseRoutineTypePageState
-import com.rendox.routinetracker.add_routine.choose_schedule.ChooseSchedulePageState
 import com.rendox.routinetracker.add_routine.choose_routine_type.RoutineTypeUi
+import com.rendox.routinetracker.add_routine.choose_schedule.ChooseSchedulePageState
+import com.rendox.routinetracker.add_routine.choose_schedule.assembleSchedule
 import com.rendox.routinetracker.add_routine.navigation.AddRoutineDestination
 import com.rendox.routinetracker.add_routine.navigation.navigate
 import com.rendox.routinetracker.add_routine.navigation.yesNoRoutineDestinations
 import com.rendox.routinetracker.add_routine.set_goal.SetGoalPageState
+import com.rendox.routinetracker.add_routine.tweak_routine.TweakRoutinePageState
 import com.rendox.routinetracker.core.model.Routine
+import com.rendox.routinetracker.core.ui.R
 import com.rendox.routinetracker.core.ui.helpers.UiText
-import com.rendox.routinetracker.feature.agenda.R
+import kotlinx.datetime.toKotlinLocalTime
 
 @Stable
 class AddRoutineScreenState(
     val navController: NavHostController,
     val navBackStackEntry: NavBackStackEntry?,
-    val chooseRoutineTypePageState: ChooseRoutineTypePageState,
-    val setGoalPageState: SetGoalPageState,
-    val chooseSchedulePageState: ChooseSchedulePageState,
+    chooseRoutineTypePageState: ChooseRoutineTypePageState,
+    setGoalPageState: SetGoalPageState,
+    chooseSchedulePageState: ChooseSchedulePageState,
+    tweakRoutinePageState: TweakRoutinePageState,
     private val saveRoutine: (Routine) -> Unit,
-    private val popOuterBackStack: () -> Unit,
+    private val navigateBackAndRecreate: () -> Unit,
+    private val navigateBack: () -> Unit,
 ) {
+    var chooseRoutineTypePageState by mutableStateOf(chooseRoutineTypePageState)
+        private set
+
+    var setGoalPageState by mutableStateOf(setGoalPageState)
+        private set
+
+    var chooseSchedulePageState by mutableStateOf(chooseSchedulePageState)
+        private set
+
+    var tweakRoutinePageState by mutableStateOf(tweakRoutinePageState)
+        private set
+
     var navDestinations by mutableStateOf(yesNoRoutineDestinations)
         private set
 
@@ -42,27 +59,17 @@ class AddRoutineScreenState(
         private set
 
     init {
-        when (chooseRoutineTypePageState.routineType) {
-            RoutineTypeUi.YesNoRoutine -> navDestinations = yesNoRoutineDestinations
-            RoutineTypeUi.MeasurableRoutine -> TODO()
-        }
+        updateNavDestinations(chooseRoutineTypePageState.routineType)
 
         navigateBackButtonText = when (navBackStackEntry?.destination?.route) {
-            navDestinations.first().route -> UiText.StringResource(
-                resId = android.R.string.cancel
-            )
-
-            else -> UiText.StringResource(
-                resId = R.string.navigate_back_button_text
-            )
+            navDestinations.first().route -> UiText.StringResource(resId = android.R.string.cancel)
+            else -> UiText.StringResource(resId = R.string.back)
         }
 
         navigateForwardButtonText = when (navBackStackEntry?.destination?.route) {
             AddRoutineDestination.ChooseRoutineType.route -> UiText.DynamicString("")
-            navDestinations.last().route ->
-                UiText.StringResource(resId = R.string.save)
-
-            else -> UiText.StringResource(resId = R.string.navigate_forward_button_text)
+            navDestinations.last().route -> UiText.StringResource(resId = R.string.save)
+            else -> UiText.StringResource(resId = R.string.next)
         }
 
         currentScreenNumber = navBackStackEntry?.let { backStack ->
@@ -70,46 +77,79 @@ class AddRoutineScreenState(
         }
     }
 
+    val containsError: Boolean
+        get() {
+            val currentRoute = navBackStackEntry?.destination?.route
+            return currentRoute == AddRoutineDestination.ChooseRoutineType.route
+                    || (currentRoute == AddRoutineDestination.SetGoal.route && setGoalPageState.containsError)
+                    || (currentRoute == AddRoutineDestination.ChooseSchedule.route && chooseSchedulePageState.containsError)
+                    || (currentRoute == AddRoutineDestination.TweakRoutine.route && tweakRoutinePageState.containsError)
+        }
+
     fun navigateBackOrCancel() {
         when (navBackStackEntry?.destination?.route) {
-            navDestinations.first().route -> {
-                popOuterBackStack()
-            }
-
+            navDestinations.first().route -> navigateBack()
             null -> {}
-            else -> {
-                navController.popBackStack()
-            }
+            else -> navController.popBackStack()
         }
     }
 
     fun navigateForwardOrSave() {
-        if (checkIfInputContainsErrors()) return
+        val currentDestinationRoute = navBackStackEntry?.destination?.route ?: return
 
-        when (val currentDestinationRoute = navBackStackEntry?.destination?.route) {
-            navDestinations.last().route -> {
-                saveRoutine(assembleRoutine())
-                popOuterBackStack()
-            }
+        if (currentDestinationRoute == navDestinations.last().route) {
+            val routine = assembleRoutine()
+            saveRoutine(routine)
+            navigateBackAndRecreate()
+            return
+        }
 
-            null -> {}
+        val currentDestinationIndex =
+            navDestinations.map { it.route }.indexOf(currentDestinationRoute)
+        val nextDestination = navDestinations[currentDestinationIndex + 1]
 
-            else -> {
-                val currentDestinationIndex =
-                    navDestinations.map { it.route }.indexOf(currentDestinationRoute)
-                val nextDestination = navDestinations[currentDestinationIndex + 1]
-                navController.navigate(nextDestination)
-            }
+        if (currentDestinationRoute == AddRoutineDestination.SetGoal.route) {
+            setGoalPageState.triggerErrorsIfAny()
+            if (setGoalPageState.containsError) return
+        }
+
+        if (currentDestinationRoute == AddRoutineDestination.ChooseSchedule.route) {
+            chooseSchedulePageState.triggerErrorsIfAny()
+            if (chooseSchedulePageState.containsError) return
+        }
+
+        if (currentDestinationRoute == AddRoutineDestination.ChooseRoutineType.route) {
+            updateNavDestinations(chooseRoutineTypePageState.routineType)
+        }
+
+        if (nextDestination == AddRoutineDestination.TweakRoutine) {
+            tweakRoutinePageState.updateChosenSchedule(
+                chooseSchedulePageState.selectedSchedulePickerState.assembleSchedule()
+            )
+        }
+
+        navController.navigate(nextDestination)
+    }
+
+    private fun updateNavDestinations(routineType: RoutineTypeUi) {
+        navDestinations = when (routineType) {
+            RoutineTypeUi.YesNoRoutine -> yesNoRoutineDestinations
+            RoutineTypeUi.MeasurableRoutine -> TODO()
         }
     }
 
-    private fun checkIfInputContainsErrors(): Boolean = when (navBackStackEntry?.destination?.route) {
-        AddRoutineDestination.SetGoal.route -> setGoalPageState.checkIfContainsErrors()
-        else -> false
-    }
+    private fun assembleRoutine(): Routine = when (chooseRoutineTypePageState.routineType) {
+        is RoutineTypeUi.YesNoRoutine -> Routine.YesNoRoutine(
+            name = setGoalPageState.routineName,
+            description = setGoalPageState.routineDescription,
+            schedule = chooseSchedulePageState.selectedSchedulePickerState.assembleSchedule(
+                tweakRoutinePageState = tweakRoutinePageState
+            ),
+            sessionDurationMinutes = tweakRoutinePageState.sessionDuration?.toMinutes()?.toInt(),
+            defaultCompletionTime = tweakRoutinePageState.sessionTime?.toKotlinLocalTime(),
+        )
 
-    private fun assembleRoutine(): Routine {
-        TODO()
+        is RoutineTypeUi.MeasurableRoutine -> TODO()
     }
 }
 
@@ -120,14 +160,17 @@ fun rememberAddRoutineScreenState(
     chooseRoutineTypePageState: ChooseRoutineTypePageState,
     setGoalPageState: SetGoalPageState,
     chooseSchedulePageState: ChooseSchedulePageState,
+    tweakRoutinePageState: TweakRoutinePageState,
     saveRoutine: (Routine) -> Unit,
-    popOuterBackStack: () -> Unit,
+    navigateBackAndRecreate: () -> Unit,
+    navigateBack: () -> Unit,
 ) = remember(
     navController,
     navBackStackEntry,
     chooseRoutineTypePageState,
     setGoalPageState,
     chooseSchedulePageState,
+    tweakRoutinePageState,
 ) {
     AddRoutineScreenState(
         navController = navController,
@@ -135,7 +178,9 @@ fun rememberAddRoutineScreenState(
         chooseRoutineTypePageState = chooseRoutineTypePageState,
         setGoalPageState = setGoalPageState,
         chooseSchedulePageState = chooseSchedulePageState,
+        tweakRoutinePageState = tweakRoutinePageState,
+        navigateBackAndRecreate = navigateBackAndRecreate,
         saveRoutine = saveRoutine,
-        popOuterBackStack = popOuterBackStack,
+        navigateBack = navigateBack,
     )
 }

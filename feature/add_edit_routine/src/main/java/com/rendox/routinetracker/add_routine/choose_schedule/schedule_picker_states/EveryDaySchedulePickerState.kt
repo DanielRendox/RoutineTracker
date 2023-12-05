@@ -1,39 +1,18 @@
-package com.rendox.routinetracker.add_routine.choose_schedule
+package com.rendox.routinetracker.add_routine.choose_schedule.schedule_picker_states
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-
-@Composable
-fun EveryDaySchedulePicker(
-    modifier: Modifier = Modifier,
-    everyDaySchedulePickerState: EveryDaySchedulePickerState,
-) {
-    ScheduleTypeOption(
-        modifier = modifier,
-        label = stringResource(id = ScheduleTypeUi.EveryDaySchedule.titleId),
-        selected = everyDaySchedulePickerState.selected,
-        onSelected = everyDaySchedulePickerState::selectOption,
-    )
-}
+import com.rendox.routinetracker.add_routine.choose_schedule.schedule_pickers.ScheduleTypeUi
 
 @Stable
 class EveryDaySchedulePickerState(
     selected: Boolean = true,
-) {
-    var selected by mutableStateOf(selected)
-        private set
+) : SchedulePickerState(selected = selected) {
 
-    fun selectOption() {
-        selected = true
-    }
+    override val scheduleType = ScheduleTypeUi.EveryDaySchedule
 
     companion object {
         val Saver: Saver<EveryDaySchedulePickerState, *> = listSaver(

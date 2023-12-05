@@ -1,12 +1,11 @@
 package com.rendox.routinetracker.routine_details.navigation
 
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.core.EaseIn
-import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
@@ -14,6 +13,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.rendox.routinetracker.routine_details.RoutineDetailsRoute
+import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 const val routineDetailsRoute = "routine_details"
 internal const val routineIdArg = "routineId"
@@ -32,39 +33,29 @@ fun NavGraphBuilder.routineDetailsScreen(popBackStack: () -> Unit) {
             navArgument(routineIdArg) { type = NavType.LongType }
         ),
         enterTransition = {
-            fadeIn(
-                animationSpec = tween(
-                    300, easing = LinearEasing
+            fadeIn() + scaleIn(
+                initialScale = 0.75f,
+                animationSpec = TweenSpec(
+                    durationMillis = 100,
+                    easing = LinearEasing,
                 )
-            ) + slideIntoContainer(
-                animationSpec = tween(300, easing = EaseIn),
-                towards = AnimatedContentTransitionScope.SlideDirection.Start
             )
         },
-//        exitTransition = {
-//            fadeOut(
-//                animationSpec = tween(
-//                    300, easing = LinearEasing
-//                )
-//            ) + slideOutOfContainer(
-//                animationSpec = tween(300, easing = EaseOut),
-//                towards = AnimatedContentTransitionScope.SlideDirection.End
-//            )
-//        }
-        popExitTransition = {
-            fadeOut(
-                animationSpec = tween(
-                    300, easing = LinearEasing
+        exitTransition = {
+            fadeOut() + scaleOut(
+                targetScale = 0.75f,
+                animationSpec = TweenSpec(
+                    durationMillis = 100,
+                    easing = LinearEasing,
                 )
-            ) + slideOutOfContainer(
-                animationSpec = tween(300, easing = EaseOut),
-                towards = AnimatedContentTransitionScope.SlideDirection.End
             )
         }
     ) {
+        val routineId = it.arguments!!.getLong(routineIdArg)
         RoutineDetailsRoute(
             popBackStack = popBackStack,
-            routineId = it.arguments!!.getLong(routineIdArg),
+            routineId = routineId,
+            routineDetailsViewModel = koinViewModel { parametersOf(routineId) }
         )
     }
 }

@@ -1,42 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- shared -->
-    <plurals name="num_of_days">
-        <item quantity="one">%d day</item>
-        <item quantity="other">%d days</item>
-    </plurals>
-
-    <plurals name="num_of_weeks">
-        <item quantity="one">%d week</item>
-        <item quantity="other">%d weeks</item>
-    </plurals>
-
-    <plurals name="num_of_months">
-        <item quantity="one">%d month</item>
-        <item quantity="other">%d months</item>
-    </plurals>
-
-    <plurals name="num_of_years">
-        <item quantity="one">%d year</item>
-        <item quantity="other">%d years</item>
-    </plurals>
-
-    <!-- RoutineStatisticsScreen -->
-    <string name="frequency_every_day">Every day</string>
-    <string name="frequency_daily">per day</string>
-    <string name="frequency_weekly">per week</string>
-    <string name="frequency_monthly">per month</string>
-    <string name="frequency_annually">per year</string>
-    <string name="frequency_activity">activity</string>
-    <string name="frequency_rest">rest</string>
     <string name="detail_label_session_duration_hours">%d h</string>
     <string name="detail_label_session_duration_minutes">%d min</string>
     <string name="detail_label_notifications_enabled_icon_description">Notifications enabled</string>
     <string name="detail_label_notifications_disabled_icon_description">Notifications disabled</string>
 
     <!-- RoutineCalendarScreen -->
-    <string name="calendar_left_navigation_icon_content_description">Navigate to the previous month</string>
-    <string name="calendar_right_navigation_icon_content_description">Navigate to the next month</string>
     <string name="current_streak">Your current streak</string>
     <string name="longest_streak">Your longest streak</string>
 </resources>
