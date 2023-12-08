@@ -29,20 +29,8 @@ class ScheduleIsDueTest {
         )
         val date1 = LocalDate(2023, (1..12).random(), (1..28).random())
         val date2 = LocalDate(2024, Month.FEBRUARY, 29)
-        assertThat(
-            schedule.isDue(
-                validationDate = date1,
-                actualDate = null,
-                numOfTimesCompletedInCurrentPeriod = 0.0,
-            )
-        ).isTrue()
-        assertThat(
-            schedule.isDue(
-                validationDate = date2,
-                actualDate = null,
-                numOfTimesCompletedInCurrentPeriod = 0.0,
-            )
-        ).isTrue()
+        assertThat(schedule.isDue(validationDate = date1)).isTrue()
+        assertThat(schedule.isDue(validationDate = date2)).isTrue()
     }
 
     @Test
@@ -77,21 +65,21 @@ class ScheduleIsDueTest {
         val saturday = LocalDate(2024, Month.JUNE, 15)
         val sunday = LocalDate(2024, Month.JUNE, 30)
 
-        assertThat(schedule1.isDue(monday, null, 0.0)).isTrue()
-        assertThat(schedule1.isDue(wednesday, null, 0.0)).isTrue()
-        assertThat(schedule1.isDue(thursday, null, 0.0)).isTrue()
-        assertThat(schedule1.isDue(sunday, null, 0.0)).isTrue()
-        assertThat(schedule1.isDue(tuesday, null, 0.0)).isFalse()
-        assertThat(schedule1.isDue(friday, null, 0.0)).isFalse()
-        assertThat(schedule1.isDue(saturday, null, 0.0)).isFalse()
+        assertThat(schedule1.isDue(monday, null)).isTrue()
+        assertThat(schedule1.isDue(wednesday, null)).isTrue()
+        assertThat(schedule1.isDue(thursday, null)).isTrue()
+        assertThat(schedule1.isDue(sunday, null)).isTrue()
+        assertThat(schedule1.isDue(tuesday, null)).isFalse()
+        assertThat(schedule1.isDue(friday, null)).isFalse()
+        assertThat(schedule1.isDue(saturday, null)).isFalse()
 
-        assertThat(schedule2.isDue(tuesday, null, 0.0)).isTrue()
-        assertThat(schedule2.isDue(wednesday, null, 0.0)).isTrue()
-        assertThat(schedule2.isDue(friday, null, 0.0)).isTrue()
-        assertThat(schedule2.isDue(saturday, null, 0.0)).isTrue()
-        assertThat(schedule2.isDue(monday, null, 0.0)).isFalse()
-        assertThat(schedule2.isDue(thursday, null, 0.0)).isFalse()
-        assertThat(schedule2.isDue(sunday, null, 0.0)).isFalse()
+        assertThat(schedule2.isDue(tuesday, null)).isTrue()
+        assertThat(schedule2.isDue(wednesday, null)).isTrue()
+        assertThat(schedule2.isDue(friday, null)).isTrue()
+        assertThat(schedule2.isDue(saturday, null)).isTrue()
+        assertThat(schedule2.isDue(monday, null)).isFalse()
+        assertThat(schedule2.isDue(thursday, null)).isFalse()
+        assertThat(schedule2.isDue(sunday, null)).isFalse()
     }
 
     @Test
@@ -118,106 +106,17 @@ class ScheduleIsDueTest {
         )
 
         val futurePeriodStart = schedule.routineStartDate.plusDays(DateTimeUnit.WEEK.days)
-        val dateScheduleDeviationIsActualFor =
-            schedule.routineStartDate.plusDays(DateTimeUnit.WEEK.days - 1)
         for (dayIndex in 0 until numOfDueDays) {
             assertThat(
-                schedule.isDue(
-                    validationDate = futurePeriodStart.plusDays(dayIndex),
-                    actualDate = dateScheduleDeviationIsActualFor,
-                    numOfTimesCompletedInCurrentPeriod = 0.0,
-                )
+                schedule.isDue(validationDate = futurePeriodStart.plusDays(dayIndex))
             ).isTrue()
         }
 
         for (dayIndex in numOfDueDays until DateTimeUnit.WEEK.days) {
             assertThat(
-                schedule.isDue(
-                    validationDate = futurePeriodStart.plusDays(dayIndex),
-                    actualDate = dateScheduleDeviationIsActualFor,
-                    numOfTimesCompletedInCurrentPeriod = 0.0,
-                )
+                schedule.isDue(validationDate = futurePeriodStart.plusDays(dayIndex))
             ).isFalse()
         }
-    }
-
-    @Test
-    fun `weekly schedule due X days per week, assert skipped, then due X days, then not due`() {
-        val schedule = Schedule.WeeklyScheduleByNumOfDueDays(
-            routineStartDate = routineStartDate,
-            numOfDueDays = 3,
-            startDayOfWeek = null,
-            numOfDueDaysInFirstPeriod = null,
-        )
-
-        for (dayIndex in 0..2) {
-            val currentDate = routineStartDate.plusDays(dayIndex)
-            assertThat(
-                schedule.isDue(
-                    validationDate = currentDate,
-                    actualDate = null,
-                    numOfTimesCompletedInCurrentPeriod = 0.0,
-                )
-            ).isTrue()
-        }
-
-        for (dayIndex in 3..5) {
-            val currentDate = routineStartDate.plusDays(dayIndex)
-            assertThat(
-                schedule.isDue(
-                    validationDate = currentDate,
-                    actualDate = routineStartDate.plusDays(2),
-                    numOfTimesCompletedInCurrentPeriod = 0.0,
-                )
-            ).isTrue()
-        }
-
-        assertThat(
-            schedule.isDue(
-                validationDate = routineStartDate.plusDays(6),
-                actualDate = routineStartDate.plusDays(2),
-                numOfTimesCompletedInCurrentPeriod = 0.0,
-            )
-        ).isFalse()
-    }
-
-    @Test
-    fun `weekly schedule due X days per week, assert not due because all completed`() {
-        val schedule = Schedule.WeeklyScheduleByNumOfDueDays(
-            routineStartDate = routineStartDate,
-            numOfDueDays = 4,
-            startDayOfWeek = null,
-            numOfDueDaysInFirstPeriod = null,
-        )
-
-        for (dayIndex in 4..6) {
-            val currentDate = routineStartDate.plusDays(dayIndex)
-            assertThat(
-                schedule.isDue(
-                    validationDate = currentDate,
-                    actualDate = routineStartDate.plusDays(3),
-                    numOfTimesCompletedInCurrentPeriod = 4.0,
-                )
-            ).isFalse()
-        }
-    }
-
-    @Test
-    fun `weekly schedule due X days per week, some days skipped, assert not due because all completed`() {
-        val schedule = Schedule.WeeklyScheduleByNumOfDueDays(
-            routineStartDate = routineStartDate,
-            numOfDueDays = 4,
-            startDayOfWeek = null,
-            numOfDueDaysInFirstPeriod = null,
-        )
-
-        assertThat(
-            schedule.isDue(
-                validationDate = routineStartDate.plusDays(6),
-                actualDate = routineStartDate.plusDays(5),
-                numOfTimesCompletedInCurrentPeriod = 4.0,
-            )
-        ).isFalse()
     }
 
     @Test
@@ -232,67 +131,43 @@ class ScheduleIsDueTest {
         for (dayIndex in 0..2) {
             val currentDate = schedule.routineStartDate.plusDays(dayIndex)
             assertThat(
-                schedule.isDue(
-                    validationDate = currentDate,
-                    actualDate = routineStartDate,
-                    numOfTimesCompletedInCurrentPeriod = 0.0,
-                )
+                schedule.isDue(validationDate = currentDate)
             ).isTrue()
         }
 
         for (dayIndex in 3..4) {
             val currentDate = schedule.routineStartDate.plusDays(dayIndex)
             assertThat(
-                schedule.isDue(
-                    validationDate = currentDate,
-                    actualDate = routineStartDate,
-                    numOfTimesCompletedInCurrentPeriod = 0.0,
-                )
+                schedule.isDue(validationDate = currentDate)
             ).isFalse()
         }
 
         for (dayIndex in 5..8) {
             val currentDate = schedule.routineStartDate.plusDays(dayIndex)
             assertThat(
-                schedule.isDue(
-                    validationDate = currentDate,
-                    actualDate = routineStartDate,
-                    numOfTimesCompletedInCurrentPeriod = 0.0,
-                )
+                schedule.isDue(validationDate = currentDate)
             ).isTrue()
         }
 
         for (dayIndex in 9..11) {
             val currentDate = schedule.routineStartDate.plusDays(dayIndex)
             assertThat(
-                schedule.isDue(
-                    validationDate = currentDate,
-                    actualDate = routineStartDate,
-                    numOfTimesCompletedInCurrentPeriod = 0.0,
-                )
+                schedule.isDue(validationDate = currentDate)
             ).isFalse()
         }
 
         for (dayIndex in 12..15) {
             val currentDate = schedule.routineStartDate.plusDays(dayIndex)
             assertThat(
-                schedule.isDue(
-                    validationDate = currentDate,
-                    actualDate = schedule.routineStartDate.plusDays(11),
-                    numOfTimesCompletedInCurrentPeriod = 4.0,
-                )
+                schedule.isDue(validationDate = currentDate)
             ).isTrue()
         }
 
         for (dayIndex in 16..18) {
             val currentDate = schedule.routineStartDate.plusDays(dayIndex)
             assertThat(
-                schedule.isDue(
-                    validationDate = currentDate,
-                    actualDate = schedule.routineStartDate.plusDays(15),
-                    numOfTimesCompletedInCurrentPeriod = 0.0,
-                )
-            ).isTrue()
+                schedule.isDue(validationDate = currentDate)
+            ).isFalse()
         }
     }
 
@@ -326,21 +201,13 @@ class ScheduleIsDueTest {
 
         for (dueDate in dueDates) {
             assertThat(
-                schedule.isDue(
-                    validationDate = dueDate,
-                    actualDate = null,
-                    numOfTimesCompletedInCurrentPeriod = 0.0,
-                )
+                schedule.isDue(validationDate = dueDate)
             ).isTrue()
         }
 
         for (notDueDate in notDueDates) {
             assertThat(
-                schedule.isDue(
-                    validationDate = notDueDate,
-                    actualDate = null,
-                    numOfTimesCompletedInCurrentPeriod = 0.0,
-                )
+                schedule.isDue(validationDate = notDueDate)
             ).isFalse()
         }
     }
@@ -363,13 +230,13 @@ class ScheduleIsDueTest {
             routineStartDate = routineStartDate,
         )
 
-        assertThat(schedule.isDue(februaryHeapYearLastDate, null, 0.0)).isTrue()
-        assertThat(schedule.isDue(februaryLastDate, null, 0.0)).isTrue()
-        assertThat(schedule.isDue(januaryLastDate, null, 0.0)).isTrue()
-        assertThat(schedule.isDue(aprilLastDate, null, 0.0)).isTrue()
-        assertThat(schedule.isDue(februaryHeapYearDayBeforeLast, null, 0.0)).isFalse()
-        assertThat(schedule.isDue(januaryDayBeforeLast, null, 0.0)).isFalse()
-        assertThat(schedule.isDue(aprilDayBeforeLast, null, 0.0)).isFalse()
+        assertThat(schedule.isDue(februaryHeapYearLastDate, null)).isTrue()
+        assertThat(schedule.isDue(februaryLastDate, null)).isTrue()
+        assertThat(schedule.isDue(januaryLastDate, null)).isTrue()
+        assertThat(schedule.isDue(aprilLastDate, null)).isTrue()
+        assertThat(schedule.isDue(februaryHeapYearDayBeforeLast, null)).isFalse()
+        assertThat(schedule.isDue(januaryDayBeforeLast, null)).isFalse()
+        assertThat(schedule.isDue(aprilDayBeforeLast, null)).isFalse()
     }
 
     @Test
@@ -403,18 +270,18 @@ class ScheduleIsDueTest {
         val forthWednesday = LocalDate(2023, Month.NOVEMBER, 22)
         val secondTuesday = LocalDate(2023, Month.NOVEMBER, 14)
 
-        assertThat(schedule.isDue(firstMonday1, null, 0.0)).isTrue()
-        assertThat(schedule.isDue(firstMonday2, null, 0.0)).isTrue()
-        assertThat(schedule.isDue(thirdTuesday, null, 0.0)).isTrue()
-        assertThat(schedule.isDue(secondFriday, null, 0.0)).isTrue()
-        assertThat(schedule.isDue(forthMonday, null, 0.0)).isTrue()
-        assertThat(schedule.isDue(lastSundayAndLastDayOfMonth, null, 0.0)).isTrue()
-        assertThat(schedule.isDue(forthAndLastSunday, null, 0.0)).isTrue()
-        assertThat(schedule.isDue(forthNotLastSunday, null, 0.0)).isFalse()
-        assertThat(schedule.isDue(fifthThursday, null, 0.0)).isTrue()
-        assertThat(schedule.isDue(forthThursday, null, 0.0)).isFalse()
-        assertThat(schedule.isDue(forthWednesday, null, 0.0)).isTrue()
-        assertThat(schedule.isDue(secondTuesday, null, 0.0)).isFalse()
+        assertThat(schedule.isDue(firstMonday1, null)).isTrue()
+        assertThat(schedule.isDue(firstMonday2, null)).isTrue()
+        assertThat(schedule.isDue(thirdTuesday, null)).isTrue()
+        assertThat(schedule.isDue(secondFriday, null)).isTrue()
+        assertThat(schedule.isDue(forthMonday, null)).isTrue()
+        assertThat(schedule.isDue(lastSundayAndLastDayOfMonth, null)).isTrue()
+        assertThat(schedule.isDue(forthAndLastSunday, null)).isTrue()
+        assertThat(schedule.isDue(forthNotLastSunday, null)).isFalse()
+        assertThat(schedule.isDue(fifthThursday, null)).isTrue()
+        assertThat(schedule.isDue(forthThursday, null)).isFalse()
+        assertThat(schedule.isDue(forthWednesday, null)).isTrue()
+        assertThat(schedule.isDue(secondTuesday, null)).isFalse()
     }
 
     @Test
@@ -442,65 +309,14 @@ class ScheduleIsDueTest {
         for (dueDayMonthNumber in 1..schedule.numOfDueDays) {
             val dueDate = LocalDate(2023, Random.nextInt(1, 12), dueDayMonthNumber)
             assertThat(
-                schedule.isDue(
-                    validationDate = dueDate,
-                    actualDate = null,
-                    numOfTimesCompletedInCurrentPeriod = 0.0,
-                )
+                schedule.isDue(validationDate = dueDate)
             ).isTrue()
         }
 
         for (notDueDayNumber in (schedule.numOfDueDays + 1)..28) {
             val dueDate = LocalDate(2023, Random.nextInt(1, 12), notDueDayNumber)
             assertThat(
-                schedule.isDue(
-                    validationDate = dueDate,
-                    actualDate = null,
-                    numOfTimesCompletedInCurrentPeriod = 0.0,
-                )
-            ).isFalse()
-        }
-    }
-
-    @Test
-    fun `MonthlyScheduleByNumOfDueDays, backlog is resolvable at inconsistent days`() {
-        val schedule = Schedule.MonthlyScheduleByNumOfDueDays(
-            routineStartDate = routineStartDate,
-            numOfDueDays = 10,
-            startFromRoutineStart = true,
-            numOfDueDaysInFirstPeriod = null,
-        )
-
-        for (dayIndex in 28..30) {
-            val dueDate = routineStartDate.plusDays(dayIndex)
-            assertThat(
-                schedule.isDue(
-                    validationDate = dueDate,
-                    actualDate = LocalDate(2023, Month.JANUARY, 28),
-                    numOfTimesCompletedInCurrentPeriod = 5.0,
-                )
-            ).isTrue()
-        }
-
-        for (dayIndex in 31..40) {
-            val dueDate = routineStartDate.plusDays(dayIndex)
-            assertThat(
-                schedule.isDue(
-                    validationDate = dueDate,
-                    actualDate = LocalDate(2023, Month.JANUARY, 28),
-                    numOfTimesCompletedInCurrentPeriod = 0.0,
-                )
-            ).isTrue()
-        }
-
-        for (dayIndex in 41..58) {
-            val dueDate = routineStartDate.plusDays(dayIndex)
-            assertThat(
-                schedule.isDue(
-                    validationDate = dueDate,
-                    actualDate = LocalDate(2023, Month.JANUARY, 28),
-                    numOfTimesCompletedInCurrentPeriod = 0.0,
-                )
+                schedule.isDue(validationDate = dueDate)
             ).isFalse()
         }
     }
@@ -517,44 +333,28 @@ class ScheduleIsDueTest {
         for (dayIndex in 0..28) {
             val dueDate = routineStartDate.plusDays(dayIndex)
             assertThat(
-                schedule.isDue(
-                    validationDate = dueDate,
-                    actualDate = null,
-                    numOfTimesCompletedInCurrentPeriod = 0.0,
-                )
+                schedule.isDue(validationDate = dueDate)
             ).isTrue()
         }
 
         for (dayIndex in 29..30) {
             val dueDate = routineStartDate.plusDays(dayIndex)
             assertThat(
-                schedule.isDue(
-                    validationDate = dueDate,
-                    actualDate = null,
-                    numOfTimesCompletedInCurrentPeriod = 0.0,
-                )
+                schedule.isDue(validationDate = dueDate)
             ).isFalse()
         }
 
         for (dayIndex in 31..87) {
             val dueDate = routineStartDate.plusDays(dayIndex)
             assertThat(
-                schedule.isDue(
-                    validationDate = dueDate,
-                    actualDate = null,
-                    numOfTimesCompletedInCurrentPeriod = 0.0,
-                )
+                schedule.isDue(validationDate = dueDate)
             ).isTrue()
         }
 
         for (dayIndex in 88..89) {
             val dueDate = routineStartDate.plusDays(dayIndex)
             assertThat(
-                schedule.isDue(
-                    validationDate = dueDate,
-                    actualDate = null,
-                    numOfTimesCompletedInCurrentPeriod = 0.0,
-                )
+                schedule.isDue(validationDate = dueDate)
             ).isFalse()
         }
     }
@@ -579,10 +379,7 @@ class ScheduleIsDueTest {
                             // subtract one because indices start count from 1, not from 0
                             days = numOfDaysInPeriod * numOfPeriodsAlreadyPassed + dueDayNumber - 1
                         )
-                    ),
-                    actualDate = null,
-                    numOfTimesCompletedInCurrentPeriod = 0.0,
-                    scheduleDeviationInCurrentPeriod = 0.0,
+                    )
                 )
             ).isTrue()
         }
@@ -596,10 +393,7 @@ class ScheduleIsDueTest {
                             // subtract one because indices start count from 1, not from 0
                             days = numOfDaysInPeriod * numOfPeriodsAlreadyPassed + notDueDayIndex - 1
                         )
-                    ),
-                    actualDate = null,
-                    numOfTimesCompletedInCurrentPeriod = 0.0,
-                    scheduleDeviationInCurrentPeriod = 0.0,
+                    )
                 )
             ).isFalse()
         }
@@ -653,21 +447,13 @@ class ScheduleIsDueTest {
 
         for (dueDate in dueDates) {
             assertThat(
-                schedule.isDue(
-                    validationDate = dueDate,
-                    actualDate = null,
-                    numOfTimesCompletedInCurrentPeriod = 0.0,
-                )
+                schedule.isDue(validationDate = dueDate)
             ).isTrue()
         }
 
         for (notDueDate in notDueDates) {
             assertThat(
-                schedule.isDue(
-                    validationDate = notDueDate,
-                    actualDate = null,
-                    numOfTimesCompletedInCurrentPeriod = 0.0,
-                )
+                schedule.isDue(validationDate = notDueDate)
             ).isFalse()
         }
     }
@@ -753,21 +539,13 @@ class ScheduleIsDueTest {
 
         for (dueDate in expectedDueDates) {
             assertThat(
-                schedule.isDue(
-                    validationDate = dueDate,
-                    actualDate = null,
-                    numOfTimesCompletedInCurrentPeriod = 0.0,
-                )
+                schedule.isDue(validationDate = dueDate)
             ).isTrue()
         }
 
         for (notDueDate in expectedNotDueDates) {
             assertThat(
-                schedule.isDue(
-                    validationDate = notDueDate,
-                    actualDate = null,
-                    numOfTimesCompletedInCurrentPeriod = 0.0,
-                )
+                schedule.isDue(validationDate = notDueDate)
             ).isFalse()
         }
     }
@@ -798,11 +576,7 @@ class ScheduleIsDueTest {
             val dueDate = LocalDate(Random.nextInt(2023, 2030), 1, 1)
                 .plusDays(dueDayNumber - 1)
             assertThat(
-                schedule.isDue(
-                    validationDate = dueDate,
-                    actualDate = null,
-                    numOfTimesCompletedInCurrentPeriod = 0.0,
-                )
+                schedule.isDue(validationDate = dueDate)
             ).isTrue()
         }
 
@@ -810,11 +584,7 @@ class ScheduleIsDueTest {
             val notDueDate = LocalDate(Random.nextInt(2023, 2030), 1, 1)
                 .plusDays(notDueDayNumber - 1)
             assertThat(
-                schedule.isDue(
-                    validationDate = notDueDate,
-                    actualDate = null,
-                    numOfTimesCompletedInCurrentPeriod = 0.0,
-                )
+                schedule.isDue(validationDate = notDueDate)
             ).isFalse()
         }
     }

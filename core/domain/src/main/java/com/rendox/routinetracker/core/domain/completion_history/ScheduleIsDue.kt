@@ -1,6 +1,5 @@
 package com.rendox.routinetracker.core.domain.completion_history
 
-import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.atEndOfMonth
 import com.rendox.routinetracker.core.logic.time.matches
 import com.rendox.routinetracker.core.model.Schedule
@@ -9,83 +8,36 @@ import kotlinx.datetime.daysUntil
 
 fun Schedule.isDue(
     validationDate: LocalDate,
-    actualDate: LocalDate?,
-    numOfTimesCompletedInCurrentPeriod: Double,
-    scheduleDeviationInCurrentPeriod: Double? = null,
     lastVacationEndDate: LocalDate? = null,
 ): Boolean {
-    println("check if schedule is due on $validationDate")
     if (validationDate < routineStartDate) return false
     routineEndDate?.let { if (validationDate > it) return false }
 
-    println("check if schedule is due 2 on $validationDate")
-
-
     return when (this) {
-        is Schedule.EveryDaySchedule -> everyDayScheduleIsDue()
+        is Schedule.EveryDaySchedule -> true
 
         is Schedule.WeeklyScheduleByDueDaysOfWeek -> weeklyScheduleByDueDaysOfWeekIsDue(
-            validationDate
+            validationDate = validationDate
         )
 
-        is Schedule.WeeklyScheduleByNumOfDueDays -> {
-            val period = getPeriodRange(validationDate)
-            scheduleByNumOfDueDaysIsDue(
-                validationDate = validationDate,
-                validationDatePeriod = period,
-                numOfDueDays = getNumOfDueDatesInPeriod(period),
-                numOfCompletedDays = numOfTimesCompletedInCurrentPeriod,
-                dateScheduleDeviationIsActualFor = actualDate,
-                scheduleDeviationInCurrentPeriod = scheduleDeviationInCurrentPeriod ?: 0.0,
-            )
-        }
+        is Schedule.ByNumOfDueDays -> scheduleByNumOfDueDaysIsDue(
+            validationDate = validationDate,
+            lastVacationEndDate = lastVacationEndDate,
+        )
 
-        is Schedule.MonthlyScheduleByDueDatesIndices -> monthlyScheduleIsDue(validationDate)
+        is Schedule.MonthlyScheduleByDueDatesIndices -> monthlyScheduleIsDue(
+            validationDate = validationDate
+        )
 
-        is Schedule.MonthlyScheduleByNumOfDueDays -> {
-            val period = getPeriodRange(validationDate)
-            scheduleByNumOfDueDaysIsDue(
-                validationDate = validationDate,
-                validationDatePeriod = period,
-                numOfDueDays = getNumOfDueDatesInPeriod(period),
-                numOfCompletedDays = numOfTimesCompletedInCurrentPeriod,
-                dateScheduleDeviationIsActualFor = actualDate,
-                scheduleDeviationInCurrentPeriod = scheduleDeviationInCurrentPeriod ?: 0.0,
-            )
-        }
+        is Schedule.CustomDateSchedule -> customDateScheduleIsDue(
+            validationDate = validationDate
+        )
 
-        is Schedule.PeriodicCustomSchedule -> {
-            val period = getPeriodRange(validationDate, lastVacationEndDate)
-            scheduleByNumOfDueDaysIsDue(
-                validationDate = validationDate,
-                validationDatePeriod = period,
-                numOfDueDays = getNumOfDueDatesInPeriod(period),
-                numOfCompletedDays = numOfTimesCompletedInCurrentPeriod,
-                dateScheduleDeviationIsActualFor = actualDate,
-                scheduleDeviationInCurrentPeriod = scheduleDeviationInCurrentPeriod ?: 0.0,
-            )
-        }
-
-        is Schedule.CustomDateSchedule -> customDateScheduleIsDue(validationDate)
-
-        is Schedule.AnnualScheduleByDueDates -> annualScheduleIsDue(validationDate)
-
-        is Schedule.AnnualScheduleByNumOfDueDays -> {
-            val period = getPeriodRange(validationDate)
-            scheduleByNumOfDueDaysIsDue(
-                validationDate = validationDate,
-                validationDatePeriod = period,
-                numOfDueDays = getNumOfDueDatesInPeriod(period),
-                numOfCompletedDays = numOfTimesCompletedInCurrentPeriod,
-                dateScheduleDeviationIsActualFor = actualDate,
-                scheduleDeviationInCurrentPeriod = scheduleDeviationInCurrentPeriod ?: 0.0,
-            )
-        }
+        is Schedule.AnnualScheduleByDueDates -> annualScheduleIsDue(
+            validationDate = validationDate
+        )
     }
 }
-
-@Suppress("UnusedReceiverParameter")
-private fun Schedule.EveryDaySchedule.everyDayScheduleIsDue(): Boolean = true
 
 private fun Schedule.WeeklyScheduleByDueDaysOfWeek.weeklyScheduleByDueDaysOfWeekIsDue(
     validationDate: LocalDate,
@@ -116,37 +68,14 @@ private fun Schedule.AnnualScheduleByDueDates.annualScheduleIsDue(
     return false
 }
 
-@Suppress("UnusedReceiverParameter")
 private fun Schedule.ByNumOfDueDays.scheduleByNumOfDueDaysIsDue(
     validationDate: LocalDate,
-    validationDatePeriod: LocalDateRange,
-    numOfDueDays: Int,
-    numOfCompletedDays: Double,
-    dateScheduleDeviationIsActualFor: LocalDate?,
-    scheduleDeviationInCurrentPeriod: Double,
+    lastVacationEndDate: LocalDate?,
 ): Boolean {
-    val validationDateNumberInPeriod = validationDatePeriod.start.daysUntil(validationDate) + 1
-    println("validation date = $validationDate")
-    println("validation date period = $validationDatePeriod")
-    println("validationDateNumberInPeriod = $validationDateNumberInPeriod")
-    println("num of due days = $numOfDueDays")
-    if (validationDateNumberInPeriod <= numOfDueDays) return true
-
-    println("dateScheduleDeviationIsActualFor = $dateScheduleDeviationIsActualFor")
-
-    dateScheduleDeviationIsActualFor?.let {
-        val daysBetweenLastDateAndValidationDate = it.daysUntil(validationDate) - 1
-        val nonNegativeScheduleDeviation =
-            if (scheduleDeviationInCurrentPeriod < 0) -scheduleDeviationInCurrentPeriod else 0.0
-        val daysExpectedToBeCompletedTillThatTime =
-            numOfCompletedDays + nonNegativeScheduleDeviation + daysBetweenLastDateAndValidationDate.toDouble()
-        println("validationDate = $validationDate")
-        println("numOfCompletedDays = $numOfCompletedDays")
-        println("nonNegativeScheduleDeviation = $nonNegativeScheduleDeviation")
-        println("daysBetweenLastDateAndValidationDate = $daysBetweenLastDateAndValidationDate")
-        println()
-        if (daysExpectedToBeCompletedTillThatTime < (numOfDueDays.toDouble())) return true
-    }
-
-    return false
+    val validationDatePeriod = (this as Schedule.PeriodicSchedule).getPeriodRange(
+        currentDate = validationDate,
+        lastVacationEndDate = lastVacationEndDate,
+    )
+    val validationDateNumber = validationDatePeriod.start.daysUntil(validationDate) + 1
+    return validationDateNumber <= getNumOfDueDatesInPeriod(validationDatePeriod)
 }

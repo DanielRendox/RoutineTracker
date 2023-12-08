@@ -49,59 +49,60 @@ private fun Routine.YesNoRoutine.yesNoRoutineComputePlanningStatus(
     lastVacationEndDate: LocalDate?,
     ): PlanningStatus {
     println("RoutineComputePlanningStatus: validation date = $validationDate")
-    if (
-        schedule.isDue(
-            validationDate,
-            actualDate,
-            numOfTimesCompletedInCurrentPeriod,
-            scheduleDeviationInCurrentPeriod,
-            lastVacationEndDate,
-        )
-    ) {
-        println("RoutineComputePlanningStatus: currentScheduleDeviation = $currentScheduleDeviation")
-        println("RoutineComputePlanningStatus: cancelDuenessIfDoneAhead = ${schedule.cancelDuenessIfDoneAhead}")
-        if (currentScheduleDeviation > 0 && schedule.cancelDuenessIfDoneAhead) {
-            actualDate?.let {
-                var dueDaysCounter = 0
-                for (day in it.plusDays(1)..validationDate) {
-                    if (
-                        schedule.isDue(
-                            validationDate,
-                            it,
-                            numOfTimesCompletedInCurrentPeriod,
-                            scheduleDeviationInCurrentPeriod
-                        )
-                    ) dueDaysCounter++
-                }
-                println("due days counter = $dueDaysCounter")
-                if (currentScheduleDeviation >= dueDaysCounter)
-                    return PlanningStatus.AlreadyCompleted
-            }
-        }
+//    if (
+//        schedule.isDue(
+//            validationDate,
+//            actualDate,
+//            numOfTimesCompletedInCurrentPeriod,
+//            scheduleDeviationInCurrentPeriod,
+//            lastVacationEndDate,
+//        )
+//    ) {
+//        println("RoutineComputePlanningStatus: currentScheduleDeviation = $currentScheduleDeviation")
+//        println("RoutineComputePlanningStatus: cancelDuenessIfDoneAhead = ${schedule.cancelDuenessIfDoneAhead}")
+//        if (currentScheduleDeviation > 0 && schedule.cancelDuenessIfDoneAhead) {
+//            actualDate?.let {
+//                var dueDaysCounter = 0
+//                for (day in it.plusDays(1)..validationDate) {
+//                    if (
+//                        schedule.isDue(
+//                            validationDate,
+//                            it,
+//                            numOfTimesCompletedInCurrentPeriod,
+//                            scheduleDeviationInCurrentPeriod
+//                        )
+//                    ) dueDaysCounter++
+//                }
+//                println("due days counter = $dueDaysCounter")
+//                if (currentScheduleDeviation >= dueDaysCounter)
+//                    return PlanningStatus.AlreadyCompleted
+//            }
+//        }
 
-        return PlanningStatus.Planned
-    }
-
-    println("RoutineComputePlanningStatus: backlog enabled = ${schedule.backlogEnabled}")
-    println()
-    if (currentScheduleDeviation < 0 && schedule.backlogEnabled) {
-        actualDate?.let {
-            var notDueDaysCounter = 0
-            for (day in it.plusDays(1)..validationDate) {
-                if (
-                    !schedule.isDue(
-                        day,
-                        it,
-                        numOfTimesCompletedInCurrentPeriod,
-                        scheduleDeviationInCurrentPeriod
-                    )
-                ) notDueDaysCounter++
-            }
-            if (currentScheduleDeviation <= -notDueDaysCounter) {
-                return PlanningStatus.Backlog
-            }
-        }
-    }
-
-    return PlanningStatus.NotDue
+//        return PlanningStatus.Planned
+//    }
+//
+//    println("RoutineComputePlanningStatus: backlog enabled = ${schedule.backlogEnabled}")
+//    println()
+//    if (currentScheduleDeviation < 0 && schedule.backlogEnabled) {
+//        actualDate?.let {
+//            var notDueDaysCounter = 0
+//            for (day in it.plusDays(1)..validationDate) {
+//                if (
+//                    !schedule.isDue(
+//                        day,
+//                        it,
+//                        numOfTimesCompletedInCurrentPeriod,
+//                        scheduleDeviationInCurrentPeriod
+//                    )
+//                ) notDueDaysCounter++
+//            }
+//            if (currentScheduleDeviation <= -notDueDaysCounter) {
+//                return PlanningStatus.Backlog
+//            }
+//        }
+//    }
+//
+//    return PlanningStatus.NotDue
+    TODO()
 }
