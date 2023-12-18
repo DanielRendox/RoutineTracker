@@ -8,7 +8,7 @@ import com.rendox.routinetracker.core.database.di.localDataSourceModule
 import com.rendox.routinetracker.core.logic.time.AnnualDate
 import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
 import com.rendox.routinetracker.core.logic.time.WeekDayNumberMonthRelated
-import com.rendox.routinetracker.core.model.Routine
+import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Schedule
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.DayOfWeek
@@ -24,7 +24,7 @@ import org.koin.dsl.module
 import org.koin.test.KoinTest
 import org.koin.test.get
 
-class RoutineLocalDataSourceImplTest : KoinTest {
+class HabitLocalDataSourceImplTest : KoinTest {
 
     private lateinit var sqlDriver: SqlDriver
     private lateinit var routineLocalDataSource: RoutineLocalDataSource
@@ -59,23 +59,23 @@ class RoutineLocalDataSourceImplTest : KoinTest {
 
     @Test
     fun getInsertYesNoRoutine() = runTest {
-        val routine = Routine.YesNoRoutine(
+        val habit = Habit.YesNoHabit(
             id = 1,
             name = "Programming",
             description = "Make my app",
             sessionDurationMinutes = 120,
             progress = 0.8f,
             schedule = Schedule.EveryDaySchedule(
-                routineStartDate = LocalDate(2023, Month.SEPTEMBER, 1),
+                startDate = LocalDate(2023, Month.SEPTEMBER, 1),
                 vacationStartDate = LocalDate(2023, Month.SEPTEMBER, 10),
                 vacationEndDate = null,
             ),
             defaultCompletionTime = LocalTime(hour = 18, minute = 30),
         )
 
-        routineLocalDataSource.insertRoutine(routine)
-        val resultingRoutine = routineLocalDataSource.getRoutineById(routine.id!!)
-        assertThat(resultingRoutine).isEqualTo(routine)
+        routineLocalDataSource.insertRoutine(habit)
+        val resultingRoutine = routineLocalDataSource.getRoutineById(habit.id!!)
+        assertThat(resultingRoutine).isEqualTo(habit)
     }
 
     @Test
@@ -91,22 +91,22 @@ class RoutineLocalDataSourceImplTest : KoinTest {
         val schedule = Schedule.WeeklyScheduleByDueDaysOfWeek(
             dueDaysOfWeek = dueDaysOfWeek,
             startDayOfWeek = DayOfWeek.WEDNESDAY,
-            routineStartDate = LocalDate(2023, Month.SEPTEMBER, 1),
+            startDate = LocalDate(2023, Month.SEPTEMBER, 1),
             vacationStartDate = LocalDate(2023, Month.SEPTEMBER, 10),
             vacationEndDate = null,
             backlogEnabled = false,
-            cancelDuenessIfDoneAhead = false,
+            completingAheadEnabled = false,
         )
 
-        val routine = Routine.YesNoRoutine(
+        val habit = Habit.YesNoHabit(
             id = 1,
             name = "Programming",
             schedule = schedule,
         )
 
-        routineLocalDataSource.insertRoutine(routine)
-        val resultingRoutine = routineLocalDataSource.getRoutineById(routine.id!!)
-        assertThat(resultingRoutine).isEqualTo(routine)
+        routineLocalDataSource.insertRoutine(habit)
+        val resultingRoutine = routineLocalDataSource.getRoutineById(habit.id!!)
+        assertThat(resultingRoutine).isEqualTo(habit)
     }
 
     @Test
@@ -124,22 +124,22 @@ class RoutineLocalDataSourceImplTest : KoinTest {
             includeLastDayOfMonth = true,
             weekDaysMonthRelated = weekDaysMonthRelated,
             startFromRoutineStart = true,
-            routineStartDate = LocalDate(2023, Month.SEPTEMBER, 1),
+            startDate = LocalDate(2023, Month.SEPTEMBER, 1),
             vacationStartDate = LocalDate(2023, Month.SEPTEMBER, 10),
             vacationEndDate = null,
             backlogEnabled = false,
-            cancelDuenessIfDoneAhead = false,
+            completingAheadEnabled = false,
         )
 
-        val routine = Routine.YesNoRoutine(
+        val habit = Habit.YesNoHabit(
             id = 1,
             name = "Studying",
             schedule = schedule,
         )
 
-        routineLocalDataSource.insertRoutine(routine)
-        val resultingRoutine = routineLocalDataSource.getRoutineById(routine.id!!)
-        assertThat(resultingRoutine).isEqualTo(routine)
+        routineLocalDataSource.insertRoutine(habit)
+        val resultingRoutine = routineLocalDataSource.getRoutineById(habit.id!!)
+        assertThat(resultingRoutine).isEqualTo(habit)
     }
 
     @Test
@@ -158,22 +158,22 @@ class RoutineLocalDataSourceImplTest : KoinTest {
                 )
             ),
             startFromRoutineStart = true,
-            routineStartDate = LocalDate(2023, Month.SEPTEMBER, 1),
+            startDate = LocalDate(2023, Month.SEPTEMBER, 1),
             vacationStartDate = LocalDate(2023, Month.SEPTEMBER, 10),
             vacationEndDate = null,
             backlogEnabled = false,
-            cancelDuenessIfDoneAhead = false,
+            completingAheadEnabled = false,
         )
 
-        val routine = Routine.YesNoRoutine(
+        val habit = Habit.YesNoHabit(
             id = 1,
             name = "Studying",
             schedule = schedule,
         )
 
-        routineLocalDataSource.insertRoutine(routine)
-        val resultingRoutine = routineLocalDataSource.getRoutineById(routine.id!!)
-        assertThat(resultingRoutine).isEqualTo(routine)
+        routineLocalDataSource.insertRoutine(habit)
+        val resultingRoutine = routineLocalDataSource.getRoutineById(habit.id!!)
+        assertThat(resultingRoutine).isEqualTo(habit)
     }
 
     @Test
@@ -187,22 +187,22 @@ class RoutineLocalDataSourceImplTest : KoinTest {
 
         val schedule = Schedule.CustomDateSchedule(
             dueDates = dueDates,
-            routineStartDate = LocalDate(2023, Month.SEPTEMBER, 1),
+            startDate = LocalDate(2023, Month.SEPTEMBER, 1),
             vacationStartDate = LocalDate(2023, Month.SEPTEMBER, 10),
             vacationEndDate = null,
             backlogEnabled = false,
-            cancelDuenessIfDoneAhead = false,
+            completingAheadEnabled = false,
         )
 
-        val routine = Routine.YesNoRoutine(
+        val habit = Habit.YesNoHabit(
             id = 1,
             name = "Studying",
             schedule = schedule,
         )
 
-        routineLocalDataSource.insertRoutine(routine)
-        val resultingRoutine = routineLocalDataSource.getRoutineById(routine.id!!)
-        assertThat(resultingRoutine).isEqualTo(routine)
+        routineLocalDataSource.insertRoutine(habit)
+        val resultingRoutine = routineLocalDataSource.getRoutineById(habit.id!!)
+        assertThat(resultingRoutine).isEqualTo(habit)
     }
 
     @Test
@@ -216,22 +216,22 @@ class RoutineLocalDataSourceImplTest : KoinTest {
 
         val schedule = Schedule.AnnualScheduleByDueDates(
             dueDates = dueDates,
-            routineStartDate = LocalDate(2023, Month.SEPTEMBER, 1),
+            startDate = LocalDate(2023, Month.SEPTEMBER, 1),
             vacationStartDate = LocalDate(2023, Month.SEPTEMBER, 10),
             vacationEndDate = null,
             backlogEnabled = false,
-            cancelDuenessIfDoneAhead = false,
+            completingAheadEnabled = false,
             startFromRoutineStart = false,
         )
 
-        val routine = Routine.YesNoRoutine(
+        val habit = Habit.YesNoHabit(
             id = 1,
             name = "Studying",
             schedule = schedule,
         )
 
-        routineLocalDataSource.insertRoutine(routine)
-        val resultingRoutine = routineLocalDataSource.getRoutineById(routine.id!!)
-        assertThat(resultingRoutine).isEqualTo(routine)
+        routineLocalDataSource.insertRoutine(habit)
+        val resultingRoutine = routineLocalDataSource.getRoutineById(habit.id!!)
+        assertThat(resultingRoutine).isEqualTo(habit)
     }
 }

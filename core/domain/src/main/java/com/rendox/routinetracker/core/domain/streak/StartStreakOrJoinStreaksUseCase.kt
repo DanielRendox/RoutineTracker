@@ -4,7 +4,7 @@ import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryR
 import com.rendox.routinetracker.core.data.streak.StreakRepository
 import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.model.HistoricalStatus
-import com.rendox.routinetracker.core.model.Routine
+import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Streak
 import com.rendox.routinetracker.core.model.completedStatuses
 import com.rendox.routinetracker.core.model.failedStatuses
@@ -16,27 +16,27 @@ class StartStreakOrJoinStreaksUseCase(
     private val streakRepository: StreakRepository,
     private val completionHistoryRepository: CompletionHistoryRepository,
 ) {
-    suspend operator fun invoke(routine: Routine, date: LocalDate) {
+    suspend operator fun invoke(habit: Habit, date: LocalDate) {
         val previousStreak = streakRepository.getStreakByDate(
-            routineId = routine.id!!,
+            routineId = habit.id!!,
             dateWithinStreak = date.minus(DatePeriod(days = 1)),
         )
         val nextCompletedEntry = completionHistoryRepository.getFirstHistoryEntryByStatus(
-            routineId = routine.id!!,
+            routineId = habit.id!!,
             matchingStatuses = completedStatuses,
             minDate = date.plusDays(1),
         )
 
         val firstFailedStatusAfterCurrentDate =
             completionHistoryRepository.getFirstHistoryEntryByStatus(
-                routineId = routine.id!!,
+                routineId = habit.id!!,
                 matchingStatuses = failedStatuses,
                 minDate = date.plusDays(1),
             )
 
         val nextStreak: Streak? = nextCompletedEntry?.let {
             streakRepository.getStreakByDate(
-                routineId = routine.id!!,
+                routineId = habit.id!!,
                 dateWithinStreak = it.date,
             )
         }
@@ -61,11 +61,11 @@ class StartStreakOrJoinStreaksUseCase(
             }
         } else {
             val lastNotCompleted = completionHistoryRepository.getLastHistoryEntryByStatus(
-                routineId = routine.id!!,
+                routineId = habit.id!!,
                 matchingStatuses = listOf(HistoricalStatus.NotCompleted),
             )
             val streakStart =
-                if (lastNotCompleted == null) routine.schedule.routineStartDate else date
+                if (lastNotCompleted == null) habit.schedule.startDate else date
 
             if (nextStreak != null && (firstFailedStatusAfterCurrentDate == null || firstFailedStatusAfterCurrentDate.date > nextStreak.startDate)) {
                 streakRepository.updateStreakById(
@@ -75,7 +75,7 @@ class StartStreakOrJoinStreaksUseCase(
                 )
             } else {
                 streakRepository.insertStreak(
-                    routineId = routine.id!!,
+                    routineId = habit.id!!,
                     streak = Streak(
                         startDate = streakStart,
                         endDate = firstFailedStatusAfterCurrentDate

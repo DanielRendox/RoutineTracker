@@ -28,7 +28,7 @@ class GetDisplayStreaksUseCase(
             endDate
         } else {
             val routineEndDate =
-                routineRepository.getRoutineById(routineId).schedule.routineEndDate
+                routineRepository.getRoutineById(routineId).schedule.endDate
             if (routineEndDate != null && routineEndDate < today) {
                 routineEndDate
             } else {

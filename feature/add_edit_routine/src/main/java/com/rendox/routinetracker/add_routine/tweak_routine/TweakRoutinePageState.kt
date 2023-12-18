@@ -117,7 +117,7 @@ class TweakRoutinePageState(
             if (chosenSchedule.supportsScheduleDeviation) chosenSchedule.backlogEnabled
             else null
         completingAheadEnabled =
-            if (chosenSchedule.supportsScheduleDeviation) chosenSchedule.cancelDuenessIfDoneAhead
+            if (chosenSchedule.supportsScheduleDeviation) chosenSchedule.completingAheadEnabled
             else null
         periodSeparationEnabled =
             if (

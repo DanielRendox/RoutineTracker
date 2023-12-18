@@ -1,7 +1,7 @@
 package com.rendox.routinetracker.core.database.routine.model
 
 import com.rendox.routinetracker.core.database.routine.RoutineEntity
-import com.rendox.routinetracker.core.model.Routine
+import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Schedule
 import kotlinx.datetime.LocalTime
 
@@ -19,13 +19,13 @@ fun RoutineEntity.toExternalModel(schedule: Schedule) = when (this.type) {
 
 internal fun RoutineEntity.toYesNoRoutine(
     schedule: Schedule,
-): Routine {
+): Habit {
     val defaultCompletionTime =
         if (defaultCompletionTimeHour != null && defaultCompletionTimeMinute != null) {
             LocalTime(hour = defaultCompletionTimeHour, minute = defaultCompletionTimeMinute)
         } else null
 
-    return Routine.YesNoRoutine(
+    return Habit.YesNoHabit(
         id = id,
         name = name,
         description = description,

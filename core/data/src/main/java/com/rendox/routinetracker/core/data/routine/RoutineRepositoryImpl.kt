@@ -1,22 +1,22 @@
 package com.rendox.routinetracker.core.data.routine
 
 import com.rendox.routinetracker.core.database.routine.RoutineLocalDataSource
-import com.rendox.routinetracker.core.model.Routine
+import com.rendox.routinetracker.core.model.Habit
 import kotlinx.datetime.LocalTime
 
 class RoutineRepositoryImpl(
     private val localDataSource: RoutineLocalDataSource,
 ) : RoutineRepository {
 
-    override suspend fun getRoutineById(id: Long): Routine {
+    override suspend fun getRoutineById(id: Long): Habit {
         return localDataSource.getRoutineById(routineId = id)
     }
 
-    override suspend fun insertRoutine(routine: Routine) {
-        localDataSource.insertRoutine(routine)
+    override suspend fun insertRoutine(habit: Habit) {
+        localDataSource.insertRoutine(habit)
     }
 
-    override suspend fun getAllRoutines(): List<Routine> {
+    override suspend fun getAllRoutines(): List<Habit> {
         return localDataSource.getAllRoutines()
     }
 

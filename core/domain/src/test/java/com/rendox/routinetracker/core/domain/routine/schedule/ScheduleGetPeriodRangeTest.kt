@@ -25,7 +25,7 @@ class ScheduleGetPeriodRangeTest {
         val schedule = Schedule.WeeklyScheduleByDueDaysOfWeek(
             dueDaysOfWeek = emptyList(),
             startDayOfWeek = null,
-            routineStartDate = routineStartDate,
+            startDate = routineStartDate,
         )
 
         // still first week
@@ -47,7 +47,7 @@ class ScheduleGetPeriodRangeTest {
         val schedule = Schedule.WeeklyScheduleByDueDaysOfWeek(
             dueDaysOfWeek = emptyList(),
             startDayOfWeek = DayOfWeek.SUNDAY,
-            routineStartDate = routineStartDate,
+            startDate = routineStartDate,
         )
 
         val firstWeek = routineStartDate..LocalDate(2023, Month.OCTOBER, 21)
@@ -63,7 +63,7 @@ class ScheduleGetPeriodRangeTest {
         val routineStartDate = LocalDate(2023, Month.OCTOBER, 18)
 
         val schedule = Schedule.MonthlyScheduleByDueDatesIndices(
-            routineStartDate = routineStartDate,
+            startDate = routineStartDate,
             dueDatesIndices = emptyList(),
             weekDaysMonthRelated = emptyList(),
             startFromRoutineStart = true,
@@ -86,7 +86,7 @@ class ScheduleGetPeriodRangeTest {
         val routineStartDate = LocalDate(2023, Month.OCTOBER, 18)
 
         val schedule = Schedule.MonthlyScheduleByDueDatesIndices(
-            routineStartDate = routineStartDate,
+            startDate = routineStartDate,
             dueDatesIndices = emptyList(),
             weekDaysMonthRelated = emptyList(),
             startFromRoutineStart = false,
@@ -105,7 +105,7 @@ class ScheduleGetPeriodRangeTest {
         val routineStartDate = LocalDate(2024, Month.FEBRUARY, 29)
 
         val schedule = Schedule.AnnualScheduleByDueDates(
-            routineStartDate = routineStartDate,
+            startDate = routineStartDate,
             dueDates = emptyList(),
             startFromRoutineStart = true,
         )
@@ -125,7 +125,7 @@ class ScheduleGetPeriodRangeTest {
         val routineStartDate = LocalDate(2023, Month.MARCH, 1)
 
         val schedule = Schedule.AnnualScheduleByDueDates(
-            routineStartDate = routineStartDate,
+            startDate = routineStartDate,
             dueDates = emptyList(),
             startFromRoutineStart = true,
         )
@@ -145,7 +145,7 @@ class ScheduleGetPeriodRangeTest {
         val routineStartDate = LocalDate(2023, Month.SEPTEMBER, 30)
 
         val schedule = Schedule.AnnualScheduleByDueDates(
-            routineStartDate = routineStartDate,
+            startDate = routineStartDate,
             dueDates = emptyList(),
             startFromRoutineStart = true,
         )
@@ -165,7 +165,7 @@ class ScheduleGetPeriodRangeTest {
         val routineStartDate = LocalDate(2023, Month.SEPTEMBER, 30)
 
         val schedule = Schedule.AnnualScheduleByDueDates(
-            routineStartDate = routineStartDate,
+            startDate = routineStartDate,
             dueDates = emptyList(),
             startFromRoutineStart = false,
         )
@@ -187,7 +187,7 @@ class ScheduleGetPeriodRangeTest {
         val numOfDaysInPeriod = Random.nextInt(99)
 
         val schedule = Schedule.PeriodicCustomSchedule(
-            routineStartDate = routineStartDate,
+            startDate = routineStartDate,
             numOfDueDays = 0,
             numOfDaysInPeriod = numOfDaysInPeriod,
         )
@@ -212,7 +212,7 @@ class ScheduleGetPeriodRangeTest {
         val routineStartDate = LocalDate(2023, Month.NOVEMBER, 1)
 
         val schedule = Schedule.PeriodicCustomSchedule(
-            routineStartDate = routineStartDate,
+            startDate = routineStartDate,
             numOfDueDays = 1,
             numOfDaysInPeriod = 2,
             vacationStartDate = LocalDate(2023, Month.NOVEMBER, 3),
@@ -243,7 +243,7 @@ class ScheduleGetPeriodRangeTest {
         val routineStartDate = LocalDate(2023, Month.NOVEMBER, 1)
 
         val schedule = Schedule.PeriodicCustomSchedule(
-            routineStartDate = routineStartDate,
+            startDate = routineStartDate,
             numOfDueDays = 1,
             numOfDaysInPeriod = 2,
             vacationStartDate = LocalDate(2023, Month.NOVEMBER, 3),

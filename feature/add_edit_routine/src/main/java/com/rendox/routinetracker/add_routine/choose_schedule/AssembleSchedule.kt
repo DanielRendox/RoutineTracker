@@ -24,7 +24,7 @@ fun SchedulePickerState.assembleSchedule(
 private fun createEveryDaySchedule(
     tweakRoutinePageState: TweakRoutinePageState?
 ): Schedule.EveryDaySchedule = Schedule.EveryDaySchedule(
-    routineStartDate = tweakRoutinePageState?.startDate?.toKotlinLocalDate()
+    startDate = tweakRoutinePageState?.startDate?.toKotlinLocalDate()
         ?: Clock.System.todayIn(TimeZone.currentSystemDefault()),
 )
 
@@ -39,16 +39,16 @@ private fun WeeklySchedulePickerState.convertToScheduleModel(
         if (tweakRoutinePageState != null) {
             Schedule.WeeklyScheduleByDueDaysOfWeek(
                 dueDaysOfWeek = specificDaysOfWeek,
-                routineStartDate = tweakRoutinePageState.startDate.toKotlinLocalDate(),
-                routineEndDate = tweakRoutinePageState.endDate?.toKotlinLocalDate(),
+                startDate = tweakRoutinePageState.startDate.toKotlinLocalDate(),
+                endDate = tweakRoutinePageState.endDate?.toKotlinLocalDate(),
                 backlogEnabled = tweakRoutinePageState.backlogEnabled!!,
-                cancelDuenessIfDoneAhead = tweakRoutinePageState.completingAheadEnabled!!,
+                completingAheadEnabled = tweakRoutinePageState.completingAheadEnabled!!,
                 periodSeparationEnabled = tweakRoutinePageState.periodSeparationEnabled!!,
             )
         } else {
             Schedule.WeeklyScheduleByDueDaysOfWeek(
                 dueDaysOfWeek = specificDaysOfWeek,
-                routineStartDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
+                startDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
             )
         }
     } else {
@@ -56,15 +56,15 @@ private fun WeeklySchedulePickerState.convertToScheduleModel(
         if (tweakRoutinePageState != null) {
             Schedule.WeeklyScheduleByNumOfDueDays(
                 numOfDueDays = numOfDueDays.toInt(),
-                routineStartDate = tweakRoutinePageState.startDate.toKotlinLocalDate(),
-                routineEndDate = tweakRoutinePageState.endDate?.toKotlinLocalDate(),
+                startDate = tweakRoutinePageState.startDate.toKotlinLocalDate(),
+                endDate = tweakRoutinePageState.endDate?.toKotlinLocalDate(),
                 backlogEnabled = tweakRoutinePageState.backlogEnabled!!,
-                cancelDuenessIfDoneAhead = tweakRoutinePageState.completingAheadEnabled!!,
+                completingAheadEnabled = tweakRoutinePageState.completingAheadEnabled!!,
             )
         } else {
             Schedule.WeeklyScheduleByNumOfDueDays(
                 numOfDueDays = numOfDueDays.toInt(),
-                routineStartDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
+                startDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
             )
         }
     }
@@ -83,33 +83,33 @@ private fun MonthlySchedulePickerState.convertToScheduleModel(
                 dueDatesIndices = specificDaysOfMonth,
                 includeLastDayOfMonth = lastDayOfMonthSelected,
                 weekDaysMonthRelated = emptyList(), // TODO add support for weekDaysMonthRelated,
-                routineStartDate = tweakRoutinePageState.startDate.toKotlinLocalDate(),
-                routineEndDate = tweakRoutinePageState.endDate?.toKotlinLocalDate(),
+                startDate = tweakRoutinePageState.startDate.toKotlinLocalDate(),
+                endDate = tweakRoutinePageState.endDate?.toKotlinLocalDate(),
                 periodSeparationEnabled = tweakRoutinePageState.periodSeparationEnabled!!,
                 backlogEnabled = tweakRoutinePageState.backlogEnabled!!,
-                cancelDuenessIfDoneAhead = tweakRoutinePageState.completingAheadEnabled!!,
+                completingAheadEnabled = tweakRoutinePageState.completingAheadEnabled!!,
             )
         } else {
             Schedule.MonthlyScheduleByDueDatesIndices(
                 dueDatesIndices = specificDaysOfMonth,
                 includeLastDayOfMonth = lastDayOfMonthSelected,
                 weekDaysMonthRelated = emptyList(), // TODO add support for weekDaysMonthRelated,
-                routineStartDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
+                startDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
             )
         }
     } else {
         if (tweakRoutinePageState != null) {
             Schedule.MonthlyScheduleByNumOfDueDays(
                 numOfDueDays = numOfDueDays.toInt(),
-                routineStartDate = tweakRoutinePageState.startDate.toKotlinLocalDate(),
-                routineEndDate = tweakRoutinePageState.endDate?.toKotlinLocalDate(),
+                startDate = tweakRoutinePageState.startDate.toKotlinLocalDate(),
+                endDate = tweakRoutinePageState.endDate?.toKotlinLocalDate(),
                 backlogEnabled = tweakRoutinePageState.backlogEnabled!!,
-                cancelDuenessIfDoneAhead = tweakRoutinePageState.completingAheadEnabled!!,
+                completingAheadEnabled = tweakRoutinePageState.completingAheadEnabled!!,
             )
         } else {
             Schedule.MonthlyScheduleByNumOfDueDays(
                 numOfDueDays = numOfDueDays.toInt(),
-                routineStartDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
+                startDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
             )
         }
     }
@@ -124,7 +124,7 @@ private fun AlternateDaysSchedulePickerState.convertToScheduleModel(
     if (numOfActivityDays + numOfRestDays == 7) {
         return Schedule.WeeklyScheduleByNumOfDueDays(
             numOfDueDays = numOfActivityDays,
-            routineStartDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
+            startDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
         )
     }
 
@@ -132,16 +132,16 @@ private fun AlternateDaysSchedulePickerState.convertToScheduleModel(
         Schedule.PeriodicCustomSchedule(
             numOfDueDays = numOfActivityDays,
             numOfDaysInPeriod = numOfActivityDays + numOfRestDays,
-            routineStartDate = tweakRoutinePageState.startDate.toKotlinLocalDate(),
-            routineEndDate = tweakRoutinePageState.endDate?.toKotlinLocalDate(),
+            startDate = tweakRoutinePageState.startDate.toKotlinLocalDate(),
+            endDate = tweakRoutinePageState.endDate?.toKotlinLocalDate(),
             backlogEnabled = tweakRoutinePageState.backlogEnabled!!,
-            cancelDuenessIfDoneAhead = tweakRoutinePageState.completingAheadEnabled!!,
+            completingAheadEnabled = tweakRoutinePageState.completingAheadEnabled!!,
         )
     } else {
         Schedule.PeriodicCustomSchedule(
             numOfDueDays = numOfActivityDays,
             numOfDaysInPeriod = numOfActivityDays + numOfRestDays,
-            routineStartDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
+            startDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
         )
     }
 }

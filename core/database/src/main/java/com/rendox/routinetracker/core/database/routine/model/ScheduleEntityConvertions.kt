@@ -54,8 +54,8 @@ fun ScheduleEntity.toExternalModel(
 }
 
 internal fun ScheduleEntity.toEveryDaySchedule() = Schedule.EveryDaySchedule(
-    routineStartDate = routineStartDate,
-    routineEndDate = routineEndDate,
+    startDate = routineStartDate,
+    endDate = routineEndDate,
     vacationStartDate = vacationStartDate,
     vacationEndDate = vacationEndDate,
 )
@@ -66,23 +66,23 @@ internal fun ScheduleEntity.toWeeklyScheduleByDueDaysOfWeek(
     dueDaysOfWeek = dueDates.map { it.toDayOfWeek() },
     startDayOfWeek = startDayOfWeekInWeeklySchedule,
     periodSeparationEnabled = periodicSeparationEnabledInPeriodicSchedule!!,
-    routineStartDate = routineStartDate,
-    routineEndDate = routineEndDate,
+    startDate = routineStartDate,
+    endDate = routineEndDate,
     vacationStartDate = vacationStartDate,
     vacationEndDate = vacationEndDate,
     backlogEnabled = backlogEnabled,
-    cancelDuenessIfDoneAhead = cancelDuenessIfDoneAhead,
+    completingAheadEnabled = cancelDuenessIfDoneAhead,
 )
 
 internal fun ScheduleEntity.toWeeklyScheduleByNumOfDueDays() = Schedule.WeeklyScheduleByNumOfDueDays(
     numOfDueDays = numOfDueDaysInByNumOfDueDaysSchedule!!,
     numOfDueDaysInFirstPeriod = numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule,
-    routineStartDate = routineStartDate,
-    routineEndDate = routineEndDate,
+    startDate = routineStartDate,
+    endDate = routineEndDate,
     vacationStartDate = vacationStartDate,
     vacationEndDate = vacationEndDate,
     backlogEnabled = backlogEnabled,
-    cancelDuenessIfDoneAhead = cancelDuenessIfDoneAhead,
+    completingAheadEnabled = cancelDuenessIfDoneAhead,
 )
 
 internal fun ScheduleEntity.toMonthlyScheduleByDueDatesIndices(
@@ -94,47 +94,47 @@ internal fun ScheduleEntity.toMonthlyScheduleByDueDatesIndices(
     weekDaysMonthRelated = weekDaysMonthRelated,
     startFromRoutineStart = startFromRoutineStartInMonthlyAndAnnualSchedule!!,
     periodSeparationEnabled = periodicSeparationEnabledInPeriodicSchedule!!,
-    routineStartDate = routineStartDate,
-    routineEndDate = routineEndDate,
+    startDate = routineStartDate,
+    endDate = routineEndDate,
     vacationStartDate = vacationStartDate,
     vacationEndDate = vacationEndDate,
     backlogEnabled = backlogEnabled,
-    cancelDuenessIfDoneAhead = cancelDuenessIfDoneAhead,
+    completingAheadEnabled = cancelDuenessIfDoneAhead,
 )
 
 internal fun ScheduleEntity.toMonthlyScheduleByNumOfDueDays() = Schedule.MonthlyScheduleByNumOfDueDays(
     numOfDueDays = numOfDueDaysInByNumOfDueDaysSchedule!!,
     numOfDueDaysInFirstPeriod = numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule,
     startFromRoutineStart = startFromRoutineStartInMonthlyAndAnnualSchedule!!,
-    routineStartDate = routineStartDate,
-    routineEndDate = routineEndDate,
+    startDate = routineStartDate,
+    endDate = routineEndDate,
     vacationStartDate = vacationStartDate,
     vacationEndDate = vacationEndDate,
     backlogEnabled = backlogEnabled,
-    cancelDuenessIfDoneAhead = cancelDuenessIfDoneAhead,
+    completingAheadEnabled = cancelDuenessIfDoneAhead,
 )
 
 internal fun ScheduleEntity.toPeriodicCustomSchedule() = Schedule.PeriodicCustomSchedule (
     numOfDueDays = numOfDueDaysInByNumOfDueDaysSchedule!!,
     numOfDaysInPeriod = numOfDaysInPeriodicCustomSchedule!!,
-    routineStartDate = routineStartDate,
-    routineEndDate = routineEndDate,
+    startDate = routineStartDate,
+    endDate = routineEndDate,
     vacationStartDate = vacationStartDate,
     vacationEndDate = vacationEndDate,
     backlogEnabled = backlogEnabled,
-    cancelDuenessIfDoneAhead = cancelDuenessIfDoneAhead,
+    completingAheadEnabled = cancelDuenessIfDoneAhead,
 )
 
 internal fun ScheduleEntity.toCustomDateSchedule(
     dueDatesIndices: List<Int>,
 ) = Schedule.CustomDateSchedule(
     dueDates = dueDatesIndices.map { it.toLocalDate() },
-    routineStartDate = routineStartDate,
-    routineEndDate = routineEndDate,
+    startDate = routineStartDate,
+    endDate = routineEndDate,
     vacationStartDate = vacationStartDate,
     vacationEndDate = vacationEndDate,
     backlogEnabled = backlogEnabled,
-    cancelDuenessIfDoneAhead = cancelDuenessIfDoneAhead,
+    completingAheadEnabled = cancelDuenessIfDoneAhead,
 )
 
 internal fun ScheduleEntity.toAnnualScheduleByDueDates(
@@ -143,22 +143,22 @@ internal fun ScheduleEntity.toAnnualScheduleByDueDates(
     dueDates = dueDates.map { it.toAnnualDate() },
     startFromRoutineStart = startFromRoutineStartInMonthlyAndAnnualSchedule!!,
     periodSeparationEnabled = periodicSeparationEnabledInPeriodicSchedule!!,
-    routineStartDate = routineStartDate,
-    routineEndDate = routineEndDate,
+    startDate = routineStartDate,
+    endDate = routineEndDate,
     vacationStartDate = vacationStartDate,
     vacationEndDate = vacationEndDate,
     backlogEnabled = backlogEnabled,
-    cancelDuenessIfDoneAhead = cancelDuenessIfDoneAhead,
+    completingAheadEnabled = cancelDuenessIfDoneAhead,
 )
 
 internal fun ScheduleEntity.toAnnualScheduleByNumOfDueDays() = Schedule.AnnualScheduleByNumOfDueDays(
     numOfDueDays = numOfDueDaysInByNumOfDueDaysSchedule!!,
     numOfDueDaysInFirstPeriod = numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule,
     startFromRoutineStart = startFromRoutineStartInMonthlyAndAnnualSchedule!!,
-    routineStartDate = routineStartDate,
-    routineEndDate = routineEndDate,
+    startDate = routineStartDate,
+    endDate = routineEndDate,
     vacationStartDate = vacationStartDate,
     vacationEndDate = vacationEndDate,
     backlogEnabled = backlogEnabled,
-    cancelDuenessIfDoneAhead = cancelDuenessIfDoneAhead,
+    completingAheadEnabled = cancelDuenessIfDoneAhead,
 )

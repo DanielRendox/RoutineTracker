@@ -1,7 +1,7 @@
 package com.rendox.routinetracker.core.testcommon.fakes.routine
 
 import com.rendox.routinetracker.core.model.CompletionHistoryEntry
-import com.rendox.routinetracker.core.model.Routine
+import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Streak
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
@@ -21,7 +21,7 @@ class RoutineData {
         }
 
     private val listOfRoutinesLock = Any()
-    var listOfRoutines = emptyList<Routine>()
+    var listOfHabits = emptyList<Habit>()
         get() {
             synchronized(listOfRoutinesLock) {
                 return field

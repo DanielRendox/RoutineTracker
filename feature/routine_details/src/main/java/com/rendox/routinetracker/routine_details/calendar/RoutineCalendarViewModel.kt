@@ -17,7 +17,7 @@ import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.DisplayStreak
 import com.rendox.routinetracker.core.model.PlanningStatus
-import com.rendox.routinetracker.core.model.Routine
+import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.RoutineStatus
 import com.rendox.routinetracker.core.model.StatusEntry
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,7 +46,7 @@ class RoutineCalendarViewModel(
     private val toggleRoutineStatus: ToggleHistoricalStatusUseCase,
     private val getAllStreaks: GetDisplayStreaksUseCase
 ) : ViewModel() {
-    private lateinit var routine: Routine
+    private lateinit var habit: Habit
 
     private val cashedDatesFlow: MutableStateFlow<Map<YearMonth, List<RoutineCalendarDate>>> =
         MutableStateFlow(emptyMap())
@@ -83,7 +83,7 @@ class RoutineCalendarViewModel(
 
     init {
         viewModelScope.launch {
-            routine = routineRepository.getRoutineById(routineId)
+            habit = routineRepository.getRoutineById(routineId)
             streaksFlow.update {
                 val streaks = getAllStreaks(routineId = routineId, today = today)
                 println("all streaks = $streaks")

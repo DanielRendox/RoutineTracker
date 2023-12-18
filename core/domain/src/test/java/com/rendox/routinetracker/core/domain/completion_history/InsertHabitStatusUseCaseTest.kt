@@ -18,7 +18,7 @@ import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.CompletionHistoryEntry
 import com.rendox.routinetracker.core.model.HistoricalStatus
-import com.rendox.routinetracker.core.model.Routine
+import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.model.Streak
 import com.rendox.routinetracker.core.testcommon.fakes.routine.CompletionHistoryLocalDataSourceFake
@@ -42,7 +42,7 @@ import org.koin.test.KoinTest
 import org.koin.test.get
 import kotlin.test.assertFailsWith
 
-class InsertRoutineStatusUseCaseTest : KoinTest {
+class InsertHabitStatusUseCaseTest : KoinTest {
 
     private lateinit var routineRepository: RoutineRepository
     private lateinit var completionHistoryRepository: CompletionHistoryRepository
@@ -103,10 +103,10 @@ class InsertRoutineStatusUseCaseTest : KoinTest {
         val routineEndDate = routineStartDate.plusDays(5)
 
         val schedule = Schedule.EveryDaySchedule(
-            routineStartDate = routineStartDate,
+            startDate = routineStartDate,
             vacationStartDate = routineStartDate.plusDays(3),
             vacationEndDate = routineStartDate.plusDays(3),
-            routineEndDate = routineEndDate,
+            endDate = routineEndDate,
         )
 
         val expectedHistory = listOf(
@@ -148,13 +148,13 @@ class InsertRoutineStatusUseCaseTest : KoinTest {
             ),
         )
 
-        val routine = Routine.YesNoRoutine(
+        val habit = Habit.YesNoHabit(
             id = routineId,
             name = "",
             schedule = schedule,
         )
 
-        routineRepository.insertRoutine(routine)
+        routineRepository.insertRoutine(habit)
 
         insertRoutineStatus(
             routineId = routineId,
@@ -312,9 +312,9 @@ class InsertRoutineStatusUseCaseTest : KoinTest {
         val routineStartDate = LocalDate(2023, Month.OCTOBER, 2) // Monday
 
         val schedule = Schedule.WeeklyScheduleByDueDaysOfWeek(
-            routineStartDate = routineStartDate,
+            startDate = routineStartDate,
             backlogEnabled = true,
-            cancelDuenessIfDoneAhead = true,
+            completingAheadEnabled = true,
             periodSeparationEnabled = true,
             dueDaysOfWeek = listOf(
                 DayOfWeek.TUESDAY,
@@ -325,13 +325,13 @@ class InsertRoutineStatusUseCaseTest : KoinTest {
             startDayOfWeek = DayOfWeek.MONDAY,
         )
 
-        val routine = Routine.YesNoRoutine(
+        val habit = Habit.YesNoHabit(
             id = routineId,
             name = "",
             schedule = schedule,
         )
 
-        routineRepository.insertRoutine(routine)
+        routineRepository.insertRoutine(habit)
 
         val completionHistory = listOf(
             false,  // Monday
@@ -580,9 +580,9 @@ class InsertRoutineStatusUseCaseTest : KoinTest {
         val routineStartDate = LocalDate(2023, Month.OCTOBER, 2) // Monday
 
         val schedule = Schedule.WeeklyScheduleByDueDaysOfWeek(
-            routineStartDate = routineStartDate,
+            startDate = routineStartDate,
             backlogEnabled = true,
-            cancelDuenessIfDoneAhead = true,
+            completingAheadEnabled = true,
             periodSeparationEnabled = false,
             dueDaysOfWeek = listOf(
                 DayOfWeek.TUESDAY,
@@ -593,13 +593,13 @@ class InsertRoutineStatusUseCaseTest : KoinTest {
             startDayOfWeek = DayOfWeek.MONDAY,
         )
 
-        val routine = Routine.YesNoRoutine(
+        val habit = Habit.YesNoHabit(
             id = routineId,
             name = "",
             schedule = schedule,
         )
 
-        routineRepository.insertRoutine(routine)
+        routineRepository.insertRoutine(habit)
 
         val completionHistory = listOf(
             false,  // Monday
@@ -850,9 +850,9 @@ class InsertRoutineStatusUseCaseTest : KoinTest {
         val routineStartDate = LocalDate(2023, Month.OCTOBER, 2) // Monday
 
         val schedule = Schedule.CustomDateSchedule(
-            routineStartDate = routineStartDate,
+            startDate = routineStartDate,
             backlogEnabled = true,
-            cancelDuenessIfDoneAhead = false,
+            completingAheadEnabled = false,
             dueDates = listOf(
                 routineStartDate.plusDays(1),
                 routineStartDate.plusDays(2),
@@ -862,13 +862,13 @@ class InsertRoutineStatusUseCaseTest : KoinTest {
             )
         )
 
-        val routine = Routine.YesNoRoutine(
+        val habit = Habit.YesNoHabit(
             id = routineId,
             name = "",
             schedule = schedule,
         )
 
-        routineRepository.insertRoutine(routine)
+        routineRepository.insertRoutine(habit)
 
         val completionHistory = listOf(
             false,
@@ -1047,9 +1047,9 @@ class InsertRoutineStatusUseCaseTest : KoinTest {
         val routineStartDate = LocalDate(2023, Month.OCTOBER, 2) // Monday
 
         val schedule = Schedule.CustomDateSchedule(
-            routineStartDate = routineStartDate,
+            startDate = routineStartDate,
             backlogEnabled = false,
-            cancelDuenessIfDoneAhead = true,
+            completingAheadEnabled = true,
             dueDates = listOf(
                 routineStartDate.plusDays(1),
                 routineStartDate.plusDays(2),
@@ -1059,13 +1059,13 @@ class InsertRoutineStatusUseCaseTest : KoinTest {
             )
         )
 
-        val routine = Routine.YesNoRoutine(
+        val habit = Habit.YesNoHabit(
             id = routineId,
             name = "",
             schedule = schedule,
         )
 
-        routineRepository.insertRoutine(routine)
+        routineRepository.insertRoutine(habit)
 
         val completionHistory = listOf(
             false,
@@ -1211,19 +1211,19 @@ class InsertRoutineStatusUseCaseTest : KoinTest {
             startFromRoutineStart = false,
             periodSeparationEnabled = false,
             backlogEnabled = true,
-            cancelDuenessIfDoneAhead = true,
-            routineStartDate = routineStartDate,
+            completingAheadEnabled = true,
+            startDate = routineStartDate,
             vacationStartDate = LocalDate(2023, Month.OCTOBER, 16),
             vacationEndDate = LocalDate(2023, Month.OCTOBER, 22),
         )
 
-        val routine = Routine.YesNoRoutine(
+        val habit = Habit.YesNoHabit(
             id = routineId,
             name = "",
             schedule = schedule,
         )
 
-        routineRepository.insertRoutine(routine)
+        routineRepository.insertRoutine(habit)
 
         val completionHistory = mutableListOf<Boolean>()
         repeat(17) { completionHistory.add(false) }
@@ -1420,19 +1420,19 @@ class InsertRoutineStatusUseCaseTest : KoinTest {
             numOfDueDays = 1,
             numOfDaysInPeriod = 2,
             backlogEnabled = true,
-            cancelDuenessIfDoneAhead = true,
-            routineStartDate = routineStartDate,
+            completingAheadEnabled = true,
+            startDate = routineStartDate,
             vacationStartDate = routineStartDate.plusDays(8),
             vacationEndDate = routineStartDate.plusDays(10),
         )
 
-        val routine = Routine.YesNoRoutine(
+        val habit = Habit.YesNoHabit(
             id = routineId,
             name = "",
             schedule = schedule,
         )
 
-        routineRepository.insertRoutine(routine)
+        routineRepository.insertRoutine(habit)
 
         val history = mutableListOf<CompletionHistoryEntry>()
 

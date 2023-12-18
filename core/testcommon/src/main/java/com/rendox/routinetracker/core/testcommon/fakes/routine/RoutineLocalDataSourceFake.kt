@@ -1,23 +1,23 @@
 package com.rendox.routinetracker.core.testcommon.fakes.routine
 
 import com.rendox.routinetracker.core.database.routine.RoutineLocalDataSource
-import com.rendox.routinetracker.core.model.Routine
+import com.rendox.routinetracker.core.model.Habit
 import kotlinx.datetime.LocalTime
 
 class RoutineLocalDataSourceFake(
     private val routineData: RoutineData
 ) : RoutineLocalDataSource {
 
-    override suspend fun getRoutineById(routineId: Long): Routine =
-        routineData.listOfRoutines[(routineId - 1).toInt()]
+    override suspend fun getRoutineById(routineId: Long): Habit =
+        routineData.listOfHabits[(routineId - 1).toInt()]
 
-    override suspend fun insertRoutine(routine: Routine) {
-        routineData.listOfRoutines =
-            routineData.listOfRoutines.toMutableList().apply { add(routine) }
+    override suspend fun insertRoutine(habit: Habit) {
+        routineData.listOfHabits =
+            routineData.listOfHabits.toMutableList().apply { add(habit) }
     }
 
-    override suspend fun getAllRoutines(): List<Routine> =
-        routineData.listOfRoutines
+    override suspend fun getAllRoutines(): List<Habit> =
+        routineData.listOfHabits
 
     override suspend fun updateDueDateSpecificCompletionTime(
         newTime: LocalTime, routineId: Long, dueDateNumber: Int

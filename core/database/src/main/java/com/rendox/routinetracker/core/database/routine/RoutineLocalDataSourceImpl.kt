@@ -10,7 +10,7 @@ import com.rendox.routinetracker.core.database.routine.model.toExternalModel
 import com.rendox.routinetracker.core.database.schedule.GetCompletionTime
 import com.rendox.routinetracker.core.database.schedule.ScheduleEntity
 import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
-import com.rendox.routinetracker.core.model.Routine
+import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Schedule
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -21,7 +21,7 @@ class RoutineLocalDataSourceImpl(
     private val dispatcher: CoroutineDispatcher,
 ) : RoutineLocalDataSource {
 
-    override suspend fun getRoutineById(routineId: Long): Routine {
+    override suspend fun getRoutineById(routineId: Long): Habit {
         return withContext(dispatcher) {
             db.routineEntityQueries.transactionWithResult {
                 val schedule = getScheduleEntity(routineId).toExternalModel(
@@ -53,13 +53,13 @@ class RoutineLocalDataSourceImpl(
                 )
             }
 
-    override suspend fun insertRoutine(routine: Routine) {
+    override suspend fun insertRoutine(habit: Habit) {
         return withContext(dispatcher) {
             db.routineEntityQueries.transaction {
-                when (routine) {
-                    is Routine.YesNoRoutine -> {
-                        insertYesNoRoutine(routine)
-                        insertSchedule(routine.schedule)
+                when (habit) {
+                    is Habit.YesNoHabit -> {
+                        insertYesNoRoutine(habit)
+                        insertSchedule(habit.schedule)
                     }
                 }
             }
@@ -67,16 +67,16 @@ class RoutineLocalDataSourceImpl(
     }
 
     @Suppress("UnusedReceiverParameter")
-    private fun TransactionWithoutReturn.insertYesNoRoutine(routine: Routine.YesNoRoutine) {
+    private fun TransactionWithoutReturn.insertYesNoRoutine(habit: Habit.YesNoHabit) {
         db.routineEntityQueries.insertRoutine(
-            id = routine.id,
+            id = habit.id,
             type = RoutineType.YesNoRoutine,
-            name = routine.name,
-            description = routine.description,
-            sessionDurationMinutes = routine.sessionDurationMinutes,
-            progress = routine.progress,
-            defaultCompletionTimeHour = routine.defaultCompletionTime?.hour,
-            defaultCompletionTimeMinute = routine.defaultCompletionTime?.minute,
+            name = habit.name,
+            description = habit.description,
+            sessionDurationMinutes = habit.sessionDurationMinutes,
+            progress = habit.progress,
+            defaultCompletionTimeHour = habit.defaultCompletionTime?.hour,
+            defaultCompletionTimeMinute = habit.defaultCompletionTime?.minute,
         )
     }
 
@@ -127,10 +127,10 @@ class RoutineLocalDataSourceImpl(
         db.scheduleEntityQueries.insertSchedule(
             id = null,
             type = ScheduleType.EveryDaySchedule,
-            routineStartDate = schedule.routineStartDate,
-            routineEndDate = schedule.routineEndDate,
+            routineStartDate = schedule.startDate,
+            routineEndDate = schedule.endDate,
             backlogEnabled = schedule.backlogEnabled,
-            cancelDuenessIfDoneAhead = schedule.cancelDuenessIfDoneAhead,
+            cancelDuenessIfDoneAhead = schedule.completingAheadEnabled,
             vacationStartDate = schedule.vacationStartDate,
             vacationEndDate = schedule.vacationEndDate,
             startDayOfWeekInWeeklySchedule = null,
@@ -147,10 +147,10 @@ class RoutineLocalDataSourceImpl(
         db.scheduleEntityQueries.insertSchedule(
             id = null,
             type = ScheduleType.WeeklyScheduleByDueDaysOfWeek,
-            routineStartDate = schedule.routineStartDate,
-            routineEndDate = schedule.routineEndDate,
+            routineStartDate = schedule.startDate,
+            routineEndDate = schedule.endDate,
             backlogEnabled = schedule.backlogEnabled,
-            cancelDuenessIfDoneAhead = schedule.cancelDuenessIfDoneAhead,
+            cancelDuenessIfDoneAhead = schedule.completingAheadEnabled,
             vacationStartDate = schedule.vacationStartDate,
             vacationEndDate = schedule.vacationEndDate,
             startDayOfWeekInWeeklySchedule = schedule.startDayOfWeek,
@@ -167,10 +167,10 @@ class RoutineLocalDataSourceImpl(
         db.scheduleEntityQueries.insertSchedule(
             id = null,
             type = ScheduleType.WeeklyScheduleByNumOfDueDays,
-            routineStartDate = schedule.routineStartDate,
-            routineEndDate = schedule.routineEndDate,
+            routineStartDate = schedule.startDate,
+            routineEndDate = schedule.endDate,
             backlogEnabled = schedule.backlogEnabled,
-            cancelDuenessIfDoneAhead = schedule.cancelDuenessIfDoneAhead,
+            cancelDuenessIfDoneAhead = schedule.completingAheadEnabled,
             vacationStartDate = schedule.vacationStartDate,
             vacationEndDate = schedule.vacationEndDate,
             startDayOfWeekInWeeklySchedule = schedule.startDayOfWeek,
@@ -187,10 +187,10 @@ class RoutineLocalDataSourceImpl(
         db.scheduleEntityQueries.insertSchedule(
             id = null,
             type = ScheduleType.MonthlyScheduleByDueDatesIndices,
-            routineStartDate = schedule.routineStartDate,
-            routineEndDate = schedule.routineEndDate,
+            routineStartDate = schedule.startDate,
+            routineEndDate = schedule.endDate,
             backlogEnabled = schedule.backlogEnabled,
-            cancelDuenessIfDoneAhead = schedule.cancelDuenessIfDoneAhead,
+            cancelDuenessIfDoneAhead = schedule.completingAheadEnabled,
             vacationStartDate = schedule.vacationStartDate,
             vacationEndDate = schedule.vacationEndDate,
             startDayOfWeekInWeeklySchedule = null,
@@ -207,10 +207,10 @@ class RoutineLocalDataSourceImpl(
         db.scheduleEntityQueries.insertSchedule(
             id = null,
             type = ScheduleType.MonthlyScheduleByNumOfDueDays,
-            routineStartDate = schedule.routineStartDate,
-            routineEndDate = schedule.routineEndDate,
+            routineStartDate = schedule.startDate,
+            routineEndDate = schedule.endDate,
             backlogEnabled = schedule.backlogEnabled,
-            cancelDuenessIfDoneAhead = schedule.cancelDuenessIfDoneAhead,
+            cancelDuenessIfDoneAhead = schedule.completingAheadEnabled,
             vacationStartDate = schedule.vacationStartDate,
             vacationEndDate = schedule.vacationEndDate,
             startDayOfWeekInWeeklySchedule = null,
@@ -238,10 +238,10 @@ class RoutineLocalDataSourceImpl(
         db.scheduleEntityQueries.insertSchedule(
             id = null,
             type = ScheduleType.PeriodicCustomSchedule,
-            routineStartDate = schedule.routineStartDate,
-            routineEndDate = schedule.routineEndDate,
+            routineStartDate = schedule.startDate,
+            routineEndDate = schedule.endDate,
             backlogEnabled = schedule.backlogEnabled,
-            cancelDuenessIfDoneAhead = schedule.cancelDuenessIfDoneAhead,
+            cancelDuenessIfDoneAhead = schedule.completingAheadEnabled,
             vacationStartDate = schedule.vacationStartDate,
             vacationEndDate = schedule.vacationEndDate,
             startDayOfWeekInWeeklySchedule = null,
@@ -258,10 +258,10 @@ class RoutineLocalDataSourceImpl(
         db.scheduleEntityQueries.insertSchedule(
             id = null,
             type = ScheduleType.CustomDateSchedule,
-            routineStartDate = schedule.routineStartDate,
-            routineEndDate = schedule.routineEndDate,
+            routineStartDate = schedule.startDate,
+            routineEndDate = schedule.endDate,
             backlogEnabled = schedule.backlogEnabled,
-            cancelDuenessIfDoneAhead = schedule.cancelDuenessIfDoneAhead,
+            cancelDuenessIfDoneAhead = schedule.completingAheadEnabled,
             vacationStartDate = schedule.vacationStartDate,
             vacationEndDate = schedule.vacationEndDate,
             startDayOfWeekInWeeklySchedule = null,
@@ -278,10 +278,10 @@ class RoutineLocalDataSourceImpl(
         db.scheduleEntityQueries.insertSchedule(
             id = null,
             type = ScheduleType.AnnualScheduleByDueDates,
-            routineStartDate = schedule.routineStartDate,
-            routineEndDate = schedule.routineEndDate,
+            routineStartDate = schedule.startDate,
+            routineEndDate = schedule.endDate,
             backlogEnabled = schedule.backlogEnabled,
-            cancelDuenessIfDoneAhead = schedule.cancelDuenessIfDoneAhead,
+            cancelDuenessIfDoneAhead = schedule.completingAheadEnabled,
             vacationStartDate = schedule.vacationStartDate,
             vacationEndDate = schedule.vacationEndDate,
             startDayOfWeekInWeeklySchedule = null,
@@ -298,10 +298,10 @@ class RoutineLocalDataSourceImpl(
         db.scheduleEntityQueries.insertSchedule(
             id = null,
             type = ScheduleType.AnnualScheduleByNumOfDueDays,
-            routineStartDate = schedule.routineStartDate,
-            routineEndDate = schedule.routineEndDate,
+            routineStartDate = schedule.startDate,
+            routineEndDate = schedule.endDate,
             backlogEnabled = schedule.backlogEnabled,
-            cancelDuenessIfDoneAhead = schedule.cancelDuenessIfDoneAhead,
+            cancelDuenessIfDoneAhead = schedule.completingAheadEnabled,
             vacationStartDate = schedule.vacationStartDate,
             vacationEndDate = schedule.vacationEndDate,
             startDayOfWeekInWeeklySchedule = null,
@@ -327,7 +327,7 @@ class RoutineLocalDataSourceImpl(
         }
     }
 
-    override suspend fun getAllRoutines(): List<Routine> {
+    override suspend fun getAllRoutines(): List<Habit> {
         return withContext(dispatcher) {
             db.routineEntityQueries.getAllRoutines()
                 .executeAsList()

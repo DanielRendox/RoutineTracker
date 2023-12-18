@@ -7,7 +7,7 @@ import com.rendox.routinetracker.core.domain.completion_history.getPeriodRange
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo
-import com.rendox.routinetracker.core.model.Routine
+import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.RoutineStatus
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.model.StatusEntry
@@ -35,8 +35,8 @@ class GetRoutineStatusUseCase(
     ): List<StatusEntry> {
         println("get routine status")
         return withContext(Dispatchers.Default) {
-            val routine: Routine = routineRepository.getRoutineById(routineId)
-            prepopulateHistoryWithMissingDates(routine, today)
+            val habit: Habit = routineRepository.getRoutineById(routineId)
+            prepopulateHistoryWithMissingDates(habit, today)
 
             val resultingStatusList = mutableListOf<StatusEntry>()
 
@@ -45,27 +45,27 @@ class GetRoutineStatusUseCase(
             resultingStatusList.addAll(completionHistoryPart.map { it.toStatusEntry() })
 
             if (completionHistoryPart.isEmpty()) {
-                resultingStatusList.addAll(computeFutureStatuses(dates, routine))
+                resultingStatusList.addAll(computeFutureStatuses(dates, habit))
             } else if (completionHistoryPart.last().date < dates.endInclusive) {
                 val startDate = completionHistoryPart.last().date.plusDays(1)
                 val endDate = dates.endInclusive
-                resultingStatusList.addAll(computeFutureStatuses(startDate..endDate, routine))
+                resultingStatusList.addAll(computeFutureStatuses(startDate..endDate, habit))
             }
             resultingStatusList
         }
     }
 
-    private suspend fun prepopulateHistoryWithMissingDates(routine: Routine, today: LocalDate) {
+    private suspend fun prepopulateHistoryWithMissingDates(habit: Habit, today: LocalDate) {
         val yesterday = today.minus(DatePeriod(days = 1))
-        val lastDateInHistory = completionHistoryRepository.getLastHistoryEntry(routine.id!!)?.date
+        val lastDateInHistory = completionHistoryRepository.getLastHistoryEntry(habit.id!!)?.date
 
-        val routineEndDate: LocalDate? = routine.schedule.routineEndDate
+        val routineEndDate: LocalDate? = habit.schedule.endDate
         if (routineEndDate != null && yesterday > routineEndDate) return
 
-        if (lastDateInHistory == null && routine.schedule.routineStartDate <= yesterday) {
-            for (date in routine.schedule.routineStartDate..yesterday) {
+        if (lastDateInHistory == null && habit.schedule.startDate <= yesterday) {
+            for (date in habit.schedule.startDate..yesterday) {
                 insertRoutineStatus(
-                    routineId = routine.id!!,
+                    routineId = habit.id!!,
                     currentDate = date,
                     completedOnCurrentDate = false,
                     today = today,
@@ -77,7 +77,7 @@ class GetRoutineStatusUseCase(
         if (lastDateInHistory != null && lastDateInHistory < yesterday) {
             for (date in lastDateInHistory.plusDays(1)..yesterday) {
                 insertRoutineStatus(
-                    routineId = routine.id!!,
+                    routineId = habit.id!!,
                     currentDate = date,
                     completedOnCurrentDate = false,
                     today = today,
@@ -89,16 +89,16 @@ class GetRoutineStatusUseCase(
 
     private suspend fun computeFutureStatuses(
         dateRange: LocalDateRange,
-        routine: Routine,
+        habit: Habit,
     ): List<StatusEntry> {
         val lastVacationStatus = completionHistoryRepository.getLastHistoryEntryByStatus(
-            routineId = routine.id!!,
+            routineId = habit.id!!,
             matchingStatuses = onVacationHistoricalStatuses,
         )
 
         val statusList = mutableListOf<StatusEntry>()
-        val lastHistoryEntry = completionHistoryRepository.getLastHistoryEntry(routine.id!!)
-        val schedule = routine.schedule
+        val lastHistoryEntry = completionHistoryRepository.getLastHistoryEntry(habit.id!!)
+        val schedule = habit.schedule
         val lastPeriod: LocalDateRange? = lastHistoryEntry?.let {
             if (schedule is Schedule.PeriodicSchedule) schedule.getPeriodRange(
                 currentDate = it.date,
@@ -109,8 +109,8 @@ class GetRoutineStatusUseCase(
         val numOfTimesCompletedInLastPeriodAtTheMomentOfLastHistoryEntryDate =
             lastHistoryEntry?.let {
                 completionHistoryRepository.getTotalTimesCompletedInPeriod(
-                    routineId = routine.id!!,
-                    startDate = lastPeriod?.start ?: routine.schedule.routineStartDate,
+                    routineId = habit.id!!,
+                    startDate = lastPeriod?.start ?: habit.schedule.startDate,
                     endDate = it.date,
                 )
             } ?: 0.0
@@ -118,24 +118,24 @@ class GetRoutineStatusUseCase(
             schedule is Schedule.PeriodicSchedule && schedule.periodSeparationEnabled
         val scheduleDeviationAtTheMomentOfLastHistoryEntryDate =
             completionHistoryRepository.getScheduleDeviationInPeriod(
-                routineId = routine.id!!,
+                routineId = habit.id!!,
                 startDate = if (periodSeparationEnabled && lastPeriod != null) {
                     lastPeriod.start
                 } else {
-                    schedule.routineStartDate
+                    schedule.startDate
                 },
                 endDate = dateRange.start,
             )
         val scheduleDeviationInCurrentPeriod = lastPeriod?.let {
             completionHistoryRepository.getScheduleDeviationInPeriod(
-                routineId = routine.id!!,
+                routineId = habit.id!!,
                 startDate = it.start,
                 endDate = dateRange.start,
             )
         }
 
         for (date in dateRange) {
-            routine.computePlanningStatus(
+            habit.computePlanningStatus(
                 validationDate = date,
                 currentScheduleDeviation = scheduleDeviationAtTheMomentOfLastHistoryEntryDate,
                 actualDate = lastHistoryEntry?.date,

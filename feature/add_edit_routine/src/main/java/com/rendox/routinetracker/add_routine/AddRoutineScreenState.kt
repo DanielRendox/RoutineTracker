@@ -17,7 +17,7 @@ import com.rendox.routinetracker.add_routine.navigation.navigate
 import com.rendox.routinetracker.add_routine.navigation.yesNoRoutineDestinations
 import com.rendox.routinetracker.add_routine.set_goal.SetGoalPageState
 import com.rendox.routinetracker.add_routine.tweak_routine.TweakRoutinePageState
-import com.rendox.routinetracker.core.model.Routine
+import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.ui.R
 import com.rendox.routinetracker.core.ui.helpers.UiText
 import kotlinx.datetime.toKotlinLocalTime
@@ -30,7 +30,7 @@ class AddRoutineScreenState(
     setGoalPageState: SetGoalPageState,
     chooseSchedulePageState: ChooseSchedulePageState,
     tweakRoutinePageState: TweakRoutinePageState,
-    private val saveRoutine: (Routine) -> Unit,
+    private val saveRoutine: (Habit) -> Unit,
     private val navigateBackAndRecreate: () -> Unit,
     private val navigateBack: () -> Unit,
 ) {
@@ -138,8 +138,8 @@ class AddRoutineScreenState(
         }
     }
 
-    private fun assembleRoutine(): Routine = when (chooseRoutineTypePageState.routineType) {
-        is RoutineTypeUi.YesNoRoutine -> Routine.YesNoRoutine(
+    private fun assembleRoutine(): Habit = when (chooseRoutineTypePageState.routineType) {
+        is RoutineTypeUi.YesNoRoutine -> Habit.YesNoHabit(
             name = setGoalPageState.routineName,
             description = setGoalPageState.routineDescription,
             schedule = chooseSchedulePageState.selectedSchedulePickerState.assembleSchedule(
@@ -161,7 +161,7 @@ fun rememberAddRoutineScreenState(
     setGoalPageState: SetGoalPageState,
     chooseSchedulePageState: ChooseSchedulePageState,
     tweakRoutinePageState: TweakRoutinePageState,
-    saveRoutine: (Routine) -> Unit,
+    saveRoutine: (Habit) -> Unit,
     navigateBackAndRecreate: () -> Unit,
     navigateBack: () -> Unit,
 ) = remember(

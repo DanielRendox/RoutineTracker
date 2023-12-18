@@ -16,7 +16,7 @@ import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.CompletionHistoryEntry
 import com.rendox.routinetracker.core.model.HistoricalStatus
-import com.rendox.routinetracker.core.model.Routine
+import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.model.Streak
 import com.rendox.routinetracker.core.testcommon.fakes.routine.CompletionHistoryLocalDataSourceFake
@@ -65,13 +65,13 @@ class ToggleHistoricalStatusUseCaseTest : KoinTest {
         numOfDueDays = 1,
         numOfDaysInPeriod = 2,
         backlogEnabled = true,
-        cancelDuenessIfDoneAhead = true,
-        routineStartDate = routineStartDate,
-        routineEndDate = routineEndDate,
+        completingAheadEnabled = true,
+        startDate = routineStartDate,
+        endDate = routineEndDate,
         vacationStartDate = routineStartDate.plusDays(8),
         vacationEndDate = routineStartDate.plusDays(10),
     )
-    private val routine = Routine.YesNoRoutine(
+    private val habit = Habit.YesNoHabit(
         id = routineId,
         name = "",
         schedule = schedule,
@@ -105,7 +105,7 @@ class ToggleHistoricalStatusUseCaseTest : KoinTest {
             continueStreakIfEnded = get(),
         )
 
-        routineRepository.insertRoutine(routine)
+        routineRepository.insertRoutine(habit)
 
         val history = mutableListOf<CompletionHistoryEntry>()
 

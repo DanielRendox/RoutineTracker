@@ -17,7 +17,7 @@ import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.CompletionHistoryEntry
 import com.rendox.routinetracker.core.model.HistoricalStatus
 import com.rendox.routinetracker.core.model.PlanningStatus
-import com.rendox.routinetracker.core.model.Routine
+import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.RoutineStatus
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.model.StatusEntry
@@ -42,7 +42,7 @@ import org.koin.test.get
 import kotlin.random.Random
 import kotlin.random.nextInt
 
-class GetRoutineStatusUseCaseTest : KoinTest {
+class GetHabitStatusUseCaseTest : KoinTest {
 
     private lateinit var insertRoutineStatusIntoHistory: InsertRoutineStatusUseCase
     private lateinit var getRoutineStatusList: GetRoutineStatusUseCase
@@ -58,9 +58,9 @@ class GetRoutineStatusUseCaseTest : KoinTest {
         numOfDueDaysInFirstPeriod = 4,
         startDayOfWeek = DayOfWeek.MONDAY,
         backlogEnabled = true,
-        cancelDuenessIfDoneAhead = true,
-        routineStartDate = routineStartDate,
-        routineEndDate = routineEndDate,
+        completingAheadEnabled = true,
+        startDate = routineStartDate,
+        endDate = routineEndDate,
     )
 
 
@@ -118,13 +118,13 @@ class GetRoutineStatusUseCaseTest : KoinTest {
 
     @Test
     fun `get routine status for dates prior to routine start, returns empty list`() = runTest {
-        val routine = Routine.YesNoRoutine(
+        val habit = Habit.YesNoHabit(
             id = routineId,
             name = "",
             schedule = weeklyScheduleByNumOfDueDays,
         )
 
-        routineRepository.insertRoutine(routine)
+        routineRepository.insertRoutine(habit)
 
         val randomDateBeforeRoutineStart =
             routineStartDate.minus(DatePeriod(days = Random.nextInt(1..50)))
@@ -140,13 +140,13 @@ class GetRoutineStatusUseCaseTest : KoinTest {
 
     @Test
     fun `WeeklyScheduleByNumOfDueDays, test due not due`() = runTest {
-        val routine = Routine.YesNoRoutine(
+        val habit = Habit.YesNoHabit(
             id = routineId,
             name = "",
             schedule = weeklyScheduleByNumOfDueDays,
         )
 
-        routineRepository.insertRoutine(routine)
+        routineRepository.insertRoutine(habit)
 
         val expectedStatuses = mutableListOf<PlanningStatus>()
         repeat(4) { expectedStatuses.add(PlanningStatus.Planned) }
@@ -165,18 +165,18 @@ class GetRoutineStatusUseCaseTest : KoinTest {
                 StatusEntry(routineStartDate.plusDays(index), status)
             }
         )
-        assertThat(routineRepository.getRoutineById(routineId)).isEqualTo(routine)
+        assertThat(routineRepository.getRoutineById(routineId)).isEqualTo(habit)
     }
 
     @Test
     fun `WeeklyScheduleByNumOfDueDays, test history pre-population`() = runTest {
-        val routine = Routine.YesNoRoutine(
+        val habit = Habit.YesNoHabit(
             id = routineId,
             name = "",
             schedule = weeklyScheduleByNumOfDueDays,
         )
 
-        routineRepository.insertRoutine(routine)
+        routineRepository.insertRoutine(habit)
 
         val thirdWeekPeriod =
             LocalDate(2023, Month.OCTOBER, 23)..LocalDate(2023, Month.OCTOBER, 29)
@@ -201,13 +201,13 @@ class GetRoutineStatusUseCaseTest : KoinTest {
 
     @Test
     fun `WeeklyScheduleByNumOfDueDays, test backlog`() = runTest {
-        val routine = Routine.YesNoRoutine(
+        val habit = Habit.YesNoHabit(
             id = routineId,
             name = "",
             schedule = weeklyScheduleByNumOfDueDays,
         )
 
-        routineRepository.insertRoutine(routine)
+        routineRepository.insertRoutine(habit)
 
 
         val forthWeekPeriod =
@@ -236,15 +236,15 @@ class GetRoutineStatusUseCaseTest : KoinTest {
             numOfDueDays = 4,
             numOfDueDaysInFirstPeriod = null,
             backlogEnabled = true,
-            cancelDuenessIfDoneAhead = true,
-            routineStartDate = LocalDate(2023, Month.NOVEMBER, 6),
+            completingAheadEnabled = true,
+            startDate = LocalDate(2023, Month.NOVEMBER, 6),
         )
-        val routine = Routine.YesNoRoutine(
+        val habit = Habit.YesNoHabit(
             id = routineId,
             name = "",
             schedule = schedule,
         )
-        routineRepository.insertRoutine(routine)
+        routineRepository.insertRoutine(habit)
 
         val completedDays =
             LocalDate(2023, Month.NOVEMBER, 6)..LocalDate(2023, Month.NOVEMBER, 9)
@@ -294,13 +294,13 @@ class GetRoutineStatusUseCaseTest : KoinTest {
 
     @Test
     fun `get routine status after end date test`() = runTest {
-        val routine = Routine.YesNoRoutine(
+        val habit = Habit.YesNoHabit(
             id = routineId,
             name = "",
             schedule = weeklyScheduleByNumOfDueDays,
         )
 
-        routineRepository.insertRoutine(routine)
+        routineRepository.insertRoutine(habit)
 
         val weekAfterEndDatePeriod =
             LocalDate(2023, Month.NOVEMBER, 13)..LocalDate(2023, Month.NOVEMBER, 19)

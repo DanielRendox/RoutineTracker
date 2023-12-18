@@ -9,7 +9,7 @@ import com.rendox.routinetracker.core.domain.completion_history.use_cases.Insert
 import com.rendox.routinetracker.core.domain.completion_time.GetRoutineCompletionTimeUseCase
 import com.rendox.routinetracker.core.model.HistoricalStatus
 import com.rendox.routinetracker.core.model.PlanningStatus
-import com.rendox.routinetracker.core.model.Routine
+import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.RoutineStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -35,7 +35,7 @@ class AgendaScreenViewModel(
 ) : ViewModel() {
 
     private val todayFlow = MutableStateFlow(today)
-    private val allRoutinesFlow = MutableStateFlow(emptyList<Routine>())
+    private val allRoutinesFlow = MutableStateFlow(emptyList<Habit>())
     private val cashedRoutinesFlow = MutableStateFlow(emptyMap<LocalDate, List<DisplayRoutine>>())
     private val _hideNotDueRoutinesFlow = MutableStateFlow(false)
 
@@ -93,16 +93,16 @@ class AgendaScreenViewModel(
         }
     }
 
-    private suspend fun getDisplayRoutine(routine: Routine, date: LocalDate): DisplayRoutine? {
+    private suspend fun getDisplayRoutine(habit: Habit, date: LocalDate): DisplayRoutine? {
         val routineStatus: RoutineStatus? = getRoutineStatus(
-            routineId = routine.id!!,
+            routineId = habit.id!!,
             date = date,
             today = todayFlow.value,
         )
         return routineStatus?.let {
             DisplayRoutine(
-                name = routine.name,
-                id = routine.id!!,
+                name = habit.name,
+                id = habit.id!!,
                 status = it,
                 completionTime = null,
                 hasGrayedOutLook = it !in dueRoutineStatuses,
@@ -137,7 +137,7 @@ class AgendaScreenViewModel(
                 for ((date, oldRoutineList) in cashedRoutines) {
                     val routine = allRoutinesFlow.value.find { it.id == routineId }?.let {
                         getDisplayRoutine(
-                            routine = it,
+                            habit = it,
                             date = date,
                         )
                     }
