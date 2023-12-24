@@ -1208,7 +1208,7 @@ class InsertHabitStatusUseCaseTest : KoinTest {
                 WeekDayMonthRelated(DayOfWeek.TUESDAY, WeekDayNumberMonthRelated.Forth),
                 WeekDayMonthRelated(DayOfWeek.THURSDAY, WeekDayNumberMonthRelated.Fifth),
             ),
-            startFromRoutineStart = false,
+            startFromHabitStart = false,
             periodSeparationEnabled = false,
             backlogEnabled = true,
             completingAheadEnabled = true,

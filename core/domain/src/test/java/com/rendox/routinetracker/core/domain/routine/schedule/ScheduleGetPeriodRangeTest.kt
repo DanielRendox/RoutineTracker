@@ -66,7 +66,7 @@ class ScheduleGetPeriodRangeTest {
             startDate = routineStartDate,
             dueDatesIndices = emptyList(),
             weekDaysMonthRelated = emptyList(),
-            startFromRoutineStart = true,
+            startFromHabitStart = true,
         )
 
         val firstMonth = routineStartDate..routineStartDate
@@ -89,7 +89,7 @@ class ScheduleGetPeriodRangeTest {
             startDate = routineStartDate,
             dueDatesIndices = emptyList(),
             weekDaysMonthRelated = emptyList(),
-            startFromRoutineStart = false,
+            startFromHabitStart = false,
         )
 
         val firstMonth = routineStartDate..routineStartDate.atEndOfMonth
@@ -107,7 +107,7 @@ class ScheduleGetPeriodRangeTest {
         val schedule = Schedule.AnnualScheduleByDueDates(
             startDate = routineStartDate,
             dueDates = emptyList(),
-            startFromRoutineStart = true,
+            startFromHabitStart = true,
         )
 
         val firstYear = routineStartDate..LocalDate(2025, Month.FEBRUARY, 28)
@@ -127,7 +127,7 @@ class ScheduleGetPeriodRangeTest {
         val schedule = Schedule.AnnualScheduleByDueDates(
             startDate = routineStartDate,
             dueDates = emptyList(),
-            startFromRoutineStart = true,
+            startFromHabitStart = true,
         )
 
         val firstYear = routineStartDate..LocalDate(2024, Month.FEBRUARY, 29)
@@ -147,7 +147,7 @@ class ScheduleGetPeriodRangeTest {
         val schedule = Schedule.AnnualScheduleByDueDates(
             startDate = routineStartDate,
             dueDates = emptyList(),
-            startFromRoutineStart = true,
+            startFromHabitStart = true,
         )
 
         val firstYear = routineStartDate..LocalDate(2024, Month.SEPTEMBER, 29)
@@ -167,7 +167,7 @@ class ScheduleGetPeriodRangeTest {
         val schedule = Schedule.AnnualScheduleByDueDates(
             startDate = routineStartDate,
             dueDates = emptyList(),
-            startFromRoutineStart = false,
+            startFromHabitStart = false,
         )
 
         val firstYear = routineStartDate..LocalDate(2023, Month.DECEMBER, 31)

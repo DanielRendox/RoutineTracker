@@ -24,7 +24,7 @@ class HabitLocalDataSourceImpl(
 
     override suspend fun getHabitById(habitId: Long): Habit {
         return withContext(dispatcher) {
-            db.routineEntityQueries.transactionWithResult {
+            db.habitEntityQueries.transactionWithResult {
                 val schedule = getScheduleEntity(habitId).toExternalModel(
                     dueDatesProvider = { getDueDates(it) },
                     weekDaysMonthRelatedProvider = { getWeekDayMonthRelatedDays(it) }
@@ -35,7 +35,7 @@ class HabitLocalDataSourceImpl(
     }
 
     private fun getHabitEntity(id: Long): HabitEntity =
-        db.routineEntityQueries.getRoutineById(id).executeAsOne()
+        db.habitEntityQueries.getHabitById(id).executeAsOne()
 
     private fun getScheduleEntity(id: Long): ScheduleEntity =
         db.scheduleEntityQueries.getScheduleById(id).executeAsOne()
@@ -56,7 +56,7 @@ class HabitLocalDataSourceImpl(
 
     override suspend fun insertHabit(habit: Habit) {
         return withContext(dispatcher) {
-            db.routineEntityQueries.transaction {
+            db.habitEntityQueries.transaction {
                 when (habit) {
                     is Habit.YesNoHabit -> {
                         insertYesNoHabit(habit)
@@ -69,7 +69,7 @@ class HabitLocalDataSourceImpl(
 
     @Suppress("UnusedReceiverParameter")
     private fun TransactionWithoutReturn.insertYesNoHabit(habit: Habit.YesNoHabit) {
-        db.routineEntityQueries.insertRoutine(
+        db.habitEntityQueries.insertHabit(
             id = habit.id,
             type = HabitType.YesNoHabit,
             name = habit.name,
@@ -128,14 +128,14 @@ class HabitLocalDataSourceImpl(
         db.scheduleEntityQueries.insertSchedule(
             id = null,
             type = ScheduleType.EveryDaySchedule,
-            routineStartDate = schedule.startDate,
-            routineEndDate = schedule.endDate,
+            startDate = schedule.startDate,
+            endDate = schedule.endDate,
             backlogEnabled = schedule.backlogEnabled,
             cancelDuenessIfDoneAhead = schedule.completingAheadEnabled,
             vacationStartDate = schedule.vacationStartDate,
             vacationEndDate = schedule.vacationEndDate,
             startDayOfWeekInWeeklySchedule = null,
-            startFromRoutineStartInMonthlyAndAnnualSchedule = null,
+            startFromHabitStartInMonthlyAndAnnualSchedule = null,
             includeLastDayOfMonthInMonthlySchedule = null,
             periodicSeparationEnabledInPeriodicSchedule = null,
             numOfDueDaysInByNumOfDueDaysSchedule = null,
@@ -148,14 +148,14 @@ class HabitLocalDataSourceImpl(
         db.scheduleEntityQueries.insertSchedule(
             id = null,
             type = ScheduleType.WeeklyScheduleByDueDaysOfWeek,
-            routineStartDate = schedule.startDate,
-            routineEndDate = schedule.endDate,
+            startDate = schedule.startDate,
+            endDate = schedule.endDate,
             backlogEnabled = schedule.backlogEnabled,
             cancelDuenessIfDoneAhead = schedule.completingAheadEnabled,
             vacationStartDate = schedule.vacationStartDate,
             vacationEndDate = schedule.vacationEndDate,
             startDayOfWeekInWeeklySchedule = schedule.startDayOfWeek,
-            startFromRoutineStartInMonthlyAndAnnualSchedule = null,
+            startFromHabitStartInMonthlyAndAnnualSchedule = null,
             includeLastDayOfMonthInMonthlySchedule = null,
             periodicSeparationEnabledInPeriodicSchedule = schedule.periodSeparationEnabled,
             numOfDueDaysInByNumOfDueDaysSchedule = null,
@@ -168,14 +168,14 @@ class HabitLocalDataSourceImpl(
         db.scheduleEntityQueries.insertSchedule(
             id = null,
             type = ScheduleType.WeeklyScheduleByNumOfDueDays,
-            routineStartDate = schedule.startDate,
-            routineEndDate = schedule.endDate,
+            startDate = schedule.startDate,
+            endDate = schedule.endDate,
             backlogEnabled = schedule.backlogEnabled,
             cancelDuenessIfDoneAhead = schedule.completingAheadEnabled,
             vacationStartDate = schedule.vacationStartDate,
             vacationEndDate = schedule.vacationEndDate,
             startDayOfWeekInWeeklySchedule = schedule.startDayOfWeek,
-            startFromRoutineStartInMonthlyAndAnnualSchedule = null,
+            startFromHabitStartInMonthlyAndAnnualSchedule = null,
             includeLastDayOfMonthInMonthlySchedule = null,
             periodicSeparationEnabledInPeriodicSchedule = schedule.periodSeparationEnabled,
             numOfDueDaysInByNumOfDueDaysSchedule = schedule.numOfDueDays,
@@ -188,14 +188,14 @@ class HabitLocalDataSourceImpl(
         db.scheduleEntityQueries.insertSchedule(
             id = null,
             type = ScheduleType.MonthlyScheduleByDueDatesIndices,
-            routineStartDate = schedule.startDate,
-            routineEndDate = schedule.endDate,
+            startDate = schedule.startDate,
+            endDate = schedule.endDate,
             backlogEnabled = schedule.backlogEnabled,
             cancelDuenessIfDoneAhead = schedule.completingAheadEnabled,
             vacationStartDate = schedule.vacationStartDate,
             vacationEndDate = schedule.vacationEndDate,
             startDayOfWeekInWeeklySchedule = null,
-            startFromRoutineStartInMonthlyAndAnnualSchedule = schedule.startFromRoutineStart,
+            startFromHabitStartInMonthlyAndAnnualSchedule = schedule.startFromHabitStart,
             includeLastDayOfMonthInMonthlySchedule = schedule.includeLastDayOfMonth,
             periodicSeparationEnabledInPeriodicSchedule = schedule.periodSeparationEnabled,
             numOfDueDaysInByNumOfDueDaysSchedule = null,
@@ -208,14 +208,14 @@ class HabitLocalDataSourceImpl(
         db.scheduleEntityQueries.insertSchedule(
             id = null,
             type = ScheduleType.MonthlyScheduleByNumOfDueDays,
-            routineStartDate = schedule.startDate,
-            routineEndDate = schedule.endDate,
+            startDate = schedule.startDate,
+            endDate = schedule.endDate,
             backlogEnabled = schedule.backlogEnabled,
             cancelDuenessIfDoneAhead = schedule.completingAheadEnabled,
             vacationStartDate = schedule.vacationStartDate,
             vacationEndDate = schedule.vacationEndDate,
             startDayOfWeekInWeeklySchedule = null,
-            startFromRoutineStartInMonthlyAndAnnualSchedule = schedule.startFromRoutineStart,
+            startFromHabitStartInMonthlyAndAnnualSchedule = schedule.startFromHabitStart,
             includeLastDayOfMonthInMonthlySchedule = null,
             periodicSeparationEnabledInPeriodicSchedule = schedule.periodSeparationEnabled,
             numOfDueDaysInByNumOfDueDaysSchedule = schedule.numOfDueDays,
@@ -239,14 +239,14 @@ class HabitLocalDataSourceImpl(
         db.scheduleEntityQueries.insertSchedule(
             id = null,
             type = ScheduleType.PeriodicCustomSchedule,
-            routineStartDate = schedule.startDate,
-            routineEndDate = schedule.endDate,
+            startDate = schedule.startDate,
+            endDate = schedule.endDate,
             backlogEnabled = schedule.backlogEnabled,
             cancelDuenessIfDoneAhead = schedule.completingAheadEnabled,
             vacationStartDate = schedule.vacationStartDate,
             vacationEndDate = schedule.vacationEndDate,
             startDayOfWeekInWeeklySchedule = null,
-            startFromRoutineStartInMonthlyAndAnnualSchedule = null,
+            startFromHabitStartInMonthlyAndAnnualSchedule = null,
             includeLastDayOfMonthInMonthlySchedule = null,
             periodicSeparationEnabledInPeriodicSchedule = schedule.periodSeparationEnabled,
             numOfDueDaysInByNumOfDueDaysSchedule = schedule.numOfDueDays,
@@ -259,14 +259,14 @@ class HabitLocalDataSourceImpl(
         db.scheduleEntityQueries.insertSchedule(
             id = null,
             type = ScheduleType.CustomDateSchedule,
-            routineStartDate = schedule.startDate,
-            routineEndDate = schedule.endDate,
+            startDate = schedule.startDate,
+            endDate = schedule.endDate,
             backlogEnabled = schedule.backlogEnabled,
             cancelDuenessIfDoneAhead = schedule.completingAheadEnabled,
             vacationStartDate = schedule.vacationStartDate,
             vacationEndDate = schedule.vacationEndDate,
             startDayOfWeekInWeeklySchedule = null,
-            startFromRoutineStartInMonthlyAndAnnualSchedule = null,
+            startFromHabitStartInMonthlyAndAnnualSchedule = null,
             includeLastDayOfMonthInMonthlySchedule = null,
             periodicSeparationEnabledInPeriodicSchedule = null,
             numOfDueDaysInByNumOfDueDaysSchedule = null,
@@ -279,14 +279,14 @@ class HabitLocalDataSourceImpl(
         db.scheduleEntityQueries.insertSchedule(
             id = null,
             type = ScheduleType.AnnualScheduleByDueDates,
-            routineStartDate = schedule.startDate,
-            routineEndDate = schedule.endDate,
+            startDate = schedule.startDate,
+            endDate = schedule.endDate,
             backlogEnabled = schedule.backlogEnabled,
             cancelDuenessIfDoneAhead = schedule.completingAheadEnabled,
             vacationStartDate = schedule.vacationStartDate,
             vacationEndDate = schedule.vacationEndDate,
             startDayOfWeekInWeeklySchedule = null,
-            startFromRoutineStartInMonthlyAndAnnualSchedule = schedule.startFromRoutineStart,
+            startFromHabitStartInMonthlyAndAnnualSchedule = schedule.startFromHabitStart,
             includeLastDayOfMonthInMonthlySchedule = null,
             periodicSeparationEnabledInPeriodicSchedule = schedule.periodSeparationEnabled,
             numOfDueDaysInByNumOfDueDaysSchedule = null,
@@ -299,14 +299,14 @@ class HabitLocalDataSourceImpl(
         db.scheduleEntityQueries.insertSchedule(
             id = null,
             type = ScheduleType.AnnualScheduleByNumOfDueDays,
-            routineStartDate = schedule.startDate,
-            routineEndDate = schedule.endDate,
+            startDate = schedule.startDate,
+            endDate = schedule.endDate,
             backlogEnabled = schedule.backlogEnabled,
             cancelDuenessIfDoneAhead = schedule.completingAheadEnabled,
             vacationStartDate = schedule.vacationStartDate,
             vacationEndDate = schedule.vacationEndDate,
             startDayOfWeekInWeeklySchedule = null,
-            startFromRoutineStartInMonthlyAndAnnualSchedule = schedule.startFromRoutineStart,
+            startFromHabitStartInMonthlyAndAnnualSchedule = schedule.startFromHabitStart,
             includeLastDayOfMonthInMonthlySchedule = null,
             periodicSeparationEnabledInPeriodicSchedule = schedule.periodSeparationEnabled,
             numOfDueDaysInByNumOfDueDaysSchedule = schedule.numOfDueDays,
@@ -330,37 +330,37 @@ class HabitLocalDataSourceImpl(
 
     override suspend fun getAllHabits(): List<Habit> {
         return withContext(dispatcher) {
-            db.routineEntityQueries.getAllRoutines()
+            db.habitEntityQueries.getAllHabits()
                 .executeAsList()
-                .map { routineEntity ->
-                    val schedule = getScheduleEntity(routineEntity.id).toExternalModel(
+                .map { habitEntity ->
+                    val schedule = getScheduleEntity(habitEntity.id).toExternalModel(
                         dueDatesProvider = { getDueDates(it) },
                         weekDaysMonthRelatedProvider = { getWeekDayMonthRelatedDays(it) }
                     )
-                    routineEntity.toExternalModel(schedule)
+                    habitEntity.toExternalModel(schedule)
                 }
         }
     }
 
     override suspend fun updateDueDateSpecificCompletionTime(
-        newTime: LocalTime, routineId: Long, dueDateNumber: Int
+        newTime: LocalTime, habitId: Long, dueDateNumber: Int
     ) {
         withContext(dispatcher) {
             db.dueDateEntityQueries.updateCompletionTime(
                 completionTimeHour = newTime.hour,
                 completionTimeMinute = newTime.minute,
-                scheduleId = routineId,
+                scheduleId = habitId,
                 dueDateNumber = dueDateNumber,
             )
         }
     }
 
     override suspend fun getDueDateSpecificCompletionTime(
-        routineId: Long, dueDateNumber: Int
+        habitId: Long, dueDateNumber: Int
     ): LocalTime? {
         return withContext(dispatcher) {
             db.dueDateEntityQueries
-                .getCompletionTime(routineId, dueDateNumber)
+                .getCompletionTime(habitId, dueDateNumber)
                 .executeAsOneOrNull()
                 ?.toExternalModel()
         }

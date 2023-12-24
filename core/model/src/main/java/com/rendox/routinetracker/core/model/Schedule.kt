@@ -105,11 +105,11 @@ sealed class Schedule {
 
             if (firstPeriodIsShort) {
                 check(numOfDueDaysInFirstPeriod != null) {
-                    "According to the routine's schedule, at the moment of the " +
-                            "routineStartDate, the first time period has been already started " +
+                    "According to the schedule, at the moment of the " +
+                            "startDate, the first time period has been already started " +
                             "and hence it's shorter than expected. Therefore, the number of due " +
                             "days for this period is ambiguous. So it should be specified " +
-                            "explicitly at the moment of the schedule (routine) creation."
+                            "explicitly at the moment of the schedule creation."
                 }
             }
         }
@@ -124,7 +124,7 @@ sealed class Schedule {
     }
 
     sealed class MonthlySchedule : PeriodicSchedule() {
-        abstract val startFromRoutineStart: Boolean
+        abstract val startFromHabitStart: Boolean
 
         override val correspondingPeriod: DatePeriod
             get() = DatePeriod(months = 1)
@@ -134,7 +134,7 @@ sealed class Schedule {
         val dueDatesIndices: List<Int>,
         val includeLastDayOfMonth: Boolean = false,
         val weekDaysMonthRelated: List<WeekDayMonthRelated>,
-        override val startFromRoutineStart: Boolean = true,
+        override val startFromHabitStart: Boolean = true,
 
         override val periodSeparationEnabled: Boolean = true,
         override val backlogEnabled: Boolean = true,
@@ -158,7 +158,7 @@ sealed class Schedule {
     data class MonthlyScheduleByNumOfDueDays(
         val numOfDueDays: Int,
         val numOfDueDaysInFirstPeriod: Int? = null,
-        override val startFromRoutineStart: Boolean = true,
+        override val startFromHabitStart: Boolean = true,
 
         override val backlogEnabled: Boolean = true,
         override val completingAheadEnabled: Boolean = true,
@@ -173,7 +173,7 @@ sealed class Schedule {
         override val supportsPeriodSeparation = false
 
         private val firstPeriodIsShort
-            get() = !startFromRoutineStart && startDate.dayOfMonth != 1
+            get() = !startFromHabitStart && startDate.dayOfMonth != 1
 
         init {
             check(numOfDueDays <= 31) {
@@ -182,11 +182,11 @@ sealed class Schedule {
 
             if (firstPeriodIsShort) {
                 check(numOfDueDaysInFirstPeriod != null) {
-                    "According to the routine's schedule, at the moment of the " +
-                            "routineStartDate, the first time period has been already started " +
+                    "According to the schedule, at the moment of the " +
+                            "startDate, the first time period has been already started " +
                             "and hence it's shorter than expected. Therefore, the number of due " +
                             "days for this period is ambiguous. So it should be specified " +
-                            "explicitly at the moment of the schedule (routine) creation."
+                            "explicitly at the moment of the schedule creation."
                 }
             }
         }
@@ -240,7 +240,7 @@ sealed class Schedule {
     }
 
     sealed class AnnualSchedule : PeriodicSchedule() {
-        abstract val startFromRoutineStart: Boolean
+        abstract val startFromHabitStart: Boolean
 
         override val correspondingPeriod: DatePeriod
             get() = DatePeriod(years = 1)
@@ -248,7 +248,7 @@ sealed class Schedule {
 
     data class AnnualScheduleByDueDates(
         val dueDates: List<AnnualDate>,
-        override val startFromRoutineStart: Boolean,
+        override val startFromHabitStart: Boolean,
 
         override val periodSeparationEnabled: Boolean = true,
         override val backlogEnabled: Boolean = true,
@@ -266,7 +266,7 @@ sealed class Schedule {
     data class AnnualScheduleByNumOfDueDays(
         val numOfDueDays: Int,
         val numOfDueDaysInFirstPeriod: Int?,
-        override val startFromRoutineStart: Boolean,
+        override val startFromHabitStart: Boolean,
 
         override val backlogEnabled: Boolean = true,
         override val completingAheadEnabled: Boolean = true,
@@ -281,7 +281,7 @@ sealed class Schedule {
         override val supportsPeriodSeparation = false
 
         private val firstPeriodIsShort
-            get() = !startFromRoutineStart && startDate.dayOfYear != 1
+            get() = !startFromHabitStart && startDate.dayOfYear != 1
 
         init {
             check(numOfDueDays <= 366) {
@@ -290,11 +290,11 @@ sealed class Schedule {
 
             if (firstPeriodIsShort) {
                 check(numOfDueDaysInFirstPeriod != null) {
-                    "According to the routine's schedule, at the moment of the " +
-                            "routineStartDate, the first time period has been already started " +
+                    "According to the schedule, at the moment of the " +
+                            "startDate, the first time period has been already started " +
                             "and hence it's shorter than expected. Therefore, the number of due " +
                             "days for this period is ambiguous. So it should be specified " +
-                            "explicitly at the moment of the schedule (routine) creation."
+                            "explicitly at the moment of the schedule creation."
                 }
             }
         }

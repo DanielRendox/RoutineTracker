@@ -194,7 +194,7 @@ class ScheduleIsDueTest {
         val schedule: Schedule = Schedule.MonthlyScheduleByDueDatesIndices(
             dueDatesIndices = dueDatesIndices,
             includeLastDayOfMonth = false,
-            startFromRoutineStart = true,
+            startFromHabitStart = true,
             weekDaysMonthRelated = emptyList(),
             startDate = routineStartDate,
         )
@@ -225,7 +225,7 @@ class ScheduleIsDueTest {
         val schedule = Schedule.MonthlyScheduleByDueDatesIndices(
             dueDatesIndices = emptyList(),
             includeLastDayOfMonth = true,
-            startFromRoutineStart = true,
+            startFromHabitStart = true,
             weekDaysMonthRelated = emptyList(),
             startDate = routineStartDate,
         )
@@ -253,7 +253,7 @@ class ScheduleIsDueTest {
                 WeekDayMonthRelated(DayOfWeek.WEDNESDAY, WeekDayNumberMonthRelated.Forth),
                 WeekDayMonthRelated(DayOfWeek.THURSDAY, WeekDayNumberMonthRelated.Fifth),
             ),
-            startFromRoutineStart = true,
+            startFromHabitStart = true,
             startDate = routineStartDate,
         )
 
@@ -291,7 +291,7 @@ class ScheduleIsDueTest {
             Schedule.MonthlyScheduleByNumOfDueDays(
                 startDate = routineStartDate.plusDays(Random.nextInt(1, 27)),
                 numOfDueDays = 18,
-                startFromRoutineStart = false,
+                startFromHabitStart = false,
                 numOfDueDaysInFirstPeriod = null,
             )
         }
@@ -302,7 +302,7 @@ class ScheduleIsDueTest {
         val schedule = Schedule.MonthlyScheduleByNumOfDueDays(
             startDate = routineStartDate,
             numOfDueDays = Random.nextInt(2, 30),
-            startFromRoutineStart = true,
+            startFromHabitStart = true,
             numOfDueDaysInFirstPeriod = null,
         )
 
@@ -325,7 +325,7 @@ class ScheduleIsDueTest {
     fun `MonthlyScheduleByNumOfDueDays, assert num of due days more than 28 doesn't introduce backlog`() {
         val schedule = Schedule.MonthlyScheduleByNumOfDueDays(
             startDate = routineStartDate,
-            startFromRoutineStart = true,
+            startFromHabitStart = true,
             numOfDueDaysInFirstPeriod = null,
             numOfDueDays = 29,
         )
@@ -534,7 +534,7 @@ class ScheduleIsDueTest {
         val schedule = Schedule.AnnualScheduleByDueDates(
             dueDates = dueDates,
             startDate = routineStartDate,
-            startFromRoutineStart = false,
+            startFromHabitStart = false,
         )
 
         for (dueDate in expectedDueDates) {
@@ -555,7 +555,7 @@ class ScheduleIsDueTest {
         assertFailsWith<IllegalStateException> {
             Schedule.AnnualScheduleByNumOfDueDays(
                 startDate = routineStartDate.plusDays(Random.nextInt(1, 365)),
-                startFromRoutineStart = false,
+                startFromHabitStart = false,
                 numOfDueDays = 0,
                 numOfDueDaysInFirstPeriod = null,
             )
@@ -568,7 +568,7 @@ class ScheduleIsDueTest {
         val schedule = Schedule.AnnualScheduleByNumOfDueDays(
             startDate = routineStartDate,
             numOfDueDays = Random.nextInt(2, 364),
-            startFromRoutineStart = true,
+            startFromHabitStart = true,
             numOfDueDaysInFirstPeriod = null,
         )
 

@@ -13,16 +13,16 @@ CREATE TABLE habitEntity (
     defaultCompletionTimeMinute INTEGER AS Int
 );
 
-getRoutineById:
+getHabitById:
 SELECT *
 FROM habitEntity
 WHERE id = ?;
 
-getAllRoutines:
+getAllHabits:
 SELECT *
 FROM habitEntity
 ORDER BY id;
 
-insertRoutine:
+insertHabit:
 INSERT INTO habitEntity
 VALUES (?, ?, ?, ?, ?, ?, ?, ?);

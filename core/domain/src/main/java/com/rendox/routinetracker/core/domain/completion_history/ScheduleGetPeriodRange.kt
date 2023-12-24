@@ -91,7 +91,7 @@ private fun Schedule.MonthlySchedule.monthlyScheduleGetPeriodDateRange(
     val startPeriodDate: LocalDate
     val endPeriodDate: LocalDate
 
-    if (startFromRoutineStart) {
+    if (startFromHabitStart) {
         val numberOfPeriodsAlreadyPassed = startDate.monthsUntil(currentDate)
         startPeriodDate = startDate.plus(DatePeriod(months = numberOfPeriodsAlreadyPassed))
         endPeriodDate = atEndOfPeriod(startPeriodDate, correspondingPeriod)
@@ -113,7 +113,7 @@ private fun Schedule.AnnualSchedule.annualScheduleGetPeriodDateRange(
     var startPeriodDate: LocalDate
     var endPeriodDate: LocalDate
 
-    if (startFromRoutineStart) {
+    if (startFromHabitStart) {
         val numberOfPeriodsAlreadyPassed = startDate.yearsUntil(currentDate)
         startPeriodDate = startDate.plus(DatePeriod(years = numberOfPeriodsAlreadyPassed))
         endPeriodDate = atEndOfPeriod(startPeriodDate, correspondingPeriod)

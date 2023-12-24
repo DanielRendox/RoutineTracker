@@ -5,17 +5,17 @@ import kotlinx.datetime.LocalTime
 
 interface HabitLocalDataSource {
 
-    suspend fun getHabitById(routineId: Long): Habit
+    suspend fun getHabitById(habitId: Long): Habit
 
     suspend fun insertHabit(habit: Habit)
 
     suspend fun getAllHabits(): List<Habit>
 
     suspend fun updateDueDateSpecificCompletionTime(
-        newTime: LocalTime, routineId: Long, dueDateNumber: Int
+        newTime: LocalTime, habitId: Long, dueDateNumber: Int
     )
 
     suspend fun getDueDateSpecificCompletionTime(
-        routineId: Long, dueDateNumber: Int
+        habitId: Long, dueDateNumber: Int
     ): LocalTime?
 }

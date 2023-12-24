@@ -123,7 +123,7 @@ class HabitLocalDataSourceImplTest : KoinTest {
             dueDatesIndices = dueDatesIndices,
             includeLastDayOfMonth = true,
             weekDaysMonthRelated = weekDaysMonthRelated,
-            startFromRoutineStart = true,
+            startFromHabitStart = true,
             startDate = LocalDate(2023, Month.SEPTEMBER, 1),
             vacationStartDate = LocalDate(2023, Month.SEPTEMBER, 10),
             vacationEndDate = null,
@@ -157,7 +157,7 @@ class HabitLocalDataSourceImplTest : KoinTest {
                     weekDayNumberMonthRelated = WeekDayNumberMonthRelated.Third,
                 )
             ),
-            startFromRoutineStart = true,
+            startFromHabitStart = true,
             startDate = LocalDate(2023, Month.SEPTEMBER, 1),
             vacationStartDate = LocalDate(2023, Month.SEPTEMBER, 10),
             vacationEndDate = null,
@@ -221,7 +221,7 @@ class HabitLocalDataSourceImplTest : KoinTest {
             vacationEndDate = null,
             backlogEnabled = false,
             completingAheadEnabled = false,
-            startFromRoutineStart = false,
+            startFromHabitStart = false,
         )
 
         val habit = Habit.YesNoHabit(

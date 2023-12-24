@@ -9,7 +9,7 @@ class HabitRepositoryImpl(
 ) : HabitRepository {
 
     override suspend fun getHabitById(id: Long): Habit {
-        return localDataSource.getHabitById(routineId = id)
+        return localDataSource.getHabitById(habitId = id)
     }
 
     override suspend fun insertHabit(habit: Habit) {

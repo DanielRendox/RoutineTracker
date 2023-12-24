@@ -53,7 +53,7 @@ class CompletionHistoryLocalDataSourceImpl(
         entry: CompletionHistoryEntry,
     ) {
         withContext(dispatcher) {
-            db.routineEntityQueries.transaction {
+            db.habitEntityQueries.transaction {
                 db.completionHistoryEntityQueries.insertHistoryEntry(
                     id = id,
                     routineId = routineId,
@@ -83,7 +83,7 @@ class CompletionHistoryLocalDataSourceImpl(
         newTimesCompleted: Float?,
     ) {
         withContext(dispatcher) {
-            db.routineEntityQueries.transaction {
+            db.habitEntityQueries.transaction {
                 val oldValue = db.completionHistoryEntityQueries.getHistoryEntriesByIndices(
                     routineId, date, date
                 ).executeAsOne()

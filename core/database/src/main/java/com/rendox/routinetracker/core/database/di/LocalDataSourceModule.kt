@@ -51,8 +51,8 @@ val localDataSourceModule = module {
             ),
             scheduleEntityAdapter = ScheduleEntity.Adapter(
                 typeAdapter = EnumColumnAdapter(),
-                routineStartDateAdapter = localDateAdapter,
-                routineEndDateAdapter = localDateAdapter,
+                startDateAdapter = localDateAdapter,
+                endDateAdapter = localDateAdapter,
                 vacationStartDateAdapter = localDateAdapter,
                 vacationEndDateAdapter = localDateAdapter,
                 startDayOfWeekInWeeklyScheduleAdapter = dayOfWeekAdapter,
