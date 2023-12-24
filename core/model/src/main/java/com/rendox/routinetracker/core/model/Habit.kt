@@ -1,5 +1,6 @@
 package com.rendox.routinetracker.core.model
 
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 
 sealed class Habit {
@@ -11,6 +12,11 @@ sealed class Habit {
     abstract val schedule: Schedule
     abstract val defaultCompletionTime: LocalTime?
 
+    abstract class CompletionRecord {
+        abstract val date: LocalDate
+        abstract val numOfTimesCompleted: Float
+    }
+
     data class YesNoHabit(
         override val id: Long? = null,
         override val name: String,
@@ -19,5 +25,10 @@ sealed class Habit {
         override val progress: Float? = null,
         override val schedule: Schedule,
         override val defaultCompletionTime: LocalTime? = null,
-    ) : Habit()
+    ) : Habit() {
+        data class CompletionRecord(
+            override val date: LocalDate,
+            override val numOfTimesCompleted: Float = 1f,
+        ) : Habit.CompletionRecord()
+    }
 }

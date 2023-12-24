@@ -36,9 +36,9 @@ class VacationRepositoryFake(
         }
     }
 
-    override suspend fun deleteVacation(habitId: Long, vacation: Vacation) {
+    override suspend fun deleteVacationById(id: Long) {
         habitData.vacationHistory.update {
-            it.toMutableList().apply { remove(habitId to vacation) }
+            it.toMutableList().apply { removeAt((id - 1).toInt()) }
         }
     }
 }

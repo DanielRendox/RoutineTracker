@@ -1,12 +1,12 @@
 package com.rendox.routinetracker.core.domain.di
 
-import com.rendox.routinetracker.core.domain.completion_time.GetRoutineCompletionTimeUseCase
+import com.rendox.routinetracker.core.domain.completion_time.GetHabitCompletionTimeUseCase
 import org.koin.dsl.module
 
-val routineDomainModule = module {
+val habitDomainModule = module {
 
     single {
-        GetRoutineCompletionTimeUseCase(
+        GetHabitCompletionTimeUseCase(
             habitRepository = get(),
             completionTimeRepository = get(),
         )

@@ -1,16 +1,13 @@
-package com.rendox.routinetracker.core.data.vacation
+package com.rendox.routinetracker.core.database.vacation
 
 import com.rendox.routinetracker.core.model.Vacation
 import kotlinx.datetime.LocalDate
 
-interface VacationRepository {
-
-    /** Returns a [Vacation] that includes [date]. */
+interface VacationLocalDataSource {
     suspend fun getVacationByDate(
         habitId: Long, date: LocalDate
     ): Vacation?
 
-    /** Returns a [Vacation] that was ended before the [currentDate]. */
     suspend fun getPreviousVacation(
         habitId: Long,
         currentDate: LocalDate,

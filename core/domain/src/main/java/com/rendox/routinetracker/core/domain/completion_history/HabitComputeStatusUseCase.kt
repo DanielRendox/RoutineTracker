@@ -1,9 +1,8 @@
 package com.rendox.routinetracker.core.domain.completion_history
 
-import com.rendox.routinetracker.core.data.completion_history.HabitCompletionHistoryRepository
-import com.rendox.routinetracker.core.data.routine.HabitRepository
+import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
+import com.rendox.routinetracker.core.data.habit.HabitRepository
 import com.rendox.routinetracker.core.data.vacation.VacationRepository
-import com.rendox.routinetracker.core.domain.completion_history.schedule.isDue
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo
@@ -17,7 +16,7 @@ import kotlinx.datetime.minus
 class HabitComputeStatusUseCase(
     private val habitRepository: HabitRepository,
     private val vacationRepository: VacationRepository,
-    private val completionHistoryRepository: HabitCompletionHistoryRepository,
+    private val completionHistoryRepository: CompletionHistoryRepository,
 ) {
 
     suspend operator fun invoke(
@@ -40,9 +39,10 @@ class HabitComputeStatusUseCase(
             currentDate = validationDate,
             today = today,
         )
-        val numOfTimesCompletedOnValidationDate =
-            completionHistoryRepository.getNumOfTimesCompletedOnDate(habit.id!!, validationDate)
-                ?: 0f
+        val numOfTimesCompletedOnValidationDate = completionHistoryRepository.getRecordByDate(
+            habitId = habit.id!!,
+            date = validationDate,
+        )?.numOfTimesCompleted ?: 0f
 
         val habitIsOnVacationAtTheMomentOfValidationDate = vacationRepository.getVacationByDate(
             habitId = habit.id!!,
@@ -238,7 +238,7 @@ class HabitComputeStatusUseCase(
             ) else null
 
         val lastCompletedDate =
-            completionHistoryRepository.getLastCompletedDate(habit.id!!) ?: return false
+            completionHistoryRepository.getLastCompletedRecord(habit.id!!)?.date ?: return false
         val lastDateInPeriod = currentDatePeriod?.endInclusive
 
         val firstDateToLookFor = currentDate.plusDays(1)

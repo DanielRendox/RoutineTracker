@@ -1,10 +1,9 @@
 package com.rendox.routinetracker.core.domain.completion_history
 
 import com.google.common.truth.Truth.assertThat
-import com.rendox.routinetracker.core.data.completion_history.HabitCompletionHistoryRepository
-import com.rendox.routinetracker.core.data.routine.HabitRepository
+import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
+import com.rendox.routinetracker.core.data.habit.HabitRepository
 import com.rendox.routinetracker.core.data.vacation.VacationRepository
-import com.rendox.routinetracker.core.domain.completion_history.schedule.isDue
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo
@@ -12,8 +11,9 @@ import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.HabitStatus
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.model.Vacation
-import com.rendox.routinetracker.core.testcommon.fakes.habit.HabitCompletionHistoryRepositoryFake
+import com.rendox.routinetracker.core.testcommon.fakes.habit.CompletionHistoryRepositoryFake
 import com.rendox.routinetracker.core.testcommon.fakes.habit.HabitData
+import com.rendox.routinetracker.core.testcommon.fakes.habit.HabitRepositoryFake
 import com.rendox.routinetracker.core.testcommon.fakes.habit.VacationRepositoryFake
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.DatePeriod
@@ -24,7 +24,7 @@ import org.junit.Before
 import org.junit.Test
 
 class HabitComputeStatusUseCaseTest {
-    private lateinit var completionHistoryRepository: HabitCompletionHistoryRepository
+    private lateinit var completionHistoryRepository: CompletionHistoryRepository
     private lateinit var computeStatus: HabitComputeStatusUseCase
     private lateinit var habitRepository: HabitRepository
     private lateinit var vacationRepository: VacationRepository
@@ -53,7 +53,7 @@ class HabitComputeStatusUseCaseTest {
         val habitData = HabitData()
         habitRepository = HabitRepositoryFake(habitData)
         vacationRepository = VacationRepositoryFake(habitData)
-        completionHistoryRepository = HabitCompletionHistoryRepositoryFake(habitData)
+        completionHistoryRepository = CompletionHistoryRepositoryFake(habitData)
 
         habitRepository.insertHabit(defaultHabit)
 
@@ -84,7 +84,7 @@ class HabitComputeStatusUseCaseTest {
         for (validationDate in dueDates) {
             completionHistoryRepository.insertCompletion(
                 habitId = 1L,
-                date = validationDate,
+                completionRecord = Habit.YesNoHabit.CompletionRecord(date = validationDate),
             )
 
             val habitStatus = computeStatus(
@@ -106,8 +106,10 @@ class HabitComputeStatusUseCaseTest {
         for (validationDate in dueDates) {
             completionHistoryRepository.insertCompletion(
                 habitId = 1L,
-                date = validationDate,
-                numOfTimesCompleted = 0.5F,
+                completionRecord = Habit.YesNoHabit.CompletionRecord(
+                    date = validationDate,
+                    numOfTimesCompleted = 0.5F,
+                ),
             )
 
             val habitStatus = computeStatus(
@@ -129,8 +131,10 @@ class HabitComputeStatusUseCaseTest {
             for (validationDate in dueDates) {
                 completionHistoryRepository.insertCompletion(
                     habitId = 1L,
-                    date = validationDate,
-                    numOfTimesCompleted = 2F,
+                    completionRecord = Habit.YesNoHabit.CompletionRecord(
+                        date = validationDate,
+                        numOfTimesCompleted = 2F,
+                    ),
                 )
 
                 val habitStatus = computeStatus(
@@ -147,8 +151,10 @@ class HabitComputeStatusUseCaseTest {
         runTest {
             completionHistoryRepository.insertCompletion(
                 habitId = 1L,
-                date = LocalDate(2023, 12, 7), // Wednesday
-                numOfTimesCompleted = 2F,
+                completionRecord = Habit.YesNoHabit.CompletionRecord(
+                    date = LocalDate(2023, 12, 7), // Wednesday
+                    numOfTimesCompleted = 2F,
+                )
             )
 
             val habitStatus = computeStatus(
@@ -163,8 +169,10 @@ class HabitComputeStatusUseCaseTest {
     fun `future date, not due, backlog, completed, assert status is SortedOutBacklog`() = runTest {
         completionHistoryRepository.insertCompletion(
             habitId = 1L,
-            date = LocalDate(2023, 12, 7), // Wednesday
-            numOfTimesCompleted = 2F,
+            completionRecord = Habit.YesNoHabit.CompletionRecord(
+                date = LocalDate(2023, 12, 7), // Wednesday
+                numOfTimesCompleted = 2F,
+            ),
         )
 
         val habitStatus = computeStatus(
@@ -199,17 +207,22 @@ class HabitComputeStatusUseCaseTest {
     fun `completed on time, not due, not completed, assert status is NotDue`() = runTest {
         completionHistoryRepository.insertCompletion(
             habitId = 1L,
-            date = LocalDate(2023, 12, 6), // Wednesday
+            completionRecord = Habit.YesNoHabit.CompletionRecord(
+                date = LocalDate(2023, 12, 6), // Wednesday
+            )
 
         )
         completionHistoryRepository.insertCompletion(
             habitId = 1L,
-            date = LocalDate(2023, 12, 7), // Thursday
+            completionRecord = Habit.YesNoHabit.CompletionRecord(
+                date = LocalDate(2023, 12, 7), // Thursday
+            )
         )
         completionHistoryRepository.insertCompletion(
             habitId = 1L,
-            date = LocalDate(2023, 12, 10), // Sunday
-
+            completionRecord = Habit.YesNoHabit.CompletionRecord(
+                date = LocalDate(2023, 12, 10), // Sunday
+            )
         )
 
         val habitStatus = computeStatus(
@@ -256,7 +269,9 @@ class HabitComputeStatusUseCaseTest {
         for (dayIndex in 2..5) {
             completionHistoryRepository.insertCompletion(
                 habitId = 1L,
-                date = defaultSchedule.startDate.plusDays(dayIndex), // Wednesday
+                completionRecord = Habit.YesNoHabit.CompletionRecord(
+                    date = defaultSchedule.startDate.plusDays(dayIndex), // Wednesday
+                )
             )
         }
 
@@ -278,7 +293,9 @@ class HabitComputeStatusUseCaseTest {
             for (dayIndex in 2..5) {
                 completionHistoryRepository.insertCompletion(
                     habitId = 2L,
-                    date = defaultSchedule.startDate.plusDays(dayIndex), // Wednesday
+                    completionRecord = Habit.YesNoHabit.CompletionRecord(
+                        date = defaultSchedule.startDate.plusDays(dayIndex), // Wednesday
+                    )
                 )
             }
 
@@ -301,7 +318,9 @@ class HabitComputeStatusUseCaseTest {
             for (dayIndex in 2..5) {
                 completionHistoryRepository.insertCompletion(
                     habitId = 2L,
-                    date = defaultSchedule.startDate.plusDays(dayIndex), // Wednesday
+                    completionRecord = Habit.YesNoHabit.CompletionRecord(
+                        date = defaultSchedule.startDate.plusDays(dayIndex), // Wednesday
+                    )
                 )
             }
 
@@ -332,7 +351,9 @@ class HabitComputeStatusUseCaseTest {
     fun `past date, due, completed later, assert status is CompletedLater`() = runTest {
         completionHistoryRepository.insertCompletion(
             habitId = 1L,
-            date = LocalDate(2023, 12, 8), // Friday
+            completionRecord = Habit.YesNoHabit.CompletionRecord(
+                date = LocalDate(2023, 12, 8), // Friday
+            )
         )
 
         val habitStatus = computeStatus(
@@ -348,7 +369,9 @@ class HabitComputeStatusUseCaseTest {
         runTest {
             completionHistoryRepository.insertCompletion(
                 habitId = 1L,
-                date = LocalDate(2023, 12, 8), // Friday
+                completionRecord = Habit.YesNoHabit.CompletionRecord(
+                    date = LocalDate(2023, 12, 8), // Friday
+                )
             )
 
             val habitStatus = computeStatus(
@@ -364,8 +387,10 @@ class HabitComputeStatusUseCaseTest {
         runTest {
             completionHistoryRepository.insertCompletion(
                 habitId = 1L,
-                date = LocalDate(2023, 12, 8), // Friday
-                numOfTimesCompleted = 2F,
+                completionRecord = Habit.YesNoHabit.CompletionRecord(
+                    date = LocalDate(2023, 12, 8), // Friday
+                    numOfTimesCompleted = 2F,
+                )
             )
 
             val statusOnWednesday = computeStatus(
@@ -388,7 +413,9 @@ class HabitComputeStatusUseCaseTest {
         runTest {
             completionHistoryRepository.insertCompletion(
                 habitId = 1L,
-                date = LocalDate(2023, 12, 8), // Friday
+                completionRecord = Habit.YesNoHabit.CompletionRecord(
+                    date = LocalDate(2023, 12, 8), // Friday
+                )
             )
 
             val habitStatus = computeStatus(
@@ -408,14 +435,17 @@ class HabitComputeStatusUseCaseTest {
             for (date in startDate..endDate) {
                 completionHistoryRepository.insertCompletion(
                     habitId = 1L,
-                    date = date,
+                    completionRecord = Habit.YesNoHabit.CompletionRecord(
+                        date = date,
+                    )
                 )
             }
             completionHistoryRepository.insertCompletion(
                 habitId = 1L,
-                date = LocalDate(2023, 12, 11),
-
+                completionRecord = Habit.YesNoHabit.CompletionRecord(
+                    date = LocalDate(2023, 12, 11),
                 )
+            )
 
             val habitStatus = computeStatus(
                 habitId = 1L,
@@ -464,7 +494,7 @@ class HabitComputeStatusUseCaseTest {
         for (date in vacationStartDate..vacationEndDate) {
             completionHistoryRepository.insertCompletion(
                 habitId = 1L,
-                date = date,
+                completionRecord = Habit.YesNoHabit.CompletionRecord(date = date)
             )
 
             val habitStatus = computeStatus(
@@ -504,7 +534,7 @@ class HabitComputeStatusUseCaseTest {
 
                 completionHistoryRepository.insertCompletion(
                     habitId = 1L,
-                    date = date,
+                    completionRecord = Habit.YesNoHabit.CompletionRecord(date = date)
                 )
 
                 val habitStatus = computeStatus(
@@ -523,8 +553,10 @@ class HabitComputeStatusUseCaseTest {
         runTest {
             completionHistoryRepository.insertCompletion(
                 habitId = 1L,
-                date = LocalDate(2023, 12, 13),
-                numOfTimesCompleted = 5F,
+                completionRecord = Habit.YesNoHabit.CompletionRecord(
+                    date = LocalDate(2023, 12, 13),
+                    numOfTimesCompleted = 5F,
+                )
             )
 
             val previousDueDates = listOf(
@@ -551,8 +583,10 @@ class HabitComputeStatusUseCaseTest {
         runTest {
             completionHistoryRepository.insertCompletion(
                 habitId = 1L,
-                date = LocalDate(2023, 12, 13),
-                numOfTimesCompleted = 5F,
+                completionRecord = Habit.YesNoHabit.CompletionRecord(
+                    date = LocalDate(2023, 12, 13),
+                    numOfTimesCompleted = 5F,
+                )
             )
 
             val habitStatus = computeStatus(
@@ -568,8 +602,10 @@ class HabitComputeStatusUseCaseTest {
         runTest {
             completionHistoryRepository.insertCompletion(
                 habitId = 1L,
-                date = LocalDate(2023, 12, 13),
-                numOfTimesCompleted = 5F,
+                completionRecord = Habit.YesNoHabit.CompletionRecord(
+                    date = LocalDate(2023, 12, 13),
+                    numOfTimesCompleted = 5F,
+                )
             )
 
             val habitStatus = computeStatus(

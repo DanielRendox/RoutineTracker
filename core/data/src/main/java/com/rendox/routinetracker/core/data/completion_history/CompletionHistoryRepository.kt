@@ -1,9 +1,9 @@
-package com.rendox.routinetracker.core.database.completion_history
+package com.rendox.routinetracker.core.data.completion_history
 
 import com.rendox.routinetracker.core.model.Habit
 import kotlinx.datetime.LocalDate
 
-interface CompletionHistoryLocalDataSource {
+interface CompletionHistoryRepository {
     suspend fun getNumOfTimesCompletedInPeriod(
         habitId: Long,
         minDate: LocalDate?,

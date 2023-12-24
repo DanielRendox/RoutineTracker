@@ -2,7 +2,7 @@ package com.rendox.routinetracker.routine_details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rendox.routinetracker.core.data.routine.HabitRepository
+import com.rendox.routinetracker.core.data.habit.HabitRepository
 import com.rendox.routinetracker.core.model.Habit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

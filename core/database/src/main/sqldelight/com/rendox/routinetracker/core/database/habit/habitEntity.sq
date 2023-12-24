@@ -1,4 +1,4 @@
-import com.rendox.routinetracker.core.database.routine.model.HabitType;
+import com.rendox.routinetracker.core.database.habit.model.HabitType;
 import kotlin.Float;
 import kotlin.Int;
 

@@ -2,11 +2,11 @@ package com.rendox.routinetracker.feature.agenda
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rendox.routinetracker.core.data.routine.HabitRepository
+import com.rendox.routinetracker.core.data.habit.HabitRepository
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.ToggleHistoricalStatusUseCase
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.GetRoutineStatusUseCase
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.InsertRoutineStatusUseCase
-import com.rendox.routinetracker.core.domain.completion_time.GetRoutineCompletionTimeUseCase
+import com.rendox.routinetracker.core.domain.completion_time.GetHabitCompletionTimeUseCase
 import com.rendox.routinetracker.core.model.HistoricalStatus
 import com.rendox.routinetracker.core.model.PlanningStatus
 import com.rendox.routinetracker.core.model.Habit
@@ -31,7 +31,7 @@ class AgendaScreenViewModel(
     private val getRoutineStatus: GetRoutineStatusUseCase,
     private val insertRoutineStatus: InsertRoutineStatusUseCase,
     private val toggleHistoricalStatus: ToggleHistoricalStatusUseCase,
-    private val getRoutineCompletionTime: GetRoutineCompletionTimeUseCase,
+    private val getRoutineCompletionTime: GetHabitCompletionTimeUseCase,
 ) : ViewModel() {
 
     private val todayFlow = MutableStateFlow(today)

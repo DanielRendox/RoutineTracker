@@ -1,4 +1,4 @@
-import com.rendox.routinetracker.core.database.routine.model.ScheduleType;
+import com.rendox.routinetracker.core.database.habit.model.ScheduleType;
 import kotlin.Boolean;
 import kotlin.Int;
 import kotlinx.datetime.DayOfWeek;
@@ -20,7 +20,7 @@ CREATE TABLE scheduleEntity (
     numOfDueDaysInByNumOfDueDaysSchedule INTEGER AS Int,
     numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule INTEGER AS Int,
     numOfDaysInPeriodicCustomSchedule INTEGER AS Int,
-    FOREIGN KEY(id) REFERENCES habitEntity(id)
+    FOREIGN KEY (id) REFERENCES habitEntity(id)
 );
 
 getScheduleById:

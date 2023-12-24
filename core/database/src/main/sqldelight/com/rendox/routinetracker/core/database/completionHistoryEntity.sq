@@ -1,0 +1,32 @@
+import kotlin.Float;
+import kotlinx.datetime.LocalDate;
+
+CREATE TABLE completionHistoryEntity (
+    habitId INTEGER NOT NULL,
+    date INTEGER AS LocalDate NOT NULL,
+    numOfTimesCompleted REAL AS Float NOT NULL,
+    PRIMARY KEY (habitId, date)
+);
+
+insertCompletion:
+INSERT INTO completionHistoryEntity
+VALUES (?, ?, ?);
+
+getNumOfTimesCompletedInPeriod:
+SELECT TOTAL(numOfTimesCompleted)
+FROM completionHistoryEntity
+WHERE habitId = :habitId
+    AND (:minDate IS NULL OR :minDate <= date)
+    AND (:maxDate IS NULL OR date <= :maxDate);
+
+getRecordByDate:
+SELECT *
+FROM completionHistoryEntity
+WHERE habitId = ? AND date = ?;
+
+getLastRecord:
+SELECT *
+FROM completionHistoryEntity
+WHERE habitId = ?
+ORDER BY date DESC
+LIMIT 1;

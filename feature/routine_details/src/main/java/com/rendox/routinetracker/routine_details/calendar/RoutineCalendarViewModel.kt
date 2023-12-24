@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kizitonwose.calendar.core.atStartOfMonth
 import com.kizitonwose.calendar.core.yearMonth
-import com.rendox.routinetracker.core.data.routine.HabitRepository
+import com.rendox.routinetracker.core.data.habit.HabitRepository
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.GetRoutineStatusUseCase
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.InsertRoutineStatusUseCase
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.ToggleHistoricalStatusUseCase

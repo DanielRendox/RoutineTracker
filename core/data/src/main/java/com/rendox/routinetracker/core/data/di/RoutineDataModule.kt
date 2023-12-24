@@ -1,9 +1,9 @@
 package com.rendox.routinetracker.core.data.di
 
-import com.rendox.routinetracker.core.data.routine.HabitRepository
-import com.rendox.routinetracker.core.data.routine.HabitRepositoryImpl
-import com.rendox.routinetracker.core.database.routine.HabitLocalDataSource
-import com.rendox.routinetracker.core.database.routine.HabitLocalDataSourceImpl
+import com.rendox.routinetracker.core.data.habit.HabitRepository
+import com.rendox.routinetracker.core.data.habit.HabitRepositoryImpl
+import com.rendox.routinetracker.core.database.habit.HabitLocalDataSource
+import com.rendox.routinetracker.core.database.habit.HabitLocalDataSourceImpl
 import org.koin.dsl.module
 
 val routineDataModule = module {

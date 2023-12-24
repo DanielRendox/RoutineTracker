@@ -33,7 +33,7 @@ import com.rendox.routinetracker.add_routine.navigation.AddRoutineDestination
 import com.rendox.routinetracker.add_routine.navigation.AddRoutineNavHost
 import com.rendox.routinetracker.add_routine.set_goal.rememberSetGoalPageState
 import com.rendox.routinetracker.add_routine.tweak_routine.rememberTweakRoutinePageState
-import com.rendox.routinetracker.core.data.routine.HabitRepository
+import com.rendox.routinetracker.core.data.habit.HabitRepository
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
