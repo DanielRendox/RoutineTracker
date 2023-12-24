@@ -9,8 +9,8 @@ val completionHistoryDomainModule = module {
 
     single {
         InsertRoutineStatusUseCase(
-            completionHistoryRepository = get(),
-            routineRepository = get(),
+            routineCompletionHistoryRepository = get(),
+            habitRepository = get(),
             startStreakOrJoinStreaks = get(),
             breakStreak = get(),
         )
@@ -18,16 +18,16 @@ val completionHistoryDomainModule = module {
 
     single {
         GetRoutineStatusUseCase(
-            routineRepository = get(),
-            completionHistoryRepository = get(),
+            habitRepository = get(),
+            routineCompletionHistoryRepository = get(),
             insertRoutineStatus = get(),
         )
     }
 
     single {
         ToggleHistoricalStatusUseCase(
-            completionHistoryRepository = get(),
-            routineRepository = get(),
+            routineCompletionHistoryRepository = get(),
+            habitRepository = get(),
             startStreakOrJoinStreaks = get(),
             breakStreak = get(),
             deleteStreakIfStarted = get(),

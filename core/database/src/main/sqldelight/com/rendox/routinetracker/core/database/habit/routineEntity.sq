@@ -1,10 +1,10 @@
-import com.rendox.routinetracker.core.database.routine.model.RoutineType;
+import com.rendox.routinetracker.core.database.routine.model.HabitType;
 import kotlin.Float;
 import kotlin.Int;
 
-CREATE TABLE routineEntity (
+CREATE TABLE habitEntity (
     id INTEGER NOT NULL PRIMARY KEY,
-    type TEXT AS RoutineType NOT NULL,
+    type TEXT AS HabitType NOT NULL,
     name TEXT NOT NULL,
     description TEXT,
     sessionDurationMinutes INTEGER AS Int,
@@ -15,14 +15,14 @@ CREATE TABLE routineEntity (
 
 getRoutineById:
 SELECT *
-FROM routineEntity
+FROM habitEntity
 WHERE id = ?;
 
 getAllRoutines:
 SELECT *
-FROM routineEntity
+FROM habitEntity
 ORDER BY id;
 
 insertRoutine:
-INSERT INTO routineEntity
+INSERT INTO habitEntity
 VALUES (?, ?, ?, ?, ?, ?, ?, ?);

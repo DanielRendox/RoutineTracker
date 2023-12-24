@@ -1,24 +1,20 @@
 package com.rendox.routinetracker.core.domain.completion_history.use_cases
 
-import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
-import com.rendox.routinetracker.core.data.routine.RoutineRepository
-import com.rendox.routinetracker.core.domain.completion_history.computePlanningStatus
+import com.rendox.routinetracker.core.data.routine.HabitRepository
+import com.rendox.routinetracker.core.data.routine_completion_history.RoutineCompletionHistoryRepository
 import com.rendox.routinetracker.core.domain.completion_history.getPeriodRange
 import com.rendox.routinetracker.core.domain.streak.BreakStreakUseCase
 import com.rendox.routinetracker.core.domain.streak.StartStreakOrJoinStreaksUseCase
-import com.rendox.routinetracker.core.logic.time.LocalDateRange
-import com.rendox.routinetracker.core.model.CompletionHistoryEntry
-import com.rendox.routinetracker.core.model.HistoricalStatus
-import com.rendox.routinetracker.core.model.PlanningStatus
 import com.rendox.routinetracker.core.model.Habit
+import com.rendox.routinetracker.core.model.HistoricalStatus
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.model.onVacationHistoricalStatuses
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
 
 class InsertRoutineStatusUseCase(
-    private val completionHistoryRepository: CompletionHistoryRepository,
-    private val routineRepository: RoutineRepository,
+    private val routineCompletionHistoryRepository: RoutineCompletionHistoryRepository,
+    private val habitRepository: HabitRepository,
     private val startStreakOrJoinStreaks: StartStreakOrJoinStreaksUseCase,
     private val breakStreak: BreakStreakUseCase,
 ) {
@@ -29,116 +25,116 @@ class InsertRoutineStatusUseCase(
         completedOnCurrentDate: Boolean,
         today: LocalDate,
     ) {
-        if (currentDate > today) return
-
-        when (val routine = routineRepository.getRoutineById(routineId)) {
-            is Habit.YesNoHabit -> insertYesNoRoutineStatus(
-                routine, currentDate, completedOnCurrentDate
-            )
-        }
+//        if (currentDate > today) return
+//
+//        when (val routine = habitRepository.getHabitById(routineId)) {
+//            is Habit.YesNoHabit -> insertYesNoRoutineStatus(
+//                routine, currentDate, completedOnCurrentDate
+//            )
+//        }
     }
 
-    private suspend fun insertYesNoRoutineStatus(
-        habit: Habit.YesNoHabit,
-        currentDate: LocalDate,
-        completedOnCurrentDate: Boolean,
-    ) {
-        val lastVacationStatus = completionHistoryRepository.getLastHistoryEntryByStatus(
-            routineId = habit.id!!,
-            matchingStatuses = onVacationHistoricalStatuses,
-        )
-
-        val schedule = habit.schedule
-        val currentPeriod: LocalDateRange? =
-            if (schedule is Schedule.PeriodicSchedule) schedule.getPeriodRange(
-                currentDate = currentDate, lastVacationEndDate = lastVacationStatus?.date
-            )
-            else null
-        val lastHistoryEntry = completionHistoryRepository.getLastHistoryEntry(habit.id!!)
-        val numOfTimesCompletedInCurrentPeriod =
-            completionHistoryRepository.getTotalTimesCompletedInPeriod(
-                routineId = habit.id!!,
-                startDate = currentPeriod?.start ?: habit.schedule.startDate,
-                endDate = currentDate,
-            )
-        val periodSeparationEnabled =
-            schedule is Schedule.PeriodicSchedule && schedule.periodSeparationEnabled
-
-        val startDate = if (periodSeparationEnabled && currentPeriod != null) {
-            currentPeriod.start
-        } else {
-            schedule.startDate
-        }
-
-        val currentScheduleDeviation =
-            completionHistoryRepository.getScheduleDeviationInPeriod(
-                routineId = habit.id!!,
-                startDate = startDate,
-                endDate = currentDate,
-            )
-
-        val scheduleDeviationInCurrentPeriod = currentPeriod?.let {
-            completionHistoryRepository.getScheduleDeviationInPeriod(
-                routineId = habit.id!!,
-                startDate = it.start,
-                endDate = currentDate,
-            )
-        }
-
-        val planningStatus = habit.computePlanningStatus(
-            validationDate = currentDate,
-            currentScheduleDeviation = currentScheduleDeviation,
-            actualDate = lastHistoryEntry?.date,
-            numOfTimesCompletedInCurrentPeriod = numOfTimesCompletedInCurrentPeriod,
-            scheduleDeviationInCurrentPeriod = scheduleDeviationInCurrentPeriod,
-            lastVacationEndDate = lastVacationStatus?.date,
-        )!!
-
-        val historicalStatusData = when (planningStatus) {
-            PlanningStatus.Planned -> deriveHistoricalStatusFromPlannedStatus(
-                habit,
-                habit.schedule,
-                completedOnCurrentDate,
-                currentDate,
-                habit.schedule.backlogEnabled,
-                numOfTimesCompletedInCurrentPeriod,
-            )
-
-            PlanningStatus.Backlog -> deriveHistoricalStatusFromBacklogStatus(
-                completedOnCurrentDate, habit, currentDate
-            )
-
-            PlanningStatus.AlreadyCompleted -> deriveHistoricalStatusFromAlreadyCompletedStatus(
-                completedOnCurrentDate
-            )
-
-            PlanningStatus.NotDue -> deriveHistoricalStatusFromNotDueStatus(
-                habit,
-                currentDate,
-                completedOnCurrentDate,
-                habit.schedule.completingAheadEnabled,
-            )
-
-            PlanningStatus.OnVacation ->
-                deriveHistoricalStatusFromOnVacationStatus(
-                    completed = completedOnCurrentDate,
-                    habit = habit,
-                    currentScheduleDeviation = currentScheduleDeviation,
-                    cancelDuenessIfDoneAhead = habit.schedule.completingAheadEnabled,
-                    currentDate = currentDate,
-                )
-        }
-
-        completionHistoryRepository.insertHistoryEntry(
-            routineId = habit.id!!,
-            entry = CompletionHistoryEntry(
-                date = currentDate,
-                status = historicalStatusData.historicalStatus,
-                scheduleDeviation = historicalStatusData.scheduleDeviation,
-                timesCompleted = if (completedOnCurrentDate) 1F else 0F,
-            ),
-        )
-    }
+//    private suspend fun insertYesNoRoutineStatus(
+//        habit: Habit.YesNoHabit,
+//        currentDate: LocalDate,
+//        completedOnCurrentDate: Boolean,
+//    ) {
+//        val lastVacationStatus = routineCompletionHistoryRepository.getLastHistoryEntryByStatus(
+//            routineId = habit.id!!,
+//            matchingStatuses = onVacationHistoricalStatuses,
+//        )
+//
+//        val schedule = habit.schedule
+//        val currentPeriod: LocalDateRange? =
+//            if (schedule is Schedule.PeriodicSchedule) schedule.getPeriodRange(
+//                currentDate = currentDate, lastVacationEndDate = lastVacationStatus?.date
+//            )
+//            else null
+//        val lastHistoryEntry = routineCompletionHistoryRepository.getLastHistoryEntry(habit.id!!)
+//        val numOfTimesCompletedInCurrentPeriod =
+//            routineCompletionHistoryRepository.getTotalTimesCompletedInPeriod(
+//                routineId = habit.id!!,
+//                startDate = currentPeriod?.start ?: habit.schedule.startDate,
+//                endDate = currentDate,
+//            )
+//        val periodSeparationEnabled =
+//            schedule is Schedule.PeriodicSchedule && schedule.periodSeparationEnabled
+//
+//        val startDate = if (periodSeparationEnabled && currentPeriod != null) {
+//            currentPeriod.start
+//        } else {
+//            schedule.startDate
+//        }
+//
+//        val currentScheduleDeviation =
+//            routineCompletionHistoryRepository.getScheduleDeviationInPeriod(
+//                routineId = habit.id!!,
+//                startDate = startDate,
+//                endDate = currentDate,
+//            )
+//
+//        val scheduleDeviationInCurrentPeriod = currentPeriod?.let {
+//            routineCompletionHistoryRepository.getScheduleDeviationInPeriod(
+//                routineId = habit.id!!,
+//                startDate = it.start,
+//                endDate = currentDate,
+//            )
+//        }
+//
+//        val planningStatus = habit.computePlanningStatus(
+//            validationDate = currentDate,
+//            currentScheduleDeviation = currentScheduleDeviation,
+//            actualDate = lastHistoryEntry?.date,
+//            numOfTimesCompletedInCurrentPeriod = numOfTimesCompletedInCurrentPeriod,
+//            scheduleDeviationInCurrentPeriod = scheduleDeviationInCurrentPeriod,
+//            lastVacationEndDate = lastVacationStatus?.date,
+//        )!!
+//
+//        val historicalStatusData = when (planningStatus) {
+//            PlanningStatus.Planned -> deriveHistoricalStatusFromPlannedStatus(
+//                habit,
+//                habit.schedule,
+//                completedOnCurrentDate,
+//                currentDate,
+//                habit.schedule.backlogEnabled,
+//                numOfTimesCompletedInCurrentPeriod,
+//            )
+//
+//            PlanningStatus.Backlog -> deriveHistoricalStatusFromBacklogStatus(
+//                completedOnCurrentDate, habit, currentDate
+//            )
+//
+//            PlanningStatus.AlreadyCompleted -> deriveHistoricalStatusFromAlreadyCompletedStatus(
+//                completedOnCurrentDate
+//            )
+//
+//            PlanningStatus.NotDue -> deriveHistoricalStatusFromNotDueStatus(
+//                habit,
+//                currentDate,
+//                completedOnCurrentDate,
+//                habit.schedule.completingAheadEnabled,
+//            )
+//
+//            PlanningStatus.OnVacation ->
+//                deriveHistoricalStatusFromOnVacationStatus(
+//                    completed = completedOnCurrentDate,
+//                    habit = habit,
+//                    currentScheduleDeviation = currentScheduleDeviation,
+//                    cancelDuenessIfDoneAhead = habit.schedule.completingAheadEnabled,
+//                    currentDate = currentDate,
+//                )
+//        }
+//
+//        routineCompletionHistoryRepository.insertHistoryEntry(
+//            routineId = habit.id!!,
+//            entry = CompletionHistoryEntry(
+//                date = currentDate,
+//                status = historicalStatusData.historicalStatus,
+//                scheduleDeviation = historicalStatusData.scheduleDeviation,
+//                timesCompleted = if (completedOnCurrentDate) 1F else 0F,
+//            ),
+//        )
+//    }
 
     private suspend fun deriveHistoricalStatusFromPlannedStatus(
         habit: Habit,
@@ -158,7 +154,7 @@ class InsertRoutineStatusUseCase(
         )
     } else {
         if (schedule is Schedule.ByNumOfDueDays) {
-            val lastVacationStatus = completionHistoryRepository.getLastHistoryEntryByStatus(
+            val lastVacationStatus = routineCompletionHistoryRepository.getLastHistoryEntryByStatus(
                 routineId = habit.id!!,
                 matchingStatuses = onVacationHistoricalStatuses,
             )
@@ -169,7 +165,7 @@ class InsertRoutineStatusUseCase(
             )
 
             val numOfDueDays =
-                schedule.getNumOfDueDatesInPeriod(validationDatePeriod)
+                schedule.getNumOfDueDatesInPeriod(validationDatePeriod!!)
 
             val numOfDaysThatRemainToBeCompletedInPeriod =
                 numOfDueDays - timesCompletedInCurrentPeriod
@@ -210,7 +206,7 @@ class InsertRoutineStatusUseCase(
     ): HistoricalStatusData = if (completed) {
         sortOutBacklog(
             habit = habitId,
-            completionHistoryRepository = completionHistoryRepository,
+            routineCompletionHistoryRepository = routineCompletionHistoryRepository,
             startStreakOrJoinStreaks = startStreakOrJoinStreaks,
             currentDate = currentDate,
         )
@@ -270,7 +266,7 @@ class InsertRoutineStatusUseCase(
         if (currentScheduleDeviation < 0) {
             sortOutBacklog(
                 habit = habit,
-                completionHistoryRepository = completionHistoryRepository,
+                routineCompletionHistoryRepository = routineCompletionHistoryRepository,
                 startStreakOrJoinStreaks = startStreakOrJoinStreaks,
                 currentDate = currentDate,
             )

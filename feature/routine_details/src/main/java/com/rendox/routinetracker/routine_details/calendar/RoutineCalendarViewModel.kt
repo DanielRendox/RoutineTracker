@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kizitonwose.calendar.core.atStartOfMonth
 import com.kizitonwose.calendar.core.yearMonth
-import com.rendox.routinetracker.core.data.routine.RoutineRepository
+import com.rendox.routinetracker.core.data.routine.HabitRepository
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.GetRoutineStatusUseCase
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.InsertRoutineStatusUseCase
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.ToggleHistoricalStatusUseCase
@@ -40,7 +40,7 @@ import java.time.YearMonth
 class RoutineCalendarViewModel(
     private val today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
     private val routineId: Long,
-    private val routineRepository: RoutineRepository,
+    private val habitRepository: HabitRepository,
     private val getRoutineStatusList: GetRoutineStatusUseCase,
     private val insertRoutineStatus: InsertRoutineStatusUseCase,
     private val toggleRoutineStatus: ToggleHistoricalStatusUseCase,
@@ -83,7 +83,7 @@ class RoutineCalendarViewModel(
 
     init {
         viewModelScope.launch {
-            habit = routineRepository.getRoutineById(routineId)
+            habit = habitRepository.getHabitById(routineId)
             streaksFlow.update {
                 val streaks = getAllStreaks(routineId = routineId, today = today)
                 println("all streaks = $streaks")

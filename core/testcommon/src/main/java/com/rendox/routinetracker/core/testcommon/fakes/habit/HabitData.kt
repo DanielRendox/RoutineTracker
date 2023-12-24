@@ -1,14 +1,16 @@
-package com.rendox.routinetracker.core.testcommon.fakes.routine
+package com.rendox.routinetracker.core.testcommon.fakes.habit
 
 import com.rendox.routinetracker.core.model.CompletionHistoryEntry
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Streak
+import com.rendox.routinetracker.core.model.Vacation
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 
-class RoutineData {
+class HabitData {
     private val completionHistoryLock = Any()
-    var completionHistory = emptyList<Pair<Long, CompletionHistoryEntry>>()
+    var routineCompletionHistory = emptyList<Pair<Long, CompletionHistoryEntry>>()
         get() {
             synchronized(completionHistoryLock) {
                 return field
@@ -20,18 +22,7 @@ class RoutineData {
             }
         }
 
-    private val listOfRoutinesLock = Any()
-    var listOfHabits = emptyList<Habit>()
-        get() {
-            synchronized(listOfRoutinesLock) {
-                return field
-            }
-        }
-        set(value) {
-            synchronized(listOfRoutinesLock) {
-                field = value
-            }
-        }
+    var listOfHabits = MutableStateFlow(emptyList<Habit>())
 
     private val completedLaterHistoryLock = Any()
     var completedLaterHistory = emptyList<Pair<Long, LocalDate>>()
@@ -71,6 +62,9 @@ class RoutineData {
                 field = value
             }
         }
+
+    val completionHistory = MutableStateFlow(emptyList<Triple<Long, LocalDate, Float>>())
+    val vacationHistory = MutableStateFlow(emptyList<Pair<Long, Vacation>>())
 }
 
 data class DueDateCompletionTimeEntity(

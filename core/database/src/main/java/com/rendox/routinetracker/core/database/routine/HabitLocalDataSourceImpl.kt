@@ -4,7 +4,8 @@ import app.cash.sqldelight.TransactionWithoutReturn
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
 import com.rendox.routinetracker.core.database.di.toDayOfWeek
 import com.rendox.routinetracker.core.database.di.toInt
-import com.rendox.routinetracker.core.database.routine.model.RoutineType
+import com.rendox.routinetracker.core.database.habit.HabitEntity
+import com.rendox.routinetracker.core.database.routine.model.HabitType
 import com.rendox.routinetracker.core.database.routine.model.ScheduleType
 import com.rendox.routinetracker.core.database.routine.model.toExternalModel
 import com.rendox.routinetracker.core.database.schedule.GetCompletionTime
@@ -16,24 +17,24 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalTime
 
-class RoutineLocalDataSourceImpl(
+class HabitLocalDataSourceImpl(
     private val db: RoutineTrackerDatabase,
     private val dispatcher: CoroutineDispatcher,
-) : RoutineLocalDataSource {
+) : HabitLocalDataSource {
 
-    override suspend fun getRoutineById(routineId: Long): Habit {
+    override suspend fun getHabitById(habitId: Long): Habit {
         return withContext(dispatcher) {
             db.routineEntityQueries.transactionWithResult {
-                val schedule = getScheduleEntity(routineId).toExternalModel(
+                val schedule = getScheduleEntity(habitId).toExternalModel(
                     dueDatesProvider = { getDueDates(it) },
                     weekDaysMonthRelatedProvider = { getWeekDayMonthRelatedDays(it) }
                 )
-                getRoutineEntity(routineId).toExternalModel(schedule)
+                getHabitEntity(habitId).toExternalModel(schedule)
             }
         }
     }
 
-    private fun getRoutineEntity(id: Long): RoutineEntity =
+    private fun getHabitEntity(id: Long): HabitEntity =
         db.routineEntityQueries.getRoutineById(id).executeAsOne()
 
     private fun getScheduleEntity(id: Long): ScheduleEntity =
@@ -53,12 +54,12 @@ class RoutineLocalDataSourceImpl(
                 )
             }
 
-    override suspend fun insertRoutine(habit: Habit) {
+    override suspend fun insertHabit(habit: Habit) {
         return withContext(dispatcher) {
             db.routineEntityQueries.transaction {
                 when (habit) {
                     is Habit.YesNoHabit -> {
-                        insertYesNoRoutine(habit)
+                        insertYesNoHabit(habit)
                         insertSchedule(habit.schedule)
                     }
                 }
@@ -67,10 +68,10 @@ class RoutineLocalDataSourceImpl(
     }
 
     @Suppress("UnusedReceiverParameter")
-    private fun TransactionWithoutReturn.insertYesNoRoutine(habit: Habit.YesNoHabit) {
+    private fun TransactionWithoutReturn.insertYesNoHabit(habit: Habit.YesNoHabit) {
         db.routineEntityQueries.insertRoutine(
             id = habit.id,
-            type = RoutineType.YesNoRoutine,
+            type = HabitType.YesNoHabit,
             name = habit.name,
             description = habit.description,
             sessionDurationMinutes = habit.sessionDurationMinutes,
@@ -327,7 +328,7 @@ class RoutineLocalDataSourceImpl(
         }
     }
 
-    override suspend fun getAllRoutines(): List<Habit> {
+    override suspend fun getAllHabits(): List<Habit> {
         return withContext(dispatcher) {
             db.routineEntityQueries.getAllRoutines()
                 .executeAsList()

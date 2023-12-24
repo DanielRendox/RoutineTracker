@@ -3,13 +3,13 @@ package com.rendox.routinetracker.core.data.routine
 import com.rendox.routinetracker.core.model.Habit
 import kotlinx.datetime.LocalTime
 
-interface RoutineRepository {
+interface HabitRepository {
 
-    suspend fun getRoutineById(id: Long): Habit
+    suspend fun getHabitById(id: Long): Habit
 
-    suspend fun insertRoutine(habit: Habit)
+    suspend fun insertHabit(habit: Habit)
 
-    suspend fun getAllRoutines(): List<Habit>
+    suspend fun getAllHabits(): List<Habit>
 
     suspend fun updateDueDateSpecificCompletionTime(
         time: LocalTime, routineId: Long, dueDateNumber: Int

@@ -5,7 +5,7 @@ CREATE TABLE streakEntity (
     routineId INTEGER NOT NULL,
     startDate INTEGER AS LocalDate NOT NULL,
     endDate INTEGER AS LocalDate,
-    FOREIGN KEY(routineId) REFERENCES routineEntity(id)
+    FOREIGN KEY(routineId) REFERENCES habitEntity(id)
 );
 
 getAllStreaks:

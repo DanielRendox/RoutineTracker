@@ -7,7 +7,7 @@ val routineDomainModule = module {
 
     single {
         GetRoutineCompletionTimeUseCase(
-            routineRepository = get(),
+            habitRepository = get(),
             completionTimeRepository = get(),
         )
     }

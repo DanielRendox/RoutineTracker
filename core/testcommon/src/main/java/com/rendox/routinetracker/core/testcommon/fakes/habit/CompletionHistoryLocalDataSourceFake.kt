@@ -1,4 +1,4 @@
-package com.rendox.routinetracker.core.testcommon.fakes.routine
+package com.rendox.routinetracker.core.testcommon.fakes.habit
 
 import com.rendox.routinetracker.core.database.completion_history.CompletionHistoryLocalDataSource
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
@@ -8,14 +8,14 @@ import com.rendox.routinetracker.core.model.HistoricalStatus
 import kotlinx.datetime.LocalDate
 
 class CompletionHistoryLocalDataSourceFake(
-    private val routineData: RoutineData
+    private val habitData: HabitData
 ) : CompletionHistoryLocalDataSource {
 
     override suspend fun getHistoryEntries(
         routineId: Long,
         dates: LocalDateRange
     ): List<CompletionHistoryEntry> =
-        routineData.completionHistory
+        habitData.routineCompletionHistory
             .filter { it.first == routineId && it.second.date in dates }
             .map { it.second }
             .sortedBy { it.date }
@@ -24,7 +24,7 @@ class CompletionHistoryLocalDataSourceFake(
         routineId: Long,
         date: LocalDate
     ): CompletionHistoryEntry? {
-        return routineData.completionHistory.firstOrNull {
+        return habitData.routineCompletionHistory.firstOrNull {
             it.first == routineId && it.second.date == date
         }?.second
     }
@@ -34,19 +34,19 @@ class CompletionHistoryLocalDataSourceFake(
         routineId: Long,
         entry: CompletionHistoryEntry,
     ) {
-        routineData.completionHistory =
-            routineData.completionHistory.toMutableList().apply { add(Pair(routineId, entry)) }
+        habitData.routineCompletionHistory =
+            habitData.routineCompletionHistory.toMutableList().apply { add(Pair(routineId, entry)) }
         if (entry.status == HistoricalStatus.CompletedLater) {
             insertCompletedLaterDate(routineId, entry.date)
         }
     }
 
     override suspend fun deleteHistoryEntry(routineId: Long, date: LocalDate) {
-        val elementToRemove = routineData.completionHistory.find {
+        val elementToRemove = habitData.routineCompletionHistory.find {
             it.first == routineId && it.second.date == date
         }
-        routineData.completionHistory =
-            routineData.completionHistory.toMutableList().apply { remove(elementToRemove) }
+        habitData.routineCompletionHistory =
+            habitData.routineCompletionHistory.toMutableList().apply { remove(elementToRemove) }
     }
 
     override suspend fun updateHistoryEntryByDate(
@@ -56,19 +56,19 @@ class CompletionHistoryLocalDataSourceFake(
         newScheduleDeviation: Float?,
         newTimesCompleted: Float?,
     ) {
-        val elementToUpdate = routineData.completionHistory.find {
+        val elementToUpdate = habitData.routineCompletionHistory.find {
             it.first == routineId && it.second.date == date
         }
         elementToUpdate?.let {
-            val elementToUpdateIndex = routineData.completionHistory.indexOf(it)
+            val elementToUpdateIndex = habitData.routineCompletionHistory.indexOf(it)
             val newValue = routineId to CompletionHistoryEntry(
                 date = date,
                 status = newStatus ?: it.second.status,
                 scheduleDeviation = newScheduleDeviation ?: it.second.scheduleDeviation,
                 timesCompleted = newTimesCompleted ?: it.second.timesCompleted,
             )
-            routineData.completionHistory =
-                routineData.completionHistory.toMutableList().apply {
+            habitData.routineCompletionHistory =
+                habitData.routineCompletionHistory.toMutableList().apply {
                     set(elementToUpdateIndex, newValue)
                 }
             if (newStatus == HistoricalStatus.CompletedLater) {
@@ -78,10 +78,10 @@ class CompletionHistoryLocalDataSourceFake(
     }
 
     override suspend fun getFirstHistoryEntry(routineId: Long): CompletionHistoryEntry? =
-        routineData.completionHistory.firstOrNull()?.second
+        habitData.routineCompletionHistory.firstOrNull()?.second
 
     override suspend fun getLastHistoryEntry(routineId: Long): CompletionHistoryEntry? =
-        routineData.completionHistory.lastOrNull()?.second
+        habitData.routineCompletionHistory.lastOrNull()?.second
 
     override suspend fun getFirstHistoryEntryByStatus(
         routineId: Long,
@@ -89,7 +89,7 @@ class CompletionHistoryLocalDataSourceFake(
         minDate: LocalDate?,
         maxDate: LocalDate?,
     ): CompletionHistoryEntry? {
-        return routineData.completionHistory.firstOrNull {
+        return habitData.routineCompletionHistory.firstOrNull {
             it.first == routineId
                     && it.second.status in matchingStatuses
                     && (minDate == null || minDate <= it.second.date)
@@ -103,7 +103,7 @@ class CompletionHistoryLocalDataSourceFake(
         minDate: LocalDate?,
         maxDate: LocalDate?,
     ): CompletionHistoryEntry? {
-        return routineData.completionHistory.lastOrNull {
+        return habitData.routineCompletionHistory.lastOrNull {
             it.first == routineId
                     && it.second.status in matchingStatuses
                     && (minDate == null || minDate <= it.second.date)
@@ -112,22 +112,22 @@ class CompletionHistoryLocalDataSourceFake(
     }
 
     override suspend fun checkIfStatusWasCompletedLater(routineId: Long, date: LocalDate): Boolean =
-        routineData.completedLaterHistory.contains(Pair(routineId, date))
+        habitData.completedLaterHistory.contains(Pair(routineId, date))
 
     override suspend fun deleteCompletedLaterBackupEntry(routineId: Long, date: LocalDate) {
-        routineData.completedLaterHistory =
-            routineData.completedLaterHistory.toMutableList()
+        habitData.completedLaterHistory =
+            habitData.completedLaterHistory.toMutableList()
                 .apply { remove(Pair(routineId, date)) }
     }
 
     private fun checkCompletedLater(routineId: Long, date: LocalDate): Boolean =
-        routineData.completedLaterHistory.contains(Pair(routineId, date))
+        habitData.completedLaterHistory.contains(Pair(routineId, date))
 
     private fun insertCompletedLaterDate(routineId: Long, date: LocalDate) {
         val alreadyInserted = checkCompletedLater(routineId, date)
         if (!alreadyInserted) {
-            routineData.completedLaterHistory =
-                routineData.completedLaterHistory.toMutableList().apply {
+            habitData.completedLaterHistory =
+                habitData.completedLaterHistory.toMutableList().apply {
                     add(Pair(routineId, date))
                 }
         }
@@ -137,7 +137,7 @@ class CompletionHistoryLocalDataSourceFake(
         routineId: Long,
         startDate: LocalDate,
         endDate: LocalDate
-    ): Double = routineData.completionHistory
+    ): Double = habitData.routineCompletionHistory
         .filter { it.second.date in startDate..endDate }
         .map { it.second.timesCompleted }
         .sum().toDouble()
@@ -147,7 +147,7 @@ class CompletionHistoryLocalDataSourceFake(
         startDate: LocalDate,
         endDate: LocalDate
     ): Double {
-        return routineData.completionHistory
+        return habitData.routineCompletionHistory
             .filter { it.first == routineId && it.second.date in startDate..endDate }
             .map { it.second.scheduleDeviation }
             .sum().toDouble()

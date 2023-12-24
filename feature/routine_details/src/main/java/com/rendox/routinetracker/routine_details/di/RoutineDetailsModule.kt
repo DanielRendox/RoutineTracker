@@ -9,7 +9,7 @@ val routineDetailsModule = module {
     viewModel { parameters ->
         RoutineCalendarViewModel(
             routineId = parameters.get(),
-            routineRepository = get(),
+            habitRepository = get(),
             getRoutineStatusList = get(),
             insertRoutineStatus = get(),
             toggleRoutineStatus = get(),
@@ -19,7 +19,7 @@ val routineDetailsModule = module {
     viewModel { parameters ->
         RoutineDetailsViewModel(
             routineId = parameters.get(),
-            routineRepository = get(),
+            habitRepository = get(),
         )
     }
 }

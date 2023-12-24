@@ -1,23 +1,23 @@
 package com.rendox.routinetracker.core.data.routine
 
-import com.rendox.routinetracker.core.database.routine.RoutineLocalDataSource
+import com.rendox.routinetracker.core.database.routine.HabitLocalDataSource
 import com.rendox.routinetracker.core.model.Habit
 import kotlinx.datetime.LocalTime
 
-class RoutineRepositoryImpl(
-    private val localDataSource: RoutineLocalDataSource,
-) : RoutineRepository {
+class HabitRepositoryImpl(
+    private val localDataSource: HabitLocalDataSource,
+) : HabitRepository {
 
-    override suspend fun getRoutineById(id: Long): Habit {
-        return localDataSource.getRoutineById(routineId = id)
+    override suspend fun getHabitById(id: Long): Habit {
+        return localDataSource.getHabitById(routineId = id)
     }
 
-    override suspend fun insertRoutine(habit: Habit) {
-        localDataSource.insertRoutine(habit)
+    override suspend fun insertHabit(habit: Habit) {
+        localDataSource.insertHabit(habit)
     }
 
-    override suspend fun getAllRoutines(): List<Habit> {
-        return localDataSource.getAllRoutines()
+    override suspend fun getAllHabits(): List<Habit> {
+        return localDataSource.getAllHabits()
     }
 
     override suspend fun updateDueDateSpecificCompletionTime(

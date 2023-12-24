@@ -9,7 +9,7 @@ CREATE TABLE completionHistoryEntity (
     status TEXT AS HistoricalStatus NOT NULL,
     scheduleDeviation REAL AS Float NOT NULL,
     timesCompleted REAL AS Float NOT NULL,
-    FOREIGN KEY(routineId) REFERENCES routineEntity(id)
+    FOREIGN KEY(routineId) REFERENCES habitEntity(id)
 );
 
 getHistoryEntriesByIndices:

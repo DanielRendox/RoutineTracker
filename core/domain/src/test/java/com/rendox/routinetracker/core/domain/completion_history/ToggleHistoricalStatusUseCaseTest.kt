@@ -1,14 +1,14 @@
 package com.rendox.routinetracker.core.domain.completion_history
 
 import com.google.common.truth.Truth.assertThat
-import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
+import com.rendox.routinetracker.core.data.routine_completion_history.RoutineCompletionHistoryRepository
 import com.rendox.routinetracker.core.data.di.completionHistoryDataModule
 import com.rendox.routinetracker.core.data.di.routineDataModule
 import com.rendox.routinetracker.core.data.di.streakDataModule
-import com.rendox.routinetracker.core.data.routine.RoutineRepository
+import com.rendox.routinetracker.core.data.routine.HabitRepository
 import com.rendox.routinetracker.core.data.streak.StreakRepository
 import com.rendox.routinetracker.core.database.completion_history.CompletionHistoryLocalDataSource
-import com.rendox.routinetracker.core.database.routine.RoutineLocalDataSource
+import com.rendox.routinetracker.core.database.routine.HabitLocalDataSource
 import com.rendox.routinetracker.core.database.streak.StreakLocalDataSource
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.ToggleHistoricalStatusUseCase
 import com.rendox.routinetracker.core.domain.di.streakDomainModule
@@ -19,10 +19,10 @@ import com.rendox.routinetracker.core.model.HistoricalStatus
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.model.Streak
-import com.rendox.routinetracker.core.testcommon.fakes.routine.CompletionHistoryLocalDataSourceFake
-import com.rendox.routinetracker.core.testcommon.fakes.routine.RoutineData
-import com.rendox.routinetracker.core.testcommon.fakes.routine.RoutineLocalDataSourceFake
-import com.rendox.routinetracker.core.testcommon.fakes.routine.StreakLocalDataSourceFake
+import com.rendox.routinetracker.core.testcommon.fakes.habit.CompletionHistoryLocalDataSourceFake
+import com.rendox.routinetracker.core.testcommon.fakes.habit.HabitData
+import com.rendox.routinetracker.core.testcommon.fakes.habit.HabitLocalDataSourceFake
+import com.rendox.routinetracker.core.testcommon.fakes.habit.StreakLocalDataSourceFake
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Month
@@ -37,24 +37,24 @@ import org.koin.test.get
 
 class ToggleHistoricalStatusUseCaseTest : KoinTest {
 
-    private lateinit var routineRepository: RoutineRepository
-    private lateinit var completionHistoryRepository: CompletionHistoryRepository
+    private lateinit var habitRepository: HabitRepository
+    private lateinit var routineCompletionHistoryRepository: RoutineCompletionHistoryRepository
     private lateinit var toggleHistoricalStatus: ToggleHistoricalStatusUseCase
     private lateinit var streakRepository: StreakRepository
 
     private val testModule = module {
-        single { RoutineData() }
+        single { HabitData() }
 
-        single<RoutineLocalDataSource> {
-            RoutineLocalDataSourceFake(routineData = get())
+        single<HabitLocalDataSource> {
+            HabitLocalDataSourceFake(habitData = get())
         }
 
         single<CompletionHistoryLocalDataSource> {
-            CompletionHistoryLocalDataSourceFake(routineData = get())
+            CompletionHistoryLocalDataSourceFake(habitData = get())
         }
 
         single<StreakLocalDataSource> {
-            StreakLocalDataSourceFake(routineData = get())
+            StreakLocalDataSourceFake(habitData = get())
         }
     }
 
@@ -92,20 +92,20 @@ class ToggleHistoricalStatusUseCaseTest : KoinTest {
             )
         }
 
-        routineRepository = get()
-        completionHistoryRepository = get()
+        habitRepository = get()
+        routineCompletionHistoryRepository = get()
         streakRepository = get()
 
         toggleHistoricalStatus = ToggleHistoricalStatusUseCase(
-            completionHistoryRepository = completionHistoryRepository,
-            routineRepository = routineRepository,
+            routineCompletionHistoryRepository = routineCompletionHistoryRepository,
+            habitRepository = habitRepository,
             startStreakOrJoinStreaks = get(),
             breakStreak = get(),
             deleteStreakIfStarted = get(),
             continueStreakIfEnded = get(),
         )
 
-        routineRepository.insertRoutine(habit)
+        habitRepository.insertHabit(habit)
 
         val history = mutableListOf<CompletionHistoryEntry>()
 
@@ -288,7 +288,7 @@ class ToggleHistoricalStatusUseCaseTest : KoinTest {
         )
 
         for (entry in history) {
-            completionHistoryRepository.insertHistoryEntry(
+            routineCompletionHistoryRepository.insertHistoryEntry(
                 routineId = routineId,
                 entry = entry,
             )
@@ -320,7 +320,7 @@ class ToggleHistoricalStatusUseCaseTest : KoinTest {
             today = routineEndDate.plusDays(1),
         )
         assertThat(
-            completionHistoryRepository.getHistoryEntryByDate(routineId, date)
+            routineCompletionHistoryRepository.getHistoryEntryByDate(routineId, date)
         ).isEqualTo(
             CompletionHistoryEntry(
                 date = date,
@@ -337,7 +337,7 @@ class ToggleHistoricalStatusUseCaseTest : KoinTest {
         )
 
         assertThat(
-            completionHistoryRepository.getHistoryEntryByDate(routineId, date)
+            routineCompletionHistoryRepository.getHistoryEntryByDate(routineId, date)
         ).isEqualTo(
             CompletionHistoryEntry(
                 date = date,
@@ -382,7 +382,7 @@ class ToggleHistoricalStatusUseCaseTest : KoinTest {
             today = routineEndDate.plusDays(1),
         )
         assertThat(
-            completionHistoryRepository.getHistoryEntryByDate(routineId, date)
+            routineCompletionHistoryRepository.getHistoryEntryByDate(routineId, date)
         ).isEqualTo(
             CompletionHistoryEntry(
                 date = date,
@@ -424,7 +424,7 @@ class ToggleHistoricalStatusUseCaseTest : KoinTest {
             today = routineEndDate.plusDays(1),
         )
         assertThat(
-            completionHistoryRepository.getHistoryEntryByDate(routineId, date)
+            routineCompletionHistoryRepository.getHistoryEntryByDate(routineId, date)
         ).isEqualTo(
             CompletionHistoryEntry(
                 date = date,
@@ -441,7 +441,7 @@ class ToggleHistoricalStatusUseCaseTest : KoinTest {
         )
 
         assertThat(
-            completionHistoryRepository.getHistoryEntryByDate(routineId, date)
+            routineCompletionHistoryRepository.getHistoryEntryByDate(routineId, date)
         ).isEqualTo(
             CompletionHistoryEntry(
                 date = date,
@@ -495,7 +495,7 @@ class ToggleHistoricalStatusUseCaseTest : KoinTest {
             today = routineEndDate.plusDays(1),
         )
         assertThat(
-            completionHistoryRepository.getHistoryEntryByDate(routineId, date)
+            routineCompletionHistoryRepository.getHistoryEntryByDate(routineId, date)
         ).isEqualTo(
             CompletionHistoryEntry(
                 date = date,
@@ -511,7 +511,7 @@ class ToggleHistoricalStatusUseCaseTest : KoinTest {
             today = routineEndDate.plusDays(1),
         )
         assertThat(
-            completionHistoryRepository.getHistoryEntryByDate(routineId, date)
+            routineCompletionHistoryRepository.getHistoryEntryByDate(routineId, date)
         ).isEqualTo(
             CompletionHistoryEntry(
                 date = date,
@@ -553,7 +553,7 @@ class ToggleHistoricalStatusUseCaseTest : KoinTest {
             today = routineEndDate.plusDays(1),
         )
         assertThat(
-            completionHistoryRepository.getHistoryEntryByDate(routineId, date)
+            routineCompletionHistoryRepository.getHistoryEntryByDate(routineId, date)
         ).isEqualTo(
             CompletionHistoryEntry(
                 date = date,
@@ -569,7 +569,7 @@ class ToggleHistoricalStatusUseCaseTest : KoinTest {
             today = routineEndDate.plusDays(1),
         )
         assertThat(
-            completionHistoryRepository.getHistoryEntryByDate(routineId, date)
+            routineCompletionHistoryRepository.getHistoryEntryByDate(routineId, date)
         ).isEqualTo(
             CompletionHistoryEntry(
                 date = date,
@@ -625,7 +625,7 @@ class ToggleHistoricalStatusUseCaseTest : KoinTest {
             timesCompleted = 1F,
         )
         assertThat(
-            completionHistoryRepository.getHistoryEntries(
+            routineCompletionHistoryRepository.getHistoryEntries(
                 routineId = routineId,
                 dates = routineStartDate..routineEndDate,
             )
@@ -637,7 +637,7 @@ class ToggleHistoricalStatusUseCaseTest : KoinTest {
             today = routineEndDate.plusDays(1),
         )
         assertThat(
-            completionHistoryRepository.getHistoryEntries(
+            routineCompletionHistoryRepository.getHistoryEntries(
                 routineId = routineId,
                 dates = routineStartDate..routineEndDate,
             )
@@ -675,7 +675,7 @@ class ToggleHistoricalStatusUseCaseTest : KoinTest {
             today = routineEndDate.plusDays(1),
         )
         assertThat(
-            completionHistoryRepository.getHistoryEntryByDate(routineId, date)
+            routineCompletionHistoryRepository.getHistoryEntryByDate(routineId, date)
         ).isEqualTo(
             CompletionHistoryEntry(
                 date = date,
@@ -691,7 +691,7 @@ class ToggleHistoricalStatusUseCaseTest : KoinTest {
             today = routineEndDate.plusDays(1),
         )
         assertThat(
-            completionHistoryRepository.getHistoryEntryByDate(routineId, date)
+            routineCompletionHistoryRepository.getHistoryEntryByDate(routineId, date)
         ).isEqualTo(
             CompletionHistoryEntry(
                 date = date,
@@ -747,7 +747,7 @@ class ToggleHistoricalStatusUseCaseTest : KoinTest {
             timesCompleted = 0F,
         )
         assertThat(
-            completionHistoryRepository.getHistoryEntries(
+            routineCompletionHistoryRepository.getHistoryEntries(
                 routineId = routineId,
                 dates = routineStartDate..routineEndDate,
             )
@@ -759,7 +759,7 @@ class ToggleHistoricalStatusUseCaseTest : KoinTest {
             today = routineEndDate.plusDays(1),
         )
         assertThat(
-            completionHistoryRepository.getHistoryEntries(
+            routineCompletionHistoryRepository.getHistoryEntries(
                 routineId = routineId,
                 dates = routineStartDate..routineEndDate,
             )
@@ -823,7 +823,7 @@ class ToggleHistoricalStatusUseCaseTest : KoinTest {
             timesCompleted = 1F,
         )
         assertThat(
-            completionHistoryRepository.getHistoryEntries(
+            routineCompletionHistoryRepository.getHistoryEntries(
                 routineId = routineId,
                 dates = routineStartDate..routineEndDate,
             )
@@ -835,7 +835,7 @@ class ToggleHistoricalStatusUseCaseTest : KoinTest {
             today = routineEndDate.plusDays(1),
         )
         assertThat(
-            completionHistoryRepository.getHistoryEntries(
+            routineCompletionHistoryRepository.getHistoryEntries(
                 routineId = routineId,
                 dates = routineStartDate..routineEndDate,
             )
@@ -887,7 +887,7 @@ class ToggleHistoricalStatusUseCaseTest : KoinTest {
             timesCompleted = 0F,
         )
         assertThat(
-            completionHistoryRepository.getHistoryEntries(
+            routineCompletionHistoryRepository.getHistoryEntries(
                 routineId = routineId,
                 dates = routineStartDate..routineEndDate,
             )
@@ -899,7 +899,7 @@ class ToggleHistoricalStatusUseCaseTest : KoinTest {
             today = routineEndDate.plusDays(1),
         )
         assertThat(
-            completionHistoryRepository.getHistoryEntries(
+            routineCompletionHistoryRepository.getHistoryEntries(
                 routineId = routineId,
                 dates = routineStartDate..routineEndDate,
             )
@@ -949,7 +949,7 @@ class ToggleHistoricalStatusUseCaseTest : KoinTest {
             today = routineEndDate.plusDays(1),
         )
         assertThat(
-            completionHistoryRepository.getHistoryEntryByDate(routineId, date)
+            routineCompletionHistoryRepository.getHistoryEntryByDate(routineId, date)
         ).isEqualTo(
             CompletionHistoryEntry(
                 date = date,
@@ -966,7 +966,7 @@ class ToggleHistoricalStatusUseCaseTest : KoinTest {
         )
 
         assertThat(
-            completionHistoryRepository.getHistoryEntryByDate(routineId, date)
+            routineCompletionHistoryRepository.getHistoryEntryByDate(routineId, date)
         ).isEqualTo(
             CompletionHistoryEntry(
                 date = date,

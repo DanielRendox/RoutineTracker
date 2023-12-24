@@ -10,7 +10,7 @@ import org.koin.dsl.module
 val streakDomainModule = module {
     single {
         BreakStreakUseCase(
-            completionHistoryRepository = get(),
+            routineCompletionHistoryRepository = get(),
             streakRepository = get(),
         )
     }
@@ -30,15 +30,15 @@ val streakDomainModule = module {
     single {
         StartStreakOrJoinStreaksUseCase(
             streakRepository = get(),
-            completionHistoryRepository = get(),
+            routineCompletionHistoryRepository = get(),
         )
     }
 
     single {
         GetDisplayStreaksUseCase(
             streakRepository = get(),
-            completionHistoryRepository = get(),
-            routineRepository = get(),
+            routineCompletionHistoryRepository = get(),
+            habitRepository = get(),
         )
     }
 }

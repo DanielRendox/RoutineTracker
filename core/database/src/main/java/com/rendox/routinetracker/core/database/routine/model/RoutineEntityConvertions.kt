@@ -1,23 +1,23 @@
 package com.rendox.routinetracker.core.database.routine.model
 
-import com.rendox.routinetracker.core.database.routine.RoutineEntity
+import com.rendox.routinetracker.core.database.habit.HabitEntity
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Schedule
 import kotlinx.datetime.LocalTime
 
-enum class RoutineType {
-    YesNoRoutine,
+enum class HabitType {
+    YesNoHabit,
 //    MeasurableRoutine,
 //    TasksRoutine,
 }
 
-fun RoutineEntity.toExternalModel(schedule: Schedule) = when (this.type) {
-    RoutineType.YesNoRoutine -> this.toYesNoRoutine(
+fun HabitEntity.toExternalModel(schedule: Schedule) = when (this.type) {
+    HabitType.YesNoHabit -> this.toYesNoRoutine(
         schedule = schedule,
     )
 }
 
-internal fun RoutineEntity.toYesNoRoutine(
+internal fun HabitEntity.toYesNoRoutine(
     schedule: Schedule,
 ): Habit {
     val defaultCompletionTime =

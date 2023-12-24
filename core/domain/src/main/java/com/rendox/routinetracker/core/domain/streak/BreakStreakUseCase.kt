@@ -1,6 +1,6 @@
 package com.rendox.routinetracker.core.domain.streak
 
-import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
+import com.rendox.routinetracker.core.data.routine_completion_history.RoutineCompletionHistoryRepository
 import com.rendox.routinetracker.core.data.streak.StreakRepository
 import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.model.Streak
@@ -10,7 +10,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
 
 class BreakStreakUseCase(
-    private val completionHistoryRepository: CompletionHistoryRepository,
+    private val routineCompletionHistoryRepository: RoutineCompletionHistoryRepository,
     private val streakRepository: StreakRepository,
 ) {
     suspend operator fun invoke(routineId: Long, date: LocalDate) {
@@ -32,7 +32,7 @@ class BreakStreakUseCase(
                 )
             }
 
-            val completedEntry = completionHistoryRepository.getFirstHistoryEntryByStatus(
+            val completedEntry = routineCompletionHistoryRepository.getFirstHistoryEntryByStatus(
                 routineId = routineId,
                 matchingStatuses = completedStatuses,
                 minDate = date.plusDays(1),

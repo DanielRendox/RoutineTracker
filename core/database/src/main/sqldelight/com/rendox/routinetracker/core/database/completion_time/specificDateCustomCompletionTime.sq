@@ -7,7 +7,7 @@ CREATE TABLE specificDateCustomCompletionTime (
     date INTEGER AS LocalDate NOT NULL,
     completionTimeHour INTEGER AS Int NOT NULL,
     completionTimeMinute INTEGER AS Int NOT NULL,
-    FOREIGN KEY(routineId) REFERENCES routineEntity(id)
+    FOREIGN KEY(routineId) REFERENCES habitEntity(id)
 );
 
 getCompletionTime:

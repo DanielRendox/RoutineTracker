@@ -1,8 +1,7 @@
 package com.rendox.routinetracker.core.domain.completion_history.use_cases
 
-import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
-import com.rendox.routinetracker.core.data.routine.RoutineRepository
-import com.rendox.routinetracker.core.domain.completion_history.computePlanningStatus
+import com.rendox.routinetracker.core.data.routine_completion_history.RoutineCompletionHistoryRepository
+import com.rendox.routinetracker.core.data.routine.HabitRepository
 import com.rendox.routinetracker.core.domain.completion_history.getPeriodRange
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.plusDays
@@ -20,8 +19,8 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
 
 class GetRoutineStatusUseCase(
-    private val routineRepository: RoutineRepository,
-    private val completionHistoryRepository: CompletionHistoryRepository,
+    private val habitRepository: HabitRepository,
+    private val routineCompletionHistoryRepository: RoutineCompletionHistoryRepository,
     private val insertRoutineStatus: InsertRoutineStatusUseCase,
 ) {
     suspend operator fun invoke(
@@ -35,13 +34,13 @@ class GetRoutineStatusUseCase(
     ): List<StatusEntry> {
         println("get routine status")
         return withContext(Dispatchers.Default) {
-            val habit: Habit = routineRepository.getRoutineById(routineId)
+            val habit: Habit = habitRepository.getHabitById(routineId)
             prepopulateHistoryWithMissingDates(habit, today)
 
             val resultingStatusList = mutableListOf<StatusEntry>()
 
             val completionHistoryPart =
-                completionHistoryRepository.getHistoryEntries(routineId, dates)
+                routineCompletionHistoryRepository.getHistoryEntries(routineId, dates)
             resultingStatusList.addAll(completionHistoryPart.map { it.toStatusEntry() })
 
             if (completionHistoryPart.isEmpty()) {
@@ -57,7 +56,7 @@ class GetRoutineStatusUseCase(
 
     private suspend fun prepopulateHistoryWithMissingDates(habit: Habit, today: LocalDate) {
         val yesterday = today.minus(DatePeriod(days = 1))
-        val lastDateInHistory = completionHistoryRepository.getLastHistoryEntry(habit.id!!)?.date
+        val lastDateInHistory = routineCompletionHistoryRepository.getLastHistoryEntry(habit.id!!)?.date
 
         val routineEndDate: LocalDate? = habit.schedule.endDate
         if (routineEndDate != null && yesterday > routineEndDate) return
@@ -91,13 +90,13 @@ class GetRoutineStatusUseCase(
         dateRange: LocalDateRange,
         habit: Habit,
     ): List<StatusEntry> {
-        val lastVacationStatus = completionHistoryRepository.getLastHistoryEntryByStatus(
+        val lastVacationStatus = routineCompletionHistoryRepository.getLastHistoryEntryByStatus(
             routineId = habit.id!!,
             matchingStatuses = onVacationHistoricalStatuses,
         )
 
         val statusList = mutableListOf<StatusEntry>()
-        val lastHistoryEntry = completionHistoryRepository.getLastHistoryEntry(habit.id!!)
+        val lastHistoryEntry = routineCompletionHistoryRepository.getLastHistoryEntry(habit.id!!)
         val schedule = habit.schedule
         val lastPeriod: LocalDateRange? = lastHistoryEntry?.let {
             if (schedule is Schedule.PeriodicSchedule) schedule.getPeriodRange(
@@ -108,7 +107,7 @@ class GetRoutineStatusUseCase(
         }
         val numOfTimesCompletedInLastPeriodAtTheMomentOfLastHistoryEntryDate =
             lastHistoryEntry?.let {
-                completionHistoryRepository.getTotalTimesCompletedInPeriod(
+                routineCompletionHistoryRepository.getTotalTimesCompletedInPeriod(
                     routineId = habit.id!!,
                     startDate = lastPeriod?.start ?: habit.schedule.startDate,
                     endDate = it.date,
@@ -117,7 +116,7 @@ class GetRoutineStatusUseCase(
         val periodSeparationEnabled =
             schedule is Schedule.PeriodicSchedule && schedule.periodSeparationEnabled
         val scheduleDeviationAtTheMomentOfLastHistoryEntryDate =
-            completionHistoryRepository.getScheduleDeviationInPeriod(
+            routineCompletionHistoryRepository.getScheduleDeviationInPeriod(
                 routineId = habit.id!!,
                 startDate = if (periodSeparationEnabled && lastPeriod != null) {
                     lastPeriod.start
@@ -127,28 +126,29 @@ class GetRoutineStatusUseCase(
                 endDate = dateRange.start,
             )
         val scheduleDeviationInCurrentPeriod = lastPeriod?.let {
-            completionHistoryRepository.getScheduleDeviationInPeriod(
+            routineCompletionHistoryRepository.getScheduleDeviationInPeriod(
                 routineId = habit.id!!,
                 startDate = it.start,
                 endDate = dateRange.start,
             )
         }
 
-        for (date in dateRange) {
-            habit.computePlanningStatus(
-                validationDate = date,
-                currentScheduleDeviation = scheduleDeviationAtTheMomentOfLastHistoryEntryDate,
-                actualDate = lastHistoryEntry?.date,
-                numOfTimesCompletedInCurrentPeriod = numOfTimesCompletedInLastPeriodAtTheMomentOfLastHistoryEntryDate,
-                scheduleDeviationInCurrentPeriod = scheduleDeviationInCurrentPeriod,
-                lastVacationEndDate = lastVacationStatus?.date,
-            )?.let {
-                statusList.add(StatusEntry(
-                    date = date,
-                    status = it,
-                ))
-            }
-        }
-        return statusList
+//        for (date in dateRange) {
+//            habit.computePlanningStatus(
+//                validationDate = date,
+//                currentScheduleDeviation = scheduleDeviationAtTheMomentOfLastHistoryEntryDate,
+//                actualDate = lastHistoryEntry?.date,
+//                numOfTimesCompletedInCurrentPeriod = numOfTimesCompletedInLastPeriodAtTheMomentOfLastHistoryEntryDate,
+//                scheduleDeviationInCurrentPeriod = scheduleDeviationInCurrentPeriod,
+//                lastVacationEndDate = lastVacationStatus?.date,
+//            )?.let {
+//                statusList.add(StatusEntry(
+//                    date = date,
+//                    status = it,
+//                ))
+//            }
+//        }
+//        return statusList
+        TODO()
     }
 }

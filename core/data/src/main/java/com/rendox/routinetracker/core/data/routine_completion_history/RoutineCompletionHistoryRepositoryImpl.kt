@@ -1,4 +1,4 @@
-package com.rendox.routinetracker.core.data.completion_history
+package com.rendox.routinetracker.core.data.routine_completion_history
 
 import com.rendox.routinetracker.core.database.completion_history.CompletionHistoryLocalDataSource
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
@@ -6,9 +6,9 @@ import com.rendox.routinetracker.core.model.CompletionHistoryEntry
 import com.rendox.routinetracker.core.model.HistoricalStatus
 import kotlinx.datetime.LocalDate
 
-class CompletionHistoryRepositoryImpl(
+class RoutineCompletionHistoryRepositoryImpl(
     private val localDataSource: CompletionHistoryLocalDataSource,
-) : CompletionHistoryRepository {
+) : RoutineCompletionHistoryRepository {
 
     override suspend fun getHistoryEntries(
         routineId: Long,

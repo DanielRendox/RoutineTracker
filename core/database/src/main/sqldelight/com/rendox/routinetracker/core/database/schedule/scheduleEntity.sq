@@ -20,7 +20,7 @@ CREATE TABLE scheduleEntity (
     numOfDueDaysInByNumOfDueDaysSchedule INTEGER AS Int,
     numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule INTEGER AS Int,
     numOfDaysInPeriodicCustomSchedule INTEGER AS Int,
-    FOREIGN KEY(id) REFERENCES routineEntity(id)
+    FOREIGN KEY(id) REFERENCES habitEntity(id)
 );
 
 getScheduleById:

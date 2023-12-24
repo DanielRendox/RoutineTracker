@@ -2,7 +2,7 @@ package com.rendox.routinetracker.feature.agenda
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rendox.routinetracker.core.data.routine.RoutineRepository
+import com.rendox.routinetracker.core.data.routine.HabitRepository
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.ToggleHistoricalStatusUseCase
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.GetRoutineStatusUseCase
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.InsertRoutineStatusUseCase
@@ -27,7 +27,7 @@ import kotlinx.datetime.todayIn
 
 class AgendaScreenViewModel(
     today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
-    private val routineRepository: RoutineRepository,
+    private val habitRepository: HabitRepository,
     private val getRoutineStatus: GetRoutineStatusUseCase,
     private val insertRoutineStatus: InsertRoutineStatusUseCase,
     private val toggleHistoricalStatus: ToggleHistoricalStatusUseCase,
@@ -72,7 +72,7 @@ class AgendaScreenViewModel(
 
     init {
         viewModelScope.launch {
-            allRoutinesFlow.update { routineRepository.getAllRoutines() }
+            allRoutinesFlow.update { habitRepository.getAllHabits() }
             updateRoutinesForDate(_currentDateFlow.value)
         }
     }

@@ -10,7 +10,7 @@ import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
 import com.rendox.routinetracker.core.database.completionhistory.CompletedLaterHistoryEntity
 import com.rendox.routinetracker.core.database.completionhistory.CompletionHistoryEntity
 import com.rendox.routinetracker.core.database.completiontime.SpecificDateCustomCompletionTime
-import com.rendox.routinetracker.core.database.routine.RoutineEntity
+import com.rendox.routinetracker.core.database.habit.HabitEntity
 import com.rendox.routinetracker.core.database.schedule.DueDateEntity
 import com.rendox.routinetracker.core.database.schedule.ScheduleEntity
 import com.rendox.routinetracker.core.database.schedule.WeekDayMonthRelatedEntity
@@ -42,7 +42,7 @@ val localDataSourceModule = module {
     single {
         RoutineTrackerDatabase(
             driver = get(),
-            routineEntityAdapter = RoutineEntity.Adapter(
+            habitEntityAdapter = HabitEntity.Adapter(
                 typeAdapter = EnumColumnAdapter(),
                 sessionDurationMinutesAdapter = IntColumnAdapter,
                 progressAdapter = FloatColumnAdapter,

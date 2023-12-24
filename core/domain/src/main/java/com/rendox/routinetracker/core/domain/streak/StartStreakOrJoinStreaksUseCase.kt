@@ -1,6 +1,6 @@
 package com.rendox.routinetracker.core.domain.streak
 
-import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
+import com.rendox.routinetracker.core.data.routine_completion_history.RoutineCompletionHistoryRepository
 import com.rendox.routinetracker.core.data.streak.StreakRepository
 import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.model.HistoricalStatus
@@ -14,21 +14,21 @@ import kotlinx.datetime.minus
 
 class StartStreakOrJoinStreaksUseCase(
     private val streakRepository: StreakRepository,
-    private val completionHistoryRepository: CompletionHistoryRepository,
+    private val routineCompletionHistoryRepository: RoutineCompletionHistoryRepository,
 ) {
     suspend operator fun invoke(habit: Habit, date: LocalDate) {
         val previousStreak = streakRepository.getStreakByDate(
             routineId = habit.id!!,
             dateWithinStreak = date.minus(DatePeriod(days = 1)),
         )
-        val nextCompletedEntry = completionHistoryRepository.getFirstHistoryEntryByStatus(
+        val nextCompletedEntry = routineCompletionHistoryRepository.getFirstHistoryEntryByStatus(
             routineId = habit.id!!,
             matchingStatuses = completedStatuses,
             minDate = date.plusDays(1),
         )
 
         val firstFailedStatusAfterCurrentDate =
-            completionHistoryRepository.getFirstHistoryEntryByStatus(
+            routineCompletionHistoryRepository.getFirstHistoryEntryByStatus(
                 routineId = habit.id!!,
                 matchingStatuses = failedStatuses,
                 minDate = date.plusDays(1),
@@ -60,7 +60,7 @@ class StartStreakOrJoinStreaksUseCase(
                 )
             }
         } else {
-            val lastNotCompleted = completionHistoryRepository.getLastHistoryEntryByStatus(
+            val lastNotCompleted = routineCompletionHistoryRepository.getLastHistoryEntryByStatus(
                 routineId = habit.id!!,
                 matchingStatuses = listOf(HistoricalStatus.NotCompleted),
             )

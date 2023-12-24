@@ -27,7 +27,7 @@ import org.koin.test.get
 class HabitLocalDataSourceImplTest : KoinTest {
 
     private lateinit var sqlDriver: SqlDriver
-    private lateinit var routineLocalDataSource: RoutineLocalDataSource
+    private lateinit var habitLocalDataSource: HabitLocalDataSource
 
     private val testModule = module {
         single {
@@ -47,7 +47,7 @@ class HabitLocalDataSourceImplTest : KoinTest {
         sqlDriver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         RoutineTrackerDatabase.Schema.create(sqlDriver)
 
-        routineLocalDataSource = RoutineLocalDataSourceImpl(
+        habitLocalDataSource = HabitLocalDataSourceImpl(
             db = get(), dispatcher = get()
         )
     }
@@ -73,8 +73,8 @@ class HabitLocalDataSourceImplTest : KoinTest {
             defaultCompletionTime = LocalTime(hour = 18, minute = 30),
         )
 
-        routineLocalDataSource.insertRoutine(habit)
-        val resultingRoutine = routineLocalDataSource.getRoutineById(habit.id!!)
+        habitLocalDataSource.insertHabit(habit)
+        val resultingRoutine = habitLocalDataSource.getHabitById(habit.id!!)
         assertThat(resultingRoutine).isEqualTo(habit)
     }
 
@@ -104,8 +104,8 @@ class HabitLocalDataSourceImplTest : KoinTest {
             schedule = schedule,
         )
 
-        routineLocalDataSource.insertRoutine(habit)
-        val resultingRoutine = routineLocalDataSource.getRoutineById(habit.id!!)
+        habitLocalDataSource.insertHabit(habit)
+        val resultingRoutine = habitLocalDataSource.getHabitById(habit.id!!)
         assertThat(resultingRoutine).isEqualTo(habit)
     }
 
@@ -137,8 +137,8 @@ class HabitLocalDataSourceImplTest : KoinTest {
             schedule = schedule,
         )
 
-        routineLocalDataSource.insertRoutine(habit)
-        val resultingRoutine = routineLocalDataSource.getRoutineById(habit.id!!)
+        habitLocalDataSource.insertHabit(habit)
+        val resultingRoutine = habitLocalDataSource.getHabitById(habit.id!!)
         assertThat(resultingRoutine).isEqualTo(habit)
     }
 
@@ -171,8 +171,8 @@ class HabitLocalDataSourceImplTest : KoinTest {
             schedule = schedule,
         )
 
-        routineLocalDataSource.insertRoutine(habit)
-        val resultingRoutine = routineLocalDataSource.getRoutineById(habit.id!!)
+        habitLocalDataSource.insertHabit(habit)
+        val resultingRoutine = habitLocalDataSource.getHabitById(habit.id!!)
         assertThat(resultingRoutine).isEqualTo(habit)
     }
 
@@ -200,8 +200,8 @@ class HabitLocalDataSourceImplTest : KoinTest {
             schedule = schedule,
         )
 
-        routineLocalDataSource.insertRoutine(habit)
-        val resultingRoutine = routineLocalDataSource.getRoutineById(habit.id!!)
+        habitLocalDataSource.insertHabit(habit)
+        val resultingRoutine = habitLocalDataSource.getHabitById(habit.id!!)
         assertThat(resultingRoutine).isEqualTo(habit)
     }
 
@@ -230,8 +230,8 @@ class HabitLocalDataSourceImplTest : KoinTest {
             schedule = schedule,
         )
 
-        routineLocalDataSource.insertRoutine(habit)
-        val resultingRoutine = routineLocalDataSource.getRoutineById(habit.id!!)
+        habitLocalDataSource.insertHabit(habit)
+        val resultingRoutine = habitLocalDataSource.getHabitById(habit.id!!)
         assertThat(resultingRoutine).isEqualTo(habit)
     }
 }

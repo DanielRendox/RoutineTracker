@@ -1,14 +1,14 @@
 package com.rendox.routinetracker.core.domain.completion_history
 
 import com.google.common.truth.Truth.assertThat
-import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
+import com.rendox.routinetracker.core.data.routine_completion_history.RoutineCompletionHistoryRepository
 import com.rendox.routinetracker.core.data.di.completionHistoryDataModule
 import com.rendox.routinetracker.core.data.di.routineDataModule
 import com.rendox.routinetracker.core.data.di.streakDataModule
-import com.rendox.routinetracker.core.data.routine.RoutineRepository
+import com.rendox.routinetracker.core.data.routine.HabitRepository
 import com.rendox.routinetracker.core.data.streak.StreakRepository
 import com.rendox.routinetracker.core.database.completion_history.CompletionHistoryLocalDataSource
-import com.rendox.routinetracker.core.database.routine.RoutineLocalDataSource
+import com.rendox.routinetracker.core.database.routine.HabitLocalDataSource
 import com.rendox.routinetracker.core.database.streak.StreakLocalDataSource
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.InsertRoutineStatusUseCase
 import com.rendox.routinetracker.core.domain.di.streakDomainModule
@@ -21,10 +21,10 @@ import com.rendox.routinetracker.core.model.HistoricalStatus
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.model.Streak
-import com.rendox.routinetracker.core.testcommon.fakes.routine.CompletionHistoryLocalDataSourceFake
-import com.rendox.routinetracker.core.testcommon.fakes.routine.RoutineData
-import com.rendox.routinetracker.core.testcommon.fakes.routine.RoutineLocalDataSourceFake
-import com.rendox.routinetracker.core.testcommon.fakes.routine.StreakLocalDataSourceFake
+import com.rendox.routinetracker.core.testcommon.fakes.habit.CompletionHistoryLocalDataSourceFake
+import com.rendox.routinetracker.core.testcommon.fakes.habit.HabitData
+import com.rendox.routinetracker.core.testcommon.fakes.habit.HabitLocalDataSourceFake
+import com.rendox.routinetracker.core.testcommon.fakes.habit.StreakLocalDataSourceFake
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DayOfWeek
@@ -44,25 +44,25 @@ import kotlin.test.assertFailsWith
 
 class InsertHabitStatusUseCaseTest : KoinTest {
 
-    private lateinit var routineRepository: RoutineRepository
-    private lateinit var completionHistoryRepository: CompletionHistoryRepository
+    private lateinit var habitRepository: HabitRepository
+    private lateinit var routineCompletionHistoryRepository: RoutineCompletionHistoryRepository
     private lateinit var insertRoutineStatus: InsertRoutineStatusUseCase
     private lateinit var streakRepository: StreakRepository
     private val today = LocalDate(2030, Month.JANUARY, 1)
 
     private val testModule = module {
-        single { RoutineData() }
+        single { HabitData() }
 
-        single<RoutineLocalDataSource> {
-            RoutineLocalDataSourceFake(routineData = get())
+        single<HabitLocalDataSource> {
+            HabitLocalDataSourceFake(habitData = get())
         }
 
         single<CompletionHistoryLocalDataSource> {
-            CompletionHistoryLocalDataSourceFake(routineData = get())
+            CompletionHistoryLocalDataSourceFake(habitData = get())
         }
 
         single<StreakLocalDataSource> {
-            StreakLocalDataSourceFake(routineData = get())
+            StreakLocalDataSourceFake(habitData = get())
         }
     }
 
@@ -78,13 +78,13 @@ class InsertHabitStatusUseCaseTest : KoinTest {
             )
         }
 
-        routineRepository = get()
-        completionHistoryRepository = get()
+        habitRepository = get()
+        routineCompletionHistoryRepository = get()
         streakRepository = get()
 
         insertRoutineStatus = InsertRoutineStatusUseCase(
-            completionHistoryRepository = completionHistoryRepository,
-            routineRepository = routineRepository,
+            routineCompletionHistoryRepository = routineCompletionHistoryRepository,
+            habitRepository = habitRepository,
             startStreakOrJoinStreaks = get(),
             breakStreak = get(),
         )
@@ -154,7 +154,7 @@ class InsertHabitStatusUseCaseTest : KoinTest {
             schedule = schedule,
         )
 
-        routineRepository.insertRoutine(habit)
+        habitRepository.insertHabit(habit)
 
         insertRoutineStatus(
             routineId = routineId,
@@ -281,7 +281,7 @@ class InsertHabitStatusUseCaseTest : KoinTest {
         )
 
         assertThat(
-            completionHistoryRepository.getHistoryEntries(
+            routineCompletionHistoryRepository.getHistoryEntries(
                 routineId = routineId,
                 dates = routineStartDate..routineEndDate,
             )
@@ -331,7 +331,7 @@ class InsertHabitStatusUseCaseTest : KoinTest {
             schedule = schedule,
         )
 
-        routineRepository.insertRoutine(habit)
+        habitRepository.insertHabit(habit)
 
         val completionHistory = listOf(
             false,  // Monday
@@ -403,7 +403,7 @@ class InsertHabitStatusUseCaseTest : KoinTest {
         }
 
         assertThat(
-            completionHistoryRepository.getHistoryEntries(
+            routineCompletionHistoryRepository.getHistoryEntries(
                 routineId = routineId,
                 dates = firstSixDaysOfFirstWeek.first().date..firstSixDaysOfFirstWeek.last().date,
             )
@@ -443,7 +443,7 @@ class InsertHabitStatusUseCaseTest : KoinTest {
         )
 
         assertThat(
-            completionHistoryRepository.getHistoryEntries(
+            routineCompletionHistoryRepository.getHistoryEntries(
                 routineId, firstWeek.first().date..firstWeek.last().date
             )
         ).isEqualTo(firstWeek)
@@ -520,7 +520,7 @@ class InsertHabitStatusUseCaseTest : KoinTest {
         fullHistorySoFar.addAll(firstWeek)
         fullHistorySoFar.addAll(secondWeek)
         assertThat(
-            completionHistoryRepository.getHistoryEntries(
+            routineCompletionHistoryRepository.getHistoryEntries(
                 routineId, routineStartDate..fullHistorySoFar.last().date
             )
         ).isEqualTo(fullHistorySoFar)
@@ -551,7 +551,7 @@ class InsertHabitStatusUseCaseTest : KoinTest {
         }
 
         assertThat(
-            completionHistoryRepository.getHistoryEntries(
+            routineCompletionHistoryRepository.getHistoryEntries(
                 routineId, routineStartDate..fullHistorySoFar.last().date
             )
         ).isEqualTo(fullHistorySoFar)
@@ -599,7 +599,7 @@ class InsertHabitStatusUseCaseTest : KoinTest {
             schedule = schedule,
         )
 
-        routineRepository.insertRoutine(habit)
+        habitRepository.insertHabit(habit)
 
         val completionHistory = listOf(
             false,  // Monday
@@ -671,7 +671,7 @@ class InsertHabitStatusUseCaseTest : KoinTest {
         }
 
         assertThat(
-            completionHistoryRepository.getHistoryEntries(
+            routineCompletionHistoryRepository.getHistoryEntries(
                 routineId = routineId,
                 dates = firstSixDaysOfFirstWeek.first().date..firstSixDaysOfFirstWeek.last().date,
             )
@@ -707,7 +707,7 @@ class InsertHabitStatusUseCaseTest : KoinTest {
         firstWeek[5] = firstWeek[5].copy(status = HistoricalStatus.CompletedLater)
 
         assertThat(
-            completionHistoryRepository.getHistoryEntries(
+            routineCompletionHistoryRepository.getHistoryEntries(
                 routineId, firstWeek.first().date..firstWeek.last().date
             )
         ).isEqualTo(firstWeek)
@@ -786,7 +786,7 @@ class InsertHabitStatusUseCaseTest : KoinTest {
         fullHistorySoFar[4] = fullHistorySoFar[4].copy(status = HistoricalStatus.CompletedLater)
 
         assertThat(
-            completionHistoryRepository.getHistoryEntries(
+            routineCompletionHistoryRepository.getHistoryEntries(
                 routineId, routineStartDate..fullHistorySoFar.last().date
             )
         ).isEqualTo(fullHistorySoFar)
@@ -826,7 +826,7 @@ class InsertHabitStatusUseCaseTest : KoinTest {
         }
 
         assertThat(
-            completionHistoryRepository.getHistoryEntries(
+            routineCompletionHistoryRepository.getHistoryEntries(
                 routineId = routineId,
                 dates = routineStartDate..fullHistorySoFar.last().date,
             )
@@ -868,7 +868,7 @@ class InsertHabitStatusUseCaseTest : KoinTest {
             schedule = schedule,
         )
 
-        routineRepository.insertRoutine(habit)
+        habitRepository.insertHabit(habit)
 
         val completionHistory = listOf(
             false,
@@ -931,7 +931,7 @@ class InsertHabitStatusUseCaseTest : KoinTest {
         )
 
         assertThat(
-            completionHistoryRepository.getHistoryEntries(
+            routineCompletionHistoryRepository.getHistoryEntries(
                 routineId, routineStartDate..routineStartDate.plusDays(4)
             )
         ).isEqualTo(expectedEntriesList)
@@ -1034,7 +1034,7 @@ class InsertHabitStatusUseCaseTest : KoinTest {
         )
 
         assertThat(
-            completionHistoryRepository.getHistoryEntries(
+            routineCompletionHistoryRepository.getHistoryEntries(
                 routineId = routineId,
                 dates = routineStartDate..routineStartDate.plusDays(14)
             )
@@ -1065,7 +1065,7 @@ class InsertHabitStatusUseCaseTest : KoinTest {
             schedule = schedule,
         )
 
-        routineRepository.insertRoutine(habit)
+        habitRepository.insertHabit(habit)
 
         val completionHistory = listOf(
             false,
@@ -1188,7 +1188,7 @@ class InsertHabitStatusUseCaseTest : KoinTest {
         )
 
         assertThat(
-            completionHistoryRepository.getHistoryEntries(
+            routineCompletionHistoryRepository.getHistoryEntries(
                 routineId,
                 routineStartDate..routineStartDate.plusDays(14)
             )
@@ -1223,7 +1223,7 @@ class InsertHabitStatusUseCaseTest : KoinTest {
             schedule = schedule,
         )
 
-        routineRepository.insertRoutine(habit)
+        habitRepository.insertHabit(habit)
 
         val completionHistory = mutableListOf<Boolean>()
         repeat(17) { completionHistory.add(false) }
@@ -1395,7 +1395,7 @@ class InsertHabitStatusUseCaseTest : KoinTest {
         }
 
         assertThat(
-            completionHistoryRepository.getHistoryEntries(
+            routineCompletionHistoryRepository.getHistoryEntries(
                 routineId,
                 routineStartDate..routineStartDate.plusDays(33)
             )
@@ -1432,7 +1432,7 @@ class InsertHabitStatusUseCaseTest : KoinTest {
             schedule = schedule,
         )
 
-        routineRepository.insertRoutine(habit)
+        habitRepository.insertHabit(habit)
 
         val history = mutableListOf<CompletionHistoryEntry>()
 
@@ -1640,7 +1640,7 @@ class InsertHabitStatusUseCaseTest : KoinTest {
         }
 
         assertThat(
-            completionHistoryRepository.getHistoryEntries(
+            routineCompletionHistoryRepository.getHistoryEntries(
                 routineId = routineId,
                 dates = routineStartDate..routineStartDate.plusDays(21),
             )

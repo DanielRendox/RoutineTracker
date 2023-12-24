@@ -1,13 +1,13 @@
 package com.rendox.routinetracker.core.domain.completion_history
 
 import com.google.common.truth.Truth.assertThat
-import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
+import com.rendox.routinetracker.core.data.routine_completion_history.RoutineCompletionHistoryRepository
 import com.rendox.routinetracker.core.data.di.completionHistoryDataModule
 import com.rendox.routinetracker.core.data.di.routineDataModule
 import com.rendox.routinetracker.core.data.di.streakDataModule
-import com.rendox.routinetracker.core.data.routine.RoutineRepository
+import com.rendox.routinetracker.core.data.routine.HabitRepository
 import com.rendox.routinetracker.core.database.completion_history.CompletionHistoryLocalDataSource
-import com.rendox.routinetracker.core.database.routine.RoutineLocalDataSource
+import com.rendox.routinetracker.core.database.routine.HabitLocalDataSource
 import com.rendox.routinetracker.core.database.streak.StreakLocalDataSource
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.GetRoutineStatusUseCase
 import com.rendox.routinetracker.core.domain.completion_history.use_cases.InsertRoutineStatusUseCase
@@ -21,10 +21,10 @@ import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.RoutineStatus
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.model.StatusEntry
-import com.rendox.routinetracker.core.testcommon.fakes.routine.CompletionHistoryLocalDataSourceFake
-import com.rendox.routinetracker.core.testcommon.fakes.routine.RoutineData
-import com.rendox.routinetracker.core.testcommon.fakes.routine.RoutineLocalDataSourceFake
-import com.rendox.routinetracker.core.testcommon.fakes.routine.StreakLocalDataSourceFake
+import com.rendox.routinetracker.core.testcommon.fakes.habit.CompletionHistoryLocalDataSourceFake
+import com.rendox.routinetracker.core.testcommon.fakes.habit.HabitData
+import com.rendox.routinetracker.core.testcommon.fakes.habit.HabitLocalDataSourceFake
+import com.rendox.routinetracker.core.testcommon.fakes.habit.StreakLocalDataSourceFake
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DayOfWeek
@@ -46,8 +46,8 @@ class GetHabitStatusUseCaseTest : KoinTest {
 
     private lateinit var insertRoutineStatusIntoHistory: InsertRoutineStatusUseCase
     private lateinit var getRoutineStatusList: GetRoutineStatusUseCase
-    private lateinit var routineRepository: RoutineRepository
-    private lateinit var completionHistoryRepository: CompletionHistoryRepository
+    private lateinit var habitRepository: HabitRepository
+    private lateinit var routineCompletionHistoryRepository: RoutineCompletionHistoryRepository
 
     private val routineId = 1L
     private val routineStartDate = LocalDate(2023, Month.OCTOBER, 11)
@@ -66,19 +66,19 @@ class GetHabitStatusUseCaseTest : KoinTest {
 
     private val testModule = module {
         single {
-            RoutineData()
+            HabitData()
         }
 
-        single<RoutineLocalDataSource> {
-            RoutineLocalDataSourceFake(routineData = get())
+        single<HabitLocalDataSource> {
+            HabitLocalDataSourceFake(habitData = get())
         }
 
         single<CompletionHistoryLocalDataSource> {
-            CompletionHistoryLocalDataSourceFake(routineData = get())
+            CompletionHistoryLocalDataSourceFake(habitData = get())
         }
 
         single<StreakLocalDataSource> {
-            StreakLocalDataSourceFake(routineData = get())
+            StreakLocalDataSourceFake(habitData = get())
         }
     }
 
@@ -94,19 +94,19 @@ class GetHabitStatusUseCaseTest : KoinTest {
             )
         }
 
-        routineRepository = get()
-        completionHistoryRepository = get()
+        habitRepository = get()
+        routineCompletionHistoryRepository = get()
 
         insertRoutineStatusIntoHistory = InsertRoutineStatusUseCase(
-            completionHistoryRepository = get(),
-            routineRepository = get(),
+            routineCompletionHistoryRepository = get(),
+            habitRepository = get(),
             startStreakOrJoinStreaks = get(),
             breakStreak = get(),
         )
 
         getRoutineStatusList = GetRoutineStatusUseCase(
-            routineRepository = get(),
-            completionHistoryRepository = get(),
+            habitRepository = get(),
+            routineCompletionHistoryRepository = get(),
             insertRoutineStatus = insertRoutineStatusIntoHistory,
         )
     }
@@ -124,7 +124,7 @@ class GetHabitStatusUseCaseTest : KoinTest {
             schedule = weeklyScheduleByNumOfDueDays,
         )
 
-        routineRepository.insertRoutine(habit)
+        habitRepository.insertHabit(habit)
 
         val randomDateBeforeRoutineStart =
             routineStartDate.minus(DatePeriod(days = Random.nextInt(1..50)))
@@ -146,7 +146,7 @@ class GetHabitStatusUseCaseTest : KoinTest {
             schedule = weeklyScheduleByNumOfDueDays,
         )
 
-        routineRepository.insertRoutine(habit)
+        habitRepository.insertHabit(habit)
 
         val expectedStatuses = mutableListOf<PlanningStatus>()
         repeat(4) { expectedStatuses.add(PlanningStatus.Planned) }
@@ -165,7 +165,7 @@ class GetHabitStatusUseCaseTest : KoinTest {
                 StatusEntry(routineStartDate.plusDays(index), status)
             }
         )
-        assertThat(routineRepository.getRoutineById(routineId)).isEqualTo(habit)
+        assertThat(habitRepository.getHabitById(routineId)).isEqualTo(habit)
     }
 
     @Test
@@ -176,7 +176,7 @@ class GetHabitStatusUseCaseTest : KoinTest {
             schedule = weeklyScheduleByNumOfDueDays,
         )
 
-        routineRepository.insertRoutine(habit)
+        habitRepository.insertHabit(habit)
 
         val thirdWeekPeriod =
             LocalDate(2023, Month.OCTOBER, 23)..LocalDate(2023, Month.OCTOBER, 29)
@@ -207,7 +207,7 @@ class GetHabitStatusUseCaseTest : KoinTest {
             schedule = weeklyScheduleByNumOfDueDays,
         )
 
-        routineRepository.insertRoutine(habit)
+        habitRepository.insertHabit(habit)
 
 
         val forthWeekPeriod =
@@ -244,12 +244,12 @@ class GetHabitStatusUseCaseTest : KoinTest {
             name = "",
             schedule = schedule,
         )
-        routineRepository.insertRoutine(habit)
+        habitRepository.insertHabit(habit)
 
         val completedDays =
             LocalDate(2023, Month.NOVEMBER, 6)..LocalDate(2023, Month.NOVEMBER, 9)
         completedDays.forEachIndexed { _, date ->
-            completionHistoryRepository.insertHistoryEntry(
+            routineCompletionHistoryRepository.insertHistoryEntry(
                 routineId = routineId,
                 entry = CompletionHistoryEntry(
                     date = date,
@@ -263,7 +263,7 @@ class GetHabitStatusUseCaseTest : KoinTest {
         val overCompletedDays =
             LocalDate(2023, Month.NOVEMBER, 10)..LocalDate(2023, Month.NOVEMBER, 12)
         overCompletedDays.forEachIndexed { _, date ->
-            completionHistoryRepository.insertHistoryEntry(
+            routineCompletionHistoryRepository.insertHistoryEntry(
                 routineId = routineId,
                 entry = CompletionHistoryEntry(
                     date = date,
@@ -300,7 +300,7 @@ class GetHabitStatusUseCaseTest : KoinTest {
             schedule = weeklyScheduleByNumOfDueDays,
         )
 
-        routineRepository.insertRoutine(habit)
+        habitRepository.insertHabit(habit)
 
         val weekAfterEndDatePeriod =
             LocalDate(2023, Month.NOVEMBER, 13)..LocalDate(2023, Month.NOVEMBER, 19)
