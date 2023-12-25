@@ -17,4 +17,9 @@ interface CompletionHistoryRepository {
         habitId: Long,
         completionRecord: Habit.CompletionRecord,
     )
+
+    suspend fun deleteCompletionByDate(
+        habitId: Long,
+        date: LocalDate,
+    )
 }

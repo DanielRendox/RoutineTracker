@@ -30,4 +30,8 @@ class CompletionHistoryRepositoryImpl(
     override suspend fun insertCompletion(habitId: Long, completionRecord: Habit.CompletionRecord) {
         localDataSource.insertCompletion(habitId, completionRecord)
     }
+
+    override suspend fun deleteCompletionByDate(habitId: Long, date: LocalDate) {
+        localDataSource.deleteCompletionByDate(habitId, date)
+    }
 }

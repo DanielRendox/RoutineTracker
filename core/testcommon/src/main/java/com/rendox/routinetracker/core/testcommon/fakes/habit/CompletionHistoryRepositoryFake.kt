@@ -39,4 +39,17 @@ class CompletionHistoryRepositoryFake(
             it.toMutableList().apply { add(habitId to completionRecord) }
         }
     }
+
+    override suspend fun deleteCompletionByDate(habitId: Long, date: LocalDate) {
+        habitData.completionHistory.update { completionHistory ->
+            val completionIndex = completionHistory.indexOfFirst {
+                it.first == habitId && it.second.date == date
+            }
+            if (completionIndex != -1) {
+                completionHistory.toMutableList().apply { removeAt(completionIndex) }
+            } else {
+                completionHistory
+            }
+        }
+    }
 }

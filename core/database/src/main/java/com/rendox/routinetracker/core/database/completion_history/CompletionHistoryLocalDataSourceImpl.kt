@@ -54,6 +54,12 @@ class CompletionHistoryLocalDataSourceImpl(
         }
     }
 
+    override suspend fun deleteCompletionByDate(habitId: Long, date: LocalDate) {
+        withContext(dispatcher) {
+            db.completionHistoryEntityQueries.deleteCompletionByDate(habitId, date)
+        }
+    }
+
     private suspend fun CompletionHistoryEntity.toExternalModel(): Habit.CompletionRecord? {
         val habitType = withContext(dispatcher) {
             db.habitEntityQueries.getHabitById(habitId).executeAsOneOrNull()?.type

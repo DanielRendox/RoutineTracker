@@ -9,7 +9,8 @@ CREATE TABLE completionHistoryEntity (
 );
 
 insertCompletion:
-INSERT INTO completionHistoryEntity
+INSERT OR REPLACE
+INTO completionHistoryEntity
 VALUES (?, ?, ?);
 
 getNumOfTimesCompletedInPeriod:
@@ -30,3 +31,7 @@ FROM completionHistoryEntity
 WHERE habitId = ?
 ORDER BY date DESC
 LIMIT 1;
+
+deleteCompletionByDate:
+DELETE FROM completionHistoryEntity
+WHERE habitId = ? AND date = ?;
