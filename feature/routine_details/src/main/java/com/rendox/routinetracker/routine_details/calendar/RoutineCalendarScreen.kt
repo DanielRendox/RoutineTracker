@@ -27,10 +27,9 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.rendox.routinetracker.core.model.RoutineStatus
+import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.ui.helpers.LocalLocale
 import com.rendox.routinetracker.feature.routine_details.R
-import kotlinx.datetime.LocalDate
 import java.time.YearMonth
 import java.time.temporal.WeekFields
 
@@ -39,37 +38,39 @@ internal fun RoutineCalendarRoute(
     modifier: Modifier = Modifier,
     viewModel: RoutineCalendarViewModel,
 ) {
+    val habit by viewModel.habitFlow.collectAsStateWithLifecycle()
     val routineCalendarDates by viewModel.visibleDatesFlow.collectAsStateWithLifecycle()
     val currentMonth by viewModel.currentMonthFlow.collectAsStateWithLifecycle()
     val currentStreakDurationInDays by viewModel.currentStreakDurationInDays.collectAsStateWithLifecycle()
     val longestStreakDurationInDays by viewModel.longestStreakDurationInDays.collectAsStateWithLifecycle()
 
-    RoutineCalendarScreen(
-        modifier = modifier,
-        routineCalendarDates = routineCalendarDates,
-        currentMonth = currentMonth,
-        currentStreakDurationInDays = currentStreakDurationInDays,
-        longestStreakDurationInDays = longestStreakDurationInDays,
-        onCalendarDateClick = { date, routineStatus ->
-            viewModel.onCalendarDateClick(
-                date = date,
-                routineStatusBeforeClick = routineStatus
-            )
-        },
-        onScrolledToNewMonth = { newMonth ->
-            viewModel.onScrolledToNewMonth(newMonth)
-        }
-    )
+    habit?.let {
+        RoutineCalendarScreen(
+            modifier = modifier,
+            habit = it,
+            routineCalendarDates = routineCalendarDates,
+            currentMonth = currentMonth,
+            currentStreakDurationInDays = currentStreakDurationInDays,
+            longestStreakDurationInDays = longestStreakDurationInDays,
+            insertCompletion = { completionRecord ->
+                viewModel.onHabitComplete(completionRecord)
+            },
+            onScrolledToNewMonth = { newMonth ->
+                viewModel.onScrolledToNewMonth(newMonth)
+            },
+        )
+    }
 }
 
 @Composable
 fun RoutineCalendarScreen(
     modifier: Modifier = Modifier,
+    habit: Habit,
     routineCalendarDates: List<RoutineCalendarDate>,
     currentMonth: YearMonth,
     currentStreakDurationInDays: Int,
     longestStreakDurationInDays: Int,
-    onCalendarDateClick: (LocalDate, RoutineStatus) -> Unit,
+    insertCompletion: (Habit.CompletionRecord) -> Unit,
     onScrolledToNewMonth: (YearMonth) -> Unit,
 ) {
     Column(
@@ -84,7 +85,21 @@ fun RoutineCalendarScreen(
             currentMonth = currentMonth,
             firstDayOfWeek = WeekFields.of(LocalLocale.current).firstDayOfWeek,
             routineCalendarDates = routineCalendarDates,
-            onDateClick = onCalendarDateClick,
+            onDateClick = { date ->
+                val numOfTimesCompleted =
+                    routineCalendarDates.find { it.date == date }?.numOfTimesCompleted
+                if (numOfTimesCompleted != null) {
+                    when (habit) {
+                        is Habit.YesNoHabit -> {
+                            val completion = Habit.YesNoHabit.CompletionRecord(
+                                date = date,
+                                numOfTimesCompleted = if (numOfTimesCompleted > 0F) 0F else 1F,
+                            )
+                            insertCompletion(completion)
+                        }
+                    }
+                }
+            },
             onScrolledToNewMonth = onScrolledToNewMonth,
         )
 

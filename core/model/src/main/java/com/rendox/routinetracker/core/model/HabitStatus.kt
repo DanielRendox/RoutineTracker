@@ -13,6 +13,9 @@ enum class HabitStatus {
     /** The habit is not due on this day because of its frequency */
     NotDue,
 
+    /** The user didn't complete the day and didn't need to, because of the habit's frequency. */
+    Skipped,
+
     /**
      * Although the habit is due on this day, the user may skip it
      * because they had over completed one of the days earlier.

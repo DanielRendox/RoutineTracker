@@ -29,6 +29,14 @@ sealed class Habit {
         data class CompletionRecord(
             override val date: LocalDate,
             override val numOfTimesCompleted: Float = 1f,
-        ) : Habit.CompletionRecord()
+        ) : Habit.CompletionRecord() {
+            constructor(
+                date: LocalDate,
+                completed: Boolean,
+            ) : this(
+                date = date,
+                numOfTimesCompleted = if (completed) 1f else 0f,
+            )
+        }
     }
 }

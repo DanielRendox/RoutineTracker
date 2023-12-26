@@ -4,22 +4,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kizitonwose.calendar.core.atStartOfMonth
 import com.kizitonwose.calendar.core.yearMonth
+import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
 import com.rendox.routinetracker.core.data.habit.HabitRepository
-import com.rendox.routinetracker.core.domain.completion_history.use_cases.GetRoutineStatusUseCase
-import com.rendox.routinetracker.core.domain.completion_history.use_cases.InsertRoutineStatusUseCase
-import com.rendox.routinetracker.core.domain.completion_history.use_cases.ToggleHistoricalStatusUseCase
-import com.rendox.routinetracker.core.domain.streak.GetDisplayStreaksUseCase
-import com.rendox.routinetracker.core.domain.streak.checkIfContainDate
+import com.rendox.routinetracker.core.domain.completion_history.HabitComputeStatusUseCase
+import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase
 import com.rendox.routinetracker.core.domain.streak.getCurrentStreak
 import com.rendox.routinetracker.core.domain.streak.getDurationInDays
 import com.rendox.routinetracker.core.domain.streak.getLongestStreak
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.DisplayStreak
-import com.rendox.routinetracker.core.model.PlanningStatus
 import com.rendox.routinetracker.core.model.Habit
-import com.rendox.routinetracker.core.model.RoutineStatus
-import com.rendox.routinetracker.core.model.StatusEntry
+import com.rendox.routinetracker.core.model.HabitStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -38,15 +34,17 @@ import kotlinx.datetime.todayIn
 import java.time.YearMonth
 
 class RoutineCalendarViewModel(
-    private val today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
+    today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
     private val routineId: Long,
     private val habitRepository: HabitRepository,
-    private val getRoutineStatusList: GetRoutineStatusUseCase,
-    private val insertRoutineStatus: InsertRoutineStatusUseCase,
-    private val toggleRoutineStatus: ToggleHistoricalStatusUseCase,
-    private val getAllStreaks: GetDisplayStreaksUseCase
+    private val computeHabitStatus: HabitComputeStatusUseCase,
+    private val completionHistoryRepository: CompletionHistoryRepository,
+    private val insertHabitCompletion: InsertHabitCompletionUseCase,
 ) : ViewModel() {
-    private lateinit var habit: Habit
+    private val _habitFlow: MutableStateFlow<Habit?> = MutableStateFlow(null)
+    val habitFlow: StateFlow<Habit?> = _habitFlow.asStateFlow()
+
+    private val todayFlow = MutableStateFlow(today)
 
     private val cashedDatesFlow: MutableStateFlow<Map<YearMonth, List<RoutineCalendarDate>>> =
         MutableStateFlow(emptyMap())
@@ -83,14 +81,8 @@ class RoutineCalendarViewModel(
 
     init {
         viewModelScope.launch {
-            habit = habitRepository.getHabitById(routineId)
-            streaksFlow.update {
-                val streaks = getAllStreaks(routineId = routineId, today = today)
-                println("all streaks = $streaks")
-                streaks
-            }
-        }
-        viewModelScope.launch {
+            _habitFlow.update { habitRepository.getHabitById(routineId) }
+
             val monthStart = _currentMonthFlow.value.atStartOfMonth().toKotlinLocalDate()
             val monthEnd = _currentMonthFlow.value.atEndOfMonth().toKotlinLocalDate()
             val initialMonthPeriod = fetchAndDeriveCalendarDates(period = monthStart..monthEnd)
@@ -103,21 +95,28 @@ class RoutineCalendarViewModel(
     private suspend fun fetchAndDeriveCalendarDates(
         period: LocalDateRange
     ): List<RoutineCalendarDate> {
-        val routineStatusesForCurrentMonth: List<StatusEntry> = getRoutineStatusList(
-            routineId = routineId,
-            dates = period,
-            today = today,
-        )
-        println("RoutineCalendarViewModelLog routineStatusesForCurrentMonth = $routineStatusesForCurrentMonth")
-        return routineStatusesForCurrentMonth.map {
-            val includedInStreak = streaksFlow.value.checkIfContainDate(it.date)
-            println("${it.date} included in streak = $includedInStreak")
-            RoutineCalendarDate(
-                date = it.date,
-                status = it.status,
-                includedInStreak = includedInStreak,
+        val currentMonthCalendarDates = mutableListOf<RoutineCalendarDate>()
+        for (date in period) {
+            val habitStatus = computeHabitStatus(
+                habitId = _habitFlow.value?.id!!,
+                validationDate = date,
+                today = todayFlow.value,
+            )
+            val numOfTimesCompleted = completionHistoryRepository.getRecordByDate(
+                habitId = _habitFlow.value?.id!!,
+                date = date,
+            )?.numOfTimesCompleted ?: 0F
+
+            currentMonthCalendarDates.add(
+                RoutineCalendarDate(
+                    date = date,
+                    status = habitStatus,
+                    includedInStreak = false, // TODO Implement streaks
+                    numOfTimesCompleted = numOfTimesCompleted,
+                )
             )
         }
+        return currentMonthCalendarDates
     }
 
     fun onScrolledToNewMonth(newMonth: YearMonth) {
@@ -135,42 +134,33 @@ class RoutineCalendarViewModel(
         }
     }
 
-    fun onCalendarDateClick(date: LocalDate, routineStatusBeforeClick: RoutineStatus) {
+    fun onHabitComplete(completionRecord: Habit.CompletionRecord) {
         viewModelScope.launch {
-            if (routineStatusBeforeClick is PlanningStatus) {
-                insertRoutineStatus(
-                    routineId = routineId,
-                    currentDate = date,
-                    completedOnCurrentDate = true,
-                    today = today,
+            try {
+                insertHabitCompletion(
+                    habitId = routineId,
+                    completionRecord = completionRecord,
+                    today = todayFlow.value,
                 )
-            } else {
-                toggleRoutineStatus(
-                    routineId = routineId,
-                    currentDate = date,
-                    today = today,
-                )
-            }
-
-            val streaks = getAllStreaks(routineId = routineId, today = today)
-            streaksFlow.update {
-                streaks
+            } catch (e: InsertHabitCompletionUseCase.IllegalDateException) {
+                // TODO display a snackbar
             }
 
             val monthStart = _currentMonthFlow.value.atStartOfMonth().toKotlinLocalDate()
             val monthEnd = _currentMonthFlow.value.atEndOfMonth().toKotlinLocalDate()
             val initialMonthPeriod = fetchAndDeriveCalendarDates(period = monthStart..monthEnd)
-            println("RoutineCalendarViewModelLog current month history: $initialMonthPeriod")
-            println("RoutineCalendarViewModelLog streaks = $streaks")
             cashedDatesFlow.update {
                 it.toMutableMap().apply { put(_currentMonthFlow.value, initialMonthPeriod) }
             }
         }
     }
+
+    // TODO update todayFlow when the date changes (in case the screen is opened at midnight)
 }
 
 data class RoutineCalendarDate(
     val date: LocalDate,
-    val status: RoutineStatus,
+    val status: HabitStatus,
     val includedInStreak: Boolean,
+    val numOfTimesCompleted: Float,
 )

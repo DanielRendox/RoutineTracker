@@ -102,7 +102,7 @@ class HabitComputeStatusUseCase(
             if (numOfTimesCompletedOnValidationDate > 0f) {
                 return HabitStatus.OverCompleted
             }
-            return HabitStatus.NotDue
+            return if (validationDate < today) HabitStatus.Skipped else HabitStatus.NotDue
         }
     }
 

@@ -29,7 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.rendox.routinetracker.core.model.RoutineStatus
+import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.ui.helpers.LocalLocale
 import com.rendox.routinetracker.feature.agenda.databinding.AgendaRecyclerviewBinding
 import kotlinx.datetime.toJavaLocalDate
@@ -56,8 +56,8 @@ internal fun AgendaRoute(
         today = LocalDate.now(),
         onAddRoutineClick = onAddRoutineClick,
         onRoutineClick = onRoutineClick,
-        onStatusCheckmarkClick = { routineId, status ->
-            viewModel.onRoutineStatusCheckmarkClick(routineId, currentDate, status)
+        insertCompletion = { routineId, completionRecord ->
+            viewModel.onHabitComplete(routineId, completionRecord)
         },
         onDateChange = { viewModel.onDateChange(it.toKotlinLocalDate()) },
         onNotDueRoutinesVisibilityToggle = {
@@ -75,7 +75,7 @@ internal fun AgendaScreen(
     today: LocalDate,
     onAddRoutineClick: () -> Unit,
     onRoutineClick: (Long) -> Unit,
-    onStatusCheckmarkClick: (Long, RoutineStatus) -> Unit,
+    insertCompletion: (Long, Habit.CompletionRecord) -> Unit,
     onDateChange: (LocalDate) -> Unit,
     onNotDueRoutinesVisibilityToggle: () -> Unit,
 ) {
@@ -138,13 +138,21 @@ internal fun AgendaScreen(
                 dateOnClick = onDateChange,
                 today = today,
             )
-                AgendaList(
-                    routineList = routineList ?: emptyList(),
-                    onRoutineClick = onRoutineClick,
-                    onStatusCheckmarkClick = { routineId, status ->
-                        onStatusCheckmarkClick(routineId, status)
-                    },
-                )
+            AgendaList(
+                routineList = routineList ?: emptyList(),
+                onRoutineClick = onRoutineClick,
+                onStatusCheckmarkClick = { routine ->
+                    when (routine.type) {
+                        DisplayHabitType.YesNoHabit -> {
+                            val completion = Habit.YesNoHabit.CompletionRecord(
+                                date = currentDate.toKotlinLocalDate(),
+                                numOfTimesCompleted = if (routine.numOfTimesCompleted > 0F) 0F else 1F,
+                            )
+                            insertCompletion(routine.id, completion)
+                        }
+                    }
+                },
+            )
         }
     }
 }
@@ -153,13 +161,13 @@ internal fun AgendaScreen(
 private fun AgendaList(
     routineList: List<DisplayRoutine>,
     onRoutineClick: (Long) -> Unit,
-    onStatusCheckmarkClick: (Long, RoutineStatus) -> Unit,
+    onStatusCheckmarkClick: (DisplayRoutine) -> Unit,
 ) {
     AndroidViewBinding(AgendaRecyclerviewBinding::inflate) {
         val adapter = AgendaListAdapter(
             routineList = routineList,
             onRoutineClick = onRoutineClick,
-            onStatusCheckmarkClick = onStatusCheckmarkClick,
+            onCheckmarkClick = onStatusCheckmarkClick,
         )
         agendaRecyclerview.adapter = adapter
     }

@@ -17,6 +17,7 @@ val completionHistoryDomainModule = module {
     single {
         InsertHabitCompletionUseCase(
             completionHistoryRepository = get(),
+            habitRepository = get(),
         )
     }
 }

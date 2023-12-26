@@ -642,6 +642,16 @@ class HabitComputeStatusUseCaseTest {
         assertThat(habitStatus).isEqualTo(HabitStatus.Finished)
     }
 
+    @Test
+    fun `past date, not due, not completed, no backlog, assert status is Skipped`() = runTest {
+        val habitStatus = computeStatus(
+            habitId = 1L,
+            validationDate = LocalDate(2023, 12, 5), // Tuesday
+            today = LocalDate(2024, 1, 1),
+        )
+        assertThat(habitStatus).isEqualTo(HabitStatus.Skipped)
+    }
+
     companion object {
         private fun getDueDatesInPeriod(
             period: LocalDateRange,
