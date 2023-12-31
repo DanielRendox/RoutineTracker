@@ -1,11 +1,7 @@
 package com.rendox.routinetracker.routine_details.navigation
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.TweenSpec
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
@@ -33,23 +29,11 @@ fun NavGraphBuilder.routineDetailsScreen(popBackStack: () -> Unit) {
             navArgument(routineIdArg) { type = NavType.LongType }
         ),
         enterTransition = {
-            fadeIn() + scaleIn(
-                initialScale = 0.75f,
-                animationSpec = TweenSpec(
-                    durationMillis = 100,
-                    easing = LinearEasing,
-                )
-            )
+            EnterTransition.None
         },
         exitTransition = {
-            fadeOut() + scaleOut(
-                targetScale = 0.75f,
-                animationSpec = TweenSpec(
-                    durationMillis = 100,
-                    easing = LinearEasing,
-                )
-            )
-        }
+            ExitTransition.None
+        },
     ) {
         val routineId = it.arguments!!.getLong(routineIdArg)
         RoutineDetailsRoute(
