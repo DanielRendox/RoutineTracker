@@ -140,7 +140,7 @@ class HabitComputeStatusUseCase(
                     getNumOfDueAndNotDueTimesInPeriod(
                         habit = habit,
                         period = today..validationDate,
-                    ).first
+                    ).second
                 } else {
                     0.0
                 }
@@ -188,7 +188,11 @@ class HabitComputeStatusUseCase(
         val actualDate = if (currentDate <= today) {
             currentDate.minus(DatePeriod(days = 1))
         } else {
-            today
+            if (completionHistoryRepository.getRecordByDate(habit.id!!, today) != null) {
+                today
+            } else {
+                today.minus(DatePeriod(days = 1))
+            }
         }
 
         val schedule = habit.schedule
@@ -230,12 +234,18 @@ class HabitComputeStatusUseCase(
         currentDate: LocalDate,
         lastVacationEndDate: LocalDate?,
     ): Boolean {
+        if (!habit.schedule.backlogEnabled) return false
+
         val schedule = habit.schedule
         val currentDatePeriod: LocalDateRange? =
-            if (schedule is Schedule.PeriodicSchedule && schedule.periodSeparationEnabled) schedule.getPeriodRange(
-                currentDate = currentDate,
-                lastVacationEndDate = lastVacationEndDate,
-            ) else null
+            if (schedule is Schedule.PeriodicSchedule && schedule.periodSeparationEnabled) {
+                schedule.getPeriodRange(
+                    currentDate = currentDate,
+                    lastVacationEndDate = lastVacationEndDate,
+                )
+            } else {
+                null
+            }
 
         val lastCompletedDate =
             completionHistoryRepository.getLastCompletedRecord(habit.id!!)?.date ?: return false
@@ -250,11 +260,7 @@ class HabitComputeStatusUseCase(
             }
 
         var numOfDueTimes = 0.0
-        val numOfTimesCompleted = completionHistoryRepository.getNumOfTimesCompletedInPeriod(
-            habitId = habit.id!!,
-            minDate = firstDateToLookFor,
-            maxDate = lastDateToLookFor,
-        )
+        var numOfTimesCompleted = 0.0
         val numOfDueTimesOnCurrentDate = habit.getNumOfDueTimesOnDate(
             date = currentDate,
             lastVacationEndDate = lastVacationEndDate,
@@ -265,8 +271,12 @@ class HabitComputeStatusUseCase(
                 date = date,
                 lastVacationEndDate = lastVacationEndDate,
             )
-            val scheduleDeviation = numOfTimesCompleted - numOfDueTimes
+            numOfTimesCompleted += completionHistoryRepository.getRecordByDate(
+                habitId = habit.id!!,
+                date = date,
+            )?.numOfTimesCompleted?.toDouble() ?: 0.0
 
+            val scheduleDeviation = numOfTimesCompleted - numOfDueTimes
             if (scheduleDeviation >= numOfDueTimesOnCurrentDate) return true
         }
         return false

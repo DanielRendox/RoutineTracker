@@ -72,5 +72,8 @@ private fun Schedule.ByNumOfDueDays.scheduleByNumOfDueDaysIsDue(
         lastVacationEndDate = lastVacationEndDate,
     ) ?: return false
     val validationDateNumber = validationDatePeriod.start.daysUntil(validationDate) + 1
-    return validationDateNumber <= getNumOfDueDatesInPeriod(validationDatePeriod)
+    val scheduleStartDate = (this as Schedule).startDate
+    val numOfDueDays =
+        getNumOfDueDates(getForFirstPeriod = scheduleStartDate in validationDatePeriod)
+    return validationDateNumber <= numOfDueDays
 }

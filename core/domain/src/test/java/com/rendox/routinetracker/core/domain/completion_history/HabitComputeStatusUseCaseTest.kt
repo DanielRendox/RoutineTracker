@@ -270,7 +270,7 @@ class HabitComputeStatusUseCaseTest {
             completionHistoryRepository.insertCompletion(
                 habitId = 1L,
                 completionRecord = Habit.YesNoHabit.CompletionRecord(
-                    date = defaultSchedule.startDate.plusDays(dayIndex), // Wednesday
+                    date = defaultSchedule.startDate.plusDays(dayIndex),
                 )
             )
         }

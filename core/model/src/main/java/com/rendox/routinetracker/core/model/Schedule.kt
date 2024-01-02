@@ -1,7 +1,6 @@
 package com.rendox.routinetracker.core.model
 
 import com.rendox.routinetracker.core.logic.time.AnnualDate
-import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DateTimeUnit
@@ -22,19 +21,19 @@ sealed class Schedule {
     abstract val supportsScheduleDeviation: Boolean
     abstract val supportsPeriodSeparation: Boolean
 
-    sealed class PeriodicSchedule: Schedule() {
+    sealed class PeriodicSchedule : Schedule() {
         abstract val periodSeparationEnabled: Boolean
         abstract val correspondingPeriod: DatePeriod
 
         override val supportsScheduleDeviation = true
     }
 
-    sealed class NonPeriodicSchedule: Schedule() {
+    sealed class NonPeriodicSchedule : Schedule() {
         override val supportsPeriodSeparation = false
     }
 
     sealed interface ByNumOfDueDays {
-        fun getNumOfDueDatesInPeriod(period: LocalDateRange): Int
+        fun getNumOfDueDates(getForFirstPeriod: Boolean): Int
     }
 
     data class EveryDaySchedule(
@@ -114,13 +113,12 @@ sealed class Schedule {
             }
         }
 
-        override fun getNumOfDueDatesInPeriod(period: LocalDateRange): Int {
-            numOfDueDaysInFirstPeriod?.let {
-                val isFirstPeriod = startDate in period
-                if (isFirstPeriod) return it
+        override fun getNumOfDueDates(getForFirstPeriod: Boolean): Int =
+            if (getForFirstPeriod && numOfDueDaysInFirstPeriod != null) {
+                numOfDueDaysInFirstPeriod
+            } else {
+                numOfDueDays
             }
-            return numOfDueDays
-        }
     }
 
     sealed class MonthlySchedule : PeriodicSchedule() {
@@ -191,13 +189,12 @@ sealed class Schedule {
             }
         }
 
-        override fun getNumOfDueDatesInPeriod(period: LocalDateRange): Int {
-            numOfDueDaysInFirstPeriod?.let {
-                val isFirstPeriod = startDate in period
-                if (isFirstPeriod) return it
+        override fun getNumOfDueDates(getForFirstPeriod: Boolean): Int =
+            if (getForFirstPeriod && numOfDueDaysInFirstPeriod != null) {
+                numOfDueDaysInFirstPeriod
+            } else {
+                numOfDueDays
             }
-            return numOfDueDays
-        }
     }
 
     data class PeriodicCustomSchedule(
@@ -219,7 +216,7 @@ sealed class Schedule {
         override val correspondingPeriod: DatePeriod
             get() = DatePeriod(days = numOfDaysInPeriod)
 
-        override fun getNumOfDueDatesInPeriod(period: LocalDateRange): Int {
+        override fun getNumOfDueDates(getForFirstPeriod: Boolean): Int {
             return numOfDueDays
         }
     }
@@ -299,13 +296,12 @@ sealed class Schedule {
             }
         }
 
-        override fun getNumOfDueDatesInPeriod(period: LocalDateRange): Int {
-            numOfDueDaysInFirstPeriod?.let {
-                val isFirstPeriod = startDate in period
-                if (isFirstPeriod) return it
+        override fun getNumOfDueDates(getForFirstPeriod: Boolean): Int =
+            if (getForFirstPeriod && numOfDueDaysInFirstPeriod != null) {
+                numOfDueDaysInFirstPeriod
+            } else {
+                numOfDueDays
             }
-            return numOfDueDays
-        }
     }
 }
 
