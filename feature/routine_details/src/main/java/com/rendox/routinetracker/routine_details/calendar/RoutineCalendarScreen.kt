@@ -30,6 +30,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.ui.helpers.LocalLocale
 import com.rendox.routinetracker.feature.routine_details.R
+import kotlinx.datetime.LocalDate
 import java.time.YearMonth
 import java.time.temporal.WeekFields
 
@@ -39,7 +40,7 @@ internal fun RoutineCalendarRoute(
     viewModel: RoutineCalendarViewModel,
 ) {
     val habit by viewModel.habitFlow.collectAsStateWithLifecycle()
-    val routineCalendarDates by viewModel.visibleDatesFlow.collectAsStateWithLifecycle()
+    val routineCalendarDates by viewModel.calendarDatesFlow.collectAsStateWithLifecycle()
     val currentMonth by viewModel.currentMonthFlow.collectAsStateWithLifecycle()
     val currentStreakDurationInDays by viewModel.currentStreakDurationInDays.collectAsStateWithLifecycle()
     val longestStreakDurationInDays by viewModel.longestStreakDurationInDays.collectAsStateWithLifecycle()
@@ -66,7 +67,7 @@ internal fun RoutineCalendarRoute(
 fun RoutineCalendarScreen(
     modifier: Modifier = Modifier,
     habit: Habit,
-    routineCalendarDates: List<RoutineCalendarDate>,
+    routineCalendarDates: Map<LocalDate, CalendarDateData>,
     currentMonth: YearMonth,
     currentStreakDurationInDays: Int,
     longestStreakDurationInDays: Int,
@@ -86,8 +87,7 @@ fun RoutineCalendarScreen(
             firstDayOfWeek = WeekFields.of(LocalLocale.current).firstDayOfWeek,
             routineCalendarDates = routineCalendarDates,
             onDateClick = { date ->
-                val numOfTimesCompleted =
-                    routineCalendarDates.find { it.date == date }?.numOfTimesCompleted
+                val numOfTimesCompleted = routineCalendarDates[date]?.numOfTimesCompleted
                 if (numOfTimesCompleted != null) {
                     when (habit) {
                         is Habit.YesNoHabit -> {
@@ -114,8 +114,7 @@ fun RoutineCalendarScreen(
                 count = currentStreakDurationInDays,
             )
             val longestStreakDurationInDaysString = pluralStringResource(
-                id = com.rendox.routinetracker.core.ui.
-                R.plurals.num_of_days,
+                id = com.rendox.routinetracker.core.ui.R.plurals.num_of_days,
                 count = longestStreakDurationInDays,
             )
 

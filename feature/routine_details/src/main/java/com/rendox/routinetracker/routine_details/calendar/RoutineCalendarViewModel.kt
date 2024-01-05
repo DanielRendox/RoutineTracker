@@ -3,6 +3,7 @@ package com.rendox.routinetracker.routine_details.calendar
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kizitonwose.calendar.core.atStartOfMonth
+import com.kizitonwose.calendar.core.yearMonth
 import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
 import com.rendox.routinetracker.core.data.habit.HabitRepository
 import com.rendox.routinetracker.core.domain.completion_history.HabitComputeStatusUseCase
@@ -14,23 +15,22 @@ import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.DisplayStreak
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.HabitStatus
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
-import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.minus
+import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toKotlinLocalDate
 import kotlinx.datetime.todayIn
 import java.time.YearMonth
@@ -43,28 +43,22 @@ class RoutineCalendarViewModel(
     private val computeHabitStatus: HabitComputeStatusUseCase,
     private val completionHistoryRepository: CompletionHistoryRepository,
     private val insertHabitCompletion: InsertHabitCompletionUseCase,
+    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default,
+    private val mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
 ) : ViewModel() {
     private val _habitFlow: MutableStateFlow<Habit?> = MutableStateFlow(null)
     val habitFlow: StateFlow<Habit?> = _habitFlow.asStateFlow()
 
     private val todayFlow = MutableStateFlow(today)
 
-    private val cashedDatesFlow: MutableStateFlow<Map<YearMonth, List<RoutineCalendarDate>>> =
-        MutableStateFlow(emptyMap())
+    private val _calendarDatesFlow = MutableStateFlow(emptyMap<LocalDate, CalendarDateData>())
+    val calendarDatesFlow = _calendarDatesFlow.asStateFlow()
+
     private val streaksFlow = MutableStateFlow(emptyList<DisplayStreak>())
 
     private val _currentMonthFlow: MutableStateFlow<YearMonth> =
-        MutableStateFlow(YearMonth.of(today.year, today.month))
+        MutableStateFlow(YearMonth.from(todayFlow.value.toJavaLocalDate()))
     val currentMonthFlow: StateFlow<YearMonth> = _currentMonthFlow.asStateFlow()
-
-    val visibleDatesFlow: StateFlow<List<RoutineCalendarDate>> =
-        combine(_currentMonthFlow, cashedDatesFlow) { currentMonth, cashedDates ->
-            cashedDates[currentMonth] ?: emptyList()
-        }.stateIn(
-            scope = viewModelScope,
-            initialValue = emptyList(),
-            started = SharingStarted.WhileSubscribed(5_000),
-        )
 
     val currentStreakDurationInDays: StateFlow<Int> = streaksFlow.map { streaks ->
         streaks.getCurrentStreak(today)?.getDurationInDays() ?: 0
@@ -82,25 +76,55 @@ class RoutineCalendarViewModel(
         started = SharingStarted.WhileSubscribed(5_000),
     )
 
+    private val monthsThatAreCurrentlyBeingUpdated = MutableStateFlow(emptyList<YearMonth>())
+
     init {
-        viewModelScope.launch {
+        viewModelScope.launch(mainDispatcher) {
             _habitFlow.update { habitRepository.getHabitById(routineId) }
         }
 
-        viewModelScope.launch {
-            val visibleMonthStart = _currentMonthFlow.value.atStartOfMonth().toKotlinLocalDate()
-            val visibleMonthEnd = _currentMonthFlow.value.atEndOfMonth().toKotlinLocalDate()
-            val updateVisibleDateJobs = mutableListOf<Job>()
-            for (date in visibleMonthStart..visibleMonthEnd) {
-                val job = launch {
-                    updateStatusForDate(date)
-                }
-                updateVisibleDateJobs.add(job)
+        viewModelScope.launch(defaultDispatcher) {
+            updateMonth(_currentMonthFlow.value)
+            for (i in 1..NumOfMonthsToLoadInitially) {
+                updateMonth(_currentMonthFlow.value.plusMonths(i.toLong()))
+                updateMonth(_currentMonthFlow.value.minusMonths(i.toLong()))
             }
-            updateVisibleDateJobs.joinAll()
+        }
+    }
 
-            updateNextMonths(currentMonth = _currentMonthFlow.value, numOfMonthsToUpdate = 5)
-            updatePreviousMonths(currentMonth = _currentMonthFlow.value, numOfMonthsToUpdate = 5)
+    /**
+     * @param forceUpdate update the data even if it's already loaded
+     */
+    private suspend fun updateMonth(month: YearMonth, forceUpdate: Boolean = false) {
+        if (!forceUpdate) {
+            val dataForMonthIsAlreadyLoaded = _calendarDatesFlow.value.keys.find {
+                it.toJavaLocalDate().yearMonth == month
+            } != null
+            if (dataForMonthIsAlreadyLoaded) return
+        }
+
+        val thisMonthIsAlreadyBeingUpdated =
+            monthsThatAreCurrentlyBeingUpdated.value.contains(month)
+        if (thisMonthIsAlreadyBeingUpdated && !forceUpdate) return
+
+        monthsThatAreCurrentlyBeingUpdated.update { oldValue ->
+            oldValue.toMutableList().apply { add(month) }
+        }
+
+        val monthStart = month.atStartOfMonth().toKotlinLocalDate()
+        val monthEnd = month.atEndOfMonth().toKotlinLocalDate()
+
+        val updateDateJobs = mutableListOf<Job>()
+        for (date in monthStart..monthEnd) {
+            val job = viewModelScope.launch(defaultDispatcher) {
+                updateStatusForDate(date)
+            }
+            updateDateJobs.add(job)
+        }
+        updateDateJobs.joinAll()
+
+        monthsThatAreCurrentlyBeingUpdated.update { oldValue ->
+            oldValue.toMutableList().apply { remove(month) }
         }
     }
 
@@ -115,92 +139,52 @@ class RoutineCalendarViewModel(
             date = date,
         )?.numOfTimesCompleted ?: 0F
 
-        val routineCalendarDate = RoutineCalendarDate(
-            date = date,
+        val calendarDateData = CalendarDateData(
             status = habitStatus,
             includedInStreak = false, // TODO Implement streaks
             numOfTimesCompleted = numOfTimesCompleted,
         )
 
-        cashedDatesFlow.update { oldValue ->
-            oldValue.toMutableMap().also { cashedDates ->
-                val currentMonth = YearMonth.of(date.year, date.month)
-                val currentMonthDates = cashedDates[currentMonth] ?: emptyList()
-                cashedDates[currentMonth] = currentMonthDates.toMutableList().apply {
-                    val indexOfDate = indexOfFirst { it.date == date }
-                    if (indexOfDate == -1) {
-                        add(routineCalendarDate)
-                    } else {
-                        set(indexOfDate, routineCalendarDate)
-                    }
-                }
-            }
-        }
-    }
-
-    private fun CoroutineScope.updatePreviousMonths(
-        currentMonth: YearMonth, numOfMonthsToUpdate: Int
-    ) {
-        val pastPeriodStart =
-            currentMonth.minusMonths(numOfMonthsToUpdate.toLong()).atStartOfMonth()
-                .toKotlinLocalDate()
-        val pastPeriodEnd =
-            currentMonth.minusMonths(1).atEndOfMonth().toKotlinLocalDate()
-        var date = pastPeriodEnd
-        while (date != pastPeriodStart) {
-            launch {
-                updateStatusForDate(date)
-            }
-            date = date.minus(DatePeriod(days = 1))
-        }
-    }
-
-    private fun CoroutineScope.updateNextMonths(
-        currentMonth: YearMonth, numOfMonthsToUpdate: Int
-    ) {
-        val futurePeriodStart =
-            currentMonth.plusMonths(1).atStartOfMonth().toKotlinLocalDate()
-        val futurePeriodEnd =
-            currentMonth.plusMonths(numOfMonthsToUpdate.toLong()).atEndOfMonth().toKotlinLocalDate()
-        for (date in futurePeriodStart..futurePeriodEnd) {
-            launch {
-                updateStatusForDate(date)
+        _calendarDatesFlow.update { oldValue ->
+            oldValue.toMutableMap().also {
+                it[date] = calendarDateData
             }
         }
     }
 
     fun onScrolledToNewMonth(newMonth: YearMonth) {
-        val oldMonth = _currentMonthFlow.value
         _currentMonthFlow.update { newMonth }
+        viewModelScope.launch(mainDispatcher) {
+            updateMonth(month = newMonth)
 
-        viewModelScope.launch {
-            if (!cashedDatesFlow.value.contains(newMonth) && newMonth != oldMonth) {
-                val visibleMonthStart = _currentMonthFlow.value.atStartOfMonth().toKotlinLocalDate()
-                val visibleMonthEnd = _currentMonthFlow.value.atEndOfMonth().toKotlinLocalDate()
-                val updateVisibleDateJobs = mutableListOf<Job>()
-                for (date in visibleMonthStart..visibleMonthEnd) {
-                    val job = launch {
-                        updateStatusForDate(date)
+            val latestDate = _calendarDatesFlow.value.keys.maxOrNull()?.toJavaLocalDate()
+            val latestMonth = latestDate?.let { YearMonth.from(it) }
+            if (latestMonth != null) {
+                val numOfMonthsUntilLastLoadedMonth =
+                    newMonth.until(latestMonth, ChronoUnit.MONTHS)
+                if (numOfMonthsUntilLastLoadedMonth < LoadAheadThreshold) {
+                    for (monthNumber in 1..NumOfMonthsToLoadAhead) {
+                        updateMonth(latestMonth.plusMonths(monthNumber.toLong()))
                     }
-                    updateVisibleDateJobs.add(job)
                 }
-                updateVisibleDateJobs.joinAll()
             }
 
-            val latestMonth = cashedDatesFlow.value.keys.maxOrNull()
-            if (latestMonth != null && newMonth.until(latestMonth, ChronoUnit.MONTHS) <= 3) {
-                updateNextMonths(currentMonth = newMonth, numOfMonthsToUpdate = 3)
-            }
-
-            val earliestMonth = cashedDatesFlow.value.keys.minOrNull()
-            if (earliestMonth != null && newMonth.until(earliestMonth, ChronoUnit.MONTHS) >= -3) {
-                updatePreviousMonths(currentMonth = newMonth, numOfMonthsToUpdate = 3)
+            val earliestDate = _calendarDatesFlow.value.keys.minOrNull()?.toJavaLocalDate()
+            val earliestMonth = earliestDate?.let { YearMonth.from(it) }
+            if (earliestMonth != null) {
+                val numOfMonthsUntilFirstLoadedMonth =
+                    earliestMonth.until(newMonth, ChronoUnit.MONTHS)
+                if (numOfMonthsUntilFirstLoadedMonth < LoadAheadThreshold) {
+                    for (monthNumber in 1..NumOfMonthsToLoadAhead) {
+                        updateMonth(earliestMonth.minusMonths(monthNumber.toLong()))
+                    }
+                }
             }
         }
     }
 
     fun onHabitComplete(completionRecord: Habit.CompletionRecord) {
-        viewModelScope.launch {
+        viewModelScope.launch(mainDispatcher) {
             try {
                 insertHabitCompletion(
                     habitId = routineId,
@@ -211,36 +195,51 @@ class RoutineCalendarViewModel(
                 // TODO display a snackbar
             }
 
-            // update the completed date first for better UX
-            updateStatusForDate(completionRecord.date)
+            // delete the outdated data
+            _calendarDatesFlow.update { emptyMap() }
+            updateMonth(_currentMonthFlow.value, forceUpdate = true)
 
-            val visibleMonthStart = _currentMonthFlow.value.atStartOfMonth().toKotlinLocalDate()
-            val visibleMonthEnd = _currentMonthFlow.value.atEndOfMonth().toKotlinLocalDate()
-            val updateVisibleDateJobs = mutableListOf<Job>()
-            for (date in visibleMonthStart..visibleMonthEnd) {
-                val job = launch {
-                    updateStatusForDate(date)
-                }
-                updateVisibleDateJobs.add(job)
+            for (i in 1..NumOfMonthsToLoadInitially) {
+                updateMonth(
+                    month = _currentMonthFlow.value.plusMonths(i.toLong()),
+                    forceUpdate = true,
+                )
+                updateMonth(
+                    month = _currentMonthFlow.value.minusMonths(i.toLong()),
+                    forceUpdate = true,
+                )
             }
-            updateVisibleDateJobs.joinAll()
-
-            // remove the other months because the data can be outdated
-            cashedDatesFlow.update { oldValue ->
-                val currentMonthDates = oldValue[_currentMonthFlow.value] ?: emptyList()
-                mapOf(_currentMonthFlow.value to currentMonthDates)
-            }
-
-            updateNextMonths(currentMonth = _currentMonthFlow.value, numOfMonthsToUpdate = 5)
-            updatePreviousMonths(currentMonth = _currentMonthFlow.value, numOfMonthsToUpdate = 5)
         }
     }
 
-    // TODO update todayFlow when the date changes (in case the screen is opened at midnight)
+// TODO update todayFlow when the date changes (in case the screen is opened at midnight)
+
+    companion object {
+        /**
+         * The number of months that should be loaded in both directions when the list of data is
+         * empty. It's done for the user to see the pre-loaded data when they scroll to the next
+         * month.
+         */
+        const val NumOfMonthsToLoadInitially = 6
+
+        /**
+         * The number of months that should be loaded ahead or behind the current month (depending
+         * on the user's scroll direction). It's done for the user to see the pre-loaded data
+         * when they scroll to the next month.
+         */
+        const val NumOfMonthsToLoadAhead = 3
+
+        /**
+         * The maximum number of months between the current month and the last/first loaded month
+         * that doesn't trigger the pre-loading of future/past months. If this threshold is
+         * exceeded, the data should be loaded. It's done for the user to see the pre-loaded data
+         * when they scroll to the next month.
+         */
+        const val LoadAheadThreshold = 3
+    }
 }
 
-data class RoutineCalendarDate(
-    val date: LocalDate,
+data class CalendarDateData(
     val status: HabitStatus,
     val includedInStreak: Boolean,
     val numOfTimesCompleted: Float,

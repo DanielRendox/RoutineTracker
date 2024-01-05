@@ -32,7 +32,7 @@ fun RoutineCalendar(
     modifier: Modifier = Modifier,
     currentMonth: YearMonth,
     firstDayOfWeek: DayOfWeek,
-    routineCalendarDates: List<RoutineCalendarDate>,
+    routineCalendarDates: Map<LocalDate, CalendarDateData>,
     onDateClick: (date: LocalDate) -> Unit,
     onScrolledToNewMonth: (month: YearMonth) -> Unit,
 ) {
@@ -42,10 +42,8 @@ fun RoutineCalendar(
         firstDayOfWeek = firstDayOfWeek,
         onScrolledToNewMonth = onScrolledToNewMonth,
         dayContent = { calendarDay ->
-            val calendarDate: RoutineCalendarDate? = remember(routineCalendarDates) {
-                routineCalendarDates.find {
-                    it.date == calendarDay.date.toKotlinLocalDate()
-                }
+            val calendarDate: CalendarDateData? = remember(routineCalendarDates) {
+                routineCalendarDates[calendarDay.date.toKotlinLocalDate()]
             }
             RoutineStatusDay(
                 day = calendarDay,
