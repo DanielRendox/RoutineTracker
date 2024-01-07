@@ -14,7 +14,7 @@ import com.rendox.routinetracker.add_routine.choose_schedule.ChooseSchedulePageS
 import com.rendox.routinetracker.add_routine.choose_schedule.assembleSchedule
 import com.rendox.routinetracker.add_routine.navigation.AddRoutineDestination
 import com.rendox.routinetracker.add_routine.navigation.navigate
-import com.rendox.routinetracker.add_routine.navigation.yesNoRoutineDestinations
+import com.rendox.routinetracker.add_routine.navigation.yesNoHabitDestinations
 import com.rendox.routinetracker.add_routine.set_goal.SetGoalPageState
 import com.rendox.routinetracker.add_routine.tweak_routine.TweakRoutinePageState
 import com.rendox.routinetracker.core.model.Habit
@@ -46,7 +46,7 @@ class AddRoutineScreenState(
     var tweakRoutinePageState by mutableStateOf(tweakRoutinePageState)
         private set
 
-    var navDestinations by mutableStateOf(yesNoRoutineDestinations)
+    var navDestinations by mutableStateOf(yesNoHabitDestinations)
         private set
 
     var navigateBackButtonText: UiText by mutableStateOf(UiText.DynamicString(""))
@@ -133,13 +133,13 @@ class AddRoutineScreenState(
 
     private fun updateNavDestinations(routineType: RoutineTypeUi) {
         navDestinations = when (routineType) {
-            RoutineTypeUi.YesNoRoutine -> yesNoRoutineDestinations
-            RoutineTypeUi.MeasurableRoutine -> TODO()
+            RoutineTypeUi.YesNoHabit -> yesNoHabitDestinations
+            RoutineTypeUi.MeasurableHabit -> TODO()
         }
     }
 
     private fun assembleRoutine(): Habit = when (chooseRoutineTypePageState.routineType) {
-        is RoutineTypeUi.YesNoRoutine -> Habit.YesNoHabit(
+        is RoutineTypeUi.YesNoHabit -> Habit.YesNoHabit(
             name = setGoalPageState.routineName,
             description = setGoalPageState.routineDescription,
             schedule = chooseSchedulePageState.selectedSchedulePickerState.assembleSchedule(
@@ -149,7 +149,7 @@ class AddRoutineScreenState(
             defaultCompletionTime = tweakRoutinePageState.sessionTime?.toKotlinLocalTime(),
         )
 
-        is RoutineTypeUi.MeasurableRoutine -> TODO()
+        is RoutineTypeUi.MeasurableHabit -> TODO()
     }
 }
 

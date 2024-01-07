@@ -41,7 +41,7 @@ sealed class AddRoutineDestination(
     )
 }
 
-val yesNoRoutineDestinations = listOf(
+val yesNoHabitDestinations = listOf(
     AddRoutineDestination.ChooseRoutineType,
     AddRoutineDestination.SetGoal,
     AddRoutineDestination.ChooseSchedule,

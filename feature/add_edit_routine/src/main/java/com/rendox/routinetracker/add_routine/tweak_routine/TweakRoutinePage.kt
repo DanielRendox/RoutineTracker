@@ -35,7 +35,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.rendox.routinetracker.add_routine.AddRoutineDestinationTopAppBar
+import com.rendox.routinetracker.add_routine.AddHabitDestinationTopAppBar
 import com.rendox.routinetracker.add_routine.navigation.AddRoutineDestination
 import com.rendox.routinetracker.core.ui.components.CustomIconSetting
 import com.rendox.routinetracker.core.ui.components.Setting
@@ -83,7 +83,7 @@ fun TweakRoutinePage(
     Column(
         modifier = modifier.verticalScroll(rememberScrollState())
     ) {
-        AddRoutineDestinationTopAppBar(
+        AddHabitDestinationTopAppBar(
             modifier = Modifier.padding(bottom = 8.dp),
             destination = AddRoutineDestination.TweakRoutine,
         )

@@ -57,7 +57,7 @@ internal fun AgendaRoute(
         onAddRoutineClick = onAddRoutineClick,
         onRoutineClick = onRoutineClick,
         insertCompletion = { routineId, completionRecord ->
-            viewModel.onHabitComplete(routineId, completionRecord)
+            viewModel.onRoutineComplete(routineId, completionRecord)
         },
         onDateChange = { viewModel.onDateChange(it.toKotlinLocalDate()) },
         onNotDueRoutinesVisibilityToggle = {
@@ -143,7 +143,7 @@ internal fun AgendaScreen(
                 onRoutineClick = onRoutineClick,
                 onStatusCheckmarkClick = { routine ->
                     when (routine.type) {
-                        DisplayHabitType.YesNoHabit -> {
+                        DisplayRoutineType.YesNoHabit -> {
                             val completion = Habit.YesNoHabit.CompletionRecord(
                                 date = currentDate.toKotlinLocalDate(),
                                 numOfTimesCompleted = if (routine.numOfTimesCompleted > 0F) 0F else 1F,

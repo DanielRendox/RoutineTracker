@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import com.rendox.routinetracker.add_routine.AddRoutineDestinationTopAppBar
+import com.rendox.routinetracker.add_routine.AddHabitDestinationTopAppBar
 import com.rendox.routinetracker.add_routine.navigation.AddRoutineDestination
 import com.rendox.routinetracker.feature.agenda.R
 
@@ -23,7 +23,7 @@ fun SetGoalPage(
     setGoalPageState: SetGoalPageState,
 ) {
     Column(modifier = modifier.verticalScroll(rememberScrollState())) {
-        AddRoutineDestinationTopAppBar(destination = AddRoutineDestination.SetGoal)
+        AddHabitDestinationTopAppBar(destination = AddRoutineDestination.SetGoal)
 
         OutlinedTextField(
             modifier = Modifier

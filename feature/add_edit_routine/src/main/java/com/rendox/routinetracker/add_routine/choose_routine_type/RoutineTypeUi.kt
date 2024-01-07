@@ -11,30 +11,30 @@ sealed class RoutineTypeUi(
     @StringRes val descriptionId: Int,
     val inDevelopment: Boolean,
 ) {
-    object YesNoRoutine : RoutineTypeUi(
+    object YesNoHabit : RoutineTypeUi(
         routineTypeId = 1,
-        titleId = R.string.yes_no_routine_title,
-        descriptionId = R.string.yes_no_routine_description,
+        titleId = R.string.yes_no_habit_title,
+        descriptionId = R.string.yes_no_habit_description,
         inDevelopment = false,
     )
 
-    object MeasurableRoutine : RoutineTypeUi(
+    object MeasurableHabit : RoutineTypeUi(
         routineTypeId = 2,
-        titleId = R.string.measurable_routine_title,
-        descriptionId = R.string.measurable_routine_description,
+        titleId = R.string.measurable_habit_title,
+        descriptionId = R.string.measurable_habit_description,
         inDevelopment = true,
     )
 
     companion object {
         fun getTypeById(id: Int) = when (id) {
-            YesNoRoutine.routineTypeId -> YesNoRoutine
-            MeasurableRoutine.routineTypeId -> MeasurableRoutine
+            YesNoHabit.routineTypeId -> YesNoHabit
+            MeasurableHabit.routineTypeId -> MeasurableHabit
             else -> throw IllegalArgumentException()
         }
     }
 }
 
-val routineTypes = listOf(
-    RoutineTypeUi.YesNoRoutine,
-    RoutineTypeUi.MeasurableRoutine,
+val habitTypes = listOf(
+    RoutineTypeUi.YesNoHabit,
+    RoutineTypeUi.MeasurableHabit,
 )

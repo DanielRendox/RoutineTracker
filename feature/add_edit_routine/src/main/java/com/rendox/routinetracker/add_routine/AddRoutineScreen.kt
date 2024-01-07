@@ -63,7 +63,6 @@ internal fun AddRoutineRoute(
         saveRoutine = { routine ->
             GlobalScope.launch {
                 withTimeout(10_000L) {
-                    println("resulting routine = $routine")
                     habitRepository.insertHabit(routine)
                 }
             }
@@ -181,7 +180,7 @@ private fun NavigationProgressIndicator(
 }
 
 @Composable
-fun AddRoutineDestinationTopAppBar(
+fun AddHabitDestinationTopAppBar(
     modifier: Modifier = Modifier,
     destination: AddRoutineDestination,
 ) {

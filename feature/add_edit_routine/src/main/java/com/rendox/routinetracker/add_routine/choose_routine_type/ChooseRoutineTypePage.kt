@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.rendox.routinetracker.add_routine.AddRoutineDestinationTopAppBar
+import com.rendox.routinetracker.add_routine.AddHabitDestinationTopAppBar
 import com.rendox.routinetracker.add_routine.navigation.AddRoutineDestination
 import com.rendox.routinetracker.feature.agenda.R
 
@@ -29,11 +29,11 @@ fun ChooseRoutineTypePage(
         modifier = modifier.verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        AddRoutineDestinationTopAppBar(
+        AddHabitDestinationTopAppBar(
             destination = AddRoutineDestination.ChooseRoutineType
         )
 
-        for (routineType in routineTypes) {
+        for (routineType in habitTypes) {
             ChooseRoutineTypeButton(
                 modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp),
                 routineType = routineType,

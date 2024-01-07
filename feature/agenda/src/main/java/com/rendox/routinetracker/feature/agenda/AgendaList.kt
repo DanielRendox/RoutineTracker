@@ -250,7 +250,7 @@ private val routines = listOf(
         id = 1,
         hasGrayedOutLook = false,
         statusToggleIsDisabled = false,
-        type = DisplayHabitType.YesNoHabit,
+        type = DisplayRoutineType.YesNoHabit,
         numOfTimesCompleted = 1f,
     ),
     DisplayRoutine(
@@ -260,7 +260,7 @@ private val routines = listOf(
         id = 2,
         hasGrayedOutLook = false,
         statusToggleIsDisabled = false,
-        type = DisplayHabitType.YesNoHabit,
+        type = DisplayRoutineType.YesNoHabit,
         numOfTimesCompleted = 0f,
     ),
     DisplayRoutine(
@@ -270,7 +270,7 @@ private val routines = listOf(
         id = 3,
         hasGrayedOutLook = false,
         statusToggleIsDisabled = true,
-        type = DisplayHabitType.YesNoHabit,
+        type = DisplayRoutineType.YesNoHabit,
         numOfTimesCompleted = 0f,
     ),
     DisplayRoutine(
@@ -280,7 +280,7 @@ private val routines = listOf(
         id = 4,
         hasGrayedOutLook = true,
         statusToggleIsDisabled = false,
-        type = DisplayHabitType.YesNoHabit,
+        type = DisplayRoutineType.YesNoHabit,
         numOfTimesCompleted = 0f,
     )
 )

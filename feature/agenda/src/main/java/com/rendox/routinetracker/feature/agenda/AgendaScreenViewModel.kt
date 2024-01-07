@@ -93,7 +93,7 @@ class AgendaScreenViewModel(
         return DisplayRoutine(
             name = habit.name,
             id = habit.id!!,
-            type = DisplayHabitType.YesNoHabit,
+            type = DisplayRoutineType.YesNoHabit,
             status = habitStatus,
             numOfTimesCompleted = numOfTimesCompleted,
             completionTime = null,
@@ -102,7 +102,7 @@ class AgendaScreenViewModel(
         )
     }
 
-    fun onHabitComplete(
+    fun onRoutineComplete(
         routineId: Long,
         completionRecord: Habit.CompletionRecord,
     ) {
@@ -146,19 +146,6 @@ class AgendaScreenViewModel(
 
     // TODO update todayFlow when the date changes (in case the screen is opened at midnight)
 
-//    fun onAddRoutineClick() {
-//        viewModelScope.launch {
-//            routineRepository.insertRoutine(routineList.first())
-//            allRoutinesFlow.update { routineRepository.getAllRoutines() }
-//            val currentDateRoutines = getRoutinesForDate(_currentDateFlow.value)
-//            cashedRoutinesFlow.update {
-//                mapOf(_currentDateFlow.value to currentDateRoutines)
-//            }
-//            println("current date = ${_currentDateFlow.value}")
-//            println("cashed routines flow = $cashedRoutinesFlow")
-//        }
-//    }
-
     companion object {
         private val dueOrCompletedStatuses = listOf(
             HabitStatus.Planned,
@@ -179,7 +166,7 @@ class AgendaScreenViewModel(
 data class DisplayRoutine(
     val name: String,
     val id: Long,
-    val type: DisplayHabitType,
+    val type: DisplayRoutineType,
     val status: HabitStatus,
     val numOfTimesCompleted: Float,
     val completionTime: LocalTime?,
@@ -187,6 +174,6 @@ data class DisplayRoutine(
     val statusToggleIsDisabled: Boolean,
 )
 
-enum class DisplayHabitType {
+enum class DisplayRoutineType {
     YesNoHabit,
 }
