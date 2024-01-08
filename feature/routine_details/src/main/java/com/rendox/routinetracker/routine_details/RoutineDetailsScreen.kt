@@ -69,9 +69,10 @@ internal fun RoutineDetailsScreen(
                 ),
                 title = {
                     Text(
-                        routineName ?: "",
+                        text = routineName ?: "",
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.headlineSmall,
                     )
                 },
                 navigationIcon = {

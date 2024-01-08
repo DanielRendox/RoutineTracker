@@ -29,6 +29,16 @@ WHERE habitId = :habitId
 ORDER BY startDate DESC
 LIMIT 1;
 
+getVacationsInPeriod:
+SELECT *
+FROM vacationEntity
+WHERE habitId = :habitId
+    -- vacation's period is within minDate..maxDate or vacation contains either minDate or maxDate
+    AND (:minDate IS NULL OR :minDate <= startDate
+        OR (startDate <= :minDate AND (endDate IS NULL OR :minDate <= endDate)))
+    AND (:maxDate IS NULL OR (endDate IS NULL AND startDate <= :maxDate) OR (endDate IS NOT NULL AND endDate <= :maxDate)
+        OR (startDate <= :maxDate AND (endDate IS NULL OR :maxDate <= endDate)));
+
 insertVacation:
 INSERT INTO vacationEntity
 VALUES (?, ?, ?, ?);

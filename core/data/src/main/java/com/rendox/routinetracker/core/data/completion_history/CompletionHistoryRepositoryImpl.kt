@@ -27,6 +27,16 @@ class CompletionHistoryRepositoryImpl(
         return localDataSource.getLastCompletedRecord(habitId)
     }
 
+    override suspend fun getRecordsInPeriod(
+        habitId: Long,
+        minDate: LocalDate?,
+        maxDate: LocalDate?,
+    ): List<Habit.CompletionRecord> {
+        return localDataSource.getRecordsInPeriod(
+            habitId, minDate, maxDate
+        )
+    }
+
     override suspend fun insertCompletion(habitId: Long, completionRecord: Habit.CompletionRecord) {
         localDataSource.insertCompletion(habitId, completionRecord)
     }

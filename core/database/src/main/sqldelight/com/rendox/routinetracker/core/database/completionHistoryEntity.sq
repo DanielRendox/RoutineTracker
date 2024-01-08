@@ -32,6 +32,13 @@ WHERE habitId = ?
 ORDER BY date DESC
 LIMIT 1;
 
+getRecordsInPeriod:
+SELECT *
+FROM completionHistoryEntity
+WHERE habitId = :habitId
+    AND (:minDate IS NULL OR :minDate <= date)
+    AND (:maxDate IS NULL OR date <= :maxDate);
+
 deleteCompletionByDate:
 DELETE FROM completionHistoryEntity
 WHERE habitId = ? AND date = ?;

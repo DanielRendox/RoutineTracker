@@ -14,6 +14,13 @@ interface VacationLocalDataSource {
     ): Vacation?
 
     suspend fun getLastVacation(habitId: Long): Vacation?
+
+    suspend fun getVacationsInPeriod(
+        habitId: Long,
+        minDate: LocalDate? = null,
+        maxDate: LocalDate? = null,
+    ): List<Vacation>
+
     suspend fun insertVacation(habitId: Long, vacation: Vacation)
     suspend fun deleteVacationById(id: Long)
 }

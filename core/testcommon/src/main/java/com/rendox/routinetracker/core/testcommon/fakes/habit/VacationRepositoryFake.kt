@@ -30,6 +30,18 @@ class VacationRepositoryFake(
         return habitData.vacationHistory.value.lastOrNull()?.second
     }
 
+    override suspend fun getVacationsInPeriod(
+        habitId: Long,
+        minDate: LocalDate?,
+        maxDate: LocalDate?,
+    ): List<Vacation> = habitData.vacationHistory.value.filter {
+        val vacationEndDate = it.second.endDate
+        it.first == habitId &&
+                (minDate == null || minDate <= it.second.startDate || it.second.containsDate(minDate)) &&
+                (maxDate == null || (vacationEndDate == null && it.second.startDate <= maxDate) || (vacationEndDate != null && vacationEndDate <= maxDate) || it.second.containsDate(maxDate))
+
+    }.map { it.second }
+
     override suspend fun insertVacation(habitId: Long, vacation: Vacation) {
         habitData.vacationHistory.update {
             it.toMutableList().apply { add(habitId to vacation) }

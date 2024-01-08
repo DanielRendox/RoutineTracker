@@ -2,7 +2,19 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="11">
+      <module name="build-logic.convention" target="17" />
+      <module name="build-logic.convention.main" target="17" />
+      <module name="build-logic.convention.test" target="17" />
+      <module name="Routine_Tracker.app" target="17" />
+      <module name="Routine_Tracker.core.data" target="17" />
+      <module name="Routine_Tracker.core.database" target="17" />
+      <module name="Routine_Tracker.core.domain" target="17" />
+      <module name="Routine_Tracker.core.testcommon" target="17" />
+      <module name="Routine_Tracker.core.ui" target="17" />
       <module name="Routine_Tracker.domain" target="17" />
+      <module name="Routine_Tracker.feature.add_edit_routine" target="17" />
+      <module name="Routine_Tracker.feature.agenda" target="17" />
+      <module name="Routine_Tracker.feature.routine_details" target="17" />
       <module name="Routine_Tracker.feature.routinedetails" target="17" />
       <module name="Routine_Tracker.playground" target="17" />
     </bytecodeTargetLevel>

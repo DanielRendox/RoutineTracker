@@ -16,10 +16,8 @@
             </builds>
           </compositeBuild>
         </compositeConfiguration>
-        <option name="testRunner" value="GRADLE" />
-        <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="gradleJvm" value="17" />
+        <option name="gradleJvm" value="#GRADLE_LOCAL_JAVA_HOME" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
@@ -40,6 +38,7 @@
             <option value="$PROJECT_DIR$/feature/routine_details" />
           </set>
         </option>
+        <option name="resolveExternalAnnotations" value="false" />
       </GradleProjectSettings>
     </option>
   </component>

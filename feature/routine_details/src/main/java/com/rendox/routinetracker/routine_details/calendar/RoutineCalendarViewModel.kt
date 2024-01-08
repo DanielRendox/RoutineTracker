@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -76,9 +77,10 @@ class RoutineCalendarViewModel(
         started = SharingStarted.WhileSubscribed(5_000),
     )
 
-    private val monthsThatAreCurrentlyBeingUpdated = MutableStateFlow(emptyList<YearMonth>())
+    private val updateMonthJobsRunningFlow = MutableStateFlow(emptyMap<YearMonth, List<Job>>())
 
     init {
+        // TODO remove explicit main dispatcher
         viewModelScope.launch(mainDispatcher) {
             _habitFlow.update { habitRepository.getHabitById(routineId) }
         }
@@ -104,27 +106,34 @@ class RoutineCalendarViewModel(
         }
 
         val thisMonthIsAlreadyBeingUpdated =
-            monthsThatAreCurrentlyBeingUpdated.value.contains(month)
-        if (thisMonthIsAlreadyBeingUpdated && !forceUpdate) return
-
-        monthsThatAreCurrentlyBeingUpdated.update { oldValue ->
-            oldValue.toMutableList().apply { add(month) }
+            updateMonthJobsRunningFlow.value.contains(month)
+        if (thisMonthIsAlreadyBeingUpdated) {
+            if (forceUpdate) {
+                updateMonthJobsRunningFlow.value[month]?.forEach { it.cancel() }
+            } else {
+                return
+            }
         }
 
         val monthStart = month.atStartOfMonth().toKotlinLocalDate()
         val monthEnd = month.atEndOfMonth().toKotlinLocalDate()
 
-        val updateDateJobs = mutableListOf<Job>()
         for (date in monthStart..monthEnd) {
             val job = viewModelScope.launch(defaultDispatcher) {
                 updateStatusForDate(date)
             }
-            updateDateJobs.add(job)
+            updateMonthJobsRunningFlow.update { updateMonthJobsRunning ->
+                updateMonthJobsRunning.toMutableMap().also {
+                    it[month] = updateMonthJobsRunning[month].orEmpty().toMutableList().apply {
+                        add(job)
+                    }
+                }
+            }
         }
-        updateDateJobs.joinAll()
 
-        monthsThatAreCurrentlyBeingUpdated.update { oldValue ->
-            oldValue.toMutableList().apply { remove(month) }
+        updateMonthJobsRunningFlow.value[month]?.joinAll()
+        updateMonthJobsRunningFlow.update { oldValue ->
+            oldValue.toMutableMap().apply { remove(month) }
         }
     }
 
@@ -184,6 +193,10 @@ class RoutineCalendarViewModel(
     }
 
     fun onHabitComplete(completionRecord: Habit.CompletionRecord) {
+        updateMonthJobsRunningFlow.value.keys.forEach { month ->
+            updateMonthJobsRunningFlow.value[month]?.forEach { it.cancel() }
+        }
+
         viewModelScope.launch(mainDispatcher) {
             try {
                 insertHabitCompletion(
@@ -195,10 +208,12 @@ class RoutineCalendarViewModel(
                 // TODO display a snackbar
             }
 
-            // delete the outdated data
-            _calendarDatesFlow.update { emptyMap() }
-            updateMonth(_currentMonthFlow.value, forceUpdate = true)
+            // update the completed day first to reflect the change in the UI as fast as possible
+            withContext(defaultDispatcher) {
+                updateStatusForDate(completionRecord.date)
+            }
 
+            updateMonth(_currentMonthFlow.value, forceUpdate = true)
             for (i in 1..NumOfMonthsToLoadInitially) {
                 updateMonth(
                     month = _currentMonthFlow.value.plusMonths(i.toLong()),

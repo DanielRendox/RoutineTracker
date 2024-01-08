@@ -41,6 +41,18 @@ class CompletionHistoryLocalDataSourceImpl(
         }
     }
 
+    override suspend fun getRecordsInPeriod(
+        habitId: Long,
+        minDate: LocalDate?,
+        maxDate: LocalDate?,
+    ): List<Habit.CompletionRecord> {
+        return withContext(dispatcher) {
+            db.completionHistoryEntityQueries.getRecordsInPeriod(
+                habitId, minDate, maxDate
+            ).executeAsList().map { it.toExternalModel()!! }
+        }
+    }
+
     override suspend fun insertCompletion(
         habitId: Long,
         completionRecord: Habit.CompletionRecord,

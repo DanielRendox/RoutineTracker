@@ -31,6 +31,16 @@ class CompletionHistoryRepositoryFake(
             .maxByOrNull { it.second.date }?.second
     }
 
+    override suspend fun getRecordsInPeriod(
+        habitId: Long,
+        minDate: LocalDate?,
+        maxDate: LocalDate?
+    ): List<Habit.CompletionRecord> = habitData.completionHistory.value.filter {
+        it.first == habitId
+                && (minDate == null || minDate <= it.second.date)
+                && (maxDate == null || it.second.date <= maxDate)
+    }.map { it.second }
+
     override suspend fun insertCompletion(
         habitId: Long,
         completionRecord: Habit.CompletionRecord,

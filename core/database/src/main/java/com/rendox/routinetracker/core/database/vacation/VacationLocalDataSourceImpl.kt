@@ -41,6 +41,20 @@ class VacationLocalDataSourceImpl(
         }
     }
 
+    override suspend fun getVacationsInPeriod(
+        habitId: Long,
+        minDate: LocalDate?,
+        maxDate: LocalDate?,
+    ): List<Vacation> {
+        return withContext(dispatcher) {
+            db.vacationEntityQueries.getVacationsInPeriod(
+                habitId = habitId,
+                minDate = minDate,
+                maxDate = maxDate,
+            ).executeAsList().map { it.toExternalModel() }
+        }
+    }
+
     override suspend fun insertVacation(habitId: Long, vacation: Vacation) {
         return withContext(dispatcher) {
             db.vacationEntityQueries.insertVacation(
