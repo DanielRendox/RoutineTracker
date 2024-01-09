@@ -239,7 +239,6 @@ class RoutineCalendarViewModelTest : KoinTest {
             defaultDispatcher = get(),
             mainDispatcher = get(),
         )
-        val initialDates = viewModel.calendarDatesFlow.value.keys
         viewModel.onHabitComplete(
             completionRecord = Habit.YesNoHabit.CompletionRecord(
                 date = today,
@@ -247,13 +246,76 @@ class RoutineCalendarViewModelTest : KoinTest {
             )
         )
         val resultingDates = viewModel.calendarDatesFlow.value
-        val expectedDates = initialDates.associateWith {
+        val expectedDates = (today..today.atEndOfMonth).associateWith {
             CalendarDateData(
                 status = computeHabitStatus(habitId = 1L, validationDate = it, today = today),
                 includedInStreak = false,
                 numOfTimesCompleted = if (it == today) 1F else 0F,
             )
         }
-        assertThat(resultingDates).containsExactlyEntriesIn(expectedDates)
+        assertThat(resultingDates).containsAtLeastEntriesIn(expectedDates)
+    }
+
+    @Test
+    fun `assert all other months get deleted when a completion is inserted`() = runTest {
+        val today = LocalDate(2024, 1, 1)
+        val viewModel = RoutineCalendarViewModel(
+            routineId = 1L,
+            today = today,
+            habitRepository = habitRepository,
+            computeHabitStatus = get(),
+            completionHistoryRepository = completionHistoryRepository,
+            insertHabitCompletion = get(),
+            defaultDispatcher = get(),
+            mainDispatcher = get(),
+        )
+        viewModel.onHabitComplete(
+            completionRecord = Habit.YesNoHabit.CompletionRecord(
+                date = today,
+                numOfTimesCompleted = 1F,
+            )
+        )
+
+        val resultingDates: Iterable<LocalDate> = viewModel.calendarDatesFlow.value.keys
+        val expectedDates: Iterable<LocalDate> = today..today.atEndOfMonth
+        assertThat(resultingDates).containsExactlyElementsIn(expectedDates)
+    }
+
+    @Test
+    fun `assert months get loaded with the margin when scrolled to a not already loaded month`() = runTest {
+        val today = LocalDate(2024, 1, 1)
+        val viewModel = RoutineCalendarViewModel(
+            routineId = 1L,
+            today = today,
+            habitRepository = habitRepository,
+            computeHabitStatus = get(),
+            completionHistoryRepository = completionHistoryRepository,
+            insertHabitCompletion = get(),
+            defaultDispatcher = get(),
+            mainDispatcher = get(),
+        )
+        val futureMonth =
+            today.toJavaLocalDate().yearMonth.plusMonths((NumOfMonthsToLoadInitially + 1).toLong())
+        viewModel.onScrolledToNewMonth(futureMonth)
+
+        // additional months get loaded only in the future because of the direction of the scroll
+        val futureMonthStartDate = futureMonth.atStartOfMonth().toKotlinLocalDate()
+        val lastDateToLoadAhead = futureMonth.plusMonths(NumOfMonthsToLoadAhead.toLong())
+            .atEndOfMonth().toKotlinLocalDate()
+        val expectedFutureDates: Iterable<LocalDate> = futureMonthStartDate..lastDateToLoadAhead
+
+        val pastMonth =
+            today.toJavaLocalDate().yearMonth.minusMonths((NumOfMonthsToLoadInitially + 1).toLong())
+        viewModel.onScrolledToNewMonth(pastMonth)
+
+        // additional months get loaded only in the past because of the direction of the scroll
+        val pastMonthEndDate = pastMonth.atEndOfMonth().toKotlinLocalDate()
+        val firstDateToLoadBehind = pastMonth.minusMonths(NumOfMonthsToLoadAhead.toLong())
+            .atStartOfMonth().toKotlinLocalDate()
+        val expectedPastDates: Iterable<LocalDate> = firstDateToLoadBehind..pastMonthEndDate
+
+        val resultingDates: Iterable<LocalDate> = viewModel.calendarDatesFlow.value.keys
+        assertThat(resultingDates).containsAtLeastElementsIn(expectedFutureDates)
+        assertThat(resultingDates).containsAtLeastElementsIn(expectedPastDates)
     }
 }
