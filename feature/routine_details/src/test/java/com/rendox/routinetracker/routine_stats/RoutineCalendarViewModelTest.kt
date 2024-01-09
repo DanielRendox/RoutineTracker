@@ -1,15 +1,14 @@
 package com.rendox.routinetracker.routine_stats
 
 import com.google.common.truth.Truth.assertThat
-import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.kizitonwose.calendar.core.atStartOfMonth
 import com.kizitonwose.calendar.core.yearMonth
 import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
 import com.rendox.routinetracker.core.data.habit.HabitRepository
-import com.rendox.routinetracker.core.data.vacation.VacationRepository
 import com.rendox.routinetracker.core.domain.completion_history.HabitComputeStatusUseCase
-import com.rendox.routinetracker.core.domain.di.completionHistoryDomainModule
+import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase
 import com.rendox.routinetracker.core.logic.time.atEndOfMonth
+import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.testcommon.fakes.habit.CompletionHistoryRepositoryFake
@@ -21,10 +20,12 @@ import com.rendox.routinetracker.routine_details.calendar.RoutineCalendarViewMod
 import com.rendox.routinetracker.routine_details.calendar.RoutineCalendarViewModel.Companion.LoadAheadThreshold
 import com.rendox.routinetracker.routine_details.calendar.RoutineCalendarViewModel.Companion.NumOfMonthsToLoadAhead
 import com.rendox.routinetracker.routine_details.calendar.RoutineCalendarViewModel.Companion.NumOfMonthsToLoadInitially
-import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
@@ -34,47 +35,36 @@ import kotlinx.datetime.toKotlinLocalDate
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
-import org.koin.dsl.module
-import org.koin.test.KoinTest
-import org.koin.test.get
 
-class RoutineCalendarViewModelTest : KoinTest {
+class RoutineCalendarViewModelTest {
 
     private lateinit var habitRepository: HabitRepository
     private lateinit var completionHistoryRepository: CompletionHistoryRepository
+    private lateinit var computeHabitStatus: HabitComputeStatusUseCase
+    private lateinit var insertHabitCompletion: InsertHabitCompletionUseCase
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val fakeDataModule = module {
-        single {
-            HabitData()
-        }
-        single<HabitRepository> {
-            HabitRepositoryFake(habitData = get())
-        }
-        single<VacationRepository> {
-            VacationRepositoryFake(habitData = get())
-        }
-        single<CompletionHistoryRepository> {
-            CompletionHistoryRepositoryFake(habitData = get())
-        }
-        single<CoroutineDispatcher> {
-            UnconfinedTestDispatcher()
-        }
-    }
+    val coroutineDispatcher = UnconfinedTestDispatcher()
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Before
     fun setUp() = runTest {
-        startKoin {
-            modules(
-                completionHistoryDomainModule,
-                fakeDataModule,
-            )
-        }
+        Dispatchers.setMain(coroutineDispatcher)
 
-        habitRepository = get()
-        completionHistoryRepository = get()
+        val habitData = HabitData()
+        habitRepository = HabitRepositoryFake(habitData)
+        completionHistoryRepository = CompletionHistoryRepositoryFake(habitData)
+        computeHabitStatus = HabitComputeStatusUseCase(
+            habitRepository = habitRepository,
+            vacationRepository = VacationRepositoryFake(habitData),
+            completionHistoryRepository = completionHistoryRepository,
+            dispatcher = coroutineDispatcher,
+        )
+        insertHabitCompletion = InsertHabitCompletionUseCase(
+            completionHistoryRepository = completionHistoryRepository,
+            habitRepository = habitRepository,
+        )
 
         habitRepository.insertHabit(
             Habit.YesNoHabit(
@@ -87,9 +77,11 @@ class RoutineCalendarViewModelTest : KoinTest {
         )
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @After
     fun tearDown() {
         stopKoin()
+        Dispatchers.resetMain()
     }
 
     @Test
@@ -99,11 +91,9 @@ class RoutineCalendarViewModelTest : KoinTest {
             routineId = 1L,
             today = today,
             habitRepository = habitRepository,
-            computeHabitStatus = get(),
+            computeHabitStatus = computeHabitStatus,
             completionHistoryRepository = completionHistoryRepository,
-            insertHabitCompletion = get(),
-            defaultDispatcher = get(),
-            mainDispatcher = get(),
+            insertHabitCompletion = insertHabitCompletion,
         )
         val initialMonth = today.toJavaLocalDate().yearMonth
         val monthStart = initialMonth.atStartOfMonth().toKotlinLocalDate()
@@ -119,11 +109,9 @@ class RoutineCalendarViewModelTest : KoinTest {
             routineId = 1L,
             today = today,
             habitRepository = habitRepository,
-            computeHabitStatus = get(),
+            computeHabitStatus = computeHabitStatus,
             completionHistoryRepository = completionHistoryRepository,
-            insertHabitCompletion = get(),
-            defaultDispatcher = get(),
-            mainDispatcher = get(),
+            insertHabitCompletion = insertHabitCompletion,
         )
         val initialMonth = today.toJavaLocalDate().yearMonth
         val pastPeriodStart = initialMonth.minusMonths(NumOfMonthsToLoadInitially.toLong())
@@ -147,11 +135,9 @@ class RoutineCalendarViewModelTest : KoinTest {
             routineId = 1L,
             today = today,
             habitRepository = habitRepository,
-            computeHabitStatus = get(),
+            computeHabitStatus = computeHabitStatus,
             completionHistoryRepository = completionHistoryRepository,
-            insertHabitCompletion = get(),
-            defaultDispatcher = get(),
-            mainDispatcher = get(),
+            insertHabitCompletion = insertHabitCompletion,
         )
         val initialDates = viewModel.calendarDatesFlow.value
         for (i in 1..(NumOfMonthsToLoadInitially - LoadAheadThreshold)) {
@@ -176,11 +162,9 @@ class RoutineCalendarViewModelTest : KoinTest {
             routineId = 1L,
             today = today,
             habitRepository = habitRepository,
-            computeHabitStatus = get(),
+            computeHabitStatus = computeHabitStatus,
             completionHistoryRepository = completionHistoryRepository,
-            insertHabitCompletion = get(),
-            defaultDispatcher = get(),
-            mainDispatcher = get(),
+            insertHabitCompletion = insertHabitCompletion,
         )
 
         for (i in 1..(LoadAheadThreshold + 1)) {
@@ -204,11 +188,9 @@ class RoutineCalendarViewModelTest : KoinTest {
             routineId = 1L,
             today = today,
             habitRepository = habitRepository,
-            computeHabitStatus = get(),
+            computeHabitStatus = computeHabitStatus,
             completionHistoryRepository = completionHistoryRepository,
-            insertHabitCompletion = get(),
-            defaultDispatcher = get(),
-            mainDispatcher = get(),
+            insertHabitCompletion = insertHabitCompletion,
         )
 
         for (i in 1..(LoadAheadThreshold + 1)) {
@@ -228,16 +210,13 @@ class RoutineCalendarViewModelTest : KoinTest {
     @Test
     fun `assert the data is updated when a completion is inserted`() = runTest {
         val today = LocalDate(2024, 1, 1)
-        val computeHabitStatus = get<HabitComputeStatusUseCase>()
         val viewModel = RoutineCalendarViewModel(
             routineId = 1L,
             today = today,
             habitRepository = habitRepository,
             computeHabitStatus = computeHabitStatus,
             completionHistoryRepository = completionHistoryRepository,
-            insertHabitCompletion = get(),
-            defaultDispatcher = get(),
-            mainDispatcher = get(),
+            insertHabitCompletion = insertHabitCompletion,
         )
         viewModel.onHabitComplete(
             completionRecord = Habit.YesNoHabit.CompletionRecord(
@@ -263,11 +242,9 @@ class RoutineCalendarViewModelTest : KoinTest {
             routineId = 1L,
             today = today,
             habitRepository = habitRepository,
-            computeHabitStatus = get(),
+            computeHabitStatus = computeHabitStatus,
             completionHistoryRepository = completionHistoryRepository,
-            insertHabitCompletion = get(),
-            defaultDispatcher = get(),
-            mainDispatcher = get(),
+            insertHabitCompletion = insertHabitCompletion,
         )
         viewModel.onHabitComplete(
             completionRecord = Habit.YesNoHabit.CompletionRecord(
@@ -288,11 +265,9 @@ class RoutineCalendarViewModelTest : KoinTest {
             routineId = 1L,
             today = today,
             habitRepository = habitRepository,
-            computeHabitStatus = get(),
+            computeHabitStatus = computeHabitStatus,
             completionHistoryRepository = completionHistoryRepository,
-            insertHabitCompletion = get(),
-            defaultDispatcher = get(),
-            mainDispatcher = get(),
+            insertHabitCompletion = insertHabitCompletion,
         )
         val futureMonth =
             today.toJavaLocalDate().yearMonth.plusMonths((NumOfMonthsToLoadInitially + 1).toLong())

@@ -13,12 +13,13 @@ import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Schedule
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalTime
 
 class HabitLocalDataSourceImpl(
     private val db: RoutineTrackerDatabase,
-    private val dispatcher: CoroutineDispatcher,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : HabitLocalDataSource {
 
     override suspend fun getHabitById(habitId: Long): Habit {

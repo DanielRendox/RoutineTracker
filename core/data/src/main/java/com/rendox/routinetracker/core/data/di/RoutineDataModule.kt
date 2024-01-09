@@ -9,7 +9,7 @@ import org.koin.dsl.module
 val routineDataModule = module {
 
     single<HabitLocalDataSource> {
-        HabitLocalDataSourceImpl(db = get(), dispatcher = get())
+        HabitLocalDataSourceImpl(db = get())
     }
 
     single<HabitRepository> {

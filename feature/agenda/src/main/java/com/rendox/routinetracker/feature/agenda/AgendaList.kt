@@ -174,7 +174,8 @@ private fun StatusCheckmark(
         }
 
         HabitStatus.Planned, HabitStatus.OnVacation, HabitStatus.NotDue,
-        HabitStatus.Backlog, HabitStatus.AlreadyCompleted, HabitStatus.CompletedLater,
+        HabitStatus.Backlog, HabitStatus.PastDateAlreadyCompleted,
+        HabitStatus.FutureDateAlreadyCompleted, HabitStatus.CompletedLater,
         HabitStatus.NotStarted, HabitStatus.Finished, HabitStatus.Skipped -> {
             backgroundColor = MaterialTheme.routineStatusColors.pendingAgenda
             icon = null

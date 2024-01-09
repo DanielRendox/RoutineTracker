@@ -17,10 +17,16 @@ enum class HabitStatus {
     Skipped,
 
     /**
-     * Although the habit is due on this day, the user may skip it
+     * Although the habit is due on this date, which is in the past, the user may skip it
      * because they had over completed one of the days earlier.
      */
-    AlreadyCompleted,
+    PastDateAlreadyCompleted,
+
+    /**
+     * Although the habit is due on this date, which is in the future, the user may skip it
+     * because they had over completed one of the days earlier.
+     */
+    FutureDateAlreadyCompleted,
 
     /**
      * The routine was due but the user failed to complete it on that day.

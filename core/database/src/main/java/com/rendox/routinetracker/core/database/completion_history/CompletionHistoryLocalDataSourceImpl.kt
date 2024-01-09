@@ -5,12 +5,13 @@ import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
 import com.rendox.routinetracker.core.database.habit.model.HabitType
 import com.rendox.routinetracker.core.model.Habit
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
 
 class CompletionHistoryLocalDataSourceImpl(
     private val db: RoutineTrackerDatabase,
-    private val dispatcher: CoroutineDispatcher,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : CompletionHistoryLocalDataSource {
     override suspend fun getNumOfTimesCompletedInPeriod(
         habitId: Long,

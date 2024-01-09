@@ -9,7 +9,7 @@ import org.koin.dsl.module
 val completionTimeDataModule = module {
 
     single<CompletionTimeLocalDataSource> {
-        CompletionTimeLocalDataSourceImpl(db = get(), dispatcher = get())
+        CompletionTimeLocalDataSourceImpl(db = get())
     }
 
     single<CompletionTimeRepository> {

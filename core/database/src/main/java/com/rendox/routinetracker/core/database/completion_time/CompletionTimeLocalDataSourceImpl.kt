@@ -3,13 +3,14 @@ package com.rendox.routinetracker.core.database.completion_time
 import com.rendox.routinetracker.core.database.GetCompletionTime
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 
 class CompletionTimeLocalDataSourceImpl(
     private val db: RoutineTrackerDatabase,
-    private val dispatcher: CoroutineDispatcher,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : CompletionTimeLocalDataSource {
 
     override suspend fun getCompletionTime(routineId: Long, date: LocalDate): LocalTime? {

@@ -4,12 +4,13 @@ import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
 import com.rendox.routinetracker.core.database.VacationEntity
 import com.rendox.routinetracker.core.model.Vacation
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
 
 class VacationLocalDataSourceImpl(
     private val db: RoutineTrackerDatabase,
-    private val dispatcher: CoroutineDispatcher,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ): VacationLocalDataSource {
     override suspend fun getVacationByDate(habitId: Long, date: LocalDate): Vacation? {
         return withContext(dispatcher) {

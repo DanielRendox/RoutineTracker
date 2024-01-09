@@ -8,10 +8,7 @@ import org.koin.dsl.module
 
 val vacationDataModule = module {
     single<VacationLocalDataSource> {
-        VacationLocalDataSourceImpl(
-            db = get(),
-            dispatcher = get(),
-        )
+        VacationLocalDataSourceImpl(db = get())
     }
     single<VacationRepository> {
         VacationRepositoryImpl(

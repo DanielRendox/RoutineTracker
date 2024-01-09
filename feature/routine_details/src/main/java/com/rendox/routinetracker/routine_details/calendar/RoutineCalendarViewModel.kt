@@ -15,8 +15,6 @@ import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.DisplayStreak
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.HabitStatus
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -43,8 +41,6 @@ class RoutineCalendarViewModel(
     private val computeHabitStatus: HabitComputeStatusUseCase,
     private val completionHistoryRepository: CompletionHistoryRepository,
     private val insertHabitCompletion: InsertHabitCompletionUseCase,
-    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default,
-    private val mainDispatcher: CoroutineDispatcher = Dispatchers.Main,
 ) : ViewModel() {
     private val _habitFlow: MutableStateFlow<Habit?> = MutableStateFlow(null)
     val habitFlow: StateFlow<Habit?> = _habitFlow.asStateFlow()
@@ -80,11 +76,11 @@ class RoutineCalendarViewModel(
 
     init {
         // TODO remove explicit main dispatcher
-        viewModelScope.launch(mainDispatcher) {
+        viewModelScope.launch {
             _habitFlow.update { habitRepository.getHabitById(routineId) }
         }
 
-        viewModelScope.launch(defaultDispatcher) {
+        viewModelScope.launch {
             updateMonth(_currentMonthFlow.value)
             for (i in 1..NumOfMonthsToLoadInitially) {
                 updateMonth(_currentMonthFlow.value.plusMonths(i.toLong()))
@@ -118,7 +114,7 @@ class RoutineCalendarViewModel(
         val monthEnd = month.atEndOfMonth().toKotlinLocalDate()
 
         for (date in monthStart..monthEnd) {
-            val job = viewModelScope.launch(defaultDispatcher) {
+            val job = viewModelScope.launch {
                 updateStatusForDate(date)
             }
             updateMonthRunningJobsFlow.update { updateMonthJobsRunning ->
@@ -162,7 +158,7 @@ class RoutineCalendarViewModel(
 
     fun onScrolledToNewMonth(newMonth: YearMonth) {
         _currentMonthFlow.update { newMonth }
-        viewModelScope.launch(mainDispatcher) {
+        viewModelScope.launch {
             updateMonth(month = newMonth)
 
             val latestDate = _calendarDatesFlow.value.keys.maxOrNull()?.toJavaLocalDate()
@@ -196,7 +192,7 @@ class RoutineCalendarViewModel(
             jobs.forEach { it.cancel() }
         }
 
-        viewModelScope.launch(mainDispatcher) {
+        viewModelScope.launch {
             try {
                 insertHabitCompletion(
                     habitId = routineId,

@@ -82,7 +82,8 @@ private fun RoutineStatusDay(
             null -> Color.Transparent
             HabitStatus.Planned -> MaterialTheme.routineStatusColors.pending
             HabitStatus.Backlog -> MaterialTheme.routineStatusColors.pending
-            HabitStatus.AlreadyCompleted -> skippedBackground
+            HabitStatus.PastDateAlreadyCompleted -> skippedBackground
+            HabitStatus.FutureDateAlreadyCompleted -> Color.Transparent
             HabitStatus.NotDue -> Color.Transparent
             HabitStatus.OnVacation -> MaterialTheme.routineStatusColors.vacationBackground
             HabitStatus.Failed -> failedBackground
@@ -103,7 +104,8 @@ private fun RoutineStatusDay(
             null -> Color.Transparent
             HabitStatus.Planned -> MaterialTheme.routineStatusColors.pendingStroke
             HabitStatus.Backlog -> MaterialTheme.routineStatusColors.pendingStroke
-            HabitStatus.AlreadyCompleted -> skippedStroke
+            HabitStatus.PastDateAlreadyCompleted -> skippedStroke
+            HabitStatus.FutureDateAlreadyCompleted -> Color.Transparent
             HabitStatus.NotDue -> Color.Transparent
             HabitStatus.OnVacation -> MaterialTheme.routineStatusColors.vacationStroke
             HabitStatus.Failed -> failedStroke

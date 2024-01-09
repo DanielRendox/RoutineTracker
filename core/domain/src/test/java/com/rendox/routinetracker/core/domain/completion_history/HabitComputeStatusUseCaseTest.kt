@@ -265,7 +265,7 @@ class HabitComputeStatusUseCaseTest {
         }
 
     @Test
-    fun `future date, already completed, assert status is AlreadyCompleted`() = runTest {
+    fun `future date, already completed, assert status is FutureDateAlreadyCompleted`() = runTest {
         for (dayIndex in 2..5) {
             completionHistoryRepository.insertCompletion(
                 habitId = 1L,
@@ -280,7 +280,7 @@ class HabitComputeStatusUseCaseTest {
             validationDate = LocalDate(2023, 12, 13),
             today = LocalDate(2023, 12, 9),
         )
-        assertThat(habitStatus).isEqualTo(HabitStatus.AlreadyCompleted)
+        assertThat(habitStatus).isEqualTo(HabitStatus.FutureDateAlreadyCompleted)
     }
 
     @Test
@@ -452,7 +452,7 @@ class HabitComputeStatusUseCaseTest {
                 validationDate = LocalDate(2023, 12, 10),
                 today = LocalDate(2023, 12, 11),
             )
-            assertThat(habitStatus).isEqualTo(HabitStatus.AlreadyCompleted)
+            assertThat(habitStatus).isEqualTo(HabitStatus.PastDateAlreadyCompleted)
         }
 
     @Test
@@ -594,7 +594,7 @@ class HabitComputeStatusUseCaseTest {
                 validationDate = LocalDate(2023, 12, 14),
                 today = LocalDate(2023, 12, 18),
             )
-            assertThat(habitStatus).isEqualTo(HabitStatus.AlreadyCompleted)
+            assertThat(habitStatus).isEqualTo(HabitStatus.PastDateAlreadyCompleted)
         }
 
     @Test
