@@ -8,6 +8,7 @@ import com.rendox.routinetracker.core.domain.completion_history.HabitComputeStat
 import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.HabitStatus
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
@@ -66,14 +68,24 @@ class AgendaScreenViewModel(
     }
 
     private fun updateRoutinesForDate(date: LocalDate) {
+        val cashedRoutinesForDate = MutableStateFlow(emptyList<DisplayRoutine>())
+        val updateRoutineJobs = mutableListOf<Job>()
         for (routine in allRoutinesFlow.value) {
-            viewModelScope.launch {
+            val job = viewModelScope.launch {
                 val routineForDate = getDisplayRoutine(routine, date)
-                cashedRoutinesFlow.update { cashedRoutines ->
-                    cashedRoutines.toMutableMap().also {
-                        val existingRoutines = it[date] ?: emptyList()
-                        it[date] = existingRoutines.toMutableList().apply { add(routineForDate) }
+                cashedRoutinesForDate.update { cashedRoutines ->
+                    cashedRoutines.toMutableList().apply {
+                        add(routineForDate)
                     }
+                }
+            }
+            updateRoutineJobs.add(job)
+        }
+        viewModelScope.launch {
+            updateRoutineJobs.joinAll()
+            cashedRoutinesFlow.update { cashedRoutines ->
+                cashedRoutines.toMutableMap().apply {
+                    this[date] = cashedRoutinesForDate.value
                 }
             }
         }
