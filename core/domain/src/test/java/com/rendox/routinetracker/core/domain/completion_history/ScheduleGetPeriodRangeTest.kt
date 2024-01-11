@@ -185,7 +185,7 @@ class ScheduleGetPeriodRangeTest {
 
         val numOfDaysInPeriod = Random.nextInt(99)
 
-        val schedule = Schedule.PeriodicCustomSchedule(
+        val schedule = Schedule.AlternateDaysSchedule(
             startDate = routineStartDate,
             numOfDueDays = 0,
             numOfDaysInPeriod = numOfDaysInPeriod,
@@ -210,7 +210,7 @@ class ScheduleGetPeriodRangeTest {
     fun assertPeriodicCustomScheduleRestartsPeriodAfterVacation() {
         val routineStartDate = LocalDate(2023, Month.NOVEMBER, 1)
 
-        val schedule = Schedule.PeriodicCustomSchedule(
+        val schedule = Schedule.AlternateDaysSchedule(
             startDate = routineStartDate,
             numOfDueDays = 1,
             numOfDaysInPeriod = 2,
@@ -241,7 +241,7 @@ class ScheduleGetPeriodRangeTest {
     fun assertPeriodicScheduleDoesNotRestartPeriodBeforeVacation() {
         val routineStartDate = LocalDate(2023, Month.NOVEMBER, 1)
 
-        val schedule = Schedule.PeriodicCustomSchedule(
+        val schedule = Schedule.AlternateDaysSchedule(
             startDate = routineStartDate,
             numOfDueDays = 1,
             numOfDaysInPeriod = 2,

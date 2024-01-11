@@ -23,8 +23,20 @@ class CompletionHistoryRepositoryImpl(
         )
     }
 
-    override suspend fun getLastCompletedRecord(habitId: Long): Habit.CompletionRecord? {
-        return localDataSource.getLastCompletedRecord(habitId)
+    override suspend fun getLastCompletedRecord(
+        habitId: Long,
+        minDate: LocalDate?,
+        maxDate: LocalDate?,
+    ): Habit.CompletionRecord? {
+        return localDataSource.getLastCompletedRecord(habitId, minDate, maxDate)
+    }
+
+    override suspend fun getFirstCompletedRecord(
+        habitId: Long,
+        minDate: LocalDate?,
+        maxDate: LocalDate?,
+    ): Habit.CompletionRecord? {
+        return localDataSource.getFirstCompletedRecord(habitId, minDate, maxDate)
     }
 
     override suspend fun getRecordsInPeriod(

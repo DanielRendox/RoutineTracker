@@ -652,6 +652,124 @@ class HabitComputeStatusUseCaseTest {
         assertThat(habitStatus).isEqualTo(HabitStatus.Skipped)
     }
 
+    @Test
+    fun `backlog disabled, negative schedule deviation, assert over completing completes ahead`() = runTest {
+        val schedule = Schedule.WeeklyScheduleByDueDaysOfWeek(
+            dueDaysOfWeek = listOf(
+                DayOfWeek.MONDAY,
+                DayOfWeek.TUESDAY,
+                DayOfWeek.SATURDAY,
+                DayOfWeek.SUNDAY,
+            ),
+            startDayOfWeek = DayOfWeek.MONDAY,
+            backlogEnabled = false,
+            completingAheadEnabled = true,
+            periodSeparationEnabled = true,
+            startDate = LocalDate(2023, 12 , 4),
+        )
+        val habit = defaultHabit.copy(id = 2L, schedule = schedule)
+        habitRepository.insertHabit(habit)
+
+        completionHistoryRepository.insertCompletion(
+            habitId = 2L,
+            completionRecord = Habit.YesNoHabit.CompletionRecord(
+                date = LocalDate(2023, 12, 6),
+                numOfTimesCompleted = 1F,
+            )
+        )
+        completionHistoryRepository.insertCompletion(
+            habitId = 2L,
+            completionRecord = Habit.YesNoHabit.CompletionRecord(
+                date = LocalDate(2023, 12, 8),
+                numOfTimesCompleted = 1F,
+            )
+        )
+
+        assertThat(
+            computeStatus(
+                habitId = 2L,
+                validationDate = LocalDate(2023, 12, 9),
+                today = LocalDate(2024, 1, 11),
+            )
+        ).isEqualTo(HabitStatus.PastDateAlreadyCompleted)
+
+        assertThat(
+            computeStatus(
+                habitId = 2L,
+                validationDate = LocalDate(2023, 12, 10),
+                today = LocalDate(2024, 1, 11),
+            )
+        ).isEqualTo(HabitStatus.PastDateAlreadyCompleted)
+    }
+
+    @Test
+    fun `assert sorting out backlog in the past revokes both previous failed status and future backlog`() = runTest {
+        val schedule = Schedule.MonthlyScheduleByDueDatesIndices(
+            dueDatesIndices = listOf(2, 8),
+            backlogEnabled = true,
+            completingAheadEnabled = true,
+            periodSeparationEnabled = true,
+            startDate = LocalDate(2024, 1 , 1),
+            weekDaysMonthRelated = emptyList(),
+        )
+        val habit = defaultHabit.copy(id = 2L, schedule = schedule)
+        habitRepository.insertHabit(habit)
+
+        completionHistoryRepository.insertCompletion(
+            habitId = 2L,
+            completionRecord = Habit.YesNoHabit.CompletionRecord(
+                date = LocalDate(2024, 1, 10),
+                numOfTimesCompleted = 1F,
+            )
+        )
+
+        assertThat(
+            computeStatus(
+                habitId = 2L,
+                validationDate = LocalDate(2024, 1, 8),
+                today = LocalDate(2024, 1, 11),
+            )
+        ).isEqualTo(HabitStatus.CompletedLater) // instead of Failed
+
+        assertThat(
+            computeStatus(
+                habitId = 2L,
+                validationDate = LocalDate(2024, 1, 12),
+                today = LocalDate(2024, 1, 11),
+            )
+        ).isEqualTo(HabitStatus.NotDue) // instead of Backlog
+    }
+
+    @Test
+    fun `assert sorting out backlog in the future does not revoke future backlog`() = runTest {
+        val schedule = Schedule.MonthlyScheduleByDueDatesIndices(
+            dueDatesIndices = listOf(2, 8),
+            backlogEnabled = true,
+            completingAheadEnabled = true,
+            periodSeparationEnabled = true,
+            startDate = LocalDate(2024, 1 , 1),
+            weekDaysMonthRelated = emptyList(),
+        )
+        val habit = defaultHabit.copy(id = 2L, schedule = schedule)
+        habitRepository.insertHabit(habit)
+
+        completionHistoryRepository.insertCompletion(
+            habitId = 2L,
+            completionRecord = Habit.YesNoHabit.CompletionRecord(
+                date = LocalDate(2024, 1, 11),
+                numOfTimesCompleted = 1F,
+            )
+        )
+
+        assertThat(
+            computeStatus(
+                habitId = 2L,
+                validationDate = LocalDate(2024, 1, 12),
+                today = LocalDate(2024, 1, 11),
+            )
+        ).isEqualTo(HabitStatus.Backlog)
+    }
+
     companion object {
         private fun getDueDatesInPeriod(
             period: LocalDateRange,

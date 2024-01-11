@@ -107,7 +107,7 @@ class HabitLocalDataSourceImpl(
             is Schedule.MonthlyScheduleByNumOfDueDays ->
                 insertMonthlyScheduleByNumOfDueDays(schedule)
 
-            is Schedule.PeriodicCustomSchedule ->
+            is Schedule.AlternateDaysSchedule ->
                 insertPeriodicCustomSchedule(schedule)
 
             is Schedule.CustomDateSchedule -> {
@@ -236,7 +236,7 @@ class HabitLocalDataSourceImpl(
         }
     }
 
-    private fun insertPeriodicCustomSchedule(schedule: Schedule.PeriodicCustomSchedule) {
+    private fun insertPeriodicCustomSchedule(schedule: Schedule.AlternateDaysSchedule) {
         db.scheduleEntityQueries.insertSchedule(
             id = null,
             type = ScheduleType.PeriodicCustomSchedule,

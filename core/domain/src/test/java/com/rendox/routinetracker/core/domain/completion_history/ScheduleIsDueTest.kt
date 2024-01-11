@@ -363,7 +363,7 @@ class ScheduleIsDueTest {
         val numOfDaysInPeriod = Random.nextInt(2, 100)
         val dueDaysNumber = numOfDaysInPeriod / 2
 
-        val schedule: Schedule = Schedule.PeriodicCustomSchedule(
+        val schedule: Schedule = Schedule.AlternateDaysSchedule(
             numOfDueDays = dueDaysNumber,
             numOfDaysInPeriod = numOfDaysInPeriod,
             startDate = routineStartDate,

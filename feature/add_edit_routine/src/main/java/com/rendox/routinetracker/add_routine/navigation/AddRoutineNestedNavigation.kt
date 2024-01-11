@@ -14,7 +14,9 @@ import com.rendox.routinetracker.add_routine.choose_routine_type.ChooseRoutineTy
 import com.rendox.routinetracker.add_routine.choose_schedule.ChooseSchedulePage
 import com.rendox.routinetracker.add_routine.set_goal.SetGoalPage
 import com.rendox.routinetracker.add_routine.tweak_routine.TweakRoutinePage
+import com.rendox.routinetracker.core.ui.helpers.LocalLocale
 import com.rendox.routinetracker.feature.agenda.R
+import java.time.temporal.WeekFields
 
 sealed class AddRoutineDestination(
     val route: String,
@@ -78,8 +80,10 @@ internal fun AddRoutineNavHost(
         },
     ) {
         composable(route = AddRoutineDestination.ChooseRoutineType.route) {
+            val startDayOfWeek = WeekFields.of(LocalLocale.current).firstDayOfWeek
+
             ChooseRoutineTypePage(
-                navigateForward = addRoutineScreenState::navigateForwardOrSave,
+                navigateForward = { addRoutineScreenState.navigateForwardOrSave(startDayOfWeek) },
                 chooseRoutineTypePageState = addRoutineScreenState.chooseRoutineTypePageState,
             )
         }

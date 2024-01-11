@@ -35,9 +35,24 @@ class CompletionHistoryLocalDataSourceImpl(
         }
     }
 
-    override suspend fun getLastCompletedRecord(habitId: Long): Habit.CompletionRecord? {
+    override suspend fun getLastCompletedRecord(
+        habitId: Long,
+        minDate: LocalDate?,
+        maxDate: LocalDate?
+    ): Habit.CompletionRecord? {
         return withContext(dispatcher) {
-            db.completionHistoryEntityQueries.getLastRecord(habitId)
+            db.completionHistoryEntityQueries.getLastRecord(habitId, minDate, maxDate)
+                .executeAsOneOrNull()?.toExternalModel()
+        }
+    }
+
+    override suspend fun getFirstCompletedRecord(
+        habitId: Long,
+        minDate: LocalDate?,
+        maxDate: LocalDate?,
+    ): Habit.CompletionRecord? {
+        return withContext(dispatcher) {
+            db.completionHistoryEntityQueries.getFirstRecord(habitId, minDate, maxDate)
                 .executeAsOneOrNull()?.toExternalModel()
         }
     }

@@ -28,8 +28,19 @@ WHERE habitId = ? AND date = ?;
 getLastRecord:
 SELECT *
 FROM completionHistoryEntity
-WHERE habitId = ?
+WHERE habitId = :habitId
+    AND (:minDate IS NULL OR :minDate <= date)
+    AND (:maxDate IS NULL OR date <= :maxDate)
 ORDER BY date DESC
+LIMIT 1;
+
+getFirstRecord:
+SELECT *
+FROM completionHistoryEntity
+WHERE habitId = :habitId
+    AND (:minDate IS NULL OR :minDate <= date)
+    AND (:maxDate IS NULL OR date <= :maxDate)
+ORDER BY date ASC
 LIMIT 1;
 
 getRecordsInPeriod:

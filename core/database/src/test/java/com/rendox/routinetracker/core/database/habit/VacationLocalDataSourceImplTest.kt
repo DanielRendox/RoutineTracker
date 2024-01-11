@@ -8,6 +8,8 @@ import com.rendox.routinetracker.core.database.di.localDataSourceModule
 import com.rendox.routinetracker.core.database.vacation.VacationLocalDataSource
 import com.rendox.routinetracker.core.database.vacation.VacationLocalDataSourceImpl
 import com.rendox.routinetracker.core.model.Vacation
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import org.junit.After
@@ -73,6 +75,7 @@ class VacationLocalDataSourceImplTest : KoinTest {
         ),
     )
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Before
     fun setUp() = runTest {
         startKoin {
@@ -86,7 +89,7 @@ class VacationLocalDataSourceImplTest : KoinTest {
         RoutineTrackerDatabase.Schema.create(sqlDriver)
 
         vacationLocalDataSource = VacationLocalDataSourceImpl(
-            db = get(), dispatcher = get()
+            db = get(), dispatcher = UnconfinedTestDispatcher()
         )
         
         for (vacation in vacationsList) {

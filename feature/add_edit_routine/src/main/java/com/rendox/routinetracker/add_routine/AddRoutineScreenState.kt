@@ -20,6 +20,7 @@ import com.rendox.routinetracker.add_routine.tweak_routine.TweakRoutinePageState
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.ui.R
 import com.rendox.routinetracker.core.ui.helpers.UiText
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.toKotlinLocalTime
 
 @Stable
@@ -94,11 +95,11 @@ class AddRoutineScreenState(
         }
     }
 
-    fun navigateForwardOrSave() {
+    fun navigateForwardOrSave(startDayOfWeek: DayOfWeek) {
         val currentDestinationRoute = navBackStackEntry?.destination?.route ?: return
 
         if (currentDestinationRoute == navDestinations.last().route) {
-            val routine = assembleRoutine()
+            val routine = assembleRoutine(startDayOfWeek)
             saveRoutine(routine)
             navigateBackAndRecreate()
             return
@@ -124,7 +125,9 @@ class AddRoutineScreenState(
 
         if (nextDestination == AddRoutineDestination.TweakRoutine) {
             tweakRoutinePageState.updateChosenSchedule(
-                chooseSchedulePageState.selectedSchedulePickerState.assembleSchedule()
+                chooseSchedulePageState.selectedSchedulePickerState.assembleSchedule(
+                    startDayOfWeek = startDayOfWeek,
+                )
             )
         }
 
@@ -138,12 +141,13 @@ class AddRoutineScreenState(
         }
     }
 
-    private fun assembleRoutine(): Habit = when (chooseRoutineTypePageState.routineType) {
+    private fun assembleRoutine(startDayOfWeek: DayOfWeek): Habit = when (chooseRoutineTypePageState.routineType) {
         is RoutineTypeUi.YesNoHabit -> Habit.YesNoHabit(
             name = setGoalPageState.routineName,
             description = setGoalPageState.routineDescription,
             schedule = chooseSchedulePageState.selectedSchedulePickerState.assembleSchedule(
-                tweakRoutinePageState = tweakRoutinePageState
+                tweakRoutinePageState = tweakRoutinePageState,
+                startDayOfWeek = startDayOfWeek,
             ),
             sessionDurationMinutes = tweakRoutinePageState.sessionDuration?.toMinutes()?.toInt(),
             defaultCompletionTime = tweakRoutinePageState.sessionTime?.toKotlinLocalTime(),

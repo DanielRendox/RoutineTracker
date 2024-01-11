@@ -11,7 +11,17 @@ interface CompletionHistoryLocalDataSource {
     ): Double
 
     suspend fun getRecordByDate(habitId: Long, date: LocalDate): Habit.CompletionRecord?
-    suspend fun getLastCompletedRecord(habitId: Long): Habit.CompletionRecord?
+    suspend fun getLastCompletedRecord(
+        habitId: Long,
+        minDate: LocalDate?,
+        maxDate: LocalDate?,
+    ): Habit.CompletionRecord?
+
+    suspend fun getFirstCompletedRecord(
+        habitId: Long,
+        minDate: LocalDate?,
+        maxDate: LocalDate?,
+    ): Habit.CompletionRecord?
 
     suspend fun getRecordsInPeriod(
         habitId: Long,

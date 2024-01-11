@@ -25,10 +25,32 @@ class CompletionHistoryRepositoryFake(
             .find { it.first == habitId && it.second.date == date }?.second
     }
 
-    override suspend fun getLastCompletedRecord(habitId: Long): Habit.CompletionRecord? {
+    override suspend fun getLastCompletedRecord(
+        habitId: Long,
+        minDate: LocalDate?,
+        maxDate: LocalDate?,
+    ): Habit.CompletionRecord? {
         return habitData.completionHistory.value
-            .filter { it.first == habitId }
+            .filter {
+                it.first == habitId
+                        && (minDate == null || minDate <= it.second.date)
+                        && (maxDate == null || it.second.date <= maxDate)
+            }
             .maxByOrNull { it.second.date }?.second
+    }
+
+    override suspend fun getFirstCompletedRecord(
+        habitId: Long,
+        minDate: LocalDate?,
+        maxDate: LocalDate?,
+    ): Habit.CompletionRecord? {
+        return habitData.completionHistory.value
+            .filter {
+                it.first == habitId
+                        && (minDate == null || minDate <= it.second.date)
+                        && (maxDate == null || it.second.date <= maxDate)
+            }
+            .minByOrNull { it.second.date }?.second
     }
 
     override suspend fun getRecordsInPeriod(

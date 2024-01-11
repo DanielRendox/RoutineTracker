@@ -22,7 +22,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.ui.components.WrapTextContent
 import com.rendox.routinetracker.core.ui.helpers.LocalLocale
@@ -179,7 +178,7 @@ private fun deriveRoutineFrequency(
             "$numOfDays $perWeek"
         }
 
-        Schedule.PeriodicCustomSchedule::class -> {
+        Schedule.AlternateDaysSchedule::class -> {
             val numOfActivityDaysString = pluralStringResource(
                 id = R.plurals.num_of_days,
                 count = numOfDueDaysPerPeriod,

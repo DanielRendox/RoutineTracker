@@ -82,17 +82,18 @@ sealed class Schedule {
         val numOfDueDaysInFirstPeriod: Int? = null,
         override val startDayOfWeek: DayOfWeek? = null,
 
-        override val backlogEnabled: Boolean = true,
-        override val completingAheadEnabled: Boolean = true,
-
         override val startDate: LocalDate,
         override val endDate: LocalDate? = null,
+
+        override val periodSeparationEnabled: Boolean = true,
 
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
     ) : WeeklySchedule(), ByNumOfDueDays {
-        override val periodSeparationEnabled: Boolean = false
-        override val supportsPeriodSeparation = false
+        override val backlogEnabled: Boolean = true
+        override val completingAheadEnabled: Boolean = true
+        override val supportsPeriodSeparation = true
+        override val supportsScheduleDeviation = false
 
         private val firstPeriodIsShort
             get() = startDayOfWeek != null && startDate.dayOfWeek != startDayOfWeek
@@ -158,8 +159,7 @@ sealed class Schedule {
         val numOfDueDaysInFirstPeriod: Int? = null,
         override val startFromHabitStart: Boolean = true,
 
-        override val backlogEnabled: Boolean = true,
-        override val completingAheadEnabled: Boolean = true,
+        override val periodSeparationEnabled: Boolean = true,
 
         override val startDate: LocalDate,
         override val endDate: LocalDate? = null,
@@ -167,8 +167,10 @@ sealed class Schedule {
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
     ) : MonthlySchedule(), ByNumOfDueDays {
-        override val periodSeparationEnabled = false
-        override val supportsPeriodSeparation = false
+        override val backlogEnabled: Boolean = true
+        override val completingAheadEnabled: Boolean = true
+        override val supportsPeriodSeparation = true
+        override val supportsScheduleDeviation = false
 
         private val firstPeriodIsShort
             get() = !startFromHabitStart && startDate.dayOfMonth != 1
@@ -197,12 +199,13 @@ sealed class Schedule {
             }
     }
 
-    data class PeriodicCustomSchedule(
+    data class AlternateDaysSchedule(
         val numOfDueDays: Int,
         val numOfDaysInPeriod: Int,
 
         override val backlogEnabled: Boolean = true,
         override val completingAheadEnabled: Boolean = true,
+        override val periodSeparationEnabled: Boolean = true,
 
         override val startDate: LocalDate,
         override val endDate: LocalDate? = null,
@@ -210,8 +213,7 @@ sealed class Schedule {
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
     ) : PeriodicSchedule(), ByNumOfDueDays {
-        override val periodSeparationEnabled = false
-        override val supportsPeriodSeparation = false
+        override val supportsPeriodSeparation = true
 
         override val correspondingPeriod: DatePeriod
             get() = DatePeriod(days = numOfDaysInPeriod)
@@ -265,8 +267,7 @@ sealed class Schedule {
         val numOfDueDaysInFirstPeriod: Int?,
         override val startFromHabitStart: Boolean,
 
-        override val backlogEnabled: Boolean = true,
-        override val completingAheadEnabled: Boolean = true,
+        override val periodSeparationEnabled: Boolean = true,
 
         override val startDate: LocalDate,
         override val endDate: LocalDate? = null,
@@ -274,8 +275,10 @@ sealed class Schedule {
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
     ) : AnnualSchedule(), ByNumOfDueDays {
-        override val periodSeparationEnabled = false
-        override val supportsPeriodSeparation = false
+        override val backlogEnabled: Boolean = true
+        override val completingAheadEnabled: Boolean = true
+        override val supportsPeriodSeparation = true
+        override val supportsScheduleDeviation = false
 
         private val firstPeriodIsShort
             get() = !startFromHabitStart && startDate.dayOfYear != 1
