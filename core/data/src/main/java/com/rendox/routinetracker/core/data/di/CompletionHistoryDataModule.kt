@@ -7,9 +7,8 @@ import com.rendox.routinetracker.core.database.completion_history.CompletionHist
 import org.koin.dsl.module
 
 val completionHistoryDataModule = module {
-
     single<CompletionHistoryLocalDataSource> {
-        CompletionHistoryLocalDataSourceImpl(db = get(), dispatcher = get())
+        CompletionHistoryLocalDataSourceImpl(db = get())
     }
 
     single<CompletionHistoryRepository> {

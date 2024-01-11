@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.rendox.routinetracker.add_routine.AddRoutineDestinationTopAppBar
+import com.rendox.routinetracker.add_routine.AddHabitDestinationTopAppBar
 import com.rendox.routinetracker.add_routine.choose_schedule.schedule_pickers.ScheduleTypeUi
 import com.rendox.routinetracker.add_routine.choose_schedule.schedule_pickers.AlternateDaysSchedulePicker
 import com.rendox.routinetracker.add_routine.choose_schedule.schedule_pickers.EveryDaySchedulePicker
@@ -26,7 +26,7 @@ fun ChooseSchedulePage(
             .padding(start = 8.dp, end = 16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        AddRoutineDestinationTopAppBar(destination = AddRoutineDestination.ChooseSchedule)
+        AddHabitDestinationTopAppBar(destination = AddRoutineDestination.ChooseSchedule)
 
         EveryDaySchedulePicker(
             everyDaySchedulePickerState = chooseSchedulePageState.everyDaySchedulePickerState,

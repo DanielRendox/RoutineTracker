@@ -14,12 +14,13 @@ import com.rendox.routinetracker.add_routine.choose_schedule.ChooseSchedulePageS
 import com.rendox.routinetracker.add_routine.choose_schedule.assembleSchedule
 import com.rendox.routinetracker.add_routine.navigation.AddRoutineDestination
 import com.rendox.routinetracker.add_routine.navigation.navigate
-import com.rendox.routinetracker.add_routine.navigation.yesNoRoutineDestinations
+import com.rendox.routinetracker.add_routine.navigation.yesNoHabitDestinations
 import com.rendox.routinetracker.add_routine.set_goal.SetGoalPageState
 import com.rendox.routinetracker.add_routine.tweak_routine.TweakRoutinePageState
-import com.rendox.routinetracker.core.model.Routine
+import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.ui.R
 import com.rendox.routinetracker.core.ui.helpers.UiText
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.toKotlinLocalTime
 
 @Stable
@@ -30,7 +31,7 @@ class AddRoutineScreenState(
     setGoalPageState: SetGoalPageState,
     chooseSchedulePageState: ChooseSchedulePageState,
     tweakRoutinePageState: TweakRoutinePageState,
-    private val saveRoutine: (Routine) -> Unit,
+    private val saveRoutine: (Habit) -> Unit,
     private val navigateBackAndRecreate: () -> Unit,
     private val navigateBack: () -> Unit,
 ) {
@@ -46,7 +47,7 @@ class AddRoutineScreenState(
     var tweakRoutinePageState by mutableStateOf(tweakRoutinePageState)
         private set
 
-    var navDestinations by mutableStateOf(yesNoRoutineDestinations)
+    var navDestinations by mutableStateOf(yesNoHabitDestinations)
         private set
 
     var navigateBackButtonText: UiText by mutableStateOf(UiText.DynamicString(""))
@@ -94,11 +95,11 @@ class AddRoutineScreenState(
         }
     }
 
-    fun navigateForwardOrSave() {
+    fun navigateForwardOrSave(startDayOfWeek: DayOfWeek) {
         val currentDestinationRoute = navBackStackEntry?.destination?.route ?: return
 
         if (currentDestinationRoute == navDestinations.last().route) {
-            val routine = assembleRoutine()
+            val routine = assembleRoutine(startDayOfWeek)
             saveRoutine(routine)
             navigateBackAndRecreate()
             return
@@ -124,7 +125,9 @@ class AddRoutineScreenState(
 
         if (nextDestination == AddRoutineDestination.TweakRoutine) {
             tweakRoutinePageState.updateChosenSchedule(
-                chooseSchedulePageState.selectedSchedulePickerState.assembleSchedule()
+                chooseSchedulePageState.selectedSchedulePickerState.assembleSchedule(
+                    startDayOfWeek = startDayOfWeek,
+                )
             )
         }
 
@@ -133,23 +136,24 @@ class AddRoutineScreenState(
 
     private fun updateNavDestinations(routineType: RoutineTypeUi) {
         navDestinations = when (routineType) {
-            RoutineTypeUi.YesNoRoutine -> yesNoRoutineDestinations
-            RoutineTypeUi.MeasurableRoutine -> TODO()
+            RoutineTypeUi.YesNoHabit -> yesNoHabitDestinations
+            RoutineTypeUi.MeasurableHabit -> TODO()
         }
     }
 
-    private fun assembleRoutine(): Routine = when (chooseRoutineTypePageState.routineType) {
-        is RoutineTypeUi.YesNoRoutine -> Routine.YesNoRoutine(
+    private fun assembleRoutine(startDayOfWeek: DayOfWeek): Habit = when (chooseRoutineTypePageState.routineType) {
+        is RoutineTypeUi.YesNoHabit -> Habit.YesNoHabit(
             name = setGoalPageState.routineName,
             description = setGoalPageState.routineDescription,
             schedule = chooseSchedulePageState.selectedSchedulePickerState.assembleSchedule(
-                tweakRoutinePageState = tweakRoutinePageState
+                tweakRoutinePageState = tweakRoutinePageState,
+                startDayOfWeek = startDayOfWeek,
             ),
             sessionDurationMinutes = tweakRoutinePageState.sessionDuration?.toMinutes()?.toInt(),
             defaultCompletionTime = tweakRoutinePageState.sessionTime?.toKotlinLocalTime(),
         )
 
-        is RoutineTypeUi.MeasurableRoutine -> TODO()
+        is RoutineTypeUi.MeasurableHabit -> TODO()
     }
 }
 
@@ -161,7 +165,7 @@ fun rememberAddRoutineScreenState(
     setGoalPageState: SetGoalPageState,
     chooseSchedulePageState: ChooseSchedulePageState,
     tweakRoutinePageState: TweakRoutinePageState,
-    saveRoutine: (Routine) -> Unit,
+    saveRoutine: (Habit) -> Unit,
     navigateBackAndRecreate: () -> Unit,
     navigateBack: () -> Unit,
 ) = remember(

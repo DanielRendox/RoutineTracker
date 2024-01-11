@@ -22,11 +22,15 @@ import kotlinx.datetime.yearsUntil
 fun Schedule.PeriodicSchedule.getPeriodRange(
     currentDate: LocalDate,
     lastVacationEndDate: LocalDate? = null,
-): LocalDateRange {
-    if (currentDate < routineStartDate) {
-        throw IllegalArgumentException(
-            "This function shouldn't be called for dates that are prior to routine start date."
-        )
+): LocalDateRange? {
+    if (currentDate < startDate) {
+        return null
+    }
+
+    endDate?.let {
+        if (currentDate > it) {
+            return null
+        }
     }
 
     val periodRange = when (this) {
@@ -36,13 +40,12 @@ fun Schedule.PeriodicSchedule.getPeriodRange(
         is Schedule.MonthlyScheduleByNumOfDueDays -> monthlyScheduleGetPeriodDateRange(currentDate)
         is Schedule.AnnualScheduleByDueDates -> annualScheduleGetPeriodDateRange(currentDate)
         is Schedule.AnnualScheduleByNumOfDueDays -> annualScheduleGetPeriodDateRange(currentDate)
-        is Schedule.PeriodicCustomSchedule -> periodicCustomScheduleGetPeriodDateRange(
+        is Schedule.AlternateDaysSchedule -> periodicCustomScheduleGetPeriodDateRange(
             currentDate, lastVacationEndDate
         )
     }
 
-    routineEndDate?.let {
-        if (periodRange.start > it) throw IllegalArgumentException()
+    endDate?.let {
         if (periodRange.endInclusive > it) {
             return periodRange.copy(endInclusive = it)
         }
@@ -60,12 +63,12 @@ private fun Schedule.WeeklySchedule.weeklyScheduleGetPeriodDateRange(
     val startFromRoutineStart = startDayOfWeek == null
     if (startFromRoutineStart) {
         val unit = DateTimeUnit.WEEK
-        val numberOfPeriodsAlreadyPassed = routineStartDate.until(currentDate, unit)
-        startPeriodDate = routineStartDate.plus(numberOfPeriodsAlreadyPassed, unit)
+        val numberOfPeriodsAlreadyPassed = startDate.until(currentDate, unit)
+        startPeriodDate = startDate.plus(numberOfPeriodsAlreadyPassed, unit)
         endPeriodDate = atEndOfPeriod(startPeriodDate, correspondingPeriod)
     } else {
         startPeriodDate = currentDate
-        while (startPeriodDate.dayOfWeek != startDayOfWeek && startPeriodDate != routineStartDate) {
+        while (startPeriodDate.dayOfWeek != startDayOfWeek && startPeriodDate != startDate) {
             startPeriodDate = startPeriodDate.minus(DatePeriod(days = 1))
         }
         val endDateDayOfWeekIndex = startDayOfWeek!!.value - 1
@@ -88,14 +91,14 @@ private fun Schedule.MonthlySchedule.monthlyScheduleGetPeriodDateRange(
     val startPeriodDate: LocalDate
     val endPeriodDate: LocalDate
 
-    if (startFromRoutineStart) {
-        val numberOfPeriodsAlreadyPassed = routineStartDate.monthsUntil(currentDate)
-        startPeriodDate = routineStartDate.plus(DatePeriod(months = numberOfPeriodsAlreadyPassed))
+    if (startFromHabitStart) {
+        val numberOfPeriodsAlreadyPassed = startDate.monthsUntil(currentDate)
+        startPeriodDate = startDate.plus(DatePeriod(months = numberOfPeriodsAlreadyPassed))
         endPeriodDate = atEndOfPeriod(startPeriodDate, correspondingPeriod)
     } else {
-        val stillFirstMonth = currentDate <= routineStartDate.atEndOfMonth
+        val stillFirstMonth = currentDate <= startDate.atEndOfMonth
         startPeriodDate = if (stillFirstMonth) {
-            routineStartDate
+            startDate
         } else {
             currentDate.withDayOfMonth(1)
         }
@@ -110,22 +113,22 @@ private fun Schedule.AnnualSchedule.annualScheduleGetPeriodDateRange(
     var startPeriodDate: LocalDate
     var endPeriodDate: LocalDate
 
-    if (startFromRoutineStart) {
-        val numberOfPeriodsAlreadyPassed = routineStartDate.yearsUntil(currentDate)
-        startPeriodDate = routineStartDate.plus(DatePeriod(years = numberOfPeriodsAlreadyPassed))
+    if (startFromHabitStart) {
+        val numberOfPeriodsAlreadyPassed = startDate.yearsUntil(currentDate)
+        startPeriodDate = startDate.plus(DatePeriod(years = numberOfPeriodsAlreadyPassed))
         endPeriodDate = atEndOfPeriod(startPeriodDate, correspondingPeriod)
 
         // plus and until functions don't work as expected with february 29
-        if (routineStartDate.month == Month.FEBRUARY && routineStartDate.dayOfMonth == 29) {
+        if (startDate.month == Month.FEBRUARY && startDate.dayOfMonth == 29) {
             if (numberOfPeriodsAlreadyPassed > 0) {
                 startPeriodDate = startPeriodDate.plusDays(1)
             }
             endPeriodDate = endPeriodDate.plusDays(1)
         }
     } else {
-        val stillFirstYear = currentDate <= routineStartDate.atEndOfYear
+        val stillFirstYear = currentDate <= startDate.atEndOfYear
         startPeriodDate = if (stillFirstYear) {
-            routineStartDate
+            startDate
         } else {
             LocalDate(currentDate.year, Month.JANUARY, 1)
         }
@@ -134,7 +137,7 @@ private fun Schedule.AnnualSchedule.annualScheduleGetPeriodDateRange(
     return startPeriodDate..endPeriodDate
 }
 
-private fun Schedule.PeriodicCustomSchedule.periodicCustomScheduleGetPeriodDateRange(
+private fun Schedule.AlternateDaysSchedule.periodicCustomScheduleGetPeriodDateRange(
     currentDate: LocalDate,
     lastVacationEndDate: LocalDate?,
     ): LocalDateRange {
@@ -147,7 +150,7 @@ private fun Schedule.PeriodicCustomSchedule.periodicCustomScheduleGetPeriodDateR
     val scheduleStartDate = if (lastVacationEndDate != null && lastVacationEndDate <= currentDate) {
         lastVacationEndDate.plusDays(1)
     } else {
-        routineStartDate
+        startDate
     }
     var startPeriodDateIndex = scheduleStartDate.daysUntil(currentDate)
     while (startPeriodDateIndex % correspondingPeriod.days != 0) {

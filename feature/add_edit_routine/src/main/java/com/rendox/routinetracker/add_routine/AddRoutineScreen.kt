@@ -33,12 +33,14 @@ import com.rendox.routinetracker.add_routine.navigation.AddRoutineDestination
 import com.rendox.routinetracker.add_routine.navigation.AddRoutineNavHost
 import com.rendox.routinetracker.add_routine.set_goal.rememberSetGoalPageState
 import com.rendox.routinetracker.add_routine.tweak_routine.rememberTweakRoutinePageState
-import com.rendox.routinetracker.core.data.routine.RoutineRepository
+import com.rendox.routinetracker.core.data.habit.HabitRepository
+import com.rendox.routinetracker.core.ui.helpers.LocalLocale
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import org.koin.compose.koinInject
+import java.time.temporal.WeekFields
 
 @OptIn(DelicateCoroutinesApi::class)
 @Composable
@@ -46,7 +48,7 @@ internal fun AddRoutineRoute(
     modifier: Modifier = Modifier,
     navigateBackAndRecreate: () -> Unit,
     navigateBack: () -> Unit,
-    routineRepository: RoutineRepository = koinInject()
+    habitRepository: HabitRepository = koinInject()
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -63,8 +65,7 @@ internal fun AddRoutineRoute(
         saveRoutine = { routine ->
             GlobalScope.launch {
                 withTimeout(10_000L) {
-                    println("resulting routine = $routine")
-                    routineRepository.insertRoutine(routine)
+                    habitRepository.insertHabit(routine)
                 }
             }
         },
@@ -97,6 +98,8 @@ internal fun AddRoutineScreen(
             val navigateForwardButtonText =
                 addRoutineScreenState.navigateForwardButtonText.asString().uppercase()
 
+            val startDayOfWeek = WeekFields.of(LocalLocale.current).firstDayOfWeek
+
             AddRoutineBottomNavigation(
                 navigateBackButtonText = navigateBackButtonText,
                 navigateForwardButtonText = navigateForwardButtonText,
@@ -104,7 +107,9 @@ internal fun AddRoutineScreen(
                 currentScreenNumber = addRoutineScreenState.currentScreenNumber,
                 numOfScreens = addRoutineScreenState.navDestinations.size,
                 navigateBackButtonOnClick = addRoutineScreenState::navigateBackOrCancel,
-                navigateForwardButtonOnClick = addRoutineScreenState::navigateForwardOrSave,
+                navigateForwardButtonOnClick = {
+                    addRoutineScreenState.navigateForwardOrSave(startDayOfWeek = startDayOfWeek)
+                },
             )
         }
     }
@@ -181,7 +186,7 @@ private fun NavigationProgressIndicator(
 }
 
 @Composable
-fun AddRoutineDestinationTopAppBar(
+fun AddHabitDestinationTopAppBar(
     modifier: Modifier = Modifier,
     destination: AddRoutineDestination,
 ) {

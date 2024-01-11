@@ -1,204 +1,104 @@
 package com.rendox.routinetracker.core.database.completion_history
 
+import com.rendox.routinetracker.core.database.CompletionHistoryEntity
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
-import com.rendox.routinetracker.core.database.completionhistory.CompletedLaterHistoryEntity
-import com.rendox.routinetracker.core.database.completionhistory.CompletionHistoryEntity
-import com.rendox.routinetracker.core.logic.time.LocalDateRange
-import com.rendox.routinetracker.core.model.CompletionHistoryEntry
-import com.rendox.routinetracker.core.model.HistoricalStatus
+import com.rendox.routinetracker.core.database.habit.model.HabitType
+import com.rendox.routinetracker.core.model.Habit
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
 
 class CompletionHistoryLocalDataSourceImpl(
     private val db: RoutineTrackerDatabase,
-    private val dispatcher: CoroutineDispatcher,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : CompletionHistoryLocalDataSource {
-
-    override suspend fun getHistoryEntries(
-        routineId: Long,
-        dates: LocalDateRange,
-    ): List<CompletionHistoryEntry> {
+    override suspend fun getNumOfTimesCompletedInPeriod(
+        habitId: Long,
+        minDate: LocalDate?,
+        maxDate: LocalDate?,
+    ): Double {
         return withContext(dispatcher) {
-            db.completionHistoryEntityQueries.getHistoryEntriesByIndices(
-                routineId = routineId,
-                start = dates.start,
-                end = dates.endInclusive,
-            ).executeAsList().map { it.toExternalModel() }
+            db.completionHistoryEntityQueries.getNumOfTimesCompletedInPeriod(
+                habitId, minDate, maxDate
+            ).executeAsOne()
         }
     }
 
-    override suspend fun getHistoryEntryByDate(
-        routineId: Long,
-        date: LocalDate
-    ): CompletionHistoryEntry? {
+    override suspend fun getRecordByDate(
+        habitId: Long, date: LocalDate
+    ): Habit.CompletionRecord? {
         return withContext(dispatcher) {
-            db.completionHistoryEntityQueries.getHistoryEntryByDate(
-                routineId = routineId,
-                date = date,
+            db.completionHistoryEntityQueries.getRecordByDate(
+                habitId, date
             ).executeAsOneOrNull()?.toExternalModel()
         }
     }
 
-    private fun CompletionHistoryEntity.toExternalModel() = CompletionHistoryEntry(
-        date = date,
-        status = status,
-        scheduleDeviation = scheduleDeviation,
-        timesCompleted = timesCompleted,
-    )
-
-    override suspend fun insertHistoryEntry(
-        id: Long?,
-        routineId: Long,
-        entry: CompletionHistoryEntry,
-    ) {
-        withContext(dispatcher) {
-            db.routineEntityQueries.transaction {
-                db.completionHistoryEntityQueries.insertHistoryEntry(
-                    id = id,
-                    routineId = routineId,
-                    date = entry.date,
-                    status = entry.status,
-                    scheduleDeviation = entry.scheduleDeviation,
-                    timesCompleted = entry.timesCompleted,
-                )
-                if (entry.status == HistoricalStatus.CompletedLater) {
-                    insertCompletedLaterDate(routineId, entry.date)
-                }
-            }
-        }
-    }
-
-    override suspend fun deleteHistoryEntry(routineId: Long, date: LocalDate) {
+    override suspend fun getLastCompletedRecord(
+        habitId: Long,
+        minDate: LocalDate?,
+        maxDate: LocalDate?
+    ): Habit.CompletionRecord? {
         return withContext(dispatcher) {
-            db.completionHistoryEntityQueries.deleteHistoryEntry(routineId, date)
-        }
-    }
-
-    override suspend fun updateHistoryEntryByDate(
-        routineId: Long,
-        date: LocalDate,
-        newStatus: HistoricalStatus?,
-        newScheduleDeviation: Float?,
-        newTimesCompleted: Float?,
-    ) {
-        withContext(dispatcher) {
-            db.routineEntityQueries.transaction {
-                val oldValue = db.completionHistoryEntityQueries.getHistoryEntriesByIndices(
-                    routineId, date, date
-                ).executeAsOne()
-                db.completionHistoryEntityQueries.updateHistoryEntryStatusByDate(
-                    status = newStatus ?: oldValue.status,
-                    routineId = routineId,
-                    date = date,
-                    scheduleDeviation = newScheduleDeviation ?: oldValue.scheduleDeviation,
-                    timesCompleted = newTimesCompleted ?: oldValue.timesCompleted,
-                )
-                if (newStatus == HistoricalStatus.CompletedLater) {
-                    insertCompletedLaterDate(routineId, date)
-                }
-            }
-        }
-    }
-
-    override suspend fun getFirstHistoryEntry(routineId: Long): CompletionHistoryEntry? {
-        return withContext(dispatcher) {
-            db.completionHistoryEntityQueries.getFirstHistoryEntry(routineId)
+            db.completionHistoryEntityQueries.getLastRecord(habitId, minDate, maxDate)
                 .executeAsOneOrNull()?.toExternalModel()
         }
     }
 
-    override suspend fun getLastHistoryEntry(routineId: Long): CompletionHistoryEntry? {
+    override suspend fun getFirstCompletedRecord(
+        habitId: Long,
+        minDate: LocalDate?,
+        maxDate: LocalDate?,
+    ): Habit.CompletionRecord? {
         return withContext(dispatcher) {
-            db.completionHistoryEntityQueries.getLastHistoryEntry(routineId)
+            db.completionHistoryEntityQueries.getFirstRecord(habitId, minDate, maxDate)
                 .executeAsOneOrNull()?.toExternalModel()
         }
     }
 
-    override suspend fun getFirstHistoryEntryByStatus(
-        routineId: Long,
-        matchingStatuses: List<HistoricalStatus>,
+    override suspend fun getRecordsInPeriod(
+        habitId: Long,
         minDate: LocalDate?,
         maxDate: LocalDate?,
-    ): CompletionHistoryEntry? {
+    ): List<Habit.CompletionRecord> {
         return withContext(dispatcher) {
-            db.completionHistoryEntityQueries.getFirstHistoryEntryByStatus(
-                routineId = routineId,
-                matchingStatuses = matchingStatuses,
-                minDate = minDate,
-                maxDate = maxDate,
-            ).executeAsOneOrNull()?.toExternalModel()
+            db.completionHistoryEntityQueries.getRecordsInPeriod(
+                habitId, minDate, maxDate
+            ).executeAsList().map { it.toExternalModel()!! }
         }
     }
 
-    override suspend fun getLastHistoryEntryByStatus(
-        routineId: Long,
-        matchingStatuses: List<HistoricalStatus>,
-        minDate: LocalDate?,
-        maxDate: LocalDate?,
-    ): CompletionHistoryEntry? {
-        return withContext(dispatcher) {
-            db.completionHistoryEntityQueries.getLastHistoryEntryByStatus(
-                routineId = routineId,
-                matchingStatuses = matchingStatuses,
-                minDate = minDate,
-                maxDate = maxDate,
-            ).executeAsOneOrNull()?.toExternalModel()
-        }
-    }
-
-    override suspend fun checkIfStatusWasCompletedLater(routineId: Long, date: LocalDate): Boolean {
-        return withContext(dispatcher) {
-            checkCompletedLater(routineId, date)
-        }
-    }
-
-    override suspend fun deleteCompletedLaterBackupEntry(
-        routineId: Long, date: LocalDate
+    override suspend fun insertCompletion(
+        habitId: Long,
+        completionRecord: Habit.CompletionRecord,
     ) {
         withContext(dispatcher) {
-            db.completedLaterHistoryEntityQueries.deleteCompletedLaterDate(
-                routineId, date
+            db.completionHistoryEntityQueries.insertCompletion(
+                habitId = habitId,
+                date = completionRecord.date,
+                numOfTimesCompleted = completionRecord.numOfTimesCompleted,
             )
         }
     }
 
-    private fun checkCompletedLater(routineId: Long, date: LocalDate): Boolean {
-        val completedLaterEntity: CompletedLaterHistoryEntity? =
-            db.completedLaterHistoryEntityQueries.getEntityByDate(
-                routineId, date
-            ).executeAsOneOrNull()
-        return completedLaterEntity != null
+    override suspend fun deleteCompletionByDate(habitId: Long, date: LocalDate) {
+        withContext(dispatcher) {
+            db.completionHistoryEntityQueries.deleteCompletionByDate(habitId, date)
+        }
     }
 
-    private fun insertCompletedLaterDate(routineId: Long, date: LocalDate) {
-        val alreadyInserted = checkCompletedLater(routineId, date)
-        if (!alreadyInserted) {
-            db.completedLaterHistoryEntityQueries.insertCompletedLaterDate(
-                id = null,
-                routineId = routineId,
+    private suspend fun CompletionHistoryEntity.toExternalModel(): Habit.CompletionRecord? {
+        val habitType = withContext(dispatcher) {
+            db.habitEntityQueries.getHabitById(habitId).executeAsOneOrNull()?.type
+        }
+        return when (habitType) {
+            HabitType.YesNoHabit -> Habit.YesNoHabit.CompletionRecord(
                 date = date,
+                numOfTimesCompleted = numOfTimesCompleted,
             )
-        }
-    }
 
-    override suspend fun getTotalTimesCompletedInPeriod(
-        routineId: Long, startDate: LocalDate, endDate: LocalDate
-    ): Double {
-        return withContext(dispatcher) {
-            db.completionHistoryEntityQueries
-                .getTotalTimesCompletedAtTheMomentOfDate(routineId, startDate, endDate)
-                .executeAsOne()
-        }
-    }
-
-    override suspend fun getScheduleDeviationInPeriod(
-        routineId: Long, startDate: LocalDate, endDate: LocalDate
-    ): Double {
-        return withContext(dispatcher) {
-            db.completionHistoryEntityQueries
-                .getScheduleDeviationAtTheMomentOfDate(routineId, startDate, endDate)
-                .executeAsOne()
+            null -> null
         }
     }
 }

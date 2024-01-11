@@ -9,34 +9,29 @@ import kotlinx.datetime.daysUntil
 fun Schedule.isDue(
     validationDate: LocalDate,
     lastVacationEndDate: LocalDate? = null,
-): Boolean {
-    if (validationDate < routineStartDate) return false
-    routineEndDate?.let { if (validationDate > it) return false }
+): Boolean = when (this) {
+    is Schedule.EveryDaySchedule -> true
 
-    return when (this) {
-        is Schedule.EveryDaySchedule -> true
+    is Schedule.ByNumOfDueDays -> scheduleByNumOfDueDaysIsDue(
+        validationDate = validationDate,
+        lastVacationEndDate = lastVacationEndDate,
+    )
 
-        is Schedule.WeeklyScheduleByDueDaysOfWeek -> weeklyScheduleByDueDaysOfWeekIsDue(
-            validationDate = validationDate
-        )
+    is Schedule.WeeklyScheduleByDueDaysOfWeek -> weeklyScheduleByDueDaysOfWeekIsDue(
+        validationDate = validationDate
+    )
 
-        is Schedule.ByNumOfDueDays -> scheduleByNumOfDueDaysIsDue(
-            validationDate = validationDate,
-            lastVacationEndDate = lastVacationEndDate,
-        )
+    is Schedule.MonthlyScheduleByDueDatesIndices -> monthlyScheduleIsDue(
+        validationDate = validationDate
+    )
 
-        is Schedule.MonthlyScheduleByDueDatesIndices -> monthlyScheduleIsDue(
-            validationDate = validationDate
-        )
+    is Schedule.CustomDateSchedule -> customDateScheduleIsDue(
+        validationDate = validationDate
+    )
 
-        is Schedule.CustomDateSchedule -> customDateScheduleIsDue(
-            validationDate = validationDate
-        )
-
-        is Schedule.AnnualScheduleByDueDates -> annualScheduleIsDue(
-            validationDate = validationDate
-        )
-    }
+    is Schedule.AnnualScheduleByDueDates -> annualScheduleIsDue(
+        validationDate = validationDate
+    )
 }
 
 private fun Schedule.WeeklyScheduleByDueDaysOfWeek.weeklyScheduleByDueDaysOfWeekIsDue(
@@ -75,7 +70,10 @@ private fun Schedule.ByNumOfDueDays.scheduleByNumOfDueDaysIsDue(
     val validationDatePeriod = (this as Schedule.PeriodicSchedule).getPeriodRange(
         currentDate = validationDate,
         lastVacationEndDate = lastVacationEndDate,
-    )
+    ) ?: return false
     val validationDateNumber = validationDatePeriod.start.daysUntil(validationDate) + 1
-    return validationDateNumber <= getNumOfDueDatesInPeriod(validationDatePeriod)
+    val scheduleStartDate = (this as Schedule).startDate
+    val numOfDueDays =
+        getNumOfDueDates(getForFirstPeriod = scheduleStartDate in validationDatePeriod)
+    return validationDateNumber <= numOfDueDays
 }

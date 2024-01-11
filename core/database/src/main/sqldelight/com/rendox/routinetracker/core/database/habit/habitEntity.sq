@@ -1,0 +1,28 @@
+import com.rendox.routinetracker.core.database.habit.model.HabitType;
+import kotlin.Float;
+import kotlin.Int;
+
+CREATE TABLE habitEntity (
+    id INTEGER NOT NULL PRIMARY KEY,
+    type TEXT AS HabitType NOT NULL,
+    name TEXT NOT NULL,
+    description TEXT,
+    sessionDurationMinutes INTEGER AS Int,
+    progress REAL AS Float,
+    defaultCompletionTimeHour INTEGER AS Int,
+    defaultCompletionTimeMinute INTEGER AS Int
+);
+
+getHabitById:
+SELECT *
+FROM habitEntity
+WHERE id = ?;
+
+getAllHabits:
+SELECT *
+FROM habitEntity
+ORDER BY id;
+
+insertHabit:
+INSERT INTO habitEntity
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);

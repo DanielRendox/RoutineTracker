@@ -11,7 +11,7 @@ import androidx.compose.runtime.setValue
 
 @Stable
 class ChooseRoutineTypePageState(
-    routineType: RoutineTypeUi = RoutineTypeUi.YesNoRoutine
+    routineType: RoutineTypeUi = RoutineTypeUi.YesNoHabit
 ) {
     var routineType: RoutineTypeUi by mutableStateOf(routineType)
         private set

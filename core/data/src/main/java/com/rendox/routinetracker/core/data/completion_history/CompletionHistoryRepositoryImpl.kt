@@ -1,116 +1,59 @@
 package com.rendox.routinetracker.core.data.completion_history
 
 import com.rendox.routinetracker.core.database.completion_history.CompletionHistoryLocalDataSource
-import com.rendox.routinetracker.core.logic.time.LocalDateRange
-import com.rendox.routinetracker.core.model.CompletionHistoryEntry
-import com.rendox.routinetracker.core.model.HistoricalStatus
+import com.rendox.routinetracker.core.model.Habit
 import kotlinx.datetime.LocalDate
 
 class CompletionHistoryRepositoryImpl(
-    private val localDataSource: CompletionHistoryLocalDataSource,
-) : CompletionHistoryRepository {
-
-    override suspend fun getHistoryEntries(
-        routineId: Long,
-        dates: LocalDateRange
-    ): List<CompletionHistoryEntry> {
-        return localDataSource.getHistoryEntries(routineId, dates)
-    }
-
-    override suspend fun getHistoryEntryByDate(
-        routineId: Long,
-        date: LocalDate
-    ): CompletionHistoryEntry? {
-        return localDataSource.getHistoryEntryByDate(routineId, date)
-    }
-
-    override suspend fun insertHistoryEntry(
-        id: Long?,
-        routineId: Long,
-        entry: CompletionHistoryEntry,
-    ) {
-        localDataSource.insertHistoryEntry(
-            id = id,
-            routineId = routineId,
-            entry = entry,
+    private val localDataSource: CompletionHistoryLocalDataSource
+): CompletionHistoryRepository {
+    override suspend fun getNumOfTimesCompletedInPeriod(
+        habitId: Long,
+        minDate: LocalDate?,
+        maxDate: LocalDate?
+    ): Double {
+        return localDataSource.getNumOfTimesCompletedInPeriod(
+            habitId, minDate, maxDate
         )
     }
 
-    override suspend fun deleteHistoryEntry(routineId: Long, date: LocalDate) {
-        localDataSource.deleteHistoryEntry(routineId, date)
-    }
-
-    override suspend fun updateHistoryEntryByDate(
-        routineId: Long,
-        date: LocalDate,
-        newStatus: HistoricalStatus?,
-        newScheduleDeviation: Float?,
-        newTimesCompleted: Float?,
-    ) {
-        localDataSource.updateHistoryEntryByDate(
-            routineId = routineId,
-            date = date,
-            newStatus = newStatus,
-            newScheduleDeviation = newScheduleDeviation,
-            newTimesCompleted = newTimesCompleted,
+    override suspend fun getRecordByDate(habitId: Long, date: LocalDate): Habit.CompletionRecord? {
+        return localDataSource.getRecordByDate(
+            habitId, date
         )
     }
 
-    override suspend fun getFirstHistoryEntry(routineId: Long): CompletionHistoryEntry? {
-        return localDataSource.getFirstHistoryEntry(routineId)
-    }
-
-    override suspend fun getLastHistoryEntry(routineId: Long): CompletionHistoryEntry? {
-        return localDataSource.getLastHistoryEntry(routineId)
-    }
-
-    override suspend fun checkIfStatusWasCompletedLater(routineId: Long, date: LocalDate): Boolean {
-        return localDataSource.checkIfStatusWasCompletedLater(routineId, date)
-    }
-
-    override suspend fun deleteCompletedLaterBackupEntry(routineId: Long, date: LocalDate) {
-        localDataSource.deleteCompletedLaterBackupEntry(routineId, date)
-    }
-
-    override suspend fun getFirstHistoryEntryByStatus(
-        routineId: Long,
-        matchingStatuses: List<HistoricalStatus>,
+    override suspend fun getLastCompletedRecord(
+        habitId: Long,
         minDate: LocalDate?,
         maxDate: LocalDate?,
-    ): CompletionHistoryEntry? {
-        return localDataSource.getFirstHistoryEntryByStatus(
-            routineId = routineId,
-            matchingStatuses = matchingStatuses,
-            minDate = minDate,
-            maxDate = maxDate,
-        )
+    ): Habit.CompletionRecord? {
+        return localDataSource.getLastCompletedRecord(habitId, minDate, maxDate)
     }
 
-    override suspend fun getLastHistoryEntryByStatus(
-        routineId: Long,
-        matchingStatuses: List<HistoricalStatus>,
+    override suspend fun getFirstCompletedRecord(
+        habitId: Long,
         minDate: LocalDate?,
         maxDate: LocalDate?,
-    ): CompletionHistoryEntry? = localDataSource.getLastHistoryEntryByStatus(
-        routineId = routineId,
-        matchingStatuses = matchingStatuses,
-        minDate = minDate,
-        maxDate = maxDate,
-    )
+    ): Habit.CompletionRecord? {
+        return localDataSource.getFirstCompletedRecord(habitId, minDate, maxDate)
+    }
 
-    override suspend fun getTotalTimesCompletedInPeriod(
-        routineId: Long, startDate: LocalDate, endDate: LocalDate
-    ): Double {
-        return localDataSource.getTotalTimesCompletedInPeriod(
-            routineId, startDate, endDate
+    override suspend fun getRecordsInPeriod(
+        habitId: Long,
+        minDate: LocalDate?,
+        maxDate: LocalDate?,
+    ): List<Habit.CompletionRecord> {
+        return localDataSource.getRecordsInPeriod(
+            habitId, minDate, maxDate
         )
     }
 
-    override suspend fun getScheduleDeviationInPeriod(
-        routineId: Long, startDate: LocalDate, endDate: LocalDate
-    ): Double {
-        return localDataSource.getScheduleDeviationInPeriod(
-            routineId, startDate, endDate
-        )
+    override suspend fun insertCompletion(habitId: Long, completionRecord: Habit.CompletionRecord) {
+        localDataSource.insertCompletion(habitId, completionRecord)
+    }
+
+    override suspend fun deleteCompletionByDate(habitId: Long, date: LocalDate) {
+        localDataSource.deleteCompletionByDate(habitId, date)
     }
 }

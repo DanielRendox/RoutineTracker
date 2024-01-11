@@ -6,19 +6,17 @@ import app.cash.sqldelight.adapter.primitive.FloatColumnAdapter
 import app.cash.sqldelight.adapter.primitive.IntColumnAdapter
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
+import com.rendox.routinetracker.core.database.CompletionHistoryEntity
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
-import com.rendox.routinetracker.core.database.completionhistory.CompletedLaterHistoryEntity
-import com.rendox.routinetracker.core.database.completionhistory.CompletionHistoryEntity
-import com.rendox.routinetracker.core.database.completiontime.SpecificDateCustomCompletionTime
-import com.rendox.routinetracker.core.database.routine.RoutineEntity
+import com.rendox.routinetracker.core.database.SpecificDateCustomCompletionTime
+import com.rendox.routinetracker.core.database.VacationEntity
+import com.rendox.routinetracker.core.database.habit.HabitEntity
 import com.rendox.routinetracker.core.database.schedule.DueDateEntity
 import com.rendox.routinetracker.core.database.schedule.ScheduleEntity
 import com.rendox.routinetracker.core.database.schedule.WeekDayMonthRelatedEntity
-import com.rendox.routinetracker.core.database.streak.StreakEntity
 import com.rendox.routinetracker.core.logic.time.AnnualDate
 import com.rendox.routinetracker.core.logic.time.epochDate
 import com.rendox.routinetracker.core.logic.time.plusDays
-import kotlinx.coroutines.Dispatchers
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Month
@@ -26,11 +24,6 @@ import kotlinx.datetime.daysUntil
 import org.koin.dsl.module
 
 val localDataSourceModule = module {
-
-    single {
-        Dispatchers.IO
-    }
-
     single<SqlDriver> {
         AndroidSqliteDriver(
             schema = RoutineTrackerDatabase.Schema,
@@ -42,7 +35,7 @@ val localDataSourceModule = module {
     single {
         RoutineTrackerDatabase(
             driver = get(),
-            routineEntityAdapter = RoutineEntity.Adapter(
+            habitEntityAdapter = HabitEntity.Adapter(
                 typeAdapter = EnumColumnAdapter(),
                 sessionDurationMinutesAdapter = IntColumnAdapter,
                 progressAdapter = FloatColumnAdapter,
@@ -51,8 +44,8 @@ val localDataSourceModule = module {
             ),
             scheduleEntityAdapter = ScheduleEntity.Adapter(
                 typeAdapter = EnumColumnAdapter(),
-                routineStartDateAdapter = localDateAdapter,
-                routineEndDateAdapter = localDateAdapter,
+                startDateAdapter = localDateAdapter,
+                endDateAdapter = localDateAdapter,
                 vacationStartDateAdapter = localDateAdapter,
                 vacationEndDateAdapter = localDateAdapter,
                 startDayOfWeekInWeeklyScheduleAdapter = dayOfWeekAdapter,
@@ -69,24 +62,19 @@ val localDataSourceModule = module {
                 weekDayIndexAdapter = IntColumnAdapter,
                 weekDayNumberMonthRelatedAdapter = EnumColumnAdapter(),
             ),
-            completionHistoryEntityAdapter = CompletionHistoryEntity.Adapter(
-                statusAdapter = EnumColumnAdapter(),
-                dateAdapter = localDateAdapter,
-                scheduleDeviationAdapter = FloatColumnAdapter,
-                timesCompletedAdapter = FloatColumnAdapter,
-            ),
             specificDateCustomCompletionTimeAdapter = SpecificDateCustomCompletionTime.Adapter(
                 dateAdapter = localDateAdapter,
                 completionTimeHourAdapter = IntColumnAdapter,
                 completionTimeMinuteAdapter = IntColumnAdapter,
             ),
-            completedLaterHistoryEntityAdapter = CompletedLaterHistoryEntity.Adapter(
+            completionHistoryEntityAdapter = CompletionHistoryEntity.Adapter(
                 dateAdapter = localDateAdapter,
+                numOfTimesCompletedAdapter = FloatColumnAdapter,
             ),
-            streakEntityAdapter = StreakEntity.Adapter(
+            vacationEntityAdapter = VacationEntity.Adapter(
                 startDateAdapter = localDateAdapter,
                 endDateAdapter = localDateAdapter,
-            ),
+            )
         )
     }
 }

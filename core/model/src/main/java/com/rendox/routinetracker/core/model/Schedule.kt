@@ -1,7 +1,6 @@
 package com.rendox.routinetracker.core.model
 
 import com.rendox.routinetracker.core.logic.time.AnnualDate
-import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DateTimeUnit
@@ -10,11 +9,11 @@ import kotlinx.datetime.LocalDate
 
 sealed class Schedule {
 
-    abstract val routineStartDate: LocalDate
-    abstract val routineEndDate: LocalDate?
+    abstract val startDate: LocalDate
+    abstract val endDate: LocalDate?
 
     abstract val backlogEnabled: Boolean
-    abstract val cancelDuenessIfDoneAhead: Boolean
+    abstract val completingAheadEnabled: Boolean
 
     abstract val vacationStartDate: LocalDate?
     abstract val vacationEndDate: LocalDate?
@@ -22,30 +21,30 @@ sealed class Schedule {
     abstract val supportsScheduleDeviation: Boolean
     abstract val supportsPeriodSeparation: Boolean
 
-    sealed class PeriodicSchedule: Schedule() {
+    sealed class PeriodicSchedule : Schedule() {
         abstract val periodSeparationEnabled: Boolean
         abstract val correspondingPeriod: DatePeriod
 
         override val supportsScheduleDeviation = true
     }
 
-    sealed class NonPeriodicSchedule: Schedule() {
+    sealed class NonPeriodicSchedule : Schedule() {
         override val supportsPeriodSeparation = false
     }
 
     sealed interface ByNumOfDueDays {
-        fun getNumOfDueDatesInPeriod(period: LocalDateRange): Int
+        fun getNumOfDueDates(getForFirstPeriod: Boolean): Int
     }
 
     data class EveryDaySchedule(
-        override val routineStartDate: LocalDate,
-        override val routineEndDate: LocalDate? = null,
+        override val startDate: LocalDate,
+        override val endDate: LocalDate? = null,
 
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
     ) : NonPeriodicSchedule() {
         override val backlogEnabled: Boolean = false
-        override val cancelDuenessIfDoneAhead: Boolean = false
+        override val completingAheadEnabled: Boolean = false
         override val supportsScheduleDeviation = false
     }
 
@@ -60,11 +59,11 @@ sealed class Schedule {
         override val startDayOfWeek: DayOfWeek? = null,
 
         override val backlogEnabled: Boolean = true,
-        override val cancelDuenessIfDoneAhead: Boolean = true,
+        override val completingAheadEnabled: Boolean = true,
         override val periodSeparationEnabled: Boolean = true,
 
-        override val routineStartDate: LocalDate,
-        override val routineEndDate: LocalDate? = null,
+        override val startDate: LocalDate,
+        override val endDate: LocalDate? = null,
 
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
@@ -83,20 +82,21 @@ sealed class Schedule {
         val numOfDueDaysInFirstPeriod: Int? = null,
         override val startDayOfWeek: DayOfWeek? = null,
 
-        override val backlogEnabled: Boolean = true,
-        override val cancelDuenessIfDoneAhead: Boolean = true,
+        override val startDate: LocalDate,
+        override val endDate: LocalDate? = null,
 
-        override val routineStartDate: LocalDate,
-        override val routineEndDate: LocalDate? = null,
+        override val periodSeparationEnabled: Boolean = true,
 
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
     ) : WeeklySchedule(), ByNumOfDueDays {
-        override val periodSeparationEnabled: Boolean = false
-        override val supportsPeriodSeparation = false
+        override val backlogEnabled: Boolean = true
+        override val completingAheadEnabled: Boolean = true
+        override val supportsPeriodSeparation = true
+        override val supportsScheduleDeviation = false
 
         private val firstPeriodIsShort
-            get() = startDayOfWeek != null && routineStartDate.dayOfWeek != startDayOfWeek
+            get() = startDayOfWeek != null && startDate.dayOfWeek != startDayOfWeek
 
         init {
             check(numOfDueDays <= DateTimeUnit.WEEK.days) {
@@ -105,26 +105,25 @@ sealed class Schedule {
 
             if (firstPeriodIsShort) {
                 check(numOfDueDaysInFirstPeriod != null) {
-                    "According to the routine's schedule, at the moment of the " +
-                            "routineStartDate, the first time period has been already started " +
+                    "According to the schedule, at the moment of the " +
+                            "startDate, the first time period has been already started " +
                             "and hence it's shorter than expected. Therefore, the number of due " +
                             "days for this period is ambiguous. So it should be specified " +
-                            "explicitly at the moment of the schedule (routine) creation."
+                            "explicitly at the moment of the schedule creation."
                 }
             }
         }
 
-        override fun getNumOfDueDatesInPeriod(period: LocalDateRange): Int {
-            numOfDueDaysInFirstPeriod?.let {
-                val isFirstPeriod = routineStartDate in period
-                if (isFirstPeriod) return it
+        override fun getNumOfDueDates(getForFirstPeriod: Boolean): Int =
+            if (getForFirstPeriod && numOfDueDaysInFirstPeriod != null) {
+                numOfDueDaysInFirstPeriod
+            } else {
+                numOfDueDays
             }
-            return numOfDueDays
-        }
     }
 
     sealed class MonthlySchedule : PeriodicSchedule() {
-        abstract val startFromRoutineStart: Boolean
+        abstract val startFromHabitStart: Boolean
 
         override val correspondingPeriod: DatePeriod
             get() = DatePeriod(months = 1)
@@ -134,14 +133,14 @@ sealed class Schedule {
         val dueDatesIndices: List<Int>,
         val includeLastDayOfMonth: Boolean = false,
         val weekDaysMonthRelated: List<WeekDayMonthRelated>,
-        override val startFromRoutineStart: Boolean = true,
+        override val startFromHabitStart: Boolean = true,
 
         override val periodSeparationEnabled: Boolean = true,
         override val backlogEnabled: Boolean = true,
-        override val cancelDuenessIfDoneAhead: Boolean = true,
+        override val completingAheadEnabled: Boolean = true,
 
-        override val routineStartDate: LocalDate,
-        override val routineEndDate: LocalDate? = null,
+        override val startDate: LocalDate,
+        override val endDate: LocalDate? = null,
 
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
@@ -158,22 +157,23 @@ sealed class Schedule {
     data class MonthlyScheduleByNumOfDueDays(
         val numOfDueDays: Int,
         val numOfDueDaysInFirstPeriod: Int? = null,
-        override val startFromRoutineStart: Boolean = true,
+        override val startFromHabitStart: Boolean = true,
 
-        override val backlogEnabled: Boolean = true,
-        override val cancelDuenessIfDoneAhead: Boolean = true,
+        override val periodSeparationEnabled: Boolean = true,
 
-        override val routineStartDate: LocalDate,
-        override val routineEndDate: LocalDate? = null,
+        override val startDate: LocalDate,
+        override val endDate: LocalDate? = null,
 
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
     ) : MonthlySchedule(), ByNumOfDueDays {
-        override val periodSeparationEnabled = false
-        override val supportsPeriodSeparation = false
+        override val backlogEnabled: Boolean = true
+        override val completingAheadEnabled: Boolean = true
+        override val supportsPeriodSeparation = true
+        override val supportsScheduleDeviation = false
 
         private val firstPeriodIsShort
-            get() = !startFromRoutineStart && routineStartDate.dayOfMonth != 1
+            get() = !startFromHabitStart && startDate.dayOfMonth != 1
 
         init {
             check(numOfDueDays <= 31) {
@@ -182,44 +182,43 @@ sealed class Schedule {
 
             if (firstPeriodIsShort) {
                 check(numOfDueDaysInFirstPeriod != null) {
-                    "According to the routine's schedule, at the moment of the " +
-                            "routineStartDate, the first time period has been already started " +
+                    "According to the schedule, at the moment of the " +
+                            "startDate, the first time period has been already started " +
                             "and hence it's shorter than expected. Therefore, the number of due " +
                             "days for this period is ambiguous. So it should be specified " +
-                            "explicitly at the moment of the schedule (routine) creation."
+                            "explicitly at the moment of the schedule creation."
                 }
             }
         }
 
-        override fun getNumOfDueDatesInPeriod(period: LocalDateRange): Int {
-            numOfDueDaysInFirstPeriod?.let {
-                val isFirstPeriod = routineStartDate in period
-                if (isFirstPeriod) return it
+        override fun getNumOfDueDates(getForFirstPeriod: Boolean): Int =
+            if (getForFirstPeriod && numOfDueDaysInFirstPeriod != null) {
+                numOfDueDaysInFirstPeriod
+            } else {
+                numOfDueDays
             }
-            return numOfDueDays
-        }
     }
 
-    data class PeriodicCustomSchedule(
+    data class AlternateDaysSchedule(
         val numOfDueDays: Int,
         val numOfDaysInPeriod: Int,
 
         override val backlogEnabled: Boolean = true,
-        override val cancelDuenessIfDoneAhead: Boolean = true,
+        override val completingAheadEnabled: Boolean = true,
+        override val periodSeparationEnabled: Boolean = true,
 
-        override val routineStartDate: LocalDate,
-        override val routineEndDate: LocalDate? = null,
+        override val startDate: LocalDate,
+        override val endDate: LocalDate? = null,
 
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
     ) : PeriodicSchedule(), ByNumOfDueDays {
-        override val periodSeparationEnabled = false
-        override val supportsPeriodSeparation = false
+        override val supportsPeriodSeparation = true
 
         override val correspondingPeriod: DatePeriod
             get() = DatePeriod(days = numOfDaysInPeriod)
 
-        override fun getNumOfDueDatesInPeriod(period: LocalDateRange): Int {
+        override fun getNumOfDueDates(getForFirstPeriod: Boolean): Int {
             return numOfDueDays
         }
     }
@@ -228,10 +227,10 @@ sealed class Schedule {
         val dueDates: List<LocalDate>,
 
         override val backlogEnabled: Boolean = true,
-        override val cancelDuenessIfDoneAhead: Boolean = true,
+        override val completingAheadEnabled: Boolean = true,
 
-        override val routineStartDate: LocalDate,
-        override val routineEndDate: LocalDate? = null,
+        override val startDate: LocalDate,
+        override val endDate: LocalDate? = null,
 
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
@@ -240,7 +239,7 @@ sealed class Schedule {
     }
 
     sealed class AnnualSchedule : PeriodicSchedule() {
-        abstract val startFromRoutineStart: Boolean
+        abstract val startFromHabitStart: Boolean
 
         override val correspondingPeriod: DatePeriod
             get() = DatePeriod(years = 1)
@@ -248,14 +247,14 @@ sealed class Schedule {
 
     data class AnnualScheduleByDueDates(
         val dueDates: List<AnnualDate>,
-        override val startFromRoutineStart: Boolean,
+        override val startFromHabitStart: Boolean,
 
         override val periodSeparationEnabled: Boolean = true,
         override val backlogEnabled: Boolean = true,
-        override val cancelDuenessIfDoneAhead: Boolean = true,
+        override val completingAheadEnabled: Boolean = true,
 
-        override val routineStartDate: LocalDate,
-        override val routineEndDate: LocalDate? = null,
+        override val startDate: LocalDate,
+        override val endDate: LocalDate? = null,
 
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
@@ -266,22 +265,23 @@ sealed class Schedule {
     data class AnnualScheduleByNumOfDueDays(
         val numOfDueDays: Int,
         val numOfDueDaysInFirstPeriod: Int?,
-        override val startFromRoutineStart: Boolean,
+        override val startFromHabitStart: Boolean,
 
-        override val backlogEnabled: Boolean = true,
-        override val cancelDuenessIfDoneAhead: Boolean = true,
+        override val periodSeparationEnabled: Boolean = true,
 
-        override val routineStartDate: LocalDate,
-        override val routineEndDate: LocalDate? = null,
+        override val startDate: LocalDate,
+        override val endDate: LocalDate? = null,
 
         override val vacationStartDate: LocalDate? = null,
         override val vacationEndDate: LocalDate? = null,
     ) : AnnualSchedule(), ByNumOfDueDays {
-        override val periodSeparationEnabled = false
-        override val supportsPeriodSeparation = false
+        override val backlogEnabled: Boolean = true
+        override val completingAheadEnabled: Boolean = true
+        override val supportsPeriodSeparation = true
+        override val supportsScheduleDeviation = false
 
         private val firstPeriodIsShort
-            get() = !startFromRoutineStart && routineStartDate.dayOfYear != 1
+            get() = !startFromHabitStart && startDate.dayOfYear != 1
 
         init {
             check(numOfDueDays <= 366) {
@@ -290,22 +290,21 @@ sealed class Schedule {
 
             if (firstPeriodIsShort) {
                 check(numOfDueDaysInFirstPeriod != null) {
-                    "According to the routine's schedule, at the moment of the " +
-                            "routineStartDate, the first time period has been already started " +
+                    "According to the schedule, at the moment of the " +
+                            "startDate, the first time period has been already started " +
                             "and hence it's shorter than expected. Therefore, the number of due " +
                             "days for this period is ambiguous. So it should be specified " +
-                            "explicitly at the moment of the schedule (routine) creation."
+                            "explicitly at the moment of the schedule creation."
                 }
             }
         }
 
-        override fun getNumOfDueDatesInPeriod(period: LocalDateRange): Int {
-            numOfDueDaysInFirstPeriod?.let {
-                val isFirstPeriod = routineStartDate in period
-                if (isFirstPeriod) return it
+        override fun getNumOfDueDates(getForFirstPeriod: Boolean): Int =
+            if (getForFirstPeriod && numOfDueDaysInFirstPeriod != null) {
+                numOfDueDaysInFirstPeriod
+            } else {
+                numOfDueDays
             }
-            return numOfDueDays
-        }
     }
 }
 

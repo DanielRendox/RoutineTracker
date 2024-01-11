@@ -6,13 +6,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -24,7 +22,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -39,20 +36,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.recyclerview.widget.RecyclerView
-import com.rendox.routinetracker.core.model.HistoricalStatus
-import com.rendox.routinetracker.core.model.PlanningStatus
-import com.rendox.routinetracker.core.model.RoutineStatus
-import com.rendox.routinetracker.core.ui.helpers.LocalLocale
+import com.rendox.routinetracker.core.model.HabitStatus
 import com.rendox.routinetracker.core.ui.theme.RoutineTrackerTheme
 import com.rendox.routinetracker.core.ui.theme.routineStatusColors
-import kotlinx.datetime.toJavaLocalTime
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 
 class AgendaListAdapter(
     private val routineList: List<DisplayRoutine>,
     private val onRoutineClick: (Long) -> Unit,
-    private val onStatusCheckmarkClick: (Long, RoutineStatus) -> Unit,
+    private val onCheckmarkClick: (DisplayRoutine) -> Unit,
 ) : RecyclerView.Adapter<AgendaListViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AgendaListViewHolder {
@@ -68,7 +59,7 @@ class AgendaListAdapter(
         holder.bind(
             routine = routine,
             onRoutineClick = { onRoutineClick(routine.id) },
-            onStatusCheckmarkClick = { status -> onStatusCheckmarkClick(routine.id, status) },
+            onStatusCheckmarkClick = { onCheckmarkClick(routine) },
         )
     }
 }
@@ -79,7 +70,7 @@ class AgendaListViewHolder(
     fun bind(
         routine: DisplayRoutine,
         onRoutineClick: () -> Unit,
-        onStatusCheckmarkClick: (RoutineStatus) -> Unit,
+        onStatusCheckmarkClick: () -> Unit,
     ) {
         composeView.setContent {
             RoutineTrackerTheme {
@@ -101,11 +92,11 @@ fun AgendaItem(
     modifier: Modifier = Modifier,
     routine: DisplayRoutine,
     onRoutineClick: () -> Unit,
-    onStatusCheckmarkClick: (RoutineStatus) -> Unit,
+    onStatusCheckmarkClick: () -> Unit,
 ) {
-    val locale = LocalLocale.current
-    val timeFormatter =
-        remember { DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale) }
+//    val locale = LocalLocale.current
+//    val timeFormatter =
+//        remember { DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale) }
 
     Row(
         modifier = modifier.alpha(
@@ -167,8 +158,8 @@ fun AgendaItem(
 @Composable
 private fun StatusCheckmark(
     modifier: Modifier = Modifier,
-    status: RoutineStatus,
-    onClick: (RoutineStatus) -> Unit,
+    status: HabitStatus,
+    onClick: () -> Unit,
     statusToggleIsDisabled: Boolean,
 ) {
     val backgroundColor: Color
@@ -176,91 +167,23 @@ private fun StatusCheckmark(
     var iconColor: Color?
 
     when (status) {
-        HistoricalStatus.NotCompleted -> {
+        HabitStatus.Failed -> {
             backgroundColor = MaterialTheme.routineStatusColors.failedBackgroundLight
             icon = Icons.Filled.Close
             iconColor = MaterialTheme.routineStatusColors.failedStroke
         }
 
-        PlanningStatus.Planned -> {
-            backgroundColor = MaterialTheme.colorScheme.surfaceVariant
-            icon = null
-            iconColor = null
-        }
-
-        PlanningStatus.Backlog -> {
+        HabitStatus.Planned, HabitStatus.OnVacation, HabitStatus.NotDue,
+        HabitStatus.Backlog, HabitStatus.PastDateAlreadyCompleted,
+        HabitStatus.FutureDateAlreadyCompleted, HabitStatus.CompletedLater,
+        HabitStatus.NotStarted, HabitStatus.Finished, HabitStatus.Skipped -> {
             backgroundColor = MaterialTheme.routineStatusColors.pendingAgenda
             icon = null
             iconColor = null
         }
 
-        PlanningStatus.AlreadyCompleted -> {
-            backgroundColor = MaterialTheme.routineStatusColors.pendingAgenda
-            icon = null
-            iconColor = null
-        }
-
-        PlanningStatus.NotDue -> {
-            backgroundColor = MaterialTheme.routineStatusColors.pendingAgenda
-            icon = null
-            iconColor = null
-        }
-
-        PlanningStatus.OnVacation -> {
-            backgroundColor = MaterialTheme.routineStatusColors.pendingAgenda
-            icon = null
-            iconColor = null
-        }
-
-        HistoricalStatus.Skipped -> {
-            backgroundColor = MaterialTheme.routineStatusColors.pendingAgenda
-            icon = null
-            iconColor = null
-        }
-
-        HistoricalStatus.NotCompletedOnVacation -> {
-            backgroundColor = MaterialTheme.routineStatusColors.pendingAgenda
-            icon = null
-            iconColor = null
-        }
-
-        HistoricalStatus.CompletedLater -> {
-            backgroundColor = MaterialTheme.routineStatusColors.pendingAgenda
-            icon = null
-            iconColor = null
-        }
-
-        HistoricalStatus.AlreadyCompleted -> {
-            backgroundColor = MaterialTheme.routineStatusColors.pendingAgenda
-            icon = null
-            iconColor = null
-        }
-
-        HistoricalStatus.Completed -> {
-            backgroundColor = MaterialTheme.routineStatusColors.completedBackgroundLight
-            icon = Icons.Filled.Done
-            iconColor = MaterialTheme.routineStatusColors.completedStroke
-        }
-
-        HistoricalStatus.OverCompleted -> {
-            backgroundColor = MaterialTheme.routineStatusColors.completedBackgroundLight
-            icon = Icons.Filled.Done
-            iconColor = MaterialTheme.routineStatusColors.completedStroke
-        }
-
-        HistoricalStatus.OverCompletedOnVacation -> {
-            backgroundColor = MaterialTheme.routineStatusColors.completedBackgroundLight
-            icon = Icons.Filled.Done
-            iconColor = MaterialTheme.routineStatusColors.completedStroke
-        }
-
-        HistoricalStatus.SortedOutBacklogOnVacation -> {
-            backgroundColor = MaterialTheme.routineStatusColors.completedBackgroundLight
-            icon = Icons.Filled.Done
-            iconColor = MaterialTheme.routineStatusColors.completedStroke
-        }
-
-        HistoricalStatus.SortedOutBacklog -> {
+        HabitStatus.Completed, HabitStatus.OverCompleted, HabitStatus.SortedOutBacklog,
+        HabitStatus.PartiallyCompleted -> {
             backgroundColor = MaterialTheme.routineStatusColors.completedBackgroundLight
             icon = Icons.Filled.Done
             iconColor = MaterialTheme.routineStatusColors.completedStroke
@@ -282,8 +205,11 @@ private fun StatusCheckmark(
             .clip(CircleShape)
             .background(backgroundColor)
             .then(
-                if (statusToggleIsDisabled) Modifier
-                else Modifier.clickable { onClick(status) }
+                if (statusToggleIsDisabled) {
+                    Modifier
+                } else {
+                    Modifier.clickable(onClick = onClick)
+                }
             )
     ) {
         icon?.let {
@@ -320,34 +246,42 @@ private fun AgendaItemInListPreview() {
 private val routines = listOf(
     DisplayRoutine(
         name = "Do sports",
-        status = HistoricalStatus.Completed,
+        status = HabitStatus.Completed,
         completionTime = kotlinx.datetime.LocalTime(hour = 9, minute = 0),
         id = 1,
         hasGrayedOutLook = false,
         statusToggleIsDisabled = false,
+        type = DisplayRoutineType.YesNoHabit,
+        numOfTimesCompleted = 1f,
     ),
     DisplayRoutine(
         name = "Learn new English words",
-        status = PlanningStatus.Planned,
+        status = HabitStatus.Planned,
         completionTime = null,
         id = 2,
         hasGrayedOutLook = false,
         statusToggleIsDisabled = false,
+        type = DisplayRoutineType.YesNoHabit,
+        numOfTimesCompleted = 0f,
     ),
     DisplayRoutine(
         name = "Spend time outside",
-        status = HistoricalStatus.NotCompleted,
+        status = HabitStatus.Failed,
         completionTime = kotlinx.datetime.LocalTime(hour = 12, minute = 30),
         id = 3,
         hasGrayedOutLook = false,
         statusToggleIsDisabled = true,
+        type = DisplayRoutineType.YesNoHabit,
+        numOfTimesCompleted = 0f,
     ),
     DisplayRoutine(
         name = "Make my app",
-        status = HistoricalStatus.CompletedLater,
+        status = HabitStatus.CompletedLater,
         completionTime = kotlinx.datetime.LocalTime(hour = 17, minute = 0),
         id = 4,
         hasGrayedOutLook = true,
         statusToggleIsDisabled = false,
+        type = DisplayRoutineType.YesNoHabit,
+        numOfTimesCompleted = 0f,
     )
 )

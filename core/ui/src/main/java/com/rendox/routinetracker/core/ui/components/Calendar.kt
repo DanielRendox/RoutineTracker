@@ -142,7 +142,6 @@ fun CalendarMonthTitle(
             val randomOffset = ZoneOffset.MIN // it doesn't matter
             val date =
                 Date.from(someDateInMonth.atStartOfDay().toInstant(randomOffset))
-            println("derived java util date = $date")
             val fullStandaloneMonthNameFormatter = SimpleDateFormat("LLLL", locale)
             fullStandaloneMonthNameFormatter.format(date).replaceFirstChar {
                 if (it.isLowerCase()) it.titlecase(locale) else it.toString()

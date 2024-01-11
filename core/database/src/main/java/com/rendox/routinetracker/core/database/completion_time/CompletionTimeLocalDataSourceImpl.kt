@@ -1,15 +1,16 @@
 package com.rendox.routinetracker.core.database.completion_time
 
+import com.rendox.routinetracker.core.database.GetCompletionTime
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
-import com.rendox.routinetracker.core.database.completiontime.GetCompletionTime
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 
 class CompletionTimeLocalDataSourceImpl(
     private val db: RoutineTrackerDatabase,
-    private val dispatcher: CoroutineDispatcher,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : CompletionTimeLocalDataSource {
 
     override suspend fun getCompletionTime(routineId: Long, date: LocalDate): LocalTime? {
@@ -31,7 +32,10 @@ class CompletionTimeLocalDataSourceImpl(
     override suspend fun insertCompletionTime(id: Long?, routineId: Long, date: LocalDate, time: LocalTime) {
         withContext(dispatcher) {
             db.specificDateCustomCompletionTimeQueries.insertCompletiontime(
-                id, routineId, date, time.hour, time.minute
+                routineId = routineId,
+                date = date,
+                completionTimeHour = time.hour,
+                completionTimeMinute = time.minute,
             )
         }
     }

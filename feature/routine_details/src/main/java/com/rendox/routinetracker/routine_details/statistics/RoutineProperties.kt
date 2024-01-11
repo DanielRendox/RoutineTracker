@@ -22,7 +22,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.rendox.routinetracker.core.model.Routine
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.ui.components.WrapTextContent
 import com.rendox.routinetracker.core.ui.helpers.LocalLocale
@@ -46,7 +45,7 @@ fun RoutineProperties(
     sessionDurationMinutes: Int?,
     completionTime: LocalTime?,
     reminderEnabled: Boolean,
-    numericalValueRoutineUnit: Routine.NumericalValueRoutineUnit?,
+//    numericalValueHabitUnit: Habit.NumericalValueRoutineUnit?,
 ) {
     Column(modifier = modifier) {
         description?.let {
@@ -140,19 +139,19 @@ fun RoutineProperties(
                 )
             }
 
-            numericalValueRoutineUnit?.let {
-                RoutineDetailLabel(
-                    modifier = Modifier.weight(weight = 3.7f, fill = false),
-                    icon = painterResource(
-                        id = com.rendox.routinetracker.feature.routine_details.R.drawable.baseline_check_circle_24
-                    ),
-                    text = deriveAmountOfWorkPerSession(
-                        numOfUnitsPerSession = it.numOfUnitsPerSession,
-                        unitsOfMeasure = it.unitsOfMeasure,
-                        sessionUnit = it.sessionUnit,
-                    ),
-                )
-            }
+//            numericalValueHabitUnit?.let {
+//                RoutineDetailLabel(
+//                    modifier = Modifier.weight(weight = 3.7f, fill = false),
+//                    icon = painterResource(
+//                        id = com.rendox.routinetracker.feature.routine_details.R.drawable.baseline_check_circle_24
+//                    ),
+//                    text = deriveAmountOfWorkPerSession(
+//                        numOfUnitsPerSession = it.numOfUnitsPerSession,
+//                        unitsOfMeasure = it.unitsOfMeasure,
+//                        sessionUnit = it.sessionUnit,
+//                    ),
+//                )
+//            }
         }
     }
 }
@@ -179,7 +178,7 @@ private fun deriveRoutineFrequency(
             "$numOfDays $perWeek"
         }
 
-        Schedule.PeriodicCustomSchedule::class -> {
+        Schedule.AlternateDaysSchedule::class -> {
             val numOfActivityDaysString = pluralStringResource(
                 id = R.plurals.num_of_days,
                 count = numOfDueDaysPerPeriod,
@@ -298,11 +297,11 @@ private fun RoutinePropertiesPreview() {
             sessionDurationMinutes = 65,
             completionTime = LocalTime(23, 15),
             reminderEnabled = true,
-            numericalValueRoutineUnit = Routine.NumericalValueRoutineUnit(
-                numOfUnitsPerSession = 7,
-                unitsOfMeasure = "books",
-                DateTimeUnit.YEAR,
-            ),
+//            numericalValueHabitUnit = Habit.NumericalValueRoutineUnit(
+//                numOfUnitsPerSession = 7,
+//                unitsOfMeasure = "books",
+//                DateTimeUnit.YEAR,
+//            ),
         )
     }
 }
