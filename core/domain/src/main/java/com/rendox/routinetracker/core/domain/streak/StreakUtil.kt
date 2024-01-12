@@ -19,14 +19,3 @@ fun List<DisplayStreak>.getCurrentStreak(today: LocalDate): DisplayStreak? =
 
 fun List<DisplayStreak>.getLongestStreak(): DisplayStreak? =
     maxByOrNull { it.getDurationInDays() }
-
-fun List<DisplayStreak>.checkIfContainDate(date: LocalDate): Boolean {
-    var includedInStreak = false
-    for (streak in this) {
-        if (streak.contains(date)) {
-            includedInStreak = true
-            break
-        }
-    }
-    return includedInStreak
-}

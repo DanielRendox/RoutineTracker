@@ -8,6 +8,8 @@ import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryR
 import com.rendox.routinetracker.core.data.habit.HabitRepository
 import com.rendox.routinetracker.core.domain.completion_history.HabitComputeStatusUseCase
 import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase
+import com.rendox.routinetracker.core.domain.streak.GetAllStreaksUseCase
+import com.rendox.routinetracker.core.domain.streak.contains
 import com.rendox.routinetracker.core.domain.streak.getCurrentStreak
 import com.rendox.routinetracker.core.domain.streak.getDurationInDays
 import com.rendox.routinetracker.core.domain.streak.getLongestStreak
@@ -41,6 +43,7 @@ class RoutineCalendarViewModel(
     private val computeHabitStatus: HabitComputeStatusUseCase,
     private val completionHistoryRepository: CompletionHistoryRepository,
     private val insertHabitCompletion: InsertHabitCompletionUseCase,
+    private val getAllStreaksUseCase: GetAllStreaksUseCase,
 ) : ViewModel() {
     private val _habitFlow: MutableStateFlow<Habit?> = MutableStateFlow(null)
     val habitFlow: StateFlow<Habit?> = _habitFlow.asStateFlow()
@@ -75,9 +78,14 @@ class RoutineCalendarViewModel(
     private val updateMonthRunningJobsFlow = MutableStateFlow(emptyMap<YearMonth, List<Job>>())
 
     init {
-        // TODO remove explicit main dispatcher
         viewModelScope.launch {
             _habitFlow.update { habitRepository.getHabitById(routineId) }
+        }
+
+        viewModelScope.launch {
+            val streaks = getAllStreaksUseCase(routineId, todayFlow.value)
+            println("RoutineCalendarViewModel: streaks = $streaks")
+            streaksFlow.update { streaks }
         }
 
         viewModelScope.launch {
@@ -145,7 +153,7 @@ class RoutineCalendarViewModel(
 
         val calendarDateData = CalendarDateData(
             status = habitStatus,
-            includedInStreak = false, // TODO Implement streaks
+            includedInStreak = streaksFlow.value.any { it.contains(date) },
             numOfTimesCompleted = numOfTimesCompleted,
         )
 
@@ -203,13 +211,21 @@ class RoutineCalendarViewModel(
                 // TODO display a snackbar
             }
 
-            updateMonth(_currentMonthFlow.value, forceUpdate = true)
+            launch {
+                updateMonth(_currentMonthFlow.value, forceUpdate = true)
 
-            // delete other months because they may be outdated
-            _calendarDatesFlow.update { calendarDates ->
-                calendarDates.filter {
-                    it.key.toJavaLocalDate().yearMonth == _currentMonthFlow.value
+                // delete other months because they may be outdated
+                _calendarDatesFlow.update { calendarDates ->
+                    calendarDates.filter {
+                        it.key.toJavaLocalDate().yearMonth == _currentMonthFlow.value
+                    }
                 }
+            }
+
+            launch {
+                val streaks = getAllStreaksUseCase(routineId, todayFlow.value)
+                println("RoutineCalendarViewModel: streaks = $streaks")
+                streaksFlow.update { streaks }
             }
         }
     }

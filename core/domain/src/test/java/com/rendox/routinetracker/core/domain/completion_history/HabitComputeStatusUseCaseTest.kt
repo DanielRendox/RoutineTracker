@@ -770,6 +770,74 @@ class HabitComputeStatusUseCaseTest {
         ).isEqualTo(HabitStatus.Backlog)
     }
 
+    @Test
+    fun `assert sorting out backlog does not transform partially completed date to completed later`() = runTest {
+        val schedule = Schedule.MonthlyScheduleByDueDatesIndices(
+            dueDatesIndices = listOf(2, 8),
+            backlogEnabled = true,
+            completingAheadEnabled = true,
+            periodSeparationEnabled = true,
+            startDate = LocalDate(2024, 1 , 1),
+            weekDaysMonthRelated = emptyList(),
+        )
+        val habit = defaultHabit.copy(id = 2L, schedule = schedule)
+        habitRepository.insertHabit(habit)
+
+        completionHistoryRepository.insertCompletion(
+            habitId = 2L,
+            completionRecord = Habit.YesNoHabit.CompletionRecord(
+                date = LocalDate(2024, 1, 8),
+                numOfTimesCompleted = 0.5F,
+            )
+        )
+
+        completionHistoryRepository.insertCompletion(
+            habitId = 2L,
+            completionRecord = Habit.YesNoHabit.CompletionRecord(
+                date = LocalDate(2024, 1, 10),
+                numOfTimesCompleted = 1F,
+            )
+        )
+
+        assertThat(
+            computeStatus(
+                habitId = 2L,
+                validationDate = LocalDate(2024, 1, 8),
+                today = LocalDate(2024, 1, 11),
+            )
+        ).isEqualTo(HabitStatus.PartiallyCompleted) // not CompletedLater
+    }
+
+    @Test
+    fun `assert partial completing introduces backlog`() = runTest {
+        val schedule = Schedule.MonthlyScheduleByDueDatesIndices(
+            dueDatesIndices = listOf(2, 8),
+            backlogEnabled = true,
+            completingAheadEnabled = true,
+            periodSeparationEnabled = true,
+            startDate = LocalDate(2024, 1 , 1),
+            weekDaysMonthRelated = emptyList(),
+        )
+        val habit = defaultHabit.copy(id = 2L, schedule = schedule)
+        habitRepository.insertHabit(habit)
+
+        completionHistoryRepository.insertCompletion(
+            habitId = 2L,
+            completionRecord = Habit.YesNoHabit.CompletionRecord(
+                date = LocalDate(2024, 1, 8),
+                numOfTimesCompleted = 0.5F,
+            )
+        )
+
+        assertThat(
+            computeStatus(
+                habitId = 2L,
+                validationDate = LocalDate(2024, 1, 11),
+                today = LocalDate(2024, 1, 11),
+            )
+        ).isEqualTo(HabitStatus.Backlog)
+    }
+
     companion object {
         private fun getDueDatesInPeriod(
             period: LocalDateRange,

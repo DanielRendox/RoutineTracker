@@ -25,8 +25,8 @@ interface CompletionHistoryRepository {
 
     suspend fun getRecordsInPeriod(
         habitId: Long,
-        minDate: LocalDate?,
-        maxDate: LocalDate?,
+        minDate: LocalDate? = null,
+        maxDate: LocalDate? = null,
     ): List<Habit.CompletionRecord>
 
     suspend fun insertCompletion(

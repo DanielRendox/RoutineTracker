@@ -18,36 +18,6 @@ import kotlinx.datetime.minus
 import kotlin.coroutines.CoroutineContext
 
 
-/**
- * The HabitComputeStatusUseCase class is responsible for computing the [HabitStatus] based on
- * various factors such as the habit's schedule, what dates are completed, and vacation periods.
- *
- * The result also depends on whether the validation date is in the past or in the future. For
- * example, when the habit has some backlog, but the validation date is in the past, the invoke
- * function will return not [HabitStatus.Backlog], but [HabitStatus.Skipped] instead. That's because
- * the user deliberately chose to skip the habit on that day. Nonetheless, if the validation date is
- * in the future, the invoke function will return [HabitStatus.Backlog] so that the user can adjust
- * their schedule to sort out this backlog later.
- *
- * Note that today is considered to be in the future.
- *
- * When the habit is on vacation, it's considered to be not due even if it's planned on schedule.
- * During the vacation, the user can still completed the habit, which will either sort out the
- * backlog (if any is present), or will complete the habit ahead.
- *
- * Each date depends on whether other dates are completed or not. For example, when one date has
- * status [HabitStatus.OverCompleted], the user will be able to skip the next planned date, which
- * will have already completed status. In the case of the previous example, with
- * backlog, the next over completed date will have status [HabitStatus.SortedOutBacklog].
- *
- * Backlog and completing ahead can be disabled by toggling the [Habit]'s [Schedule]'s properties.
- *
- * Period separation can be enabled or disabled as well. If enabled, the schedule deviation that
- * indicates backlog and how many times the habit was completed ahead will be reset at the start
- * of each period.
- *
- * @see [HabitStatus] for more details on what each status means, and when it is returned.
- */
 class HabitComputeStatusUseCase(
     private val habitRepository: HabitRepository,
     private val vacationRepository: VacationRepository,
@@ -55,6 +25,36 @@ class HabitComputeStatusUseCase(
     private val dispatcher: CoroutineContext = Dispatchers.Default,
 ) {
 
+    /**
+     * The HabitComputeStatusUseCase class is responsible for computing the [HabitStatus] based on
+     * various factors such as the habit's schedule, what dates are completed, and vacation periods.
+     *
+     * The result also depends on whether the validation date is in the past or in the future. For
+     * example, when the habit has some backlog, but the validation date is in the past, the invoke
+     * function will return not [HabitStatus.Backlog], but [HabitStatus.Skipped] instead. That's because
+     * the user deliberately chose to skip the habit on that day. Nonetheless, if the validation date is
+     * in the future, the invoke function will return [HabitStatus.Backlog] so that the user can adjust
+     * their schedule to sort out this backlog later.
+     *
+     * Note that today is considered to be in the future.
+     *
+     * When the habit is on vacation, it's considered to be not due even if it's planned on schedule.
+     * During the vacation, the user can still completed the habit, which will either sort out the
+     * backlog (if any is present), or will complete the habit ahead.
+     *
+     * Each date depends on whether other dates are completed or not. For example, when one date has
+     * status [HabitStatus.OverCompleted], the user will be able to skip the next planned date, which
+     * will have already completed status. In the case of the previous example, with
+     * backlog, the next over completed date will have status [HabitStatus.SortedOutBacklog].
+     *
+     * Backlog and completing ahead can be disabled by toggling the [Habit]'s [Schedule]'s properties.
+     *
+     * Period separation can be enabled or disabled as well. If enabled, the schedule deviation that
+     * indicates backlog and how many times the habit was completed ahead will be reset at the start
+     * of each period.
+     *
+     * @see [HabitStatus] for more details on what each status means, and when it is returned.
+     */
     suspend operator fun invoke(
         habitId: Long,
         validationDate: LocalDate,

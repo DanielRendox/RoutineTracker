@@ -13,6 +13,7 @@ val routineDetailsModule = module {
             computeHabitStatus = get(),
             completionHistoryRepository = get(),
             insertHabitCompletion = get(),
+            getAllStreaksUseCase = get(),
         )
     }
     viewModel { parameters ->

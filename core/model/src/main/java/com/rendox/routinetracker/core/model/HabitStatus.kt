@@ -62,3 +62,9 @@ enum class HabitStatus {
     /** The habit has been finished at the moment of the given date. */
     Finished,
 }
+
+val completedStatuses = listOf(
+    HabitStatus.Completed,
+    HabitStatus.OverCompleted,
+    HabitStatus.SortedOutBacklog,
+)

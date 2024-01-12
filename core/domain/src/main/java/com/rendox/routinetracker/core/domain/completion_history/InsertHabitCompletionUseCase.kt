@@ -5,10 +5,11 @@ import com.rendox.routinetracker.core.data.habit.HabitRepository
 import com.rendox.routinetracker.core.model.Habit
 import kotlinx.datetime.LocalDate
 
-class InsertHabitCompletionUseCase(
+open class InsertHabitCompletionUseCase(
     private val completionHistoryRepository: CompletionHistoryRepository,
     private val habitRepository: HabitRepository,
 ) {
+
     /**
      * Inserts a completion record for a habit.
      * If the number of times completed is 0, the completion record is deleted.
