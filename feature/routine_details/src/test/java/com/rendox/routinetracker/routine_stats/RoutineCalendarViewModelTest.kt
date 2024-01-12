@@ -59,7 +59,7 @@ class RoutineCalendarViewModelTest {
             habitRepository = habitRepository,
             vacationRepository = VacationRepositoryFake(habitData),
             completionHistoryRepository = completionHistoryRepository,
-            dispatcher = coroutineDispatcher,
+            defaultDispatcher = coroutineDispatcher,
         )
         insertHabitCompletion = InsertHabitCompletionUseCase(
             completionHistoryRepository = completionHistoryRepository,

@@ -42,6 +42,10 @@ class VacationRepositoryFake(
 
     }.map { it.second }
 
+    override suspend fun getAllVacations(): List<Pair<Long, Vacation>> {
+        return habitData.vacationHistory.value
+    }
+
     override suspend fun insertVacation(habitId: Long, vacation: Vacation) {
         habitData.vacationHistory.update {
             it.toMutableList().apply { add(habitId to vacation) }

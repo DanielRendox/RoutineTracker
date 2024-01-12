@@ -69,6 +69,14 @@ class CompletionHistoryLocalDataSourceImpl(
         }
     }
 
+    override suspend fun getAllRecords(): List<Pair<Long, Habit.CompletionRecord>> {
+        return withContext(dispatcher) {
+            db.completionHistoryEntityQueries.getAllRecords().executeAsList().map {
+                it.habitId to it.toExternalModel()!!
+            }
+        }
+    }
+
     override suspend fun insertCompletion(
         habitId: Long,
         completionRecord: Habit.CompletionRecord,

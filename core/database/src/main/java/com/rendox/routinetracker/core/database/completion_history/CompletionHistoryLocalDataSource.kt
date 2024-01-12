@@ -29,6 +29,8 @@ interface CompletionHistoryLocalDataSource {
         maxDate: LocalDate?,
     ): List<Habit.CompletionRecord>
 
+    suspend fun getAllRecords(): List<Pair<Long, Habit.CompletionRecord>>
+
     suspend fun insertCompletion(
         habitId: Long,
         completionRecord: Habit.CompletionRecord,

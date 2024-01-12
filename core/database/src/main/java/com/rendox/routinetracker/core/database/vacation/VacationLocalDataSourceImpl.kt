@@ -56,6 +56,14 @@ class VacationLocalDataSourceImpl(
         }
     }
 
+    override suspend fun getAllVacations(): List<Pair<Long, Vacation>> {
+        return withContext(dispatcher) {
+            db.vacationEntityQueries.getAllVacations().executeAsList().map {
+                Pair(it.habitId, it.toExternalModel())
+            }
+        }
+    }
+
     override suspend fun insertVacation(habitId: Long, vacation: Vacation) {
         return withContext(dispatcher) {
             db.vacationEntityQueries.insertVacation(

@@ -4,10 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
 import com.rendox.routinetracker.core.data.habit.HabitRepository
-import com.rendox.routinetracker.core.domain.completion_history.HabitComputeStatusUseCase
+import com.rendox.routinetracker.core.data.vacation.VacationRepository
+import com.rendox.routinetracker.core.domain.completion_history.HabitStatusComputer
 import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.HabitStatus
+import com.rendox.routinetracker.core.model.Vacation
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -18,41 +21,44 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
+import kotlin.coroutines.CoroutineContext
 
 class AgendaScreenViewModel(
     today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
     private val habitRepository: HabitRepository,
     private val insertHabitCompletion: InsertHabitCompletionUseCase,
-    private val computeHabitStatus: HabitComputeStatusUseCase,
+    private val vacationRepository: VacationRepository,
     private val completionHistoryRepository: CompletionHistoryRepository,
+    private val defaultDispatcher: CoroutineContext = Dispatchers.Default,
 ) : ViewModel() {
     private val todayFlow = MutableStateFlow(today)
     private val allRoutinesFlow = MutableStateFlow(emptyList<Habit>())
-    private val cashedRoutinesFlow = MutableStateFlow(emptyMap<LocalDate, List<DisplayRoutine>>())
+    private val completionHistoryFlow =
+        MutableStateFlow(emptyList<Pair<Long, Habit.CompletionRecord>>())
+    private val vacationHistoryFlow = MutableStateFlow(emptyList<Pair<Long, Vacation>>())
     private val _hideNotDueRoutinesFlow = MutableStateFlow(false)
+    private val cashedRoutinesFlow = MutableStateFlow(emptyList<DisplayRoutine>())
 
     private val _currentDateFlow = MutableStateFlow(today)
     val currentDateFlow = _currentDateFlow.asStateFlow()
 
     val visibleRoutinesFlow: StateFlow<List<DisplayRoutine>?> =
         combine(
-            _currentDateFlow,
             cashedRoutinesFlow,
             _hideNotDueRoutinesFlow,
-        ) { currentDate, cashedRoutines, hideNotDueRoutines ->
-            cashedRoutines[currentDate]?.let { currentDateRoutines ->
-                currentDateRoutines.filter {
-                    if (hideNotDueRoutines) {
-                        it.status in dueOrCompletedStatuses
-                    } else {
-                        it.status !in nonExistentStatuses
-                    }
-                }.sortedBy { it.id }
+        ) { cashedRoutines, hideNotDueRoutines ->
+            cashedRoutines.filter {
+                if (hideNotDueRoutines) {
+                    it.status in dueOrCompletedStatuses
+                } else {
+                    it.status !in nonExistentStatuses
+                }
             }
         }.stateIn(
             scope = viewModelScope,
@@ -62,45 +68,65 @@ class AgendaScreenViewModel(
 
     init {
         viewModelScope.launch {
-            allRoutinesFlow.update { habitRepository.getAllHabits() }
+            val jobs = mutableListOf<Job>()
+
+            val updateRoutinesJob = launch {
+                allRoutinesFlow.update { habitRepository.getAllHabits() }
+            }
+            jobs.add(updateRoutinesJob)
+
+            val updateCompletionHistoryJob = launch {
+                completionHistoryFlow.update { completionHistoryRepository.getAllRecords() }
+            }
+            jobs.add(updateCompletionHistoryJob)
+
+            val updateVacationsJob = launch {
+                vacationHistoryFlow.update { vacationRepository.getAllVacations() }
+            }
+            jobs.add(updateVacationsJob)
+
+            jobs.joinAll()
             updateRoutinesForDate(_currentDateFlow.value)
         }
     }
 
-    private fun updateRoutinesForDate(date: LocalDate) {
-        val cashedRoutinesForDate = MutableStateFlow(emptyList<DisplayRoutine>())
-        val updateRoutineJobs = mutableListOf<Job>()
+    private fun updateRoutinesForDate(date: LocalDate) = viewModelScope.launch {
         for (routine in allRoutinesFlow.value) {
-            val job = viewModelScope.launch {
-                val routineForDate = getDisplayRoutine(routine, date)
-                cashedRoutinesForDate.update { cashedRoutines ->
-                    cashedRoutines.toMutableList().apply {
-                        add(routineForDate)
-                    }
-                }
-            }
-            updateRoutineJobs.add(job)
-        }
-        viewModelScope.launch {
-            updateRoutineJobs.joinAll()
             cashedRoutinesFlow.update { cashedRoutines ->
-                cashedRoutines.toMutableMap().apply {
-                    this[date] = cashedRoutinesForDate.value
+                cashedRoutines.toMutableList().apply {
+                    val routineToUpdateIndex = indexOfFirst { it.id == routine.id }
+                    val displayRoutine = getDisplayRoutine(habit = routine, date = date)
+                    if (routineToUpdateIndex == -1) {
+                        add(displayRoutine)
+                    } else {
+                        set(routineToUpdateIndex, displayRoutine)
+                    }
                 }
             }
         }
     }
 
     private suspend fun getDisplayRoutine(habit: Habit, date: LocalDate): DisplayRoutine {
-        val habitStatus: HabitStatus = computeHabitStatus(
-            habitId = habit.id!!,
-            validationDate = date,
-            today = todayFlow.value,
-        )
-        val numOfTimesCompleted = completionHistoryRepository.getRecordByDate(
-            habitId = habit.id!!,
-            date = date,
-        )?.numOfTimesCompleted ?: 0F
+        val habitStatus: HabitStatus = withContext(defaultDispatcher) {
+            val habitStatusComputer = HabitStatusComputer(
+                habit = habit,
+                completionHistory = completionHistoryFlow.value
+                    .filter { it.first == habit.id }
+                    .map { it.second },
+                vacationHistory = vacationHistoryFlow.value
+                    .filter { it.first == habit.id }
+                    .map { it.second },
+                defaultDispatcher = defaultDispatcher,
+            )
+            habitStatusComputer.computeStatus(
+                validationDate = date,
+                today = todayFlow.value,
+            )
+        }
+
+        val numOfTimesCompleted = completionHistoryFlow.value.find {
+            it.first == habit.id && it.second.date == date
+        }?.second?.numOfTimesCompleted ?: 0F
 
         return DisplayRoutine(
             name = habit.name,
@@ -124,32 +150,36 @@ class AgendaScreenViewModel(
                 completionRecord = completionRecord,
                 today = todayFlow.value,
             )
+            completionHistoryFlow.update { completionHistoryRepository.getAllRecords() }
+
+            val routine = allRoutinesFlow.value.find { it.id == routineId }?.let {
+                getDisplayRoutine(
+                    habit = it,
+                    date = completionRecord.date,
+                )
+            }
 
             cashedRoutinesFlow.update { cashedRoutines ->
-                val newCashedRoutinesValue = cashedRoutines.toMutableMap()
-                for ((date, oldRoutineList) in cashedRoutines) {
-                    val routine = allRoutinesFlow.value.find { it.id == routineId }?.let {
-                        getDisplayRoutine(
-                            habit = it,
-                            date = date,
+                cashedRoutines.toMutableList().apply {
+                    val routineToUpdateIndex = indexOfFirst { it.id == routineId }
+                    when {
+                        routine == null && routineToUpdateIndex != -1 -> removeAt(
+                            routineToUpdateIndex
+                        )
+
+                        routine != null && routineToUpdateIndex == -1 -> add(routine)
+                        routine != null && routineToUpdateIndex != -1 -> set(
+                            routineToUpdateIndex, routine,
                         )
                     }
-                    newCashedRoutinesValue[date] = oldRoutineList.toMutableList().apply {
-                        val routineToUpdateIndex = indexOf(find { it.id == routineId })
-                        if (routine == null) removeAt(routineToUpdateIndex)
-                        else set(routineToUpdateIndex, routine)
-                    }
                 }
-                newCashedRoutinesValue
             }
         }
     }
 
     fun onDateChange(newDate: LocalDate) {
         _currentDateFlow.update { newDate }
-        if (!cashedRoutinesFlow.value.contains(newDate)) {
-            updateRoutinesForDate(newDate)
-        }
+        updateRoutinesForDate(newDate)
     }
 
     fun onNotDueRoutinesVisibilityToggle() {

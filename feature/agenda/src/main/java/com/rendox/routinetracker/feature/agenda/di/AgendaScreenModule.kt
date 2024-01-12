@@ -10,7 +10,7 @@ val agendaScreenModule = module {
         AgendaScreenViewModel(
             habitRepository = get(),
             insertHabitCompletion = get(),
-            computeHabitStatus = get(),
+            vacationRepository = get(),
             completionHistoryRepository = get(),
         )
     }
