@@ -1,39 +1,46 @@
 package com.rendox.routinetracker.core.domain.streak
 
-import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
-import com.rendox.routinetracker.core.data.habit.HabitRepository
-import com.rendox.routinetracker.core.domain.completion_history.HabitComputeStatusUseCase
+import com.rendox.routinetracker.core.domain.completion_history.HabitStatusComputer
 import com.rendox.routinetracker.core.domain.completion_history.isDue
-import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.DisplayStreak
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.HabitStatus
 import com.rendox.routinetracker.core.model.Streak
+import com.rendox.routinetracker.core.model.Vacation
 import com.rendox.routinetracker.core.model.completedStatuses
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
+import kotlin.coroutines.CoroutineContext
 
 class GetAllStreaksUseCase(
-    private val completionHistoryRepository: CompletionHistoryRepository,
-    private val computeHabitStatus: HabitComputeStatusUseCase,
-    private val habitRepository: HabitRepository,
+    private val habit: Habit,
+    private val completionHistory: List<Habit.CompletionRecord>,
+    vacationHistory: List<Vacation>,
+    private val defaultDispatcher: CoroutineContext,
 ) {
-    suspend operator fun invoke(habitId: Long, today: LocalDate): List<DisplayStreak> {
-        val habit = habitRepository.getHabitById(habitId)
+    private val habitStatusComputer = HabitStatusComputer(
+        habit = habit,
+        completionHistory = completionHistory,
+        vacationHistory = vacationHistory,
+        defaultDispatcher = defaultDispatcher,
+    )
+
+    suspend operator fun invoke(
+        today: LocalDate
+    ): List<DisplayStreak> = withContext(defaultDispatcher) {
         val streaks = mutableListOf<Streak>()
 
         var completedDate = habit.schedule.startDate.minus(DatePeriod(days = 1))
         var failedDate: LocalDate? = null
         while (true) {
-            completedDate = completionHistoryRepository.getFirstCompletedRecord(
-                habitId = habitId,
-                minDate = completedDate.plusDays(1),
-            )?.date ?: break
+            completedDate = completionHistory
+                .filter { it.date > completedDate }
+                .minOfOrNull { it.date } ?: break
 
-            val habitStatus = computeHabitStatus(
-                habitId = habitId,
+            val habitStatus = habitStatusComputer.computeStatus(
                 validationDate = completedDate,
                 today = today,
             )
@@ -60,7 +67,7 @@ class GetAllStreaksUseCase(
             )
         }
 
-        return streaks.map { it.toDisplayStreak(habit, today) }
+        streaks.map { it.toDisplayStreak(habit, today) }
     }
 
     private suspend fun findNextFailedDate(
@@ -70,8 +77,7 @@ class GetAllStreaksUseCase(
     ): LocalDate? {
         for (date in currentDate..today) {
             if (habit.schedule.isDue(validationDate = date)) {
-                val habitStatus = computeHabitStatus(
-                    habitId = habit.id!!,
+                val habitStatus = habitStatusComputer.computeStatus(
                     validationDate = date,
                     today = today,
                 )
@@ -93,8 +99,7 @@ class GetAllStreaksUseCase(
         val habitEndDate = habit.schedule.endDate
         val endDate = when {
             habitEndDate != null && habitEndDate < today -> habitEndDate
-            computeHabitStatus(
-                habitId = habit.id!!,
+            habitStatusComputer.computeStatus(
                 validationDate = today,
                 today = today
             ) == HabitStatus.Planned -> today.minus(DatePeriod(days = 1))

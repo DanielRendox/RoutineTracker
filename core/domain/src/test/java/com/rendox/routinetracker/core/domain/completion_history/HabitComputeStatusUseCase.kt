@@ -8,7 +8,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.datetime.LocalDate
 import kotlin.coroutines.CoroutineContext
 
-
+/**
+ * This is a helper class for testing the [HabitStatusComputer] class.
+ */
 class HabitComputeStatusUseCase(
     private val habitRepository: HabitRepository,
     private val vacationRepository: VacationRepository,

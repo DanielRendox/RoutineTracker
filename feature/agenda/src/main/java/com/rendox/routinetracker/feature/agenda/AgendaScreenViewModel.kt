@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
@@ -90,7 +89,7 @@ class AgendaScreenViewModel(
         }
     }
 
-    private fun updateRoutinesForDate(date: LocalDate) = viewModelScope.launch {
+    private fun updateRoutinesForDate(date: LocalDate) = viewModelScope.launch(defaultDispatcher) {
         for (routine in allRoutinesFlow.value) {
             cashedRoutinesFlow.update { cashedRoutines ->
                 cashedRoutines.toMutableList().apply {
@@ -107,22 +106,20 @@ class AgendaScreenViewModel(
     }
 
     private suspend fun getDisplayRoutine(habit: Habit, date: LocalDate): DisplayRoutine {
-        val habitStatus: HabitStatus = withContext(defaultDispatcher) {
-            val habitStatusComputer = HabitStatusComputer(
-                habit = habit,
-                completionHistory = completionHistoryFlow.value
-                    .filter { it.first == habit.id }
-                    .map { it.second },
-                vacationHistory = vacationHistoryFlow.value
-                    .filter { it.first == habit.id }
-                    .map { it.second },
-                defaultDispatcher = defaultDispatcher,
-            )
-            habitStatusComputer.computeStatus(
-                validationDate = date,
-                today = todayFlow.value,
-            )
-        }
+        val habitStatusComputer = HabitStatusComputer(
+            habit = habit,
+            completionHistory = completionHistoryFlow.value
+                .filter { it.first == habit.id }
+                .map { it.second },
+            vacationHistory = vacationHistoryFlow.value
+                .filter { it.first == habit.id }
+                .map { it.second },
+            defaultDispatcher = defaultDispatcher,
+        )
+        val habitStatus: HabitStatus = habitStatusComputer.computeStatus(
+            validationDate = date,
+            today = todayFlow.value,
+        )
 
         val numOfTimesCompleted = completionHistoryFlow.value.find {
             it.first == habit.id && it.second.date == date

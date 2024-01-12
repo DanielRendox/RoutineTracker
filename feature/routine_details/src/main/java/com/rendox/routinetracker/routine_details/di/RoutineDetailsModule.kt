@@ -10,10 +10,9 @@ val routineDetailsModule = module {
         RoutineCalendarViewModel(
             routineId = parameters.get(),
             habitRepository = get(),
-            computeHabitStatus = get(),
             completionHistoryRepository = get(),
+            vacationRepository = get(),
             insertHabitCompletion = get(),
-            getAllStreaksUseCase = get(),
         )
     }
     viewModel { parameters ->
