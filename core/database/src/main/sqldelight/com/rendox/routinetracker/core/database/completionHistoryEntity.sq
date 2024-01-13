@@ -48,7 +48,8 @@ SELECT *
 FROM completionHistoryEntity
 WHERE habitId = :habitId
     AND (:minDate IS NULL OR :minDate <= date)
-    AND (:maxDate IS NULL OR date <= :maxDate);
+    AND (:maxDate IS NULL OR date <= :maxDate)
+ORDER BY date ASC;
 
 getAllRecords:
 SELECT *

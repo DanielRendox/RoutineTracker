@@ -42,6 +42,7 @@ internal fun Project.addLocalTestDependencies(
             add("testImplementation", "org.junit.jupiter:junit-jupiter-api")
             add("testImplementation", "org.junit.jupiter:junit-jupiter-engine")
             add("testImplementation", "org.junit.vintage:junit-vintage-engine")
+            add("testImplementation", "org.junit.jupiter:junit-jupiter-params")
             add("testImplementation", libs.findLibrary("google-truth").get())
         }
         testOptions {

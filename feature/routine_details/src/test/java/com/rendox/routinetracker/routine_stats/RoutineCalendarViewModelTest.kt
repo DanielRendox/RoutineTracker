@@ -91,7 +91,7 @@ class RoutineCalendarViewModelTest {
             routineId = 1L,
             today = today,
             habitRepository = habitRepository,
-            computeHabitStatus = computeHabitStatus,
+            computeHabitStatuses = computeHabitStatus,
             completionHistoryRepository = completionHistoryRepository,
             insertHabitCompletion = insertHabitCompletion,
         )
@@ -109,7 +109,7 @@ class RoutineCalendarViewModelTest {
             routineId = 1L,
             today = today,
             habitRepository = habitRepository,
-            computeHabitStatus = computeHabitStatus,
+            computeHabitStatuses = computeHabitStatus,
             completionHistoryRepository = completionHistoryRepository,
             insertHabitCompletion = insertHabitCompletion,
         )
@@ -135,7 +135,7 @@ class RoutineCalendarViewModelTest {
             routineId = 1L,
             today = today,
             habitRepository = habitRepository,
-            computeHabitStatus = computeHabitStatus,
+            computeHabitStatuses = computeHabitStatus,
             completionHistoryRepository = completionHistoryRepository,
             insertHabitCompletion = insertHabitCompletion,
         )
@@ -162,7 +162,7 @@ class RoutineCalendarViewModelTest {
             routineId = 1L,
             today = today,
             habitRepository = habitRepository,
-            computeHabitStatus = computeHabitStatus,
+            computeHabitStatuses = computeHabitStatus,
             completionHistoryRepository = completionHistoryRepository,
             insertHabitCompletion = insertHabitCompletion,
         )
@@ -188,7 +188,7 @@ class RoutineCalendarViewModelTest {
             routineId = 1L,
             today = today,
             habitRepository = habitRepository,
-            computeHabitStatus = computeHabitStatus,
+            computeHabitStatuses = computeHabitStatus,
             completionHistoryRepository = completionHistoryRepository,
             insertHabitCompletion = insertHabitCompletion,
         )
@@ -214,7 +214,7 @@ class RoutineCalendarViewModelTest {
             routineId = 1L,
             today = today,
             habitRepository = habitRepository,
-            computeHabitStatus = computeHabitStatus,
+            computeHabitStatuses = computeHabitStatus,
             completionHistoryRepository = completionHistoryRepository,
             insertHabitCompletion = insertHabitCompletion,
         )
@@ -242,7 +242,7 @@ class RoutineCalendarViewModelTest {
             routineId = 1L,
             today = today,
             habitRepository = habitRepository,
-            computeHabitStatus = computeHabitStatus,
+            computeHabitStatuses = computeHabitStatus,
             completionHistoryRepository = completionHistoryRepository,
             insertHabitCompletion = insertHabitCompletion,
         )
@@ -265,7 +265,7 @@ class RoutineCalendarViewModelTest {
             routineId = 1L,
             today = today,
             habitRepository = habitRepository,
-            computeHabitStatus = computeHabitStatus,
+            computeHabitStatuses = computeHabitStatus,
             completionHistoryRepository = completionHistoryRepository,
             insertHabitCompletion = insertHabitCompletion,
         )

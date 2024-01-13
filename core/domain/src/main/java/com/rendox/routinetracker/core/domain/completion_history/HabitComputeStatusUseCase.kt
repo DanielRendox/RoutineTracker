@@ -9,7 +9,7 @@ import kotlinx.datetime.LocalDate
 import kotlin.coroutines.CoroutineContext
 
 /**
- * This is a helper class for testing the [HabitStatusComputer] class.
+ * This is a helper class for testing the [HabitStatusComputerImpl] class.
  */
 class HabitComputeStatusUseCase(
     private val habitRepository: HabitRepository,
@@ -22,12 +22,31 @@ class HabitComputeStatusUseCase(
         validationDate: LocalDate,
         today: LocalDate,
     ): HabitStatus {
-        val habitStatusComputer = HabitStatusComputer(
+        val habitStatusComputer = HabitStatusComputerImpl(
             habit = habitRepository.getHabitById(habitId),
             completionHistory = completionHistoryRepository.getRecordsInPeriod(habitId = habitId),
             vacationHistory = vacationRepository.getVacationsInPeriod(habitId = habitId),
             defaultDispatcher = defaultDispatcher,
         )
         return habitStatusComputer.computeStatus(validationDate, today)
+    }
+
+    suspend operator fun invoke(
+        habitId: Long,
+        validationDates: Iterable<LocalDate>,
+        today: LocalDate,
+    ): Map<LocalDate, HabitStatus> {
+        val habitStatusComputer = HabitStatusComputerImpl(
+            habit = habitRepository.getHabitById(habitId),
+            completionHistory = completionHistoryRepository.getRecordsInPeriod(habitId = habitId),
+            vacationHistory = vacationRepository.getVacationsInPeriod(habitId = habitId),
+            defaultDispatcher = defaultDispatcher,
+        )
+        return validationDates.associateWith {
+            habitStatusComputer.computeStatus(
+                validationDate = it,
+                today = today,
+            )
+        }
     }
 }

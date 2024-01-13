@@ -11,8 +11,9 @@ val routineDetailsModule = module {
             routineId = parameters.get(),
             habitRepository = get(),
             completionHistoryRepository = get(),
-            vacationRepository = get(),
+            getAllStreaksUseCase = get(),
             insertHabitCompletion = get(),
+            computeHabitStatuses = get(),
         )
     }
     viewModel { parameters ->

@@ -1,26 +1,26 @@
 package com.rendox.routinetracker.core.domain.streak
 
 import com.google.common.truth.Truth.assertThat
-import com.rendox.routinetracker.core.model.DisplayStreak
+import com.rendox.routinetracker.core.model.Streak
 import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.Test
 
 class StreakUtilTest {
 
     private val streaks = listOf(
-        DisplayStreak(
+        Streak(
             startDate = LocalDate(2023, 1, 5),
             endDate = LocalDate(2023, 1, 7),
         ),
-        DisplayStreak(
+        Streak(
             startDate = LocalDate(2023, 1, 11),
             endDate = LocalDate(2023, 1, 20),
         ),
-        DisplayStreak(
+        Streak(
             startDate = LocalDate(2023, 3, 1),
             endDate = LocalDate(2023, 3, 5),
         ),
-        DisplayStreak(
+        Streak(
             startDate = LocalDate(2023, 4, 1),
             endDate = LocalDate(2023, 4, 10),
         ),

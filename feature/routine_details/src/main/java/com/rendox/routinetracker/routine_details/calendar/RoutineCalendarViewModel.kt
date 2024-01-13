@@ -6,18 +6,17 @@ import com.kizitonwose.calendar.core.atStartOfMonth
 import com.kizitonwose.calendar.core.yearMonth
 import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
 import com.rendox.routinetracker.core.data.habit.HabitRepository
-import com.rendox.routinetracker.core.data.vacation.VacationRepository
-import com.rendox.routinetracker.core.domain.completion_history.HabitStatusComputer
+import com.rendox.routinetracker.core.domain.completion_history.HabitComputeStatusUseCase
 import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase
+import com.rendox.routinetracker.core.domain.streak.GetAllStreaksUseCase
 import com.rendox.routinetracker.core.domain.streak.contains
 import com.rendox.routinetracker.core.domain.streak.getCurrentStreak
 import com.rendox.routinetracker.core.domain.streak.getDurationInDays
 import com.rendox.routinetracker.core.domain.streak.getLongestStreak
 import com.rendox.routinetracker.core.logic.time.rangeTo
-import com.rendox.routinetracker.core.model.DisplayStreak
+import com.rendox.routinetracker.core.model.Streak
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.HabitStatus
-import com.rendox.routinetracker.core.model.Vacation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,8 +42,9 @@ class RoutineCalendarViewModel(
     private val routineId: Long,
     private val habitRepository: HabitRepository,
     private val completionHistoryRepository: CompletionHistoryRepository,
-    private val vacationRepository: VacationRepository,
+    private val computeHabitStatuses: HabitComputeStatusUseCase,
     private val insertHabitCompletion: InsertHabitCompletionUseCase,
+    private val getAllStreaksUseCase: GetAllStreaksUseCase,
     private val defaultDispatcher: CoroutineContext = Dispatchers.Default,
 ) : ViewModel() {
     private val _habitFlow: MutableStateFlow<Habit?> = MutableStateFlow(null)
@@ -55,10 +55,10 @@ class RoutineCalendarViewModel(
     private val _calendarDatesFlow = MutableStateFlow(emptyMap<LocalDate, CalendarDateData>())
     val calendarDatesFlow = _calendarDatesFlow.asStateFlow()
 
-    private val streaksFlow = MutableStateFlow(emptyList<DisplayStreak>())
+    private val streaksFlow = MutableStateFlow(emptyList<Streak>())
 
-    private val _currentMonthFlow: MutableStateFlow<YearMonth> =
-        MutableStateFlow(YearMonth.from(todayFlow.value.toJavaLocalDate()))
+    private val initialMonth = YearMonth.from(todayFlow.value.toJavaLocalDate())
+    private val _currentMonthFlow: MutableStateFlow<YearMonth> = MutableStateFlow(initialMonth)
     val currentMonthFlow: StateFlow<YearMonth> = _currentMonthFlow.asStateFlow()
 
     val currentStreakDurationInDays: StateFlow<Int> = streaksFlow.map { streaks ->
@@ -77,10 +77,6 @@ class RoutineCalendarViewModel(
         started = SharingStarted.WhileSubscribed(5_000),
     )
 
-    private val completionHistoryFlow =
-        MutableStateFlow(emptyList<Habit.CompletionRecord>())
-    private val vacationHistoryFlow = MutableStateFlow(emptyList<Vacation>())
-
     init {
         viewModelScope.launch {
             val jobs = mutableListOf<Job>()
@@ -90,22 +86,20 @@ class RoutineCalendarViewModel(
             }
             jobs.add(updateHabitJob)
 
-            val updateCompletionHistoryJob = launch {
-                completionHistoryFlow.update {
-                    completionHistoryRepository.getRecordsInPeriod(habitId = routineId)
-                }
-            }
-            jobs.add(updateCompletionHistoryJob)
-
-            val updateVacationsJob = launch {
-                vacationHistoryFlow.update {
-                    vacationRepository.getVacationsInPeriod(habitId = routineId)
-                }
-            }
-            jobs.add(updateVacationsJob)
-
             jobs.joinAll()
+            streaksFlow.update {
+                getAllStreaksUseCase(
+                    habitId = routineId,
+                    today = todayFlow.value,
+                )
+            }
             updateMonthsWithMargin()
+        }
+
+        viewModelScope.launch {
+            streaksFlow.collect {
+                println("RoutineCalendarViewModel streaksFlow: $it")
+            }
         }
     }
 
@@ -143,41 +137,34 @@ class RoutineCalendarViewModel(
 
         val monthStart = monthToUpdate.atStartOfMonth().toKotlinLocalDate()
         val monthEnd = monthToUpdate.atEndOfMonth().toKotlinLocalDate()
-        for (date in monthStart..monthEnd) {
-            updateStatusForDate(date)
-        }
-    }
-
-    private suspend fun updateStatusForDate(date: LocalDate) {
-        val habitStatusComputer = HabitStatusComputer(
-            habit = habitFlow.value!!,
-            completionHistory = completionHistoryFlow.value,
-            vacationHistory = vacationHistoryFlow.value,
-            defaultDispatcher = defaultDispatcher,
-        )
-        val habitStatus = habitStatusComputer.computeStatus(
-            validationDate = date,
+        val habitStatuses = computeHabitStatuses(
+            habitId = routineId,
+            validationDates = monthStart..monthEnd,
             today = todayFlow.value,
         )
-        val numOfTimesCompleted =
-            completionHistoryFlow.value.find { it.date == date }?.numOfTimesCompleted ?: 0F
-
-        val calendarDateData = CalendarDateData(
-            status = habitStatus,
-            includedInStreak = streaksFlow.value.any { it.contains(date) },
-            numOfTimesCompleted = numOfTimesCompleted,
+        val completionHistory = completionHistoryRepository.getRecordsInPeriod(
+            habitId = routineId,
+            minDate = monthStart,
+            maxDate = monthEnd,
         )
-
+        val calendarDateData = habitStatuses.mapValues { (date, status) ->
+            CalendarDateData(
+                status = status,
+                includedInStreak = streaksFlow.value.any { it.contains(date) },
+                numOfTimesCompleted = completionHistory.find { it.date == date }
+                    ?.numOfTimesCompleted ?: 0F,
+            )
+        }
         _calendarDatesFlow.update {
-            it.toMutableMap().also { calendarDates ->
-                calendarDates[date] = calendarDateData
-            }
+            it.toMutableMap().apply { putAll(calendarDateData) }
         }
     }
 
     fun onScrolledToNewMonth(newMonth: YearMonth) {
         _currentMonthFlow.update { newMonth }
-        updateMonthsWithMargin()
+        if (newMonth != initialMonth) {
+            updateMonthsWithMargin()
+        }
     }
 
     fun onHabitComplete(completionRecord: Habit.CompletionRecord) = viewModelScope.launch {
@@ -191,10 +178,12 @@ class RoutineCalendarViewModel(
             // TODO display a snackbar
         }
 
-        completionHistoryFlow.update {
-            completionHistoryRepository.getRecordsInPeriod(habitId = routineId)
+        streaksFlow.update {
+            getAllStreaksUseCase(
+                habitId = routineId,
+                today = todayFlow.value,
+            )
         }
-
         updateMonthsWithMargin(forceUpdate = true)
     }
 

@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
 import com.rendox.routinetracker.core.data.habit.HabitRepository
 import com.rendox.routinetracker.core.data.vacation.VacationRepository
-import com.rendox.routinetracker.core.domain.completion_history.HabitStatusComputer
+import com.rendox.routinetracker.core.domain.completion_history.HabitStatusComputerImpl
 import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.HabitStatus
@@ -106,7 +106,7 @@ class AgendaScreenViewModel(
     }
 
     private suspend fun getDisplayRoutine(habit: Habit, date: LocalDate): DisplayRoutine {
-        val habitStatusComputer = HabitStatusComputer(
+        val habitStatusComputer = HabitStatusComputerImpl(
             habit = habit,
             completionHistory = completionHistoryFlow.value
                 .filter { it.first == habit.id }

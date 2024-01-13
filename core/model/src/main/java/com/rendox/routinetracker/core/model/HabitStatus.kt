@@ -63,7 +63,7 @@ enum class HabitStatus {
     Finished,
 }
 
-val completedStatuses = listOf(
+val streakCreatorStatuses = listOf(
     HabitStatus.Completed,
     HabitStatus.OverCompleted,
     HabitStatus.SortedOutBacklog,

@@ -8,6 +8,7 @@ import com.rendox.routinetracker.core.data.di.vacationDataModule
 import com.rendox.routinetracker.core.database.di.localDataSourceModule
 import com.rendox.routinetracker.core.domain.di.completionHistoryDomainModule
 import com.rendox.routinetracker.core.domain.di.habitDomainModule
+import com.rendox.routinetracker.core.domain.di.streaksDomainModule
 import com.rendox.routinetracker.feature.agenda.di.agendaScreenModule
 import com.rendox.routinetracker.routine_details.di.routineDetailsModule
 import org.koin.android.ext.koin.androidContext
@@ -26,6 +27,7 @@ class RoutineTrackerApp: Application() {
                 vacationDataModule,
                 habitDomainModule,
                 completionHistoryDomainModule,
+                streaksDomainModule,
                 agendaScreenModule,
                 routineDetailsModule,
             )
