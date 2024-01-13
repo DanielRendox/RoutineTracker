@@ -13,7 +13,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Month
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import kotlin.random.Random
 import kotlin.test.assertFailsWith
 

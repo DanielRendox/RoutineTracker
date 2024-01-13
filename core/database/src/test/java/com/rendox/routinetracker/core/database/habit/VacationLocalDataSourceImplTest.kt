@@ -12,9 +12,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -76,7 +76,7 @@ class VacationLocalDataSourceImplTest : KoinTest {
     )
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    @Before
+    @BeforeEach
     fun setUp() = runTest {
         startKoin {
             modules(
@@ -100,7 +100,7 @@ class VacationLocalDataSourceImplTest : KoinTest {
         }
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         stopKoin()
     }

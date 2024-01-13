@@ -38,8 +38,14 @@ internal fun Project.addLocalTestDependencies(
     commonExtension.apply {
         dependencies {
             add("testImplementation", libs.findLibrary("androidx-test-core").get())
-            add("testImplementation", libs.findLibrary("junit").get())
+            add("testImplementation", libs.findLibrary("junit-bom").get())
+            add("testImplementation", "org.junit.jupiter:junit-jupiter-api")
+            add("testImplementation", "org.junit.jupiter:junit-jupiter-engine")
+            add("testImplementation", "org.junit.vintage:junit-vintage-engine")
             add("testImplementation", libs.findLibrary("google-truth").get())
+        }
+        testOptions {
+            unitTests.all { it.useJUnitPlatform() }
         }
     }
 }

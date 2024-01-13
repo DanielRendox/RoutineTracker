@@ -32,9 +32,9 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toKotlinLocalDate
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.koin.core.context.stopKoin
 
 class RoutineCalendarViewModelTest {
@@ -48,7 +48,7 @@ class RoutineCalendarViewModelTest {
     val coroutineDispatcher = UnconfinedTestDispatcher()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    @Before
+    @BeforeEach
     fun setUp() = runTest {
         Dispatchers.setMain(coroutineDispatcher)
 
@@ -78,7 +78,7 @@ class RoutineCalendarViewModelTest {
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    @After
+    @AfterEach
     fun tearDown() {
         stopKoin()
         Dispatchers.resetMain()

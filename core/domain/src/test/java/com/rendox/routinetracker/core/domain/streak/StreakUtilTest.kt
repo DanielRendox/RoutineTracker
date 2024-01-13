@@ -3,7 +3,7 @@ package com.rendox.routinetracker.core.domain.streak
 import com.google.common.truth.Truth.assertThat
 import com.rendox.routinetracker.core.model.DisplayStreak
 import kotlinx.datetime.LocalDate
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class StreakUtilTest {
 

@@ -20,8 +20,8 @@ import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.BeforeEach
 
 class HabitComputeStatusUseCaseTest {
     private lateinit var completionHistoryRepository: CompletionHistoryRepository
@@ -48,7 +48,7 @@ class HabitComputeStatusUseCaseTest {
         schedule = defaultSchedule,
     )
 
-    @Before
+    @BeforeEach
     fun setUp() = runTest {
         val habitData = HabitData()
         habitRepository = HabitRepositoryFake(habitData)

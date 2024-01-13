@@ -17,9 +17,9 @@ import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.Month
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -38,7 +38,7 @@ class HabitLocalDataSourceImplTest : KoinTest {
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    @Before
+    @BeforeEach
     fun setUp() {
         startKoin {
             modules(
@@ -55,7 +55,7 @@ class HabitLocalDataSourceImplTest : KoinTest {
         )
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         stopKoin()
     }
