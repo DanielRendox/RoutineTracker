@@ -13,7 +13,7 @@ enum class ScheduleType {
     WeeklyScheduleByNumOfDueDays,
     MonthlyScheduleByDueDatesIndices,
     MonthlyScheduleByNumOfDueDays,
-    PeriodicCustomSchedule,
+    AlternateDaysSchedule,
     CustomDateSchedule,
     AnnualScheduleByDueDates,
     AnnualScheduleByNumOfDueDays,
@@ -41,7 +41,7 @@ internal fun ScheduleEntity.toExternalModel(
         ScheduleType.MonthlyScheduleByNumOfDueDays ->
             toMonthlyScheduleByNumOfDueDays()
 
-        ScheduleType.PeriodicCustomSchedule -> toPeriodicCustomSchedule()
+        ScheduleType.AlternateDaysSchedule -> toAlternateDaySchedule()
         ScheduleType.CustomDateSchedule ->
             toCustomDateSchedule(dueDatesProvider(id))
 
@@ -56,8 +56,6 @@ internal fun ScheduleEntity.toExternalModel(
 internal fun ScheduleEntity.toEveryDaySchedule() = Schedule.EveryDaySchedule(
     startDate = startDate,
     endDate = endDate,
-    vacationStartDate = vacationStartDate,
-    vacationEndDate = vacationEndDate,
 )
 
 internal fun ScheduleEntity.toWeeklyScheduleByDueDaysOfWeek(
@@ -68,8 +66,6 @@ internal fun ScheduleEntity.toWeeklyScheduleByDueDaysOfWeek(
     periodSeparationEnabled = periodicSeparationEnabledInPeriodicSchedule!!,
     startDate = startDate,
     endDate = endDate,
-    vacationStartDate = vacationStartDate,
-    vacationEndDate = vacationEndDate,
     backlogEnabled = backlogEnabled,
     completingAheadEnabled = cancelDuenessIfDoneAhead,
 )
@@ -79,8 +75,6 @@ internal fun ScheduleEntity.toWeeklyScheduleByNumOfDueDays() = Schedule.WeeklySc
     numOfDueDaysInFirstPeriod = numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule,
     startDate = startDate,
     endDate = endDate,
-    vacationStartDate = vacationStartDate,
-    vacationEndDate = vacationEndDate,
     periodSeparationEnabled = periodicSeparationEnabledInPeriodicSchedule!!,
 )
 
@@ -95,8 +89,6 @@ internal fun ScheduleEntity.toMonthlyScheduleByDueDatesIndices(
     periodSeparationEnabled = periodicSeparationEnabledInPeriodicSchedule!!,
     startDate = startDate,
     endDate = endDate,
-    vacationStartDate = vacationStartDate,
-    vacationEndDate = vacationEndDate,
     backlogEnabled = backlogEnabled,
     completingAheadEnabled = cancelDuenessIfDoneAhead,
 )
@@ -107,18 +99,14 @@ internal fun ScheduleEntity.toMonthlyScheduleByNumOfDueDays() = Schedule.Monthly
     startFromHabitStart = startFromHabitStartInMonthlyAndAnnualSchedule!!,
     startDate = startDate,
     endDate = endDate,
-    vacationStartDate = vacationStartDate,
-    vacationEndDate = vacationEndDate,
     periodSeparationEnabled = periodicSeparationEnabledInPeriodicSchedule!!,
 )
 
-internal fun ScheduleEntity.toPeriodicCustomSchedule() = Schedule.AlternateDaysSchedule (
+internal fun ScheduleEntity.toAlternateDaySchedule() = Schedule.AlternateDaysSchedule (
     numOfDueDays = numOfDueDaysInByNumOfDueDaysSchedule!!,
-    numOfDaysInPeriod = numOfDaysInPeriodicCustomSchedule!!,
+    numOfDaysInPeriod = numOfDaysInAlternateDaysSchedule!!,
     startDate = startDate,
     endDate = endDate,
-    vacationStartDate = vacationStartDate,
-    vacationEndDate = vacationEndDate,
     backlogEnabled = backlogEnabled,
     completingAheadEnabled = cancelDuenessIfDoneAhead,
     periodSeparationEnabled = periodicSeparationEnabledInPeriodicSchedule!!,
@@ -130,8 +118,6 @@ internal fun ScheduleEntity.toCustomDateSchedule(
     dueDates = dueDatesIndices.map { it.toLocalDate() },
     startDate = startDate,
     endDate = endDate,
-    vacationStartDate = vacationStartDate,
-    vacationEndDate = vacationEndDate,
     backlogEnabled = backlogEnabled,
     completingAheadEnabled = cancelDuenessIfDoneAhead,
 )
@@ -144,8 +130,6 @@ internal fun ScheduleEntity.toAnnualScheduleByDueDates(
     periodSeparationEnabled = periodicSeparationEnabledInPeriodicSchedule!!,
     startDate = startDate,
     endDate = endDate,
-    vacationStartDate = vacationStartDate,
-    vacationEndDate = vacationEndDate,
     backlogEnabled = backlogEnabled,
     completingAheadEnabled = cancelDuenessIfDoneAhead,
 )
@@ -156,7 +140,5 @@ internal fun ScheduleEntity.toAnnualScheduleByNumOfDueDays() = Schedule.AnnualSc
     startFromHabitStart = startFromHabitStartInMonthlyAndAnnualSchedule!!,
     startDate = startDate,
     endDate = endDate,
-    vacationStartDate = vacationStartDate,
-    vacationEndDate = vacationEndDate,
     periodSeparationEnabled = periodicSeparationEnabledInPeriodicSchedule!!,
 )

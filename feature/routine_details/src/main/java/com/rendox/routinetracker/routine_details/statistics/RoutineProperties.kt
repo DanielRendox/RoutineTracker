@@ -41,7 +41,7 @@ fun RoutineProperties(
     progress: Float?,
     scheduleType: KClass<out Schedule>,
     numOfDueDaysPerPeriod: Int,
-    numOfDaysInPeriodForPeriodicCustomSchedule: Int?,
+    numOfDaysInPeriodForAlternateDaysSchedule: Int?,
     sessionDurationMinutes: Int?,
     completionTime: LocalTime?,
     reminderEnabled: Boolean,
@@ -79,7 +79,7 @@ fun RoutineProperties(
 
         Row(modifier = Modifier.fillMaxWidth()) {
             val frequencyString = deriveRoutineFrequency(
-                scheduleType, numOfDueDaysPerPeriod, numOfDaysInPeriodForPeriodicCustomSchedule
+                scheduleType, numOfDueDaysPerPeriod, numOfDaysInPeriodForAlternateDaysSchedule
             )
             val sessionDurationString =
                 sessionDurationMinutes?.let { deriveRoutineSessionDuration(it) }
@@ -160,7 +160,7 @@ fun RoutineProperties(
 private fun deriveRoutineFrequency(
     scheduleType: KClass<out Schedule>,
     numOfDueDaysPerPeriod: Int,
-    numOfDaysInPeriodForPeriodicCustomSchedule: Int?,
+    numOfDaysInPeriodForAlternateDaysSchedule: Int?,
 ): String? {
     return when (scheduleType) {
         Schedule.EveryDaySchedule::class ->
@@ -186,7 +186,7 @@ private fun deriveRoutineFrequency(
             )
             val activity = stringResource(id = R.string.frequency_activity)
             val numOfRestDays =
-                numOfDaysInPeriodForPeriodicCustomSchedule!! - numOfDueDaysPerPeriod
+                numOfDaysInPeriodForAlternateDaysSchedule!! - numOfDueDaysPerPeriod
             val numOfRestDaysString = pluralStringResource(
                 id = R.plurals.num_of_days,
                 count = numOfRestDays,
@@ -293,7 +293,7 @@ private fun RoutinePropertiesPreview() {
             progress = 0.75f,
             scheduleType = Schedule.AnnualSchedule::class,
             numOfDueDaysPerPeriod = 90,
-            numOfDaysInPeriodForPeriodicCustomSchedule = null,
+            numOfDaysInPeriodForAlternateDaysSchedule = null,
             sessionDurationMinutes = 65,
             completionTime = LocalTime(23, 15),
             reminderEnabled = true,

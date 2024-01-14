@@ -15,9 +15,6 @@ sealed class Schedule {
     abstract val backlogEnabled: Boolean
     abstract val completingAheadEnabled: Boolean
 
-    abstract val vacationStartDate: LocalDate?
-    abstract val vacationEndDate: LocalDate?
-
     abstract val supportsScheduleDeviation: Boolean
     abstract val supportsPeriodSeparation: Boolean
 
@@ -39,9 +36,6 @@ sealed class Schedule {
     data class EveryDaySchedule(
         override val startDate: LocalDate,
         override val endDate: LocalDate? = null,
-
-        override val vacationStartDate: LocalDate? = null,
-        override val vacationEndDate: LocalDate? = null,
     ) : NonPeriodicSchedule() {
         override val backlogEnabled: Boolean = false
         override val completingAheadEnabled: Boolean = false
@@ -64,9 +58,6 @@ sealed class Schedule {
 
         override val startDate: LocalDate,
         override val endDate: LocalDate? = null,
-
-        override val vacationStartDate: LocalDate? = null,
-        override val vacationEndDate: LocalDate? = null,
     ) : WeeklySchedule() {
         override val supportsPeriodSeparation = true
 
@@ -86,9 +77,6 @@ sealed class Schedule {
         override val endDate: LocalDate? = null,
 
         override val periodSeparationEnabled: Boolean = true,
-
-        override val vacationStartDate: LocalDate? = null,
-        override val vacationEndDate: LocalDate? = null,
     ) : WeeklySchedule(), ByNumOfDueDays {
         override val backlogEnabled: Boolean = true
         override val completingAheadEnabled: Boolean = true
@@ -141,9 +129,6 @@ sealed class Schedule {
 
         override val startDate: LocalDate,
         override val endDate: LocalDate? = null,
-
-        override val vacationStartDate: LocalDate? = null,
-        override val vacationEndDate: LocalDate? = null,
     ) : MonthlySchedule() {
         override val supportsPeriodSeparation = true
 
@@ -163,9 +148,6 @@ sealed class Schedule {
 
         override val startDate: LocalDate,
         override val endDate: LocalDate? = null,
-
-        override val vacationStartDate: LocalDate? = null,
-        override val vacationEndDate: LocalDate? = null,
     ) : MonthlySchedule(), ByNumOfDueDays {
         override val backlogEnabled: Boolean = true
         override val completingAheadEnabled: Boolean = true
@@ -209,9 +191,6 @@ sealed class Schedule {
 
         override val startDate: LocalDate,
         override val endDate: LocalDate? = null,
-
-        override val vacationStartDate: LocalDate? = null,
-        override val vacationEndDate: LocalDate? = null,
     ) : PeriodicSchedule(), ByNumOfDueDays {
         override val supportsPeriodSeparation = true
 
@@ -231,9 +210,6 @@ sealed class Schedule {
 
         override val startDate: LocalDate,
         override val endDate: LocalDate? = null,
-
-        override val vacationStartDate: LocalDate? = null,
-        override val vacationEndDate: LocalDate? = null,
     ) : NonPeriodicSchedule() {
         override val supportsScheduleDeviation = true
     }
@@ -255,9 +231,6 @@ sealed class Schedule {
 
         override val startDate: LocalDate,
         override val endDate: LocalDate? = null,
-
-        override val vacationStartDate: LocalDate? = null,
-        override val vacationEndDate: LocalDate? = null,
     ) : AnnualSchedule() {
         override val supportsPeriodSeparation = true
     }
@@ -271,9 +244,6 @@ sealed class Schedule {
 
         override val startDate: LocalDate,
         override val endDate: LocalDate? = null,
-
-        override val vacationStartDate: LocalDate? = null,
-        override val vacationEndDate: LocalDate? = null,
     ) : AnnualSchedule(), ByNumOfDueDays {
         override val backlogEnabled: Boolean = true
         override val completingAheadEnabled: Boolean = true

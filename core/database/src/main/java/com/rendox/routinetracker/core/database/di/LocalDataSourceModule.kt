@@ -53,12 +53,10 @@ val localDataSourceModule = module {
                 typeAdapter = EnumColumnAdapter(),
                 startDateAdapter = localDateAdapter,
                 endDateAdapter = localDateAdapter,
-                vacationStartDateAdapter = localDateAdapter,
-                vacationEndDateAdapter = localDateAdapter,
                 startDayOfWeekInWeeklyScheduleAdapter = dayOfWeekAdapter,
                 numOfDueDaysInByNumOfDueDaysScheduleAdapter = IntColumnAdapter,
                 numOfDueDaysInFirstPeriodInByNumOfDueDaysScheduleAdapter = IntColumnAdapter,
-                numOfDaysInPeriodicCustomScheduleAdapter = IntColumnAdapter,
+                numOfDaysInAlternateDaysScheduleAdapter = IntColumnAdapter,
             ),
             dueDateEntityAdapter = DueDateEntity.Adapter(
                 dueDateNumberAdapter = IntColumnAdapter,

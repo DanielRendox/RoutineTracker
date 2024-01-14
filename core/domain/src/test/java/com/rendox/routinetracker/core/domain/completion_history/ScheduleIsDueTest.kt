@@ -359,7 +359,7 @@ class ScheduleIsDueTest {
     }
 
     @Test
-    fun periodicCustomScheduleIsDue() {
+    fun alternateDaysScheduleIsDue() {
         val numOfDaysInPeriod = Random.nextInt(2, 100)
         val dueDaysNumber = numOfDaysInPeriod / 2
 

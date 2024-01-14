@@ -45,7 +45,7 @@ internal class ScheduleLocalDataSourceImpl(
                 insertMonthlyScheduleByNumOfDueDays(schedule)
 
             is Schedule.AlternateDaysSchedule ->
-                insertPeriodicCustomSchedule(schedule)
+                insertAlternateDaysSchedule(schedule)
 
             is Schedule.CustomDateSchedule -> {
                 insertCustomDateSchedule(schedule)
@@ -78,15 +78,13 @@ internal class ScheduleLocalDataSourceImpl(
             endDate = schedule.endDate,
             backlogEnabled = schedule.backlogEnabled,
             cancelDuenessIfDoneAhead = schedule.completingAheadEnabled,
-            vacationStartDate = schedule.vacationStartDate,
-            vacationEndDate = schedule.vacationEndDate,
             startDayOfWeekInWeeklySchedule = null,
             startFromHabitStartInMonthlyAndAnnualSchedule = null,
             includeLastDayOfMonthInMonthlySchedule = null,
             periodicSeparationEnabledInPeriodicSchedule = null,
             numOfDueDaysInByNumOfDueDaysSchedule = null,
             numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule = null,
-            numOfDaysInPeriodicCustomSchedule = null,
+            numOfDaysInAlternateDaysSchedule = null,
         )
     }
 
@@ -98,15 +96,13 @@ internal class ScheduleLocalDataSourceImpl(
             endDate = schedule.endDate,
             backlogEnabled = schedule.backlogEnabled,
             cancelDuenessIfDoneAhead = schedule.completingAheadEnabled,
-            vacationStartDate = schedule.vacationStartDate,
-            vacationEndDate = schedule.vacationEndDate,
             startDayOfWeekInWeeklySchedule = schedule.startDayOfWeek,
             startFromHabitStartInMonthlyAndAnnualSchedule = null,
             includeLastDayOfMonthInMonthlySchedule = null,
             periodicSeparationEnabledInPeriodicSchedule = schedule.periodSeparationEnabled,
             numOfDueDaysInByNumOfDueDaysSchedule = null,
             numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule = null,
-            numOfDaysInPeriodicCustomSchedule = null,
+            numOfDaysInAlternateDaysSchedule = null,
         )
     }
 
@@ -118,15 +114,13 @@ internal class ScheduleLocalDataSourceImpl(
             endDate = schedule.endDate,
             backlogEnabled = schedule.backlogEnabled,
             cancelDuenessIfDoneAhead = schedule.completingAheadEnabled,
-            vacationStartDate = schedule.vacationStartDate,
-            vacationEndDate = schedule.vacationEndDate,
             startDayOfWeekInWeeklySchedule = schedule.startDayOfWeek,
             startFromHabitStartInMonthlyAndAnnualSchedule = null,
             includeLastDayOfMonthInMonthlySchedule = null,
             periodicSeparationEnabledInPeriodicSchedule = schedule.periodSeparationEnabled,
             numOfDueDaysInByNumOfDueDaysSchedule = schedule.numOfDueDays,
             numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule = schedule.numOfDueDaysInFirstPeriod,
-            numOfDaysInPeriodicCustomSchedule = null,
+            numOfDaysInAlternateDaysSchedule = null,
         )
     }
 
@@ -138,15 +132,13 @@ internal class ScheduleLocalDataSourceImpl(
             endDate = schedule.endDate,
             backlogEnabled = schedule.backlogEnabled,
             cancelDuenessIfDoneAhead = schedule.completingAheadEnabled,
-            vacationStartDate = schedule.vacationStartDate,
-            vacationEndDate = schedule.vacationEndDate,
             startDayOfWeekInWeeklySchedule = null,
             startFromHabitStartInMonthlyAndAnnualSchedule = schedule.startFromHabitStart,
             includeLastDayOfMonthInMonthlySchedule = schedule.includeLastDayOfMonth,
             periodicSeparationEnabledInPeriodicSchedule = schedule.periodSeparationEnabled,
             numOfDueDaysInByNumOfDueDaysSchedule = null,
             numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule = null,
-            numOfDaysInPeriodicCustomSchedule = null,
+            numOfDaysInAlternateDaysSchedule = null
         )
     }
 
@@ -158,35 +150,31 @@ internal class ScheduleLocalDataSourceImpl(
             endDate = schedule.endDate,
             backlogEnabled = schedule.backlogEnabled,
             cancelDuenessIfDoneAhead = schedule.completingAheadEnabled,
-            vacationStartDate = schedule.vacationStartDate,
-            vacationEndDate = schedule.vacationEndDate,
             startDayOfWeekInWeeklySchedule = null,
             startFromHabitStartInMonthlyAndAnnualSchedule = schedule.startFromHabitStart,
             includeLastDayOfMonthInMonthlySchedule = null,
             periodicSeparationEnabledInPeriodicSchedule = schedule.periodSeparationEnabled,
             numOfDueDaysInByNumOfDueDaysSchedule = schedule.numOfDueDays,
             numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule = schedule.numOfDueDaysInFirstPeriod,
-            numOfDaysInPeriodicCustomSchedule = null,
+            numOfDaysInAlternateDaysSchedule = null,
         )
     }
 
-    private fun insertPeriodicCustomSchedule(schedule: Schedule.AlternateDaysSchedule) {
+    private fun insertAlternateDaysSchedule(schedule: Schedule.AlternateDaysSchedule) {
         db.scheduleEntityQueries.insertSchedule(
             id = null,
-            type = ScheduleType.PeriodicCustomSchedule,
+            type = ScheduleType.AlternateDaysSchedule,
             startDate = schedule.startDate,
             endDate = schedule.endDate,
             backlogEnabled = schedule.backlogEnabled,
             cancelDuenessIfDoneAhead = schedule.completingAheadEnabled,
-            vacationStartDate = schedule.vacationStartDate,
-            vacationEndDate = schedule.vacationEndDate,
             startDayOfWeekInWeeklySchedule = null,
             startFromHabitStartInMonthlyAndAnnualSchedule = null,
             includeLastDayOfMonthInMonthlySchedule = null,
             periodicSeparationEnabledInPeriodicSchedule = schedule.periodSeparationEnabled,
             numOfDueDaysInByNumOfDueDaysSchedule = schedule.numOfDueDays,
             numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule = null,
-            numOfDaysInPeriodicCustomSchedule = schedule.numOfDaysInPeriod,
+            numOfDaysInAlternateDaysSchedule = schedule.numOfDaysInPeriod,
         )
     }
 
@@ -198,15 +186,13 @@ internal class ScheduleLocalDataSourceImpl(
             endDate = schedule.endDate,
             backlogEnabled = schedule.backlogEnabled,
             cancelDuenessIfDoneAhead = schedule.completingAheadEnabled,
-            vacationStartDate = schedule.vacationStartDate,
-            vacationEndDate = schedule.vacationEndDate,
             startDayOfWeekInWeeklySchedule = null,
             startFromHabitStartInMonthlyAndAnnualSchedule = null,
             includeLastDayOfMonthInMonthlySchedule = null,
             periodicSeparationEnabledInPeriodicSchedule = null,
             numOfDueDaysInByNumOfDueDaysSchedule = null,
             numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule = null,
-            numOfDaysInPeriodicCustomSchedule = null,
+            numOfDaysInAlternateDaysSchedule = null,
         )
     }
 
@@ -218,15 +204,13 @@ internal class ScheduleLocalDataSourceImpl(
             endDate = schedule.endDate,
             backlogEnabled = schedule.backlogEnabled,
             cancelDuenessIfDoneAhead = schedule.completingAheadEnabled,
-            vacationStartDate = schedule.vacationStartDate,
-            vacationEndDate = schedule.vacationEndDate,
             startDayOfWeekInWeeklySchedule = null,
             startFromHabitStartInMonthlyAndAnnualSchedule = schedule.startFromHabitStart,
             includeLastDayOfMonthInMonthlySchedule = null,
             periodicSeparationEnabledInPeriodicSchedule = schedule.periodSeparationEnabled,
             numOfDueDaysInByNumOfDueDaysSchedule = null,
             numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule = null,
-            numOfDaysInPeriodicCustomSchedule = null,
+            numOfDaysInAlternateDaysSchedule = null,
         )
     }
 
@@ -238,15 +222,13 @@ internal class ScheduleLocalDataSourceImpl(
             endDate = schedule.endDate,
             backlogEnabled = schedule.backlogEnabled,
             cancelDuenessIfDoneAhead = schedule.completingAheadEnabled,
-            vacationStartDate = schedule.vacationStartDate,
-            vacationEndDate = schedule.vacationEndDate,
             startDayOfWeekInWeeklySchedule = null,
             startFromHabitStartInMonthlyAndAnnualSchedule = schedule.startFromHabitStart,
             includeLastDayOfMonthInMonthlySchedule = null,
             periodicSeparationEnabledInPeriodicSchedule = schedule.periodSeparationEnabled,
             numOfDueDaysInByNumOfDueDaysSchedule = schedule.numOfDueDays,
             numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule = schedule.numOfDueDaysInFirstPeriod,
-            numOfDaysInPeriodicCustomSchedule = null,
+            numOfDaysInAlternateDaysSchedule = null,
         )
     }
 

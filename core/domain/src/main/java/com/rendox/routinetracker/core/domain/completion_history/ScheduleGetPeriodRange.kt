@@ -40,7 +40,7 @@ fun Schedule.PeriodicSchedule.getPeriodRange(
         is Schedule.MonthlyScheduleByNumOfDueDays -> monthlyScheduleGetPeriodDateRange(currentDate)
         is Schedule.AnnualScheduleByDueDates -> annualScheduleGetPeriodDateRange(currentDate)
         is Schedule.AnnualScheduleByNumOfDueDays -> annualScheduleGetPeriodDateRange(currentDate)
-        is Schedule.AlternateDaysSchedule -> periodicCustomScheduleGetPeriodDateRange(
+        is Schedule.AlternateDaysSchedule -> alternateDaysScheduleGetPeriodRange(
             currentDate, lastVacationEndDate
         )
     }
@@ -137,7 +137,7 @@ private fun Schedule.AnnualSchedule.annualScheduleGetPeriodDateRange(
     return startPeriodDate..endPeriodDate
 }
 
-private fun Schedule.AlternateDaysSchedule.periodicCustomScheduleGetPeriodDateRange(
+private fun Schedule.AlternateDaysSchedule.alternateDaysScheduleGetPeriodRange(
     currentDate: LocalDate,
     lastVacationEndDate: LocalDate?,
     ): LocalDateRange {
