@@ -4,21 +4,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kizitonwose.calendar.core.atStartOfMonth
 import com.kizitonwose.calendar.core.yearMonth
-import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
-import com.rendox.routinetracker.core.data.habit.HabitRepository
-import com.rendox.routinetracker.core.domain.completion_history.HabitComputeStatusUseCase
+import com.rendox.routinetracker.core.domain.completion_history.GetHabitCompletionDataUseCase
 import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase
+import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCaseImpl
+import com.rendox.routinetracker.core.domain.di.GetHabitUseCase
 import com.rendox.routinetracker.core.domain.streak.GetAllStreaksUseCase
 import com.rendox.routinetracker.core.domain.streak.contains
 import com.rendox.routinetracker.core.domain.streak.getCurrentStreak
 import com.rendox.routinetracker.core.domain.streak.getDurationInDays
 import com.rendox.routinetracker.core.domain.streak.getLongestStreak
 import com.rendox.routinetracker.core.logic.time.rangeTo
-import com.rendox.routinetracker.core.model.Streak
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.HabitStatus
+import com.rendox.routinetracker.core.model.Streak
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +25,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
@@ -40,12 +38,11 @@ import kotlin.coroutines.CoroutineContext
 class RoutineCalendarViewModel(
     today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
     private val routineId: Long,
-    private val habitRepository: HabitRepository,
-    private val completionHistoryRepository: CompletionHistoryRepository,
-    private val computeHabitStatuses: HabitComputeStatusUseCase,
+    private val getHabit: GetHabitUseCase,
+    private val getHabitCompletionData: GetHabitCompletionDataUseCase,
     private val insertHabitCompletion: InsertHabitCompletionUseCase,
     private val getAllStreaksUseCase: GetAllStreaksUseCase,
-    private val defaultDispatcher: CoroutineContext = Dispatchers.Default,
+    private val dispatcher: CoroutineContext = Dispatchers.Main.immediate,
 ) : ViewModel() {
     private val _habitFlow: MutableStateFlow<Habit?> = MutableStateFlow(null)
     val habitFlow: StateFlow<Habit?> = _habitFlow.asStateFlow()
@@ -78,22 +75,18 @@ class RoutineCalendarViewModel(
     )
 
     init {
-        viewModelScope.launch {
-            val jobs = mutableListOf<Job>()
-
-            val updateHabitJob = launch {
-                _habitFlow.update { habitRepository.getHabitById(routineId) }
-            }
-            jobs.add(updateHabitJob)
-
-            jobs.joinAll()
+        viewModelScope.launch(dispatcher) {
+            _habitFlow.update { getHabit(routineId) }
             streaksFlow.update {
                 getAllStreaksUseCase(
                     habitId = routineId,
                     today = todayFlow.value,
                 )
             }
+            println("actually it runs on $dispatcher")
             updateMonthsWithMargin()
+            println("updated!!")
+            println("calendar dates flow init = ${calendarDatesFlow.value}")
         }
 
         viewModelScope.launch {
@@ -103,9 +96,9 @@ class RoutineCalendarViewModel(
         }
     }
 
-    private fun updateMonthsWithMargin(
+    private suspend fun updateMonthsWithMargin(
         forceUpdate: Boolean = false
-    ) = viewModelScope.launch(defaultDispatcher) {
+    ) {
         // delete all other months because the data may be outdated
         if (forceUpdate) {
             val start = _currentMonthFlow.value.minusMonths(NumOfMonthsToLoadAhead.toLong())
@@ -137,33 +130,30 @@ class RoutineCalendarViewModel(
 
         val monthStart = monthToUpdate.atStartOfMonth().toKotlinLocalDate()
         val monthEnd = monthToUpdate.atEndOfMonth().toKotlinLocalDate()
-        val habitStatuses = computeHabitStatuses(
+        val datesCompletionData = getHabitCompletionData(
             habitId = routineId,
             validationDates = monthStart..monthEnd,
             today = todayFlow.value,
         )
-        val completionHistory = completionHistoryRepository.getRecordsInPeriod(
-            habitId = routineId,
-            minDate = monthStart,
-            maxDate = monthEnd,
-        )
-        val calendarDateData = habitStatuses.mapValues { (date, status) ->
+        val calendarDateData = datesCompletionData.mapValues { (date, completionData) ->
             CalendarDateData(
-                status = status,
+                status = completionData.habitStatus,
                 includedInStreak = streaksFlow.value.any { it.contains(date) },
-                numOfTimesCompleted = completionHistory.find { it.date == date }
-                    ?.numOfTimesCompleted ?: 0F,
+                numOfTimesCompleted = completionData.numOfTimesCompleted,
             )
         }
         _calendarDatesFlow.update {
             it.toMutableMap().apply { putAll(calendarDateData) }
         }
+        println("calendar dates flow = ${calendarDatesFlow.value}")
     }
 
     fun onScrolledToNewMonth(newMonth: YearMonth) {
         _currentMonthFlow.update { newMonth }
         if (newMonth != initialMonth) {
-            updateMonthsWithMargin()
+            viewModelScope.launch {
+                updateMonthsWithMargin()
+            }
         }
     }
 
@@ -174,7 +164,7 @@ class RoutineCalendarViewModel(
                 completionRecord = completionRecord,
                 today = todayFlow.value,
             )
-        } catch (e: InsertHabitCompletionUseCase.IllegalDateException) {
+        } catch (e: InsertHabitCompletionUseCaseImpl.IllegalDateException) {
             // TODO display a snackbar
         }
 

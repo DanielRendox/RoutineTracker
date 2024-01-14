@@ -8,10 +8,9 @@ val agendaScreenModule = module {
 
     viewModel {
         AgendaScreenViewModel(
-            habitRepository = get(),
+            getAllHabits = get(),
             insertHabitCompletion = get(),
-            vacationRepository = get(),
-            completionHistoryRepository = get(),
+            getHabitCompletionData = get(),
         )
     }
 }

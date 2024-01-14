@@ -7,18 +7,16 @@ import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.HabitStatus
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.model.Vacation
-import kotlinx.coroutines.Dispatchers
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
-import kotlin.coroutines.CoroutineContext
 
-class HabitStatusComputerImpl(
+internal class HabitStatusComputerImpl(
     private val habit: Habit,
     private val completionHistory: List<Habit.CompletionRecord>,
     private val vacationHistory: List<Vacation>,
-    private val defaultDispatcher: CoroutineContext = Dispatchers.Default,
 ): HabitStatusComputer {
+
     /**
      * The HabitComputeStatusUseCase class is responsible for computing the [HabitStatus] based on
      * various factors such as the habit's schedule, what dates are completed, and vacation periods.

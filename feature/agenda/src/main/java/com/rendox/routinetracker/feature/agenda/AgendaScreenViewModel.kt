@@ -2,16 +2,11 @@ package com.rendox.routinetracker.feature.agenda
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
-import com.rendox.routinetracker.core.data.habit.HabitRepository
-import com.rendox.routinetracker.core.data.vacation.VacationRepository
-import com.rendox.routinetracker.core.domain.completion_history.HabitStatusComputerImpl
+import com.rendox.routinetracker.core.domain.completion_history.GetHabitCompletionDataUseCase
 import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase
+import com.rendox.routinetracker.core.domain.di.GetAllHabitsUseCase
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.HabitStatus
-import com.rendox.routinetracker.core.model.Vacation
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -19,28 +14,21 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
-import kotlin.coroutines.CoroutineContext
 
 class AgendaScreenViewModel(
     today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
-    private val habitRepository: HabitRepository,
+    private val getAllHabits: GetAllHabitsUseCase,
     private val insertHabitCompletion: InsertHabitCompletionUseCase,
-    private val vacationRepository: VacationRepository,
-    private val completionHistoryRepository: CompletionHistoryRepository,
-    private val defaultDispatcher: CoroutineContext = Dispatchers.Default,
+    private val getHabitCompletionData: GetHabitCompletionDataUseCase,
 ) : ViewModel() {
     private val todayFlow = MutableStateFlow(today)
     private val allRoutinesFlow = MutableStateFlow(emptyList<Habit>())
-    private val completionHistoryFlow =
-        MutableStateFlow(emptyList<Pair<Long, Habit.CompletionRecord>>())
-    private val vacationHistoryFlow = MutableStateFlow(emptyList<Pair<Long, Vacation>>())
     private val _hideNotDueRoutinesFlow = MutableStateFlow(false)
     private val cashedRoutinesFlow = MutableStateFlow(emptyList<DisplayRoutine>())
 
@@ -67,29 +55,12 @@ class AgendaScreenViewModel(
 
     init {
         viewModelScope.launch {
-            val jobs = mutableListOf<Job>()
-
-            val updateRoutinesJob = launch {
-                allRoutinesFlow.update { habitRepository.getAllHabits() }
-            }
-            jobs.add(updateRoutinesJob)
-
-            val updateCompletionHistoryJob = launch {
-                completionHistoryFlow.update { completionHistoryRepository.getAllRecords() }
-            }
-            jobs.add(updateCompletionHistoryJob)
-
-            val updateVacationsJob = launch {
-                vacationHistoryFlow.update { vacationRepository.getAllVacations() }
-            }
-            jobs.add(updateVacationsJob)
-
-            jobs.joinAll()
+            allRoutinesFlow.update { getAllHabits() }
             updateRoutinesForDate(_currentDateFlow.value)
         }
     }
 
-    private fun updateRoutinesForDate(date: LocalDate) = viewModelScope.launch(defaultDispatcher) {
+    private fun updateRoutinesForDate(date: LocalDate) = viewModelScope.launch {
         for (routine in allRoutinesFlow.value) {
             cashedRoutinesFlow.update { cashedRoutines ->
                 cashedRoutines.toMutableList().apply {
@@ -106,33 +77,20 @@ class AgendaScreenViewModel(
     }
 
     private suspend fun getDisplayRoutine(habit: Habit, date: LocalDate): DisplayRoutine {
-        val habitStatusComputer = HabitStatusComputerImpl(
-            habit = habit,
-            completionHistory = completionHistoryFlow.value
-                .filter { it.first == habit.id }
-                .map { it.second },
-            vacationHistory = vacationHistoryFlow.value
-                .filter { it.first == habit.id }
-                .map { it.second },
-            defaultDispatcher = defaultDispatcher,
-        )
-        val habitStatus: HabitStatus = habitStatusComputer.computeStatus(
+        val habitCompletionData = getHabitCompletionData(
             validationDate = date,
             today = todayFlow.value,
+            habitId = habit.id!!,
         )
-
-        val numOfTimesCompleted = completionHistoryFlow.value.find {
-            it.first == habit.id && it.second.date == date
-        }?.second?.numOfTimesCompleted ?: 0F
 
         return DisplayRoutine(
             name = habit.name,
             id = habit.id!!,
             type = DisplayRoutineType.YesNoHabit,
-            status = habitStatus,
-            numOfTimesCompleted = numOfTimesCompleted,
+            status = habitCompletionData.habitStatus,
+            numOfTimesCompleted = habitCompletionData.numOfTimesCompleted,
             completionTime = null,
-            hasGrayedOutLook = habitStatus !in dueOrCompletedStatuses,
+            hasGrayedOutLook = habitCompletionData.habitStatus !in dueOrCompletedStatuses,
             statusToggleIsDisabled = date > todayFlow.value,
         )
     }
@@ -147,7 +105,6 @@ class AgendaScreenViewModel(
                 completionRecord = completionRecord,
                 today = todayFlow.value,
             )
-            completionHistoryFlow.update { completionHistoryRepository.getAllRecords() }
 
             val routine = allRoutinesFlow.value.find { it.id == routineId }?.let {
                 getDisplayRoutine(

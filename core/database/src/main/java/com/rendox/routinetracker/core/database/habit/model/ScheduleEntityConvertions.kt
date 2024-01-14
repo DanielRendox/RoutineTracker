@@ -19,7 +19,7 @@ enum class ScheduleType {
     AnnualScheduleByNumOfDueDays,
 }
 
-fun ScheduleEntity.toExternalModel(
+internal fun ScheduleEntity.toExternalModel(
     dueDatesProvider: (Long) -> List<Int>,
     weekDaysMonthRelatedProvider: (Long) -> List<WeekDayMonthRelated>
 ): Schedule {

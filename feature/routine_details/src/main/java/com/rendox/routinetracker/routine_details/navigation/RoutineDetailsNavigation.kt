@@ -9,8 +9,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.rendox.routinetracker.routine_details.RoutineDetailsRoute
-import org.koin.androidx.compose.koinViewModel
-import org.koin.core.parameter.parametersOf
 
 const val routineDetailsRoute = "routine_details"
 internal const val routineIdArg = "routineId"
@@ -39,7 +37,6 @@ fun NavGraphBuilder.routineDetailsScreen(popBackStack: () -> Unit) {
         RoutineDetailsRoute(
             popBackStack = popBackStack,
             routineId = routineId,
-            routineDetailsViewModel = koinViewModel { parametersOf(routineId) }
         )
     }
 }

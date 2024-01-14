@@ -51,7 +51,7 @@ class HabitLocalDataSourceImplTest : KoinTest {
         RoutineTrackerDatabase.Schema.create(sqlDriver)
 
         habitLocalDataSource = HabitLocalDataSourceImpl(
-            db = get(), dispatcher = UnconfinedTestDispatcher()
+            db = get(), ioDispatcher = UnconfinedTestDispatcher()
         )
     }
 

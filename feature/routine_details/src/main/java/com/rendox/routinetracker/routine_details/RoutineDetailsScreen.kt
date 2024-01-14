@@ -15,25 +15,33 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.rendox.routinetracker.core.domain.di.GetHabitUseCase
+import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.routine_details.navigation.RoutineDetailsNavHost
 import com.rendox.routinetracker.routine_details.navigation.calendarNavRoute
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 @Composable
 internal fun RoutineDetailsRoute(
     modifier: Modifier = Modifier,
     routineId: Long,
-    routineDetailsViewModel: RoutineDetailsViewModel = koinViewModel(),
+    getHabit: GetHabitUseCase = koinInject(),
     popBackStack: () -> Unit,
 ) {
-    val routine by routineDetailsViewModel.routineFlow.collectAsStateWithLifecycle()
+    var routine by remember { mutableStateOf<Habit?>(null) }
+    LaunchedEffect(Unit) {
+        routine = getHabit(routineId)
+    }
 
     RoutineDetailsScreen(
         modifier = modifier,

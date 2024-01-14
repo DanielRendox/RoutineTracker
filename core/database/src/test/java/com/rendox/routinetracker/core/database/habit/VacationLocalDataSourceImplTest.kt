@@ -89,7 +89,7 @@ class VacationLocalDataSourceImplTest : KoinTest {
         RoutineTrackerDatabase.Schema.create(sqlDriver)
 
         vacationLocalDataSource = VacationLocalDataSourceImpl(
-            db = get(), dispatcher = UnconfinedTestDispatcher()
+            db = get(), ioDispatcher = UnconfinedTestDispatcher()
         )
         
         for (vacation in vacationsList) {

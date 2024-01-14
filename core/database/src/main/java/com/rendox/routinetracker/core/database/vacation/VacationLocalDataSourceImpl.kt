@@ -3,24 +3,23 @@ package com.rendox.routinetracker.core.database.vacation
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
 import com.rendox.routinetracker.core.database.VacationEntity
 import com.rendox.routinetracker.core.model.Vacation
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
+import kotlin.coroutines.CoroutineContext
 
 class VacationLocalDataSourceImpl(
     private val db: RoutineTrackerDatabase,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val ioDispatcher: CoroutineContext,
 ): VacationLocalDataSource {
     override suspend fun getVacationByDate(habitId: Long, date: LocalDate): Vacation? {
-        return withContext(dispatcher) {
+        return withContext(ioDispatcher) {
             db.vacationEntityQueries.getVacationByDate(habitId, date)
                 .executeAsOneOrNull()?.toExternalModel()
         }
     }
 
     override suspend fun getPreviousVacation(habitId: Long, currentDate: LocalDate): Vacation? {
-        return withContext(dispatcher) {
+        return withContext(ioDispatcher) {
             val previousVacation = db.vacationEntityQueries.getPreviousVacation(
                 habitId = habitId,
                 currentDate = currentDate,
@@ -36,7 +35,7 @@ class VacationLocalDataSourceImpl(
     }
 
     override suspend fun getLastVacation(habitId: Long): Vacation? {
-        return withContext(dispatcher) {
+        return withContext(ioDispatcher) {
             db.vacationEntityQueries.getLastVacation(habitId)
                 .executeAsOneOrNull()?.toExternalModel()
         }
@@ -47,7 +46,7 @@ class VacationLocalDataSourceImpl(
         minDate: LocalDate?,
         maxDate: LocalDate?,
     ): List<Vacation> {
-        return withContext(dispatcher) {
+        return withContext(ioDispatcher) {
             db.vacationEntityQueries.getVacationsInPeriod(
                 habitId = habitId,
                 minDate = minDate,
@@ -57,7 +56,7 @@ class VacationLocalDataSourceImpl(
     }
 
     override suspend fun getAllVacations(): List<Pair<Long, Vacation>> {
-        return withContext(dispatcher) {
+        return withContext(ioDispatcher) {
             db.vacationEntityQueries.getAllVacations().executeAsList().map {
                 Pair(it.habitId, it.toExternalModel())
             }
@@ -65,7 +64,7 @@ class VacationLocalDataSourceImpl(
     }
 
     override suspend fun insertVacation(habitId: Long, vacation: Vacation) {
-        return withContext(dispatcher) {
+        return withContext(ioDispatcher) {
             db.vacationEntityQueries.insertVacation(
                 habitId = habitId,
                 id = vacation.id,
@@ -76,7 +75,7 @@ class VacationLocalDataSourceImpl(
     }
 
     override suspend fun deleteVacationById(id: Long) {
-        return withContext(dispatcher) {
+        return withContext(ioDispatcher) {
             db.vacationEntityQueries.deleteVacationById(id)
         }
     }

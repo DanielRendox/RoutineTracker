@@ -13,6 +13,10 @@ CREATE TABLE habitEntity (
     defaultCompletionTimeMinute INTEGER AS Int
 );
 
+insertHabit:
+INSERT INTO habitEntity
+VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
 getHabitById:
 SELECT *
 FROM habitEntity
@@ -23,6 +27,6 @@ SELECT *
 FROM habitEntity
 ORDER BY id;
 
-insertHabit:
-INSERT INTO habitEntity
-VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+deleteHabitById:
+DELETE FROM habitEntity
+WHERE id = ?;

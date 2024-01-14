@@ -7,7 +7,6 @@ import kotlinx.datetime.LocalTime
 
 class HabitData {
     var listOfHabits = MutableStateFlow(emptyList<Habit>())
-    val dueDateCompletionTimes = MutableStateFlow(emptyList<DueDateCompletionTimeEntity>())
     val completionHistory = MutableStateFlow(emptyList<Pair<Long, Habit.CompletionRecord>>())
     val vacationHistory = MutableStateFlow(emptyList<Pair<Long, Vacation>>())
 }

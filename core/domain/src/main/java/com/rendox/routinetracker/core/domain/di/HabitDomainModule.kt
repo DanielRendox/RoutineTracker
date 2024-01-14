@@ -1,23 +1,28 @@
 package com.rendox.routinetracker.core.domain.di
 
-import com.rendox.routinetracker.core.domain.completion_history.HabitComputeStatusUseCase
-import com.rendox.routinetracker.core.domain.completion_time.GetHabitCompletionTimeUseCase
+import com.rendox.routinetracker.core.data.habit.HabitRepository
+import com.rendox.routinetracker.core.model.Habit
 import org.koin.dsl.module
 
 val habitDomainModule = module {
-
     single {
-        GetHabitCompletionTimeUseCase(
-            habitRepository = get(),
-            completionTimeRepository = get(),
-        )
+        InsertHabitUseCase(get<HabitRepository>()::insertHabit)
     }
 
     single {
-        HabitComputeStatusUseCase(
-            habitRepository = get(),
-            completionHistoryRepository = get(),
-            vacationRepository = get(),
-        )
+        GetHabitUseCase(get<HabitRepository>()::getHabitById)
+    }
+
+    single {
+        GetAllHabitsUseCase(get<HabitRepository>()::getAllHabits)
+    }
+
+    single {
+        DeleteHabitUseCase(get<HabitRepository>()::deleteHabit)
     }
 }
+
+fun interface InsertHabitUseCase : suspend (Habit) -> Unit
+fun interface GetHabitUseCase : suspend (Long) -> Habit
+fun interface GetAllHabitsUseCase : suspend () -> List<Habit>
+fun interface DeleteHabitUseCase : suspend (Long) -> Unit

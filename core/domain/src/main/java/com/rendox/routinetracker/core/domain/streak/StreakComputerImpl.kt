@@ -1,6 +1,6 @@
 package com.rendox.routinetracker.core.domain.streak
 
-import com.rendox.routinetracker.core.domain.completion_history.HabitStatusComputerImpl
+import com.rendox.routinetracker.core.domain.completion_history.HabitStatusComputer
 import com.rendox.routinetracker.core.domain.completion_history.getPeriodRange
 import com.rendox.routinetracker.core.domain.completion_history.isDue
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
@@ -15,12 +15,12 @@ import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
 
-class StreakComputerImpl(
+internal class StreakComputerImpl(
     private val habit: Habit,
     private val completionHistory: List<Habit.CompletionRecord>,
-    private val habitStatusComputer: HabitStatusComputerImpl,
-) {
-    fun computeAllStreaks(today: LocalDate): List<Streak> {
+    private val habitStatusComputer: HabitStatusComputer,
+) : StreakComputer {
+    override fun computeAllStreaks(today: LocalDate): List<Streak> {
         if (completionHistory.isEmpty()) return emptyList()
 
         val habitEndDate = habit.schedule.endDate
@@ -61,7 +61,6 @@ class StreakComputerImpl(
                 completedDate = completedDate,
                 completedDatePeriod = completedDatePeriod,
                 today = today,
-                habitStatusComputer = habitStatusComputer,
             )
 
             failedDate = findNextFailedDate(
@@ -69,7 +68,6 @@ class StreakComputerImpl(
                 currentDate = completedDate,
                 today = today,
                 maxDate = lastPossibleStreakDate,
-                habitStatusComputer = habitStatusComputer,
             )
 
             val streakShouldEndAtPeriodEnd =
@@ -115,7 +113,6 @@ class StreakComputerImpl(
         completedDate: LocalDate,
         completedDatePeriod: LocalDateRange?,
         today: LocalDate,
-        habitStatusComputer: HabitStatusComputerImpl,
     ): LocalDate {
         if (!habit.schedule.backlogEnabled) return completedDate
         val previousFailedDate = findPreviousFailedDate(
@@ -123,7 +120,6 @@ class StreakComputerImpl(
             currentDate = completedDate,
             minDate = completedDatePeriod?.start ?: habit.schedule.startDate,
             today = today,
-            habitStatusComputer = habitStatusComputer,
         )
         return when (previousFailedDate) {
             null -> completedDatePeriod?.start ?: habit.schedule.startDate
@@ -136,7 +132,6 @@ class StreakComputerImpl(
         currentDate: LocalDate,
         today: LocalDate,
         maxDate: LocalDate,
-        habitStatusComputer: HabitStatusComputerImpl,
     ): LocalDate? {
         for (date in currentDate..maxDate) {
             if (habit.schedule.isDue(validationDate = date)) {
@@ -155,7 +150,6 @@ class StreakComputerImpl(
         currentDate: LocalDate,
         minDate: LocalDate,
         today: LocalDate,
-        habitStatusComputer: HabitStatusComputerImpl,
     ): LocalDate? {
         var date = currentDate
         while (date >= minDate) {

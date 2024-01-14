@@ -4,12 +4,16 @@ import com.rendox.routinetracker.core.data.completion_time.CompletionTimeReposit
 import com.rendox.routinetracker.core.data.completion_time.CompletionTimeRepositoryImpl
 import com.rendox.routinetracker.core.database.completion_time.CompletionTimeLocalDataSource
 import com.rendox.routinetracker.core.database.completion_time.CompletionTimeLocalDataSourceImpl
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val completionTimeDataModule = module {
 
     single<CompletionTimeLocalDataSource> {
-        CompletionTimeLocalDataSourceImpl(db = get())
+        CompletionTimeLocalDataSourceImpl(
+            db = get(),
+            ioDispatcher = get(qualifier = named("ioDispatcher")),
+        )
     }
 
     single<CompletionTimeRepository> {
