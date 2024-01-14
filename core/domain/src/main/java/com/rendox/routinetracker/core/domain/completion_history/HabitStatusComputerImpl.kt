@@ -28,7 +28,8 @@ internal class HabitStatusComputerImpl(
      * in the future, the invoke function will return [HabitStatus.Backlog] so that the user can adjust
      * their schedule to sort out this backlog later.
      *
-     * Note that today is considered to be in the future.
+     * Note that today is considered to be in the future except cases with skipped and already
+     * completed statuses because the user should visually see that today is included in streak.
      *
      * When the habit is on vacation, it's considered to be not due even if it's planned on schedule.
      * During the vacation, the user can still completed the habit, which will either sort out the
@@ -83,8 +84,8 @@ internal class HabitStatusComputerImpl(
             val alreadyCompleted = checkIfIsAlreadyCompleted(
                 habit, scheduleDeviation, numOfDueTimesOnValidationDate, validationDate, today
             )
-            if (alreadyCompleted && validationDate < today) return HabitStatus.PastDateAlreadyCompleted
-            if (alreadyCompleted && validationDate >= today) return HabitStatus.FutureDateAlreadyCompleted
+            if (alreadyCompleted && validationDate <= today) return HabitStatus.PastDateAlreadyCompleted
+            if (alreadyCompleted && validationDate > today) return HabitStatus.FutureDateAlreadyCompleted
 
             if (validationDate < today) {
                 val wasCompletedLater = checkIfWasCompletedLater(
@@ -111,7 +112,7 @@ internal class HabitStatusComputerImpl(
                 return HabitStatus.OverCompleted
             }
             if (habitIsOnVacationAtTheMomentOfValidationDate) return HabitStatus.OnVacation
-            return if (validationDate < today) HabitStatus.Skipped else HabitStatus.NotDue
+            return if (validationDate <= today) HabitStatus.Skipped else HabitStatus.NotDue
         }
     }
 
