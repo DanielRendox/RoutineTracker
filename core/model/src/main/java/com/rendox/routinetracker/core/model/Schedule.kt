@@ -16,7 +16,7 @@ sealed class Schedule {
     abstract val completingAheadEnabled: Boolean
 
     abstract val supportsScheduleDeviation: Boolean
-    abstract val supportsPeriodSeparation: Boolean
+    val supportsPeriodSeparation: Boolean = false
 
     sealed class PeriodicSchedule : Schedule() {
         abstract val periodSeparationEnabled: Boolean
@@ -25,9 +25,7 @@ sealed class Schedule {
         override val supportsScheduleDeviation = true
     }
 
-    sealed class NonPeriodicSchedule : Schedule() {
-        override val supportsPeriodSeparation = false
-    }
+    sealed class NonPeriodicSchedule : Schedule()
 
     sealed interface ByNumOfDueDays {
         fun getNumOfDueDates(getForFirstPeriod: Boolean): Int
@@ -59,7 +57,6 @@ sealed class Schedule {
         override val startDate: LocalDate,
         override val endDate: LocalDate? = null,
     ) : WeeklySchedule() {
-        override val supportsPeriodSeparation = true
 
         init {
             check(dueDaysOfWeek.size <= DateTimeUnit.WEEK.days) {
@@ -80,7 +77,6 @@ sealed class Schedule {
     ) : WeeklySchedule(), ByNumOfDueDays {
         override val backlogEnabled: Boolean = true
         override val completingAheadEnabled: Boolean = true
-        override val supportsPeriodSeparation = true
         override val supportsScheduleDeviation = false
 
         private val firstPeriodIsShort
@@ -130,7 +126,6 @@ sealed class Schedule {
         override val startDate: LocalDate,
         override val endDate: LocalDate? = null,
     ) : MonthlySchedule() {
-        override val supportsPeriodSeparation = true
 
         init {
             check(dueDatesIndices.size <= 31) {
@@ -151,7 +146,6 @@ sealed class Schedule {
     ) : MonthlySchedule(), ByNumOfDueDays {
         override val backlogEnabled: Boolean = true
         override val completingAheadEnabled: Boolean = true
-        override val supportsPeriodSeparation = true
         override val supportsScheduleDeviation = false
 
         private val firstPeriodIsShort
@@ -192,8 +186,6 @@ sealed class Schedule {
         override val startDate: LocalDate,
         override val endDate: LocalDate? = null,
     ) : PeriodicSchedule(), ByNumOfDueDays {
-        override val supportsPeriodSeparation = true
-
         override val correspondingPeriod: DatePeriod
             get() = DatePeriod(days = numOfDaysInPeriod)
 
@@ -225,15 +217,13 @@ sealed class Schedule {
         val dueDates: List<AnnualDate>,
         override val startFromHabitStart: Boolean,
 
-        override val periodSeparationEnabled: Boolean = true,
         override val backlogEnabled: Boolean = true,
         override val completingAheadEnabled: Boolean = true,
+        override val periodSeparationEnabled: Boolean = true,
 
         override val startDate: LocalDate,
         override val endDate: LocalDate? = null,
-    ) : AnnualSchedule() {
-        override val supportsPeriodSeparation = true
-    }
+    ) : AnnualSchedule()
 
     data class AnnualScheduleByNumOfDueDays(
         val numOfDueDays: Int,
@@ -247,7 +237,6 @@ sealed class Schedule {
     ) : AnnualSchedule(), ByNumOfDueDays {
         override val backlogEnabled: Boolean = true
         override val completingAheadEnabled: Boolean = true
-        override val supportsPeriodSeparation = true
         override val supportsScheduleDeviation = false
 
         private val firstPeriodIsShort

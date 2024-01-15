@@ -36,11 +36,11 @@ class AlternateDaysSchedulePickerState(
         private set
 
     fun updateNumOfActivityDays(numOfDays: String) {
-        if (numOfDays.length <= 3) numOfActivityDays = numOfDays
+        if (numOfDays.length <= 2) numOfActivityDays = numOfDays
         checkNumOfActivityDaysValidity()
     }
     fun updateNumOfRestDays(numOfDays: String) {
-        if (numOfDays.length <= 3) numOfRestDays = numOfDays
+        if (numOfDays.length <= 2) numOfRestDays = numOfDays
         checkNumOfRestDaysValidity()
     }
 

@@ -63,7 +63,6 @@ internal fun ScheduleEntity.toWeeklyScheduleByDueDaysOfWeek(
 ) = Schedule.WeeklyScheduleByDueDaysOfWeek(
     dueDaysOfWeek = dueDates.map { it.toDayOfWeek() },
     startDayOfWeek = startDayOfWeekInWeeklySchedule,
-    periodSeparationEnabled = periodicSeparationEnabledInPeriodicSchedule!!,
     startDate = startDate,
     endDate = endDate,
     backlogEnabled = backlogEnabled,
@@ -75,7 +74,6 @@ internal fun ScheduleEntity.toWeeklyScheduleByNumOfDueDays() = Schedule.WeeklySc
     numOfDueDaysInFirstPeriod = numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule,
     startDate = startDate,
     endDate = endDate,
-    periodSeparationEnabled = periodicSeparationEnabledInPeriodicSchedule!!,
 )
 
 internal fun ScheduleEntity.toMonthlyScheduleByDueDatesIndices(
@@ -86,7 +84,6 @@ internal fun ScheduleEntity.toMonthlyScheduleByDueDatesIndices(
     includeLastDayOfMonth = includeLastDayOfMonthInMonthlySchedule!!,
     weekDaysMonthRelated = weekDaysMonthRelated,
     startFromHabitStart = startFromHabitStartInMonthlyAndAnnualSchedule!!,
-    periodSeparationEnabled = periodicSeparationEnabledInPeriodicSchedule!!,
     startDate = startDate,
     endDate = endDate,
     backlogEnabled = backlogEnabled,
@@ -99,7 +96,6 @@ internal fun ScheduleEntity.toMonthlyScheduleByNumOfDueDays() = Schedule.Monthly
     startFromHabitStart = startFromHabitStartInMonthlyAndAnnualSchedule!!,
     startDate = startDate,
     endDate = endDate,
-    periodSeparationEnabled = periodicSeparationEnabledInPeriodicSchedule!!,
 )
 
 internal fun ScheduleEntity.toAlternateDaySchedule() = Schedule.AlternateDaysSchedule (
@@ -109,7 +105,6 @@ internal fun ScheduleEntity.toAlternateDaySchedule() = Schedule.AlternateDaysSch
     endDate = endDate,
     backlogEnabled = backlogEnabled,
     completingAheadEnabled = cancelDuenessIfDoneAhead,
-    periodSeparationEnabled = periodicSeparationEnabledInPeriodicSchedule!!,
 )
 
 internal fun ScheduleEntity.toCustomDateSchedule(
@@ -127,7 +122,6 @@ internal fun ScheduleEntity.toAnnualScheduleByDueDates(
 ) = Schedule.AnnualScheduleByDueDates(
     dueDates = dueDates.map { it.toAnnualDate() },
     startFromHabitStart = startFromHabitStartInMonthlyAndAnnualSchedule!!,
-    periodSeparationEnabled = periodicSeparationEnabledInPeriodicSchedule!!,
     startDate = startDate,
     endDate = endDate,
     backlogEnabled = backlogEnabled,
@@ -140,5 +134,4 @@ internal fun ScheduleEntity.toAnnualScheduleByNumOfDueDays() = Schedule.AnnualSc
     startFromHabitStart = startFromHabitStartInMonthlyAndAnnualSchedule!!,
     startDate = startDate,
     endDate = endDate,
-    periodSeparationEnabled = periodicSeparationEnabledInPeriodicSchedule!!,
 )

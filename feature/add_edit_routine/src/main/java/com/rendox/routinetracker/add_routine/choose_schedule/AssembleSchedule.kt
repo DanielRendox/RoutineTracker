@@ -50,7 +50,6 @@ private fun WeeklySchedulePickerState.convertToScheduleModel(
                 endDate = tweakRoutinePageState.endDate?.toKotlinLocalDate(),
                 backlogEnabled = tweakRoutinePageState.backlogEnabled!!,
                 completingAheadEnabled = tweakRoutinePageState.completingAheadEnabled!!,
-                periodSeparationEnabled = tweakRoutinePageState.periodSeparationEnabled!!,
             )
         } else {
             Schedule.WeeklyScheduleByDueDaysOfWeek(
@@ -65,7 +64,6 @@ private fun WeeklySchedulePickerState.convertToScheduleModel(
                 numOfDueDays = numOfDueDays.toInt(),
                 startDate = tweakRoutinePageState.startDate.toKotlinLocalDate(),
                 endDate = tweakRoutinePageState.endDate?.toKotlinLocalDate(),
-                periodSeparationEnabled = tweakRoutinePageState.periodSeparationEnabled!!,
             )
         } else {
             Schedule.WeeklyScheduleByNumOfDueDays(
@@ -91,7 +89,6 @@ private fun MonthlySchedulePickerState.convertToScheduleModel(
                 weekDaysMonthRelated = emptyList(), // TODO add support for weekDaysMonthRelated,
                 startDate = tweakRoutinePageState.startDate.toKotlinLocalDate(),
                 endDate = tweakRoutinePageState.endDate?.toKotlinLocalDate(),
-                periodSeparationEnabled = tweakRoutinePageState.periodSeparationEnabled!!,
                 backlogEnabled = tweakRoutinePageState.backlogEnabled!!,
                 completingAheadEnabled = tweakRoutinePageState.completingAheadEnabled!!,
             )
@@ -109,7 +106,6 @@ private fun MonthlySchedulePickerState.convertToScheduleModel(
                 numOfDueDays = numOfDueDays.toInt(),
                 startDate = tweakRoutinePageState.startDate.toKotlinLocalDate(),
                 endDate = tweakRoutinePageState.endDate?.toKotlinLocalDate(),
-                periodSeparationEnabled = tweakRoutinePageState.periodSeparationEnabled!!,
             )
         } else {
             Schedule.MonthlyScheduleByNumOfDueDays(
@@ -142,7 +138,6 @@ private fun AlternateDaysSchedulePickerState.convertToScheduleModel(
             endDate = tweakRoutinePageState.endDate?.toKotlinLocalDate(),
             backlogEnabled = tweakRoutinePageState.backlogEnabled!!,
             completingAheadEnabled = tweakRoutinePageState.completingAheadEnabled!!,
-            periodSeparationEnabled = tweakRoutinePageState.periodSeparationEnabled!!,
         )
     } else {
         Schedule.AlternateDaysSchedule(

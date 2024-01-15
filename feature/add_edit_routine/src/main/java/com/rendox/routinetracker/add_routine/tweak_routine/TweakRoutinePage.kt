@@ -154,7 +154,6 @@ fun TweakRoutinePage(
                         isOn = completingAheadEnabled,
                         onToggle = tweakRoutinePageState::updateCompletingAheadEnabled,
                     )
-                    Divider(modifier = Modifier.padding(start = 16.dp))
                 }
                 tweakRoutinePageState.periodSeparationEnabled?.let { periodSeparationEnabled ->
                     Setting(
