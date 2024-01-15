@@ -10,17 +10,29 @@ import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.HabitStatus
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.model.Streak
+import com.rendox.routinetracker.core.model.Vacation
 import com.rendox.routinetracker.core.model.streakCreatorStatuses
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
 
+/**
+ * Computes streaks for a habit based on its completion history and habit statuses.
+ *
+ * Passing not entire completion history but only the part of it will result in streaks computed
+ * for the only for the corresponding historical period. But that is only true when the habit's
+ * schedule's period separation is enabled so that completed dates in other periods do not affect
+ * the dates of the current period.
+ */
 internal class StreakComputerImpl(
-    private val habit: Habit,
-    private val completionHistory: List<Habit.CompletionRecord>,
     private val habitStatusComputer: HabitStatusComputer,
 ) : StreakComputer {
-    override fun computeAllStreaks(today: LocalDate): List<Streak> {
+    override fun computeAllStreaks(
+        today: LocalDate,
+        habit: Habit,
+        completionHistory: List<Habit.CompletionRecord>,
+        vacationHistory: List<Vacation>,
+    ): List<Streak> {
         if (completionHistory.isEmpty()) return emptyList()
 
         val habitEndDate = habit.schedule.endDate
@@ -30,21 +42,15 @@ internal class StreakComputerImpl(
         }
 
         val streaks = mutableListOf<Streak>()
-        var failedDate: LocalDate? = null
+        var failedDate: LocalDate?
 
-        var previousCompletedDatePeriod: LocalDateRange? = null
-
-        for (completedDate in completionHistory.first().date..completionHistory.last().date) {
-            val completedDateIsInPreviousPeriod =
-                previousCompletedDatePeriod != null && previousCompletedDatePeriod.contains(
-                    completedDate
-                )
-            if (completedDateIsInPreviousPeriod) continue
-            if (failedDate != null && failedDate > completedDate) continue
-
+        for (completedDate in completionHistory.map { it.date }) {
             val habitStatus = habitStatusComputer.computeStatus(
                 validationDate = completedDate,
                 today = today,
+                habit = habit,
+                completionHistory = completionHistory,
+                vacationHistory = vacationHistory,
             )
             if (habitStatus !in streakCreatorStatuses) continue
 
@@ -61,6 +67,8 @@ internal class StreakComputerImpl(
                 completedDate = completedDate,
                 completedDatePeriod = completedDatePeriod,
                 today = today,
+                completionHistory = completionHistory,
+                vacationHistory = vacationHistory,
             )
 
             failedDate = findNextFailedDate(
@@ -68,6 +76,8 @@ internal class StreakComputerImpl(
                 currentDate = completedDate,
                 today = today,
                 maxDate = lastPossibleStreakDate,
+                completionHistory = completionHistory,
+                vacationHistory = vacationHistory,
             )
 
             val streakShouldEndAtPeriodEnd =
@@ -80,6 +90,9 @@ internal class StreakComputerImpl(
                     val todayStatus = habitStatusComputer.computeStatus(
                         validationDate = today,
                         today = today,
+                        habit = habit,
+                        completionHistory = completionHistory,
+                        vacationHistory = vacationHistory,
                     )
                     if (todayStatus == HabitStatus.Planned) {
                         today.minus(DatePeriod(days = 1))
@@ -91,18 +104,23 @@ internal class StreakComputerImpl(
                 else -> lastPossibleStreakDate
             }
 
-            val streak = Streak(startDate = streakStartDate, endDate = streakEndDate)
+            val currentStreak = Streak(startDate = streakStartDate, endDate = streakEndDate)
+            val someStreakAlreadyIncludesCurrentStreak = streaks.any { saveStreak ->
+                saveStreak.startDate <= currentStreak.startDate &&
+                        saveStreak.endDate >= currentStreak.endDate
+            }
+            if (someStreakAlreadyIncludesCurrentStreak) continue
+
             val streakToMerge =
-                streaks.find { it.endDate.plusDays(1) == streak.startDate }
+                streaks.find { it.endDate.plusDays(1) == currentStreak.startDate }
             if (streakToMerge != null) {
                 streaks.remove(streakToMerge)
-                streaks.add(streak.copy(startDate = streakToMerge.startDate))
+                streaks.add(currentStreak.copy(startDate = streakToMerge.startDate))
             } else {
-                streaks.add(streak)
+                streaks.add(currentStreak)
             }
 
             println("GetAllStreaksUseCase: completedDate=$completedDate, failedDate=$failedDate")
-            previousCompletedDatePeriod = completedDatePeriod
         }
 
         return streaks
@@ -113,6 +131,8 @@ internal class StreakComputerImpl(
         completedDate: LocalDate,
         completedDatePeriod: LocalDateRange?,
         today: LocalDate,
+        completionHistory: List<Habit.CompletionRecord>,
+        vacationHistory: List<Vacation>,
     ): LocalDate {
         if (!habit.schedule.backlogEnabled) return completedDate
         val previousFailedDate = findPreviousFailedDate(
@@ -120,6 +140,8 @@ internal class StreakComputerImpl(
             currentDate = completedDate,
             minDate = completedDatePeriod?.start ?: habit.schedule.startDate,
             today = today,
+            completionHistory = completionHistory,
+            vacationHistory = vacationHistory,
         )
         return when (previousFailedDate) {
             null -> completedDatePeriod?.start ?: habit.schedule.startDate
@@ -132,12 +154,17 @@ internal class StreakComputerImpl(
         currentDate: LocalDate,
         today: LocalDate,
         maxDate: LocalDate,
+        completionHistory: List<Habit.CompletionRecord>,
+        vacationHistory: List<Vacation>,
     ): LocalDate? {
         for (date in currentDate..maxDate) {
             if (habit.schedule.isDue(validationDate = date)) {
                 val habitStatus = habitStatusComputer.computeStatus(
                     validationDate = date,
                     today = today,
+                    habit = habit,
+                    completionHistory = completionHistory,
+                    vacationHistory = vacationHistory,
                 )
                 if (habitStatus == HabitStatus.Failed) return date
             }
@@ -150,6 +177,8 @@ internal class StreakComputerImpl(
         currentDate: LocalDate,
         minDate: LocalDate,
         today: LocalDate,
+        completionHistory: List<Habit.CompletionRecord>,
+        vacationHistory: List<Vacation>,
     ): LocalDate? {
         var date = currentDate
         while (date >= minDate) {
@@ -157,6 +186,9 @@ internal class StreakComputerImpl(
                 val habitStatus = habitStatusComputer.computeStatus(
                     validationDate = date,
                     today = today,
+                    habit = habit,
+                    completionHistory = completionHistory,
+                    vacationHistory = vacationHistory,
                 )
                 if (habitStatus == HabitStatus.Failed) return date
             }

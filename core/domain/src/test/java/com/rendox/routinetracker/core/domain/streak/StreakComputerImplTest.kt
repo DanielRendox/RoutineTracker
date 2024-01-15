@@ -1,7 +1,9 @@
 package com.rendox.routinetracker.core.domain.streak
 
 import com.google.common.truth.Truth.assertThat
+import com.rendox.routinetracker.core.domain.completion_history.HabitStatusComputer
 import com.rendox.routinetracker.core.domain.completion_history.HabitStatusComputerImpl
+import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.Streak
 import com.rendox.routinetracker.core.model.Habit
@@ -17,6 +19,9 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 
 class StreakComputerImplTest {
+
+    private val habitStatusComputer: HabitStatusComputer = HabitStatusComputerImpl()
+    private val streakComputer: StreakComputer = StreakComputerImpl(habitStatusComputer)
 
     @Test
     fun `a series of completed dates forms a streak`() {
@@ -35,18 +40,14 @@ class StreakComputerImplTest {
             )
         }
         val vacationHistory = emptyList<Vacation>()
-        val habitStatusComputer = HabitStatusComputerImpl(
+
+        val streaks = streakComputer.computeAllStreaks(
             habit = habit,
             completionHistory = completionHistory,
             vacationHistory = vacationHistory,
+            today = today,
         )
-        val streakComputer = StreakComputerImpl(
-            habit = habit,
-            completionHistory = completionHistory,
-            habitStatusComputer = habitStatusComputer,
-        )
-
-        assertThat(streakComputer.computeAllStreaks(today)).containsExactly(
+        assertThat(streaks).containsExactly(
             Streak(
                 startDate = streakStart,
                 endDate = streakEnd,
@@ -70,18 +71,14 @@ class StreakComputerImplTest {
             )
         )
         val vacationHistory = emptyList<Vacation>()
-        val habitStatusComputer = HabitStatusComputerImpl(
+
+        val streaks = streakComputer.computeAllStreaks(
             habit = habit,
             completionHistory = completionHistory,
             vacationHistory = vacationHistory,
+            today = today,
         )
-        val streakComputer = StreakComputerImpl(
-            habit = habit,
-            completionHistory = completionHistory,
-            habitStatusComputer = habitStatusComputer,
-        )
-
-        assertThat(streakComputer.computeAllStreaks(today)).containsExactly(
+        assertThat(streaks).containsExactly(
             Streak(
                 startDate = completedDate,
                 endDate = completedDate,
@@ -111,18 +108,14 @@ class StreakComputerImplTest {
             )
         )
         val vacationHistory = emptyList<Vacation>()
-        val habitStatusComputer = HabitStatusComputerImpl(
+        val streaks = streakComputer.computeAllStreaks(
             habit = habit,
             completionHistory = completionHistory,
             vacationHistory = vacationHistory,
-        )
-        val streakComputer = StreakComputerImpl(
-            habit = habit,
-            completionHistory = completionHistory,
-            habitStatusComputer = habitStatusComputer,
+            today = today,
         )
 
-        assertThat(streakComputer.computeAllStreaks(today)).containsExactly(
+        assertThat(streaks).containsExactly(
             Streak(
                 startDate = streakStart,
                 endDate = streakEnd,
@@ -152,18 +145,13 @@ class StreakComputerImplTest {
             )
         )
         val vacationHistory = emptyList<Vacation>()
-        val habitStatusComputer = HabitStatusComputerImpl(
+        val streaks = streakComputer.computeAllStreaks(
             habit = habit,
             completionHistory = completionHistory,
             vacationHistory = vacationHistory,
-        )
-        val streakComputer = StreakComputerImpl(
-            habit = habit,
-            completionHistory = completionHistory,
-            habitStatusComputer = habitStatusComputer,
+            today = today,
         )
 
-        val streaks = streakComputer.computeAllStreaks(today)
         for (streak in streaks) {
             assertThat(streak.startDate..streak.endDate).containsNoneIn(
                 startDate..completedDate.minus(DatePeriod(days = 1))
@@ -202,17 +190,13 @@ class StreakComputerImplTest {
             )
         )
         val vacationHistory = emptyList<Vacation>()
-        val habitStatusComputer = HabitStatusComputerImpl(
+        val streaks = streakComputer.computeAllStreaks(
             habit = habit,
             completionHistory = completionHistory,
             vacationHistory = vacationHistory,
+            today = todayString.toLocalDate(),
         )
-        val streakComputer = StreakComputerImpl(
-            habit = habit,
-            completionHistory = completionHistory,
-            habitStatusComputer = habitStatusComputer,
-        )
-        assertThat(streakComputer.computeAllStreaks(todayString.toLocalDate())).containsExactly(
+        assertThat(streaks).containsExactly(
             Streak(
                 startDate = streakStartDateString.toLocalDate(),
                 endDate = streakEndDateString.toLocalDate(),
@@ -240,17 +224,12 @@ class StreakComputerImplTest {
             )
         )
         val vacationHistory = emptyList<Vacation>()
-        val habitStatusComputer = HabitStatusComputerImpl(
+        val streaks = streakComputer.computeAllStreaks(
             habit = habit,
             completionHistory = completionHistory,
             vacationHistory = vacationHistory,
+            today = today,
         )
-        val streakComputer = StreakComputerImpl(
-            habit = habit,
-            completionHistory = completionHistory,
-            habitStatusComputer = habitStatusComputer,
-        )
-        val streaks = streakComputer.computeAllStreaks(today)
         for (streak in streaks) {
             assertThat(streak.endDate).isAtMost(today)
         }
@@ -279,17 +258,12 @@ class StreakComputerImplTest {
             ),
         )
         val vacationHistory = emptyList<Vacation>()
-        val habitStatusComputer = HabitStatusComputerImpl(
+        val streaks = streakComputer.computeAllStreaks(
             habit = habit,
             completionHistory = completionHistory,
             vacationHistory = vacationHistory,
+            today = today,
         )
-        val streakComputer = StreakComputerImpl(
-            habit = habit,
-            completionHistory = completionHistory,
-            habitStatusComputer = habitStatusComputer,
-        )
-        val streaks = streakComputer.computeAllStreaks(today)
         for (streak in streaks) {
             assertThat(streak.startDate..streak.endDate).contains(today)
         }
@@ -314,17 +288,12 @@ class StreakComputerImplTest {
             ),
         )
         val vacationHistory = emptyList<Vacation>()
-        val habitStatusComputer = HabitStatusComputerImpl(
+        val streaks = streakComputer.computeAllStreaks(
             habit = habit,
             completionHistory = completionHistory,
             vacationHistory = vacationHistory,
+            today = today,
         )
-        val streakComputer = StreakComputerImpl(
-            habit = habit,
-            completionHistory = completionHistory,
-            habitStatusComputer = habitStatusComputer,
-        )
-        val streaks = streakComputer.computeAllStreaks(today)
         for (streak in streaks) {
             assertThat(streak.startDate..streak.endDate).contains(today)
         }
@@ -349,19 +318,159 @@ class StreakComputerImplTest {
             ),
         )
         val vacationHistory = emptyList<Vacation>()
-        val habitStatusComputer = HabitStatusComputerImpl(
+        val streaks = streakComputer.computeAllStreaks(
             habit = habit,
             completionHistory = completionHistory,
             vacationHistory = vacationHistory,
+            today = today,
         )
-        val streakComputer = StreakComputerImpl(
-            habit = habit,
-            completionHistory = completionHistory,
-            habitStatusComputer = habitStatusComputer,
-        )
-        val streaks = streakComputer.computeAllStreaks(today)
         for (streak in streaks) {
             assertThat(streak.startDate..streak.endDate).doesNotContain(today)
         }
+    }
+
+    @Test
+    fun `returns corresponding streaks when only part of completion history is provided`() {
+        val startDate = LocalDate(2023, 12, 1)
+        val schedule = Schedule.MonthlyScheduleByDueDatesIndices(
+            dueDatesIndices = listOf(1, 2, 4, 5, 11, 12, 18, 19, 25, 26),
+            startDate = startDate,
+            periodSeparationEnabled = true,
+        )
+        val habit = Habit.YesNoHabit(
+            name = "test habit",
+            schedule = schedule,
+        )
+        val today = LocalDate(2024, 2, 2)
+        val completionHistory = listOf(
+            Habit.YesNoHabit.CompletionRecord(
+                date = LocalDate(2023, 12, 29),
+                completed = true,
+            ),
+            Habit.YesNoHabit.CompletionRecord(
+                date = LocalDate(2024, 1, 5),
+                completed = true,
+            ),
+            Habit.YesNoHabit.CompletionRecord(
+                date = LocalDate(2024, 1, 15),
+                completed = true,
+            ),
+            Habit.YesNoHabit.CompletionRecord(
+                date = LocalDate(2024, 1, 18),
+                completed = true,
+            ),
+            Habit.YesNoHabit.CompletionRecord(
+                date = LocalDate(2024, 1, 26),
+                completed = true,
+            ),
+            Habit.YesNoHabit.CompletionRecord(
+                date = LocalDate(2024, 2, 2),
+                completed = true,
+            ),
+        )
+        val expectedStreakHistory = listOf(
+            Streak(
+                startDate = LocalDate(2023, 12, 26),
+                endDate = LocalDate(2023, 12, 31),
+            ),
+            Streak(
+                startDate = LocalDate(2024, 1, 5),
+                endDate = LocalDate(2024, 1, 10),
+            ),
+            Streak(
+                startDate = LocalDate(2024, 1, 12),
+                endDate = LocalDate(2024, 1, 18),
+            ),
+            Streak(
+                startDate = LocalDate(2024, 1, 26),
+                endDate = LocalDate(2024, 1, 31),
+            ),
+            Streak(
+                startDate = LocalDate(2024, 2, 2),
+                endDate = LocalDate(2024, 2, 2),
+            ),
+        )
+        val expectedStreaks = expectedStreakHistory.filter {
+            val firstStreakStartDate = LocalDate(2024, 1, 5)
+            val lastStreakEndDate = LocalDate(2024, 1, 31)
+            it.startDate >= firstStreakStartDate && it.endDate <= lastStreakEndDate
+        }
+        val vacationHistory = emptyList<Vacation>()
+        val streaks = streakComputer.computeAllStreaks(
+            habit = habit,
+            completionHistory = completionHistory.filter {
+                val start = LocalDate(2024, 1, 5)
+                val end = LocalDate(2024, 1, 26)
+                it.date in start..end
+            },
+            vacationHistory = vacationHistory,
+            today = today,
+        )
+        assertThat(streaks).containsExactlyElementsIn(expectedStreaks)
+    }
+
+    @Test
+    fun `vacation period is included in streak if streak lasted before vacation`() {
+        val startDate = LocalDate(2024, 1, 1)
+        val completedDate = LocalDate(2024, 1, 5)
+        val schedule = Schedule.WeeklyScheduleByDueDaysOfWeek(
+            dueDaysOfWeek = listOf(DayOfWeek.MONDAY, DayOfWeek.FRIDAY),
+            startDate = startDate,
+        )
+        val habit = Habit.YesNoHabit(
+            name = "test habit",
+            schedule = schedule,
+        )
+        val completionHistory = listOf(
+            Habit.YesNoHabit.CompletionRecord(
+                date = completedDate,
+                completed = true,
+            )
+        )
+        val vacationHistory = listOf(
+            Vacation(
+                startDate = LocalDate(2024, 1, 5),
+                endDate = LocalDate(2024, 1, 5),
+            )
+        )
+        val streaks = streakComputer.computeAllStreaks(
+            habit = habit,
+            completionHistory = completionHistory,
+            vacationHistory = vacationHistory,
+            today = LocalDate(2024, 1, 31),
+        )
+        assertThat(streaks).containsExactly(
+            Streak(
+                startDate = startDate,
+                endDate = startDate.plusDays(6),
+            )
+        )
+    }
+
+    @Test
+    fun `vacation period is not included in streak if streak did not last before vacation`() {
+        val startDate = LocalDate(2024, 1, 1)
+        val schedule = Schedule.WeeklyScheduleByDueDaysOfWeek(
+            dueDaysOfWeek = listOf(DayOfWeek.MONDAY, DayOfWeek.FRIDAY),
+            startDate = startDate,
+        )
+        val habit = Habit.YesNoHabit(
+            name = "test habit",
+            schedule = schedule,
+        )
+        val completionHistory = emptyList<Habit.YesNoHabit.CompletionRecord>()
+        val vacationHistory = listOf(
+            Vacation(
+                startDate = LocalDate(2024, 1, 5),
+                endDate = LocalDate(2024, 1, 5),
+            )
+        )
+        val streaks = streakComputer.computeAllStreaks(
+            habit = habit,
+            completionHistory = completionHistory,
+            vacationHistory = vacationHistory,
+            today = LocalDate(2024, 1, 31),
+        )
+        assertThat(streaks).isEmpty()
     }
 }

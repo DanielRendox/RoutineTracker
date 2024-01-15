@@ -1,8 +1,16 @@
 package com.rendox.routinetracker.core.domain.streak
 
+import com.rendox.routinetracker.core.domain.completion_history.HabitStatusComputer
+import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Streak
+import com.rendox.routinetracker.core.model.Vacation
 import kotlinx.datetime.LocalDate
 
-internal interface StreakComputer {
-    fun computeAllStreaks(today: LocalDate): List<Streak>
+interface StreakComputer {
+    fun computeAllStreaks(
+        today: LocalDate,
+        habit: Habit,
+        completionHistory: List<Habit.CompletionRecord>,
+        vacationHistory: List<Vacation>,
+    ): List<Streak>
 }

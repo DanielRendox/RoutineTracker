@@ -11,11 +11,7 @@ import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
 
-internal class HabitStatusComputerImpl(
-    private val habit: Habit,
-    private val completionHistory: List<Habit.CompletionRecord>,
-    private val vacationHistory: List<Vacation>,
-): HabitStatusComputer {
+internal class HabitStatusComputerImpl: HabitStatusComputer {
 
     /**
      * The HabitComputeStatusUseCase class is responsible for computing the [HabitStatus] based on
@@ -51,7 +47,10 @@ internal class HabitStatusComputerImpl(
     override fun computeStatus(
         validationDate: LocalDate,
         today: LocalDate,
-    ): HabitStatus  {
+        habit: Habit,
+        completionHistory: List<Habit.CompletionRecord>,
+        vacationHistory: List<Vacation>,
+    ): HabitStatus {
         if (validationDate < habit.schedule.startDate) return HabitStatus.NotStarted
         habit.schedule.endDate?.let { if (validationDate > it) return HabitStatus.Finished }
 
@@ -61,6 +60,8 @@ internal class HabitStatusComputerImpl(
             currentDate = validationDate,
             today = today,
             completedToday = completedToday,
+            completionHistory = completionHistory,
+            vacationHistory = vacationHistory,
         )
 
         val numOfTimesCompletedOnValidationDate =
@@ -82,7 +83,13 @@ internal class HabitStatusComputerImpl(
             if (completedStatus != null) return completedStatus
 
             val alreadyCompleted = checkIfIsAlreadyCompleted(
-                habit, scheduleDeviation, numOfDueTimesOnValidationDate, validationDate, today
+                habit = habit,
+                scheduleDeviation = scheduleDeviation,
+                numOfDueTimesOnValidationDate = numOfDueTimesOnValidationDate,
+                validationDate = validationDate,
+                today = today,
+                completionHistory = completionHistory,
+                vacationHistory = vacationHistory,
             )
             if (alreadyCompleted && validationDate <= today) return HabitStatus.PastDateAlreadyCompleted
             if (alreadyCompleted && validationDate > today) return HabitStatus.FutureDateAlreadyCompleted
@@ -92,6 +99,8 @@ internal class HabitStatusComputerImpl(
                     currentDate = validationDate,
                     numOfDueTimesOnCurrentDate = numOfDueTimesOnValidationDate,
                     habit = habit,
+                    completionHistory = completionHistory,
+                    vacationHistory = vacationHistory,
                 )
                 if (wasCompletedLater) return HabitStatus.CompletedLater
             }
@@ -99,12 +108,13 @@ internal class HabitStatusComputerImpl(
             return if (validationDate < today) HabitStatus.Failed else HabitStatus.Planned
         } else {
             val backlogStatus = deriveBacklogStatus(
-                habit,
-                scheduleDeviation,
-                numOfTimesCompletedOnValidationDate,
-                validationDate,
-                today,
+                habit = habit,
+                scheduleDeviation = scheduleDeviation,
+                numOfTimesCompletedOnValidationDate = numOfTimesCompletedOnValidationDate,
+                validationDate = validationDate,
+                today = today,
                 completedToday = completedToday,
+                vacationHistory = vacationHistory,
             )
             if (backlogStatus != null) return backlogStatus
 
@@ -144,6 +154,7 @@ internal class HabitStatusComputerImpl(
         validationDate: LocalDate,
         today: LocalDate,
         completedToday: Boolean,
+        vacationHistory: List<Vacation>,
     ): HabitStatus? {
         if (scheduleDeviation < 0.0 && habit.schedule.backlogEnabled) {
             val numOfNotDueTimes =
@@ -152,6 +163,7 @@ internal class HabitStatusComputerImpl(
                     getNumOfNotDueTimesInPeriod(
                         habit = habit,
                         period = startDate..validationDate,
+                        vacationHistory = vacationHistory,
                     )
                 } else {
                     0.0
@@ -171,6 +183,7 @@ internal class HabitStatusComputerImpl(
     private fun getNumOfNotDueTimesInPeriod(
         habit: Habit,
         period: LocalDateRange,
+        vacationHistory: List<Vacation>,
     ): Double {
         var numOfNotDueTimesInPeriod = 0.0
 
@@ -197,6 +210,8 @@ internal class HabitStatusComputerImpl(
         numOfDueTimesOnValidationDate: Float,
         validationDate: LocalDate,
         today: LocalDate,
+        completionHistory: List<Habit.CompletionRecord>,
+        vacationHistory: List<Vacation>,
     ): Boolean {
         if (!habit.schedule.completingAheadEnabled) return false
 
@@ -206,6 +221,7 @@ internal class HabitStatusComputerImpl(
                     getNumOfDueTimesInPeriod(
                         habit = habit,
                         period = today..validationDate,
+                        vacationHistory = vacationHistory,
                     )
                 } else {
                     numOfDueTimesOnValidationDate.toDouble()
@@ -265,6 +281,8 @@ internal class HabitStatusComputerImpl(
         today: LocalDate,
         currentDate: LocalDate,
         completedToday: Boolean,
+        completionHistory: List<Habit.CompletionRecord>,
+        vacationHistory: List<Vacation>,
     ): Double {
         val actualDate = if (currentDate <= today) {
             currentDate.minus(DatePeriod(days = 1))
@@ -289,7 +307,7 @@ internal class HabitStatusComputerImpl(
         val numOfTimesCompleted = completionHistory
             .filter { it.date in period }
             .sumOf { it.numOfTimesCompleted.toDouble() }
-        val numOfDueTimes = getNumOfDueTimesInPeriod(habit, period)
+        val numOfDueTimes = getNumOfDueTimesInPeriod(habit, period, vacationHistory)
         return numOfTimesCompleted - numOfDueTimes
     }
 
@@ -301,6 +319,8 @@ internal class HabitStatusComputerImpl(
         habit: Habit,
         currentDate: LocalDate,
         numOfDueTimesOnCurrentDate: Float,
+        completionHistory: List<Habit.CompletionRecord>,
+        vacationHistory: List<Vacation>,
     ): Boolean {
         if (!habit.schedule.backlogEnabled) return false
 
@@ -343,6 +363,7 @@ internal class HabitStatusComputerImpl(
     private fun getNumOfDueTimesInPeriod(
         habit: Habit,
         period: LocalDateRange,
+        vacationHistory: List<Vacation>,
     ): Double {
         var numOfDueTimesInPeriod = 0.0
 

@@ -12,6 +12,7 @@ class GetHabitCompletionDataUseCaseImpl(
     private val getHabit: GetHabitUseCase,
     private val vacationRepository: VacationRepository,
     private val completionHistoryRepository: CompletionHistoryRepository,
+    private val habitStatusComputer: HabitStatusComputer,
     private val defaultDispatcher: CoroutineContext,
 ) : GetHabitCompletionDataUseCase {
     override suspend operator fun invoke(
@@ -30,15 +31,13 @@ class GetHabitCompletionDataUseCaseImpl(
         today: LocalDate,
     ): Map<LocalDate, HabitCompletionData> = withContext(defaultDispatcher) {
         val completionHistory = completionHistoryRepository.getRecordsInPeriod(habitId = habitId)
-        val habitStatusComputer: HabitStatusComputer = HabitStatusComputerImpl(
-            habit = getHabit(habitId),
-            completionHistory = completionHistory,
-            vacationHistory = vacationRepository.getVacationsInPeriod(habitId = habitId),
-        )
         validationDates.associateWith { date ->
             val habitStatus = habitStatusComputer.computeStatus(
                 validationDate = date,
                 today = today,
+                habit = getHabit(habitId),
+                completionHistory = completionHistory,
+                vacationHistory = vacationRepository.getVacationsInPeriod(habitId = habitId),
             )
             val numOfTimesCompleted =
                 completionHistory.find { it.date == date }?.numOfTimesCompleted ?: 0f
