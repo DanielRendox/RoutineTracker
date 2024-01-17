@@ -52,6 +52,7 @@ fun SingleDatePickerDialog(
     initialDate: LocalDate = today,
     dismissButtonOnClick: () -> Unit,
     confirmButtonOnClick: (LocalDate) -> Unit,
+    dateIsEnabled: (LocalDate) -> Boolean = { true },
 ) {
     var selectedDate by remember { mutableStateOf(initialDate) }
 
@@ -91,6 +92,7 @@ fun SingleDatePickerDialog(
                     ),
                     selectedDate = selectedDate,
                     onDateClicked = { selectedDate = it },
+                    dateIsEnabled = dateIsEnabled,
                 )
 
                 Row(
@@ -121,6 +123,7 @@ fun DatePickerCalendar(
     modifier: Modifier = Modifier,
     selectedDate: LocalDate,
     onDateClicked: (LocalDate) -> Unit,
+    dateIsEnabled: (LocalDate) -> Boolean,
 ) {
     CalendarMonthlyPaged(
         modifier = modifier,
@@ -129,46 +132,49 @@ fun DatePickerCalendar(
         onScrolledToNewMonth = { },
     ) { calendarDay ->
         val clickInteractionSource = remember { MutableInteractionSource() }
-        if (calendarDay.position !in notCurrentMonthDates) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .padding(4.dp)
-                    .aspectRatio(1f)
-                    .clip(shape = CircleShape)
-                    .background(
-                        color = if (calendarDay.date == selectedDate) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .padding(4.dp)
+                .aspectRatio(1f)
+                .clip(shape = CircleShape)
+                .background(
+                    color = if (calendarDay.date == selectedDate) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        Color.Transparent
+                    }
+                )
+                .border(
+                    border = BorderStroke(
+                        color = if (calendarDay.date == LocalDate.now()) {
                             MaterialTheme.colorScheme.primary
                         } else {
                             Color.Transparent
-                        }
-                    )
-                    .border(
-                        border = BorderStroke(
-                            color = if (calendarDay.date == LocalDate.now()) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                Color.Transparent
-                            },
-                            width = 1.dp,
-                        ),
-                        shape = CircleShape,
-                    )
-                    .clickable(interactionSource = clickInteractionSource, indication = null) {
-                        onDateClicked(calendarDay.date)
-                    }
-            ) {
-                Text(
-                    modifier = Modifier.align(Alignment.Center),
-                    text = calendarDay.date.dayOfMonth.toString(),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (calendarDay.date == selectedDate) {
-                        MaterialTheme.colorScheme.onPrimary
-                    } else {
-                        MaterialTheme.colorScheme.onSurface
-                    },
+                        },
+                        width = 1.dp,
+                    ),
+                    shape = CircleShape,
                 )
-            }
+                .clickable(
+                    onClick = { onDateClicked(calendarDay.date) },
+                    interactionSource = clickInteractionSource,
+                    indication = null,
+                    enabled = calendarDay.position !in notCurrentMonthDates
+                            && dateIsEnabled(calendarDay.date),
+                )
+        ) {
+            Text(
+                modifier = Modifier.align(Alignment.Center),
+                text = calendarDay.date.dayOfMonth.toString(),
+                style = MaterialTheme.typography.bodySmall,
+                color = when {
+                    calendarDay.date == selectedDate -> MaterialTheme.colorScheme.onPrimary
+                    calendarDay.position in notCurrentMonthDates -> Color.Transparent
+                    !dateIsEnabled(calendarDay.date) -> MaterialTheme.colorScheme.outlineVariant
+                    else -> MaterialTheme.colorScheme.onSurface
+                }
+            )
         }
     }
 }
@@ -181,7 +187,8 @@ private fun DatePickerPreview() {
     Card(modifier = Modifier.width(300.dp)) {
         DatePickerCalendar(
             selectedDate = LocalDate.now().plusDays(10),
-            onDateClicked = {}
+            onDateClicked = {},
+            dateIsEnabled = { true },
         )
     }
 }
