@@ -116,7 +116,7 @@ sealed class Schedule {
     data class MonthlyScheduleByDueDatesIndices(
         val dueDatesIndices: List<Int>,
         val includeLastDayOfMonth: Boolean = false,
-        val weekDaysMonthRelated: List<WeekDayMonthRelated>,
+        val weekDaysMonthRelated: List<WeekDayMonthRelated> = emptyList(),
         override val startFromHabitStart: Boolean = true,
 
         override val periodSeparationEnabled: Boolean = true,

@@ -1,0 +1,54 @@
+import kotlinx.datetime.LocalDate;
+
+CREATE TABLE cashedStreakEntity (
+    habitId INTEGER NOT NULL,
+    startDate INTEGER AS LocalDate NOT NULL,
+    endDate INTEGER AS LocalDate NOT NULL,
+    PRIMARY KEY (startDate, endDate),
+    FOREIGN KEY (habitId) REFERENCES habitEntity(id)
+);
+
+insertStreak:
+INSERT OR IGNORE
+INTO cashedStreakEntity
+VALUES (?, ?, ?);
+
+getAllStreaks:
+SELECT *
+FROM cashedStreakEntity
+WHERE habitId = ?;
+
+getStreaksInPeriod:
+SELECT *
+FROM cashedStreakEntity
+WHERE habitId = :habitId
+    AND startDate <= :periodEnd AND endDate >= :periodStart;
+
+deleteStreaksInPeriod:
+DELETE FROM cashedStreakEntity
+WHERE habitId = :habitId
+    AND :periodStart <= startDate AND endDate <= :periodEnd;
+
+CREATE TABLE streakCashedPeriodEntity (
+    habitId INTEGER NOT NULL,
+    startDate INTEGER AS LocalDate NOT NULL,
+    endDate INTEGER AS LocalDate NOT NULL,
+    PRIMARY KEY (startDate, endDate),
+    FOREIGN KEY (habitId) REFERENCES habitEntity(id)
+);
+
+insertPeriod:
+INSERT OR IGNORE
+INTO streakCashedPeriodEntity
+VALUES (?, ?, ?);
+
+getAllCashedPeriods:
+SELECT *
+FROM streakCashedPeriodEntity
+WHERE habitId = ?;
+
+getCashedPeriod:
+SELECT *
+FROM streakCashedPeriodEntity
+WHERE habitId = :habitId
+    AND startDate <= :dateInPeriod AND :dateInPeriod <= endDate;

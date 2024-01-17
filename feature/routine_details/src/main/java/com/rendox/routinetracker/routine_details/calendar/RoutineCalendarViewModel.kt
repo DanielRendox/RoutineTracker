@@ -91,7 +91,7 @@ class RoutineCalendarViewModel(
 
         viewModelScope.launch {
             streaksFlow.collect {
-                println("RoutineCalendarViewModel streaksFlow: $it")
+                println("RoutineCalendarViewModel streaksFlow: ${it.filter { it.startDate > LocalDate(2023, 8, 1) }}")
             }
         }
     }
@@ -127,6 +127,7 @@ class RoutineCalendarViewModel(
             }
             if (dataForMonthIsAlreadyLoaded) return
         }
+        println("updating month $monthToUpdate")
 
         val monthStart = monthToUpdate.atStartOfMonth().toKotlinLocalDate()
         val monthEnd = monthToUpdate.atEndOfMonth().toKotlinLocalDate()

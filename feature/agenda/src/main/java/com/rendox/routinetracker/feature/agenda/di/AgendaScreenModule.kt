@@ -11,6 +11,7 @@ val agendaScreenModule = module {
             getAllHabits = get(),
             insertHabitCompletion = get(),
             getHabitCompletionData = get(),
+            insertHabit = get(),
         )
     }
 }

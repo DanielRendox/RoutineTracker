@@ -68,3 +68,17 @@ val streakCreatorStatuses = listOf(
     HabitStatus.OverCompleted,
     HabitStatus.SortedOutBacklog,
 )
+
+val dueOrCompletedStatuses = listOf(
+    HabitStatus.Planned,
+    HabitStatus.Backlog,
+    HabitStatus.Failed,
+    HabitStatus.Completed,
+    HabitStatus.OverCompleted,
+    HabitStatus.SortedOutBacklog,
+)
+
+val nonExistentStatuses = listOf(
+    HabitStatus.NotStarted,
+    HabitStatus.Finished,
+)

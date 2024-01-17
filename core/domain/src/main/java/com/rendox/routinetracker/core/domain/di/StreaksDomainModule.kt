@@ -1,9 +1,6 @@
 package com.rendox.routinetracker.core.domain.di
 
-import com.rendox.routinetracker.core.domain.completion_history.HabitStatusComputer
-import com.rendox.routinetracker.core.domain.completion_history.HabitStatusComputerImpl
 import com.rendox.routinetracker.core.domain.streak.GetAllStreaksUseCase
-import com.rendox.routinetracker.core.domain.streak.GetAllStreaksUseCaseImpl
 import com.rendox.routinetracker.core.domain.streak.GetAllStreaksWithCashingUseCase
 import com.rendox.routinetracker.core.domain.streak.StreakComputer
 import com.rendox.routinetracker.core.domain.streak.StreakComputerImpl
@@ -16,12 +13,20 @@ val streakDomainModule = module {
     }
 
     single<GetAllStreaksUseCase> {
-        GetAllStreaksUseCaseImpl(
+//        GetAllStreaksUseCaseImpl(
+//            getHabit = get(),
+//            completionHistoryRepository = get(),
+//            vacationHistoryRepository = get(),
+//            defaultDispatcher = get(qualifier = named("defaultDispatcher")),
+//            streakComputer = get(),
+//        )
+        GetAllStreaksWithCashingUseCase(
             getHabit = get(),
             completionHistoryRepository = get(),
             vacationHistoryRepository = get(),
             defaultDispatcher = get(qualifier = named("defaultDispatcher")),
             streakComputer = get(),
+            streakRepository = get(),
         )
     }
 }

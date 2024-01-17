@@ -2,7 +2,7 @@ package com.rendox.routinetracker.core.database.habit
 
 import com.rendox.routinetracker.core.model.Schedule
 
-internal interface ScheduleLocalDataSource {
+interface ScheduleLocalDataSource {
     fun insertSchedule(schedule: Schedule)
     fun getScheduleById(scheduleId: Long): Schedule
     fun getAllSchedules(): List<Schedule>

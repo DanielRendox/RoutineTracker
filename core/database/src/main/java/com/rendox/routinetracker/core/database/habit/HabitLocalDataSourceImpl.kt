@@ -10,18 +10,8 @@ import kotlin.coroutines.CoroutineContext
 class HabitLocalDataSourceImpl(
     private val db: RoutineTrackerDatabase,
     private val ioDispatcher: CoroutineContext,
+    private val scheduleLocalDataSource: ScheduleLocalDataSource,
 ) : HabitLocalDataSource {
-
-    private val weekDaysMonthRelatedLocalDataSource: WeekDaysMonthRelatedLocalDataSource =
-        WeekDaysMonthRelatedLocalDataSourceImpl(db)
-    private val dueDateLocalDataSource: DueDateLocalDataSource =
-        DueDateLocalDataSourceImpl(db)
-
-    private val scheduleLocalDataSource: ScheduleLocalDataSource = ScheduleLocalDataSourceImpl(
-        db = db,
-        weekDaysMonthRelatedLocalDataSource = weekDaysMonthRelatedLocalDataSource,
-        dueDateLocalDataSource = dueDateLocalDataSource,
-    )
 
     override suspend fun insertHabit(habit: Habit) = withContext(ioDispatcher) {
         db.habitEntityQueries.transaction {

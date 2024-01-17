@@ -5,8 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.rendox.routinetracker.core.domain.completion_history.GetHabitCompletionDataUseCase
 import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase
 import com.rendox.routinetracker.core.domain.di.GetAllHabitsUseCase
+import com.rendox.routinetracker.core.domain.di.InsertHabitUseCase
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.HabitStatus
+import com.rendox.routinetracker.core.model.dueOrCompletedStatuses
+import com.rendox.routinetracker.core.model.nonExistentStatuses
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -24,6 +27,7 @@ import kotlinx.datetime.todayIn
 class AgendaScreenViewModel(
     today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
     private val getAllHabits: GetAllHabitsUseCase,
+    private val insertHabit: InsertHabitUseCase,
     private val insertHabitCompletion: InsertHabitCompletionUseCase,
     private val getHabitCompletionData: GetHabitCompletionDataUseCase,
 ) : ViewModel() {
@@ -141,22 +145,6 @@ class AgendaScreenViewModel(
     }
 
     // TODO update todayFlow when the date changes (in case the screen is opened at midnight)
-
-    companion object {
-        private val dueOrCompletedStatuses = listOf(
-            HabitStatus.Planned,
-            HabitStatus.Backlog,
-            HabitStatus.Failed,
-            HabitStatus.Completed,
-            HabitStatus.OverCompleted,
-            HabitStatus.SortedOutBacklog,
-        )
-
-        private val nonExistentStatuses = listOf(
-            HabitStatus.NotStarted,
-            HabitStatus.Finished,
-        )
-    }
 }
 
 data class DisplayRoutine(

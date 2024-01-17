@@ -5,7 +5,7 @@ import com.rendox.routinetracker.core.domain.di.GetHabitUseCase
 import com.rendox.routinetracker.core.model.Habit
 import kotlinx.datetime.LocalDate
 
-class InsertHabitCompletionUseCaseImpl(
+open class InsertHabitCompletionUseCaseImpl(
     private val completionHistoryRepository: CompletionHistoryRepository,
     private val getHabit: GetHabitUseCase
 ) : InsertHabitCompletionUseCase {

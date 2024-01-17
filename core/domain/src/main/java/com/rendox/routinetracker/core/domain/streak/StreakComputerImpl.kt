@@ -16,14 +16,6 @@ import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
 
-/**
- * Computes streaks for a habit based on its completion history and habit statuses.
- *
- * Passing not entire completion history but only the part of it will result in streaks computed
- * for the only for the corresponding historical period. But that is only true when the habit's
- * schedule's period separation is enabled so that completed dates in other periods do not affect
- * the dates of the current period.
- */
 internal class StreakComputerImpl(
     private val habitStatusComputer: HabitStatusComputer,
 ) : StreakComputer {
@@ -125,6 +117,19 @@ internal class StreakComputerImpl(
 
         return streaks
     }
+
+    override fun computeStreaksInPeriod(
+        today: LocalDate,
+        habit: Habit,
+        completionHistory: List<Habit.CompletionRecord>,
+        vacationHistory: List<Vacation>,
+        period: LocalDateRange
+    ): List<Streak> = computeAllStreaks(
+        today = today,
+        habit = habit,
+        completionHistory = completionHistory.filter { it.date in period },
+        vacationHistory = vacationHistory,
+    )
 
     private fun findStreakStartDate(
         habit: Habit,
