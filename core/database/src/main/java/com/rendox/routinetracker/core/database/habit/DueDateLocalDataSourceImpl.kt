@@ -21,4 +21,8 @@ internal class DueDateLocalDataSourceImpl(
     override fun getDueDates(scheduleId: Long): List<Int> {
         return db.dueDateEntityQueries.getDueDates(scheduleId).executeAsList()
     }
+
+    override fun deleteDueDates(scheduleId: Long) {
+        db.dueDateEntityQueries.deleteDueDates(scheduleId)
+    }
 }

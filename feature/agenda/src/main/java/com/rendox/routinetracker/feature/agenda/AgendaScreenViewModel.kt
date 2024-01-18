@@ -4,17 +4,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rendox.routinetracker.core.domain.completion_history.GetHabitCompletionDataUseCase
 import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase
+import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase.IllegalDateEditAttemptException
 import com.rendox.routinetracker.core.domain.di.GetAllHabitsUseCase
-import com.rendox.routinetracker.core.domain.di.InsertHabitUseCase
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.HabitStatus
 import com.rendox.routinetracker.core.model.dueOrCompletedStatuses
-import com.rendox.routinetracker.core.model.nonExistentStatuses
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -27,14 +28,15 @@ import kotlinx.datetime.todayIn
 class AgendaScreenViewModel(
     today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
     private val getAllHabits: GetAllHabitsUseCase,
-    private val insertHabit: InsertHabitUseCase,
     private val insertHabitCompletion: InsertHabitCompletionUseCase,
     private val getHabitCompletionData: GetHabitCompletionDataUseCase,
 ) : ViewModel() {
     private val todayFlow = MutableStateFlow(today)
     private val allRoutinesFlow = MutableStateFlow(emptyList<Habit>())
-    private val _hideNotDueRoutinesFlow = MutableStateFlow(false)
     private val cashedRoutinesFlow = MutableStateFlow(emptyList<DisplayRoutine>())
+
+    private val _showAllRoutinesFlow = MutableStateFlow(true)
+    val showAllRoutinesFlow = _showAllRoutinesFlow.asStateFlow()
 
     private val _currentDateFlow = MutableStateFlow(today)
     val currentDateFlow = _currentDateFlow.asStateFlow()
@@ -42,13 +44,13 @@ class AgendaScreenViewModel(
     val visibleRoutinesFlow: StateFlow<List<DisplayRoutine>?> =
         combine(
             cashedRoutinesFlow,
-            _hideNotDueRoutinesFlow,
-        ) { cashedRoutines, hideNotDueRoutines ->
+            _showAllRoutinesFlow,
+        ) { cashedRoutines, showAllRoutines ->
             cashedRoutines.filter {
-                if (hideNotDueRoutines) {
-                    it.status in dueOrCompletedStatuses
+                if (showAllRoutines) {
+                    true
                 } else {
-                    it.status !in nonExistentStatuses
+                    it.status in dueOrCompletedStatuses
                 }
             }
         }.stateIn(
@@ -56,6 +58,9 @@ class AgendaScreenViewModel(
             initialValue = null,
             started = SharingStarted.WhileSubscribed(5_000),
         )
+
+    private val agendaScreenEventsChannel = Channel<AgendaScreenEvent>()
+    val agendaScreenEventsFlow = agendaScreenEventsChannel.receiveAsFlow()
 
     init {
         viewModelScope.launch {
@@ -104,11 +109,18 @@ class AgendaScreenViewModel(
         completionRecord: Habit.CompletionRecord,
     ) {
         viewModelScope.launch {
-            insertHabitCompletion(
-                habitId = routineId,
-                completionRecord = completionRecord,
-                today = todayFlow.value,
-            )
+            try {
+                insertHabitCompletion(
+                    habitId = routineId,
+                    completionRecord = completionRecord,
+                    today = todayFlow.value,
+                )
+            } catch (exception: IllegalDateEditAttemptException) {
+                agendaScreenEventsChannel.send(
+                    AgendaScreenEvent.BlockedCompletionAttempt(exception)
+                )
+                return@launch
+            }
 
             val routine = allRoutinesFlow.value.find { it.id == routineId }?.let {
                 getDisplayRoutine(
@@ -141,10 +153,8 @@ class AgendaScreenViewModel(
     }
 
     fun onNotDueRoutinesVisibilityToggle() {
-        _hideNotDueRoutinesFlow.update { !it }
+        _showAllRoutinesFlow.update { !it }
     }
-
-    // TODO update todayFlow when the date changes (in case the screen is opened at midnight)
 }
 
 data class DisplayRoutine(
@@ -160,4 +170,10 @@ data class DisplayRoutine(
 
 enum class DisplayRoutineType {
     YesNoHabit,
+}
+
+sealed interface AgendaScreenEvent {
+    class BlockedCompletionAttempt(
+        val illegalDateEditAttemptException: IllegalDateEditAttemptException
+    ) : AgendaScreenEvent
 }

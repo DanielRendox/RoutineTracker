@@ -1,5 +1,6 @@
 package com.rendox.routinetracker.add_routine
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -8,16 +9,24 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,14 +44,11 @@ import com.rendox.routinetracker.add_routine.set_goal.rememberSetGoalPageState
 import com.rendox.routinetracker.add_routine.tweak_routine.rememberTweakRoutinePageState
 import com.rendox.routinetracker.core.domain.di.InsertHabitUseCase
 import com.rendox.routinetracker.core.ui.helpers.LocalLocale
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
+import com.rendox.routinetracker.feature.agenda.R
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
 import org.koin.compose.koinInject
 import java.time.temporal.WeekFields
 
-@OptIn(DelicateCoroutinesApi::class)
 @Composable
 internal fun AddRoutineRoute(
     modifier: Modifier = Modifier,
@@ -50,9 +56,20 @@ internal fun AddRoutineRoute(
     navigateBack: () -> Unit,
     insertHabit: InsertHabitUseCase = koinInject()
 ) {
+    var dialogIsVisible by remember { mutableStateOf(false) }
+    DiscardCreatingNewHabitDialog(
+        dialogIsVisible = dialogIsVisible,
+        onDismissRequest = { dialogIsVisible = false },
+        onConfirmButtonClicked = {
+            dialogIsVisible = false
+            navigateBack()
+        },
+    )
+
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
+    val coroutineScope = rememberCoroutineScope()
     val addRoutineScreenState = rememberAddRoutineScreenState(
         navController = navController,
         navBackStackEntry = navBackStackEntry,
@@ -60,13 +77,11 @@ internal fun AddRoutineRoute(
         setGoalPageState = rememberSetGoalPageState(),
         chooseSchedulePageState = rememberChooseSchedulePageState(),
         tweakRoutinePageState = rememberTweakRoutinePageState(),
-        navigateBackAndRecreate = navigateBackAndRecreate,
         navigateBack = navigateBack,
         saveRoutine = { routine ->
-            GlobalScope.launch {
-                withTimeout(10_000L) {
-                    insertHabit(routine)
-                }
+            coroutineScope.launch {
+                insertHabit(routine)
+                navigateBackAndRecreate()
             }
         },
     )
@@ -75,6 +90,45 @@ internal fun AddRoutineRoute(
         modifier = modifier,
         addRoutineScreenState = addRoutineScreenState,
     )
+
+    BackHandler {
+        println("AddRoutineRoute back button pressed")
+       dialogIsVisible = true
+    }
+}
+
+@Composable
+private fun DiscardCreatingNewHabitDialog(
+    modifier: Modifier = Modifier,
+    dialogIsVisible: Boolean,
+    onDismissRequest: () -> Unit,
+    onConfirmButtonClicked: () -> Unit,
+) {
+    if (dialogIsVisible) {
+        AlertDialog(
+            modifier = modifier,
+            onDismissRequest = onDismissRequest,
+            text = {
+                Text(
+                    text = stringResource(id = R.string.discard_habit_creation_dialog_title),
+                )
+            },
+            dismissButton = {
+                TextButton(onClick = onDismissRequest) {
+                    Text(
+                        text = stringResource(id = android.R.string.cancel),
+                    )
+                }
+            },
+            confirmButton = {
+                FilledTonalButton(onClick = onConfirmButtonClicked) {
+                    Text(
+                        text = stringResource(id = R.string.discard_habit_creation),
+                    )
+                }
+            },
+        )
+    }
 }
 
 @Composable
@@ -83,10 +137,12 @@ internal fun AddRoutineScreen(
     addRoutineScreenState: AddRoutineScreenState,
 ) {
     Surface(modifier = modifier.fillMaxSize()) {
-        Column(modifier = modifier.fillMaxSize()) {
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+        ) {
             AddRoutineNavHost(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .weight(1f),
                 navController = addRoutineScreenState.navController,
                 addRoutineScreenState = addRoutineScreenState,
@@ -101,6 +157,9 @@ internal fun AddRoutineScreen(
             val startDayOfWeek = WeekFields.of(LocalLocale.current).firstDayOfWeek
 
             AddRoutineBottomNavigation(
+                modifier = Modifier
+                    .navigationBarsPadding()
+                    .imePadding(),
                 navigateBackButtonText = navigateBackButtonText,
                 navigateForwardButtonText = navigateForwardButtonText,
                 navigateForwardButtonIsEnabled = !addRoutineScreenState.containsError,

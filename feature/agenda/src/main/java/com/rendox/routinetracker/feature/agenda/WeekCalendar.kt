@@ -13,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import com.kizitonwose.calendar.compose.WeekCalendar
 import com.kizitonwose.calendar.compose.weekcalendar.rememberWeekCalendarState
 import com.rendox.routinetracker.core.ui.helpers.LocalLocale
-import kotlinx.datetime.DayOfWeek
 import java.time.LocalDate
 import java.time.format.TextStyle
 
@@ -36,7 +36,6 @@ fun RoutineTrackerWeekCalendar(
     selectedDate: LocalDate,
     modifier: Modifier = Modifier,
     initialDate: LocalDate,
-    firstDayOfWeek: DayOfWeek,
     today: LocalDate,
     dateOnClick: (LocalDate) -> Unit
 ) {
@@ -44,12 +43,19 @@ fun RoutineTrackerWeekCalendar(
     val startDate = remember { initialDate.minusDays(500) }
     val endDate = remember { initialDate.plusDays(500) }
 
+    // Make the initial date centered (presuming there are 7 days visible).
+    val firstDisplayDate = remember {
+        selectedDate.minusDays(3)
+    }
     val calendarState = rememberWeekCalendarState(
         startDate = startDate,
         endDate = endDate,
         firstVisibleWeekDate = initialDate,
-        firstDayOfWeek = firstDayOfWeek,
+        firstDayOfWeek = firstDisplayDate.dayOfWeek,
     )
+    LaunchedEffect(Unit) {
+        calendarState.scrollToWeek(firstDisplayDate)
+    }
 
     WeekCalendar(
         modifier = modifier,
@@ -87,7 +93,7 @@ private fun WeekCalendarDay(
 
     Box(
         modifier = modifier
-            .width(screenWidth / 9f)
+            .width(48.dp)
             .padding(2.dp)
             .clip(RoundedCornerShape(25))
             .background(color = backgroundColor)
@@ -143,7 +149,6 @@ private fun RoutineTrackerWeekCalendarPreview() {
                 .height(70.dp)
                 .fillMaxWidth(),
             initialDate = today,
-            firstDayOfWeek = DayOfWeek.MONDAY,
             dateOnClick = { selectedDate = it },
             selectedDate = selectedDate,
             today = today,

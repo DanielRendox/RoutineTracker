@@ -32,7 +32,6 @@ class AddRoutineScreenState(
     chooseSchedulePageState: ChooseSchedulePageState,
     tweakRoutinePageState: TweakRoutinePageState,
     private val saveRoutine: (Habit) -> Unit,
-    private val navigateBackAndRecreate: () -> Unit,
     private val navigateBack: () -> Unit,
 ) {
     var chooseRoutineTypePageState by mutableStateOf(chooseRoutineTypePageState)
@@ -63,7 +62,7 @@ class AddRoutineScreenState(
         updateNavDestinations(chooseRoutineTypePageState.routineType)
 
         navigateBackButtonText = when (navBackStackEntry?.destination?.route) {
-            navDestinations.first().route -> UiText.StringResource(resId = android.R.string.cancel)
+            navDestinations.first().route -> UiText.StringResource(resId = com.rendox.routinetracker.feature.agenda.R.string.discard_habit_creation)
             else -> UiText.StringResource(resId = R.string.back)
         }
 
@@ -101,7 +100,6 @@ class AddRoutineScreenState(
         if (currentDestinationRoute == navDestinations.last().route) {
             val routine = assembleRoutine(startDayOfWeek)
             saveRoutine(routine)
-            navigateBackAndRecreate()
             return
         }
 
@@ -124,10 +122,12 @@ class AddRoutineScreenState(
         }
 
         if (nextDestination == AddRoutineDestination.TweakRoutine) {
+            val schedule = chooseSchedulePageState.selectedSchedulePickerState.assembleSchedule(
+                startDayOfWeek = startDayOfWeek,
+            )
+            println("AddRoutineScreenState assembled schedule: $schedule")
             tweakRoutinePageState.updateChosenSchedule(
-                chooseSchedulePageState.selectedSchedulePickerState.assembleSchedule(
-                    startDayOfWeek = startDayOfWeek,
-                )
+                schedule
             )
         }
 
@@ -166,7 +166,6 @@ fun rememberAddRoutineScreenState(
     chooseSchedulePageState: ChooseSchedulePageState,
     tweakRoutinePageState: TweakRoutinePageState,
     saveRoutine: (Habit) -> Unit,
-    navigateBackAndRecreate: () -> Unit,
     navigateBack: () -> Unit,
 ) = remember(
     navController,
@@ -183,7 +182,6 @@ fun rememberAddRoutineScreenState(
         setGoalPageState = setGoalPageState,
         chooseSchedulePageState = chooseSchedulePageState,
         tweakRoutinePageState = tweakRoutinePageState,
-        navigateBackAndRecreate = navigateBackAndRecreate,
         saveRoutine = saveRoutine,
         navigateBack = navigateBack,
     )

@@ -27,9 +27,7 @@ sealed class Schedule {
 
     sealed class NonPeriodicSchedule : Schedule()
 
-    sealed interface ByNumOfDueDays {
-        fun getNumOfDueDates(getForFirstPeriod: Boolean): Int
-    }
+    sealed interface ByNumOfDueDays
 
     data class EveryDaySchedule(
         override val startDate: LocalDate,
@@ -79,31 +77,11 @@ sealed class Schedule {
         override val completingAheadEnabled: Boolean = true
         override val supportsScheduleDeviation = false
 
-        private val firstPeriodIsShort
-            get() = startDayOfWeek != null && startDate.dayOfWeek != startDayOfWeek
-
         init {
             check(numOfDueDays <= DateTimeUnit.WEEK.days) {
                 "The number of due dates shouldn't be higher than the number of days in week."
             }
-
-            if (firstPeriodIsShort) {
-                check(numOfDueDaysInFirstPeriod != null) {
-                    "According to the schedule, at the moment of the " +
-                            "startDate, the first time period has been already started " +
-                            "and hence it's shorter than expected. Therefore, the number of due " +
-                            "days for this period is ambiguous. So it should be specified " +
-                            "explicitly at the moment of the schedule creation."
-                }
-            }
         }
-
-        override fun getNumOfDueDates(getForFirstPeriod: Boolean): Int =
-            if (getForFirstPeriod && numOfDueDaysInFirstPeriod != null) {
-                numOfDueDaysInFirstPeriod
-            } else {
-                numOfDueDays
-            }
     }
 
     sealed class MonthlySchedule : PeriodicSchedule() {
@@ -148,31 +126,11 @@ sealed class Schedule {
         override val completingAheadEnabled: Boolean = true
         override val supportsScheduleDeviation = false
 
-        private val firstPeriodIsShort
-            get() = !startFromHabitStart && startDate.dayOfMonth != 1
-
         init {
             check(numOfDueDays <= 31) {
                 "The number of due dates shouldn't be higher than max num of days in month (31)."
             }
-
-            if (firstPeriodIsShort) {
-                check(numOfDueDaysInFirstPeriod != null) {
-                    "According to the schedule, at the moment of the " +
-                            "startDate, the first time period has been already started " +
-                            "and hence it's shorter than expected. Therefore, the number of due " +
-                            "days for this period is ambiguous. So it should be specified " +
-                            "explicitly at the moment of the schedule creation."
-                }
-            }
         }
-
-        override fun getNumOfDueDates(getForFirstPeriod: Boolean): Int =
-            if (getForFirstPeriod && numOfDueDaysInFirstPeriod != null) {
-                numOfDueDaysInFirstPeriod
-            } else {
-                numOfDueDays
-            }
     }
 
     data class AlternateDaysSchedule(
@@ -188,10 +146,6 @@ sealed class Schedule {
     ) : PeriodicSchedule(), ByNumOfDueDays {
         override val correspondingPeriod: DatePeriod
             get() = DatePeriod(days = numOfDaysInPeriod)
-
-        override fun getNumOfDueDates(getForFirstPeriod: Boolean): Int {
-            return numOfDueDays
-        }
     }
 
     data class CustomDateSchedule(
@@ -239,31 +193,11 @@ sealed class Schedule {
         override val completingAheadEnabled: Boolean = true
         override val supportsScheduleDeviation = false
 
-        private val firstPeriodIsShort
-            get() = !startFromHabitStart && startDate.dayOfYear != 1
-
         init {
             check(numOfDueDays <= 366) {
                 "The number of due dates shouldn't be higher than max num of days in year (366)."
             }
-
-            if (firstPeriodIsShort) {
-                check(numOfDueDaysInFirstPeriod != null) {
-                    "According to the schedule, at the moment of the " +
-                            "startDate, the first time period has been already started " +
-                            "and hence it's shorter than expected. Therefore, the number of due " +
-                            "days for this period is ambiguous. So it should be specified " +
-                            "explicitly at the moment of the schedule creation."
-                }
-            }
         }
-
-        override fun getNumOfDueDates(getForFirstPeriod: Boolean): Int =
-            if (getForFirstPeriod && numOfDueDaysInFirstPeriod != null) {
-                numOfDueDaysInFirstPeriod
-            } else {
-                numOfDueDays
-            }
     }
 }
 

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -130,7 +131,8 @@ private fun DayOfMonthPicker(
                 modifier = Modifier
                     .padding(horizontal = 4.dp, vertical = 2.dp)
                     .height(40.dp)
-                    .wrapContentWidth(),
+                    .wrapContentWidth()
+                    .widthIn(min = 40.dp),
                 text = stringResource(
                     id = com.rendox.routinetracker.feature.agenda.R.string.monthly_picker_last_day_of_month_label
                 ),

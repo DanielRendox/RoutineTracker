@@ -74,6 +74,7 @@ internal fun ScheduleEntity.toWeeklyScheduleByNumOfDueDays() = Schedule.WeeklySc
     numOfDueDaysInFirstPeriod = numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule,
     startDate = startDate,
     endDate = endDate,
+    startDayOfWeek = startDayOfWeekInWeeklySchedule,
 )
 
 internal fun ScheduleEntity.toMonthlyScheduleByDueDatesIndices(

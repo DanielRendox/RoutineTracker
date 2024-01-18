@@ -50,3 +50,7 @@ VALUES (?, ?, ?, ?);
 deleteVacationById:
 DELETE FROM vacationEntity
 WHERE id = ?;
+
+deleteAllVacationsForHabit:
+DELETE FROM vacationEntity
+WHERE habitId = ?;

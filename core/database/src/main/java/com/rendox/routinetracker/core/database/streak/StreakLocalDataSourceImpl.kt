@@ -17,8 +17,6 @@ class StreakLocalDataSourceImpl(
         streaks: List<Pair<Long, Streak>>,
         periods: List<Pair<Long, LocalDateRange>>
     ) = withContext(ioDispatcher) {
-        println("StreakLocalDataSourceImpl, habitId = ${streaks.first().first} insert streaks: $streaks")
-        println("StreakLocalDataSourceImpl, habitId = ${periods.first().first} insert periods: $periods")
         db.cashedStreakQueries.transaction {
             for (streak in streaks) {
                 db.cashedStreakQueries.insertStreak(

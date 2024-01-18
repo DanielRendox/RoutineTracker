@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,6 +23,7 @@ import com.kizitonwose.calendar.core.DayPosition
 import com.rendox.routinetracker.core.model.HabitStatus
 import com.rendox.routinetracker.core.ui.components.CalendarMonthlyPaged
 import com.rendox.routinetracker.core.ui.theme.routineStatusColors
+import com.rendox.routinetracker.routine_details.CalendarDateData
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.toKotlinLocalDate
 import java.time.DayOfWeek
@@ -46,6 +48,7 @@ fun RoutineCalendar(
                 routineCalendarDates[calendarDay.date.toKotlinLocalDate()]
             }
             RoutineStatusDay(
+                modifier = Modifier.align(Alignment.Center),
                 day = calendarDay,
                 habitStatus = calendarDate?.status,
                 includedInStreak = calendarDate?.includedInStreak ?: false,
@@ -125,6 +128,7 @@ private fun RoutineStatusDay(
     Box(
         modifier = modifier
             .padding(horizontal = 8.dp, vertical = 4.dp)
+            .sizeIn(maxWidth = 40.dp, maxHeight = 40.dp)
             .aspectRatio(1f)
             .clip(shape = CircleShape)
             .background(color = backgroundColor, shape = CircleShape)

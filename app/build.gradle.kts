@@ -70,4 +70,5 @@ dependencies {
     testImplementation(project(":core:testcommon"))
 
     implementation(libs.jetbrains.kotlinx.datetime)
+    implementation(libs.material)
 }

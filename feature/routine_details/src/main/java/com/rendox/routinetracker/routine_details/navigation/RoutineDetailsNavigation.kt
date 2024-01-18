@@ -35,7 +35,7 @@ fun NavGraphBuilder.routineDetailsScreen(popBackStack: () -> Unit) {
     ) {
         val routineId = it.arguments!!.getLong(routineIdArg)
         RoutineDetailsRoute(
-            popBackStack = popBackStack,
+            navigateBack = popBackStack,
             routineId = routineId,
         )
     }

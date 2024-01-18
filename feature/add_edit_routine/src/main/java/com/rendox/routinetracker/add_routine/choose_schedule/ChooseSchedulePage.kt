@@ -24,7 +24,7 @@ fun ChooseSchedulePage(
     Column(
         modifier = modifier
             .padding(start = 8.dp, end = 16.dp)
-            .verticalScroll(rememberScrollState())
+            .verticalScroll(rememberScrollState()),
     ) {
         AddHabitDestinationTopAppBar(destination = AddRoutineDestination.ChooseSchedule)
 

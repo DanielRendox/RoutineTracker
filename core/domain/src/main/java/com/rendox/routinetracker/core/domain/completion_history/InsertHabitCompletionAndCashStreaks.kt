@@ -25,7 +25,7 @@ class InsertHabitCompletionAndCashStreaks(
     getHabit = getHabit,
 ) {
     /**
-     * @throws InsertHabitCompletionUseCaseImpl.IllegalDateException if the [completionRecord]'s
+     * @throws InsertHabitCompletionUseCase.IllegalDateEditAttemptException if the [completionRecord]'s
      * date is earlier than the habit's start date or later than the habit's end date (if it
      * exists), or if the date is later than today.
      */

@@ -32,4 +32,8 @@ internal class WeekDaysMonthRelatedLocalDataSourceImpl(
                     weekDayNumberMonthRelated = entity.weekDayNumberMonthRelated,
                 )
             }
+
+    override fun deleteWeekDayMonthRelatedDays(scheduleId: Long) {
+        db.weekDayMonthRelatedEntityQueries.deleteWeekDayMonthRelatedDays(scheduleId)
+    }
 }

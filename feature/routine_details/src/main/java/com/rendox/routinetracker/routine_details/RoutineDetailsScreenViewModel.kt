@@ -1,4 +1,4 @@
-package com.rendox.routinetracker.routine_details.calendar
+package com.rendox.routinetracker.routine_details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -6,6 +6,7 @@ import com.kizitonwose.calendar.core.atStartOfMonth
 import com.kizitonwose.calendar.core.yearMonth
 import com.rendox.routinetracker.core.domain.completion_history.GetHabitCompletionDataUseCase
 import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase
+import com.rendox.routinetracker.core.domain.di.DeleteHabitUseCase
 import com.rendox.routinetracker.core.domain.di.GetHabitUseCase
 import com.rendox.routinetracker.core.domain.streak.GetAllStreaksUseCase
 import com.rendox.routinetracker.core.domain.streak.contains
@@ -16,12 +17,13 @@ import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.HabitStatus
 import com.rendox.routinetracker.core.model.Streak
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -32,16 +34,15 @@ import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toKotlinLocalDate
 import kotlinx.datetime.todayIn
 import java.time.YearMonth
-import kotlin.coroutines.CoroutineContext
 
-class RoutineCalendarViewModel(
+class RoutineDetailsScreenViewModel(
     today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
     private val routineId: Long,
     private val getHabit: GetHabitUseCase,
     private val getHabitCompletionData: GetHabitCompletionDataUseCase,
     private val insertHabitCompletion: InsertHabitCompletionUseCase,
     private val getAllStreaksUseCase: GetAllStreaksUseCase,
-    private val dispatcher: CoroutineContext = Dispatchers.Main.immediate,
+    private val deleteHabit: DeleteHabitUseCase,
 ) : ViewModel() {
     private val _habitFlow: MutableStateFlow<Habit?> = MutableStateFlow(null)
     val habitFlow: StateFlow<Habit?> = _habitFlow.asStateFlow()
@@ -73,8 +74,11 @@ class RoutineCalendarViewModel(
         started = SharingStarted.WhileSubscribed(5_000),
     )
 
+    private val routineDetailsScreenEventsChannel = Channel<RoutineDetailsScreenEvent>()
+    val routineDetailsScreenEventsFlow = routineDetailsScreenEventsChannel.receiveAsFlow()
+
     init {
-        viewModelScope.launch(dispatcher) {
+        viewModelScope.launch {
             _habitFlow.update { getHabit(routineId) }
             streaksFlow.update {
                 getAllStreaksUseCase(
@@ -82,16 +86,7 @@ class RoutineCalendarViewModel(
                     today = todayFlow.value,
                 )
             }
-            println("actually it runs on $dispatcher")
             updateMonthsWithMargin()
-            println("updated!!")
-            println("calendar dates flow init = ${calendarDatesFlow.value}")
-        }
-
-        viewModelScope.launch {
-            streaksFlow.collect {
-                println("RoutineCalendarViewModel streaksFlow: ${it.filter { it.startDate > LocalDate(2023, 8, 1) }}")
-            }
         }
     }
 
@@ -164,8 +159,10 @@ class RoutineCalendarViewModel(
                 completionRecord = completionRecord,
                 today = todayFlow.value,
             )
-        } catch (e: InsertHabitCompletionUseCase.IllegalDateException) {
-            // TODO display a snackbar
+        } catch (exception: InsertHabitCompletionUseCase.IllegalDateEditAttemptException) {
+            routineDetailsScreenEventsChannel.send(
+                RoutineDetailsScreenEvent.BlockedCompletionAttempt(exception)
+            )
         }
 
         streaksFlow.update {
@@ -177,7 +174,12 @@ class RoutineCalendarViewModel(
         updateMonthsWithMargin(forceUpdate = true)
     }
 
-// TODO update todayFlow when the date changes (in case the screen is opened at midnight)
+    fun onDeleteHabit() = viewModelScope.launch {
+        _habitFlow.value?.let { habit ->
+            deleteHabit(habit.id!!)
+        }
+        routineDetailsScreenEventsChannel.send(RoutineDetailsScreenEvent.NavigateBack)
+    }
 
     companion object {
         /**
@@ -194,3 +196,11 @@ data class CalendarDateData(
     val includedInStreak: Boolean,
     val numOfTimesCompleted: Float,
 )
+
+sealed interface RoutineDetailsScreenEvent {
+    class BlockedCompletionAttempt(
+        val illegalDateEditAttemptException: InsertHabitCompletionUseCase.IllegalDateEditAttemptException
+    ) : RoutineDetailsScreenEvent
+
+    object NavigateBack : RoutineDetailsScreenEvent
+}

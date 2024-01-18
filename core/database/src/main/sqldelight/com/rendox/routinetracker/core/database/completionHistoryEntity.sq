@@ -58,3 +58,7 @@ FROM completionHistoryEntity;
 deleteCompletionByDate:
 DELETE FROM completionHistoryEntity
 WHERE habitId = ? AND date = ?;
+
+deleteAllCompletionsForHabit:
+DELETE FROM completionHistoryEntity
+WHERE habitId = ?;

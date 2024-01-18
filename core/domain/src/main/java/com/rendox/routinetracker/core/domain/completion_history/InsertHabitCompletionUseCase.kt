@@ -9,4 +9,10 @@ interface InsertHabitCompletionUseCase {
         completionRecord: Habit.CompletionRecord,
         today: LocalDate,
     )
+
+    sealed class IllegalDateEditAttemptException : Exception() {
+        object FutureDateEditAttemptException : IllegalDateEditAttemptException()
+        object FinishedHabitDateEditAttemptException : IllegalDateEditAttemptException()
+        object NotStartedHabitDateEditAttemptException : IllegalDateEditAttemptException()
+    }
 }

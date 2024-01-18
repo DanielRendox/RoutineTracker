@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
@@ -22,6 +23,7 @@ fun Setting(
     description: String?,
     isOn: Boolean,
     onToggle: (Boolean) -> Unit,
+    enabled: Boolean = true,
 ) {
     Row(
         modifier = modifier
@@ -31,7 +33,9 @@ fun Setting(
     ) {
         Column(modifier = Modifier
             .weight(1f)
-            .padding(end = 16.dp)) {
+            .padding(end = 16.dp)
+            .alpha(if (enabled) 1f else 0.5f)
+        ) {
             Text(text = title)
             description?.let {
                 Text(
@@ -42,7 +46,11 @@ fun Setting(
                 )
             }
         }
-        Switch(checked = isOn, onCheckedChange = onToggle)
+        Switch(
+            checked = isOn,
+            onCheckedChange = onToggle,
+            enabled = enabled,
+        )
     }
 }
 

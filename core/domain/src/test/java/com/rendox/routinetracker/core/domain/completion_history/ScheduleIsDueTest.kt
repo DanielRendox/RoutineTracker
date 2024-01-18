@@ -4,7 +4,9 @@ import com.google.common.truth.Truth.assertThat
 import com.rendox.routinetracker.core.logic.time.AnnualDate
 import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
 import com.rendox.routinetracker.core.logic.time.WeekDayNumberMonthRelated
+import com.rendox.routinetracker.core.logic.time.atEndOfMonth
 import com.rendox.routinetracker.core.logic.time.plusDays
+import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.Schedule
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DateTimeUnit
@@ -14,8 +16,9 @@ import kotlinx.datetime.Month
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import kotlin.random.Random
-import kotlin.test.assertFailsWith
 
 class ScheduleIsDueTest {
 
@@ -81,15 +84,25 @@ class ScheduleIsDueTest {
         assertThat(schedule2.isDue(sunday, null)).isFalse()
     }
 
-    @Test
-    fun `weekly schedule, first period is short, assert fails with an exception`() {
-        assertFailsWith<IllegalStateException> {
-            Schedule.WeeklyScheduleByNumOfDueDays(
-                startDate = routineStartDate,
-                numOfDueDays = 5,
-                startDayOfWeek = DayOfWeek.MONDAY,
-                numOfDueDaysInFirstPeriod = null,
-            )
+    @ParameterizedTest
+    @CsvSource("2, 2", "4, 4", "6, 4")
+    fun `weekly schedule, first period is short, assert fails with an exception`(
+        numOfDueDays: Int,
+        numOfFirstDueDays: Int,
+    ) {
+        val scheduleStartDate = LocalDate(2024, 1, 4)
+        val schedule = Schedule.WeeklyScheduleByNumOfDueDays(
+            startDate = scheduleStartDate, // Thursday, first period contains only 4 days
+            numOfDueDays = numOfDueDays,
+            startDayOfWeek = DayOfWeek.MONDAY,
+            numOfDueDaysInFirstPeriod = null,
+        )
+        for (date in scheduleStartDate..scheduleStartDate.plusDays(numOfFirstDueDays - 1)) {
+            assertThat(schedule.isDue(date)).isTrue()
+        }
+        val endOfWeek = scheduleStartDate.plusDays(3)
+        for (date in scheduleStartDate.plusDays(numOfFirstDueDays)..endOfWeek) {
+            assertThat(schedule.isDue(date)).isFalse()
         }
     }
 
@@ -133,6 +146,7 @@ class ScheduleIsDueTest {
                 schedule.isDue(validationDate = currentDate)
             ).isTrue()
         }
+        println("checkpoint 1")
 
         for (dayIndex in 3..4) {
             val currentDate = schedule.startDate.plusDays(dayIndex)
@@ -140,12 +154,15 @@ class ScheduleIsDueTest {
                 schedule.isDue(validationDate = currentDate)
             ).isFalse()
         }
+        println("checkpoint 2")
+
 
         for (dayIndex in 5..8) {
             val currentDate = schedule.startDate.plusDays(dayIndex)
             assertThat(
                 schedule.isDue(validationDate = currentDate)
             ).isTrue()
+            println("checkpoint 3")
         }
 
         for (dayIndex in 9..11) {
@@ -283,16 +300,35 @@ class ScheduleIsDueTest {
         assertThat(schedule.isDue(secondTuesday, null)).isFalse()
     }
 
-    @Test
-    fun `MonthlyScheduleByNumOfDueDays, first period is short, assert fails with an exception`() {
-        assertFailsWith<IllegalStateException> {
-            // should fail because routine start date is not the first day of month
-            Schedule.MonthlyScheduleByNumOfDueDays(
-                startDate = routineStartDate.plusDays(Random.nextInt(1, 27)),
-                numOfDueDays = 18,
-                startFromHabitStart = false,
-                numOfDueDaysInFirstPeriod = null,
-            )
+    @ParameterizedTest(name = "{0}")
+    @CsvSource(
+        "period contains default num of due days -> due on first specified num of days, 18, 18",
+        "period is shorter than specified num of due days -> due on each day of the period, 30, 28"
+    )
+    fun `MonthlyScheduleByNumOfDueDays, first period is short, num of due days in first period not provided`(
+        testName: String,
+        numOfDueDays: Int,
+        numOfFirstDueDays: Int,
+    ) {
+        val scheduleStartDate = routineStartDate.plus(DatePeriod(months = 1))
+        val schedule = Schedule.MonthlyScheduleByNumOfDueDays(
+            startDate = scheduleStartDate,
+            numOfDueDays = numOfDueDays,
+            startFromHabitStart = false,
+            numOfDueDaysInFirstPeriod = null,
+        )
+        for (dateNumber in 1..numOfFirstDueDays) {
+            assertThat(
+                schedule.isDue(
+                    validationDate = scheduleStartDate.plusDays(dateNumber - 1)
+                )
+            ).isTrue()
+        }
+
+        val firstNotDueDay = scheduleStartDate.plusDays(numOfFirstDueDays)
+        for (date in firstNotDueDay..scheduleStartDate.atEndOfMonth) {
+            println("date = $date")
+            assertThat(schedule.isDue(validationDate = date)).isFalse()
         }
     }
 
@@ -549,15 +585,25 @@ class ScheduleIsDueTest {
         }
     }
 
-    @Test
-    fun `AnnualScheduleByNumOfDueDays, first period is short, fails with an exception`() {
-        assertFailsWith<IllegalStateException> {
-            Schedule.AnnualScheduleByNumOfDueDays(
-                startDate = routineStartDate.plusDays(Random.nextInt(1, 365)),
-                startFromHabitStart = false,
-                numOfDueDays = 0,
-                numOfDueDaysInFirstPeriod = null,
-            )
+    @ParameterizedTest
+    @CsvSource("264, 264", "300, 265")
+    fun `AnnualScheduleByNumOfDueDays, first period is short, fails with an exception`(
+        numOfDueDays: Int,
+        numOfFirstDueDays: Int,
+    ) {
+        val scheduleStartDate = routineStartDate.plusDays(100)
+        val schedule = Schedule.AnnualScheduleByNumOfDueDays(
+            startDate = scheduleStartDate,
+            startFromHabitStart = false,
+            numOfDueDays = numOfDueDays,
+            numOfDueDaysInFirstPeriod = null,
+        )
+        for (date in scheduleStartDate..scheduleStartDate.plusDays(numOfDueDays - 1)) {
+            assertThat(schedule.isDue(date)).isTrue()
+        }
+        val endOfYear = LocalDate(scheduleStartDate.year, Month.DECEMBER, 31)
+        for (date in scheduleStartDate.plusDays(numOfDueDays)..endOfYear) {
+            assertThat(schedule.isDue(date)).isFalse()
         }
     }
 

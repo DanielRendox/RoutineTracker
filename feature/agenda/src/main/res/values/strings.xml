@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="fab_icon_description">Add a new routine</string>
+    <string name="routine_visibility_icon_toggle_all_visible_description">All routines visibile, click to hide</string>
+    <string name="routine_visibility_icon_toggle_some_routines_hidden_description">Inappropriate routines hidden, click to show</string>
 </resources>

@@ -5,6 +5,7 @@ import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
+import com.rendox.routinetracker.core.database.di.habitLocalDataModule
 import com.rendox.routinetracker.core.database.di.localDataSourceModule
 import com.rendox.routinetracker.core.logic.time.AnnualDate
 import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
@@ -43,6 +44,7 @@ class HabitLocalDataSourceImplTest : KoinTest {
         startKoin {
             modules(
                 localDataSourceModule,
+                habitLocalDataModule,
                 testModule,
             )
         }
@@ -51,7 +53,9 @@ class HabitLocalDataSourceImplTest : KoinTest {
         RoutineTrackerDatabase.Schema.create(sqlDriver)
 
         habitLocalDataSource = HabitLocalDataSourceImpl(
-            db = get(), ioDispatcher = UnconfinedTestDispatcher()
+            db = get(),
+            ioDispatcher = UnconfinedTestDispatcher(),
+            scheduleLocalDataSource = get(),
         )
     }
 

@@ -250,6 +250,9 @@ internal class ScheduleLocalDataSourceImpl(
             )
         }
 
-    override fun deleteSchedule(scheduleId: Long) =
+    override fun deleteSchedule(scheduleId: Long) {
         db.scheduleEntityQueries.deleteSchedule(scheduleId)
+        dueDateLocalDataSource.deleteDueDates(scheduleId)
+        weekDaysMonthRelatedLocalDataSource.deleteWeekDayMonthRelatedDays(scheduleId)
+    }
 }

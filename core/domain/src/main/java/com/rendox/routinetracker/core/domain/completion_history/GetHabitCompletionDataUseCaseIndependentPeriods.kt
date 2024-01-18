@@ -38,16 +38,23 @@ class GetHabitCompletionDataUseCaseIndependentPeriods(
             requestedDates = validationDates,
             schedule = habit.schedule,
         )
-        val completionHistory = completionHistoryRepository.getRecordsInPeriod(
-            habitId = habitId,
-            minDate = period.start,
-            maxDate = period.endInclusive,
-        )
-        val vacationHistory = vacationRepository.getVacationsInPeriod(
-            habitId = habitId,
-            minDate = period.start,
-            maxDate = period.endInclusive,
-        )
+
+        val completionHistory = if (period != null) {
+            completionHistoryRepository.getRecordsInPeriod(
+                habitId = habitId,
+                minDate = period.start,
+                maxDate = period.endInclusive,
+            )
+        } else emptyList()
+
+        val vacationHistory = if (period != null) {
+            vacationRepository.getVacationsInPeriod(
+                habitId = habitId,
+                minDate = period.start,
+                maxDate = period.endInclusive,
+            )
+        } else emptyList()
+
         validationDates.associateWith { date ->
             val habitStatus = habitStatusComputer.computeStatus(
                 validationDate = date,
@@ -66,11 +73,25 @@ class GetHabitCompletionDataUseCaseIndependentPeriods(
     }
 
     companion object {
-        fun expandPeriodToScheduleBounds(
-            requestedDates: Iterable<LocalDate>,
+        private fun expandPeriodToScheduleBounds(
+            requestedDates: LocalDateRange,
             schedule: Schedule,
-        ): LocalDateRange {
-            val minDate = requestedDates.min()
+        ): LocalDateRange? {
+            val scheduleEndDate = schedule.endDate
+
+            val requestedDatesLaterThanHabitEnd =
+                scheduleEndDate != null && requestedDates.start > scheduleEndDate
+            if (requestedDatesLaterThanHabitEnd) return null
+
+            val requestedDatesEarlierThanHabitStart =
+                requestedDates.endInclusive < schedule.startDate
+            if (requestedDatesEarlierThanHabitStart) return null
+
+            val requestedDatesIsIncorrectRange = requestedDates.endInclusive < requestedDates.start
+            if (requestedDatesIsIncorrectRange) return null
+
+
+            val minDate = requestedDates.start
             val requestedStart = when {
                 schedule.startDate > minDate -> schedule.startDate
                 else -> minDate
@@ -79,8 +100,7 @@ class GetHabitCompletionDataUseCaseIndependentPeriods(
                 is Schedule.PeriodicSchedule -> schedule.getPeriodRange(requestedStart)!!.start
                 else -> requestedStart
             }
-            val scheduleEndDate = schedule.endDate
-            val maxDate = requestedDates.max()
+            val maxDate = requestedDates.endInclusive
             val requestedEnd = when {
                 scheduleEndDate != null && scheduleEndDate < maxDate ->
                     scheduleEndDate
