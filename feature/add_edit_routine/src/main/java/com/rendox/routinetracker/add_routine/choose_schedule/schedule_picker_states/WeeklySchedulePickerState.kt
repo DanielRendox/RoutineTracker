@@ -10,6 +10,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.kizitonwose.calendar.core.daysOfWeek
 import com.rendox.routinetracker.add_routine.choose_schedule.schedule_pickers.ScheduleTypeUi
+import com.rendox.routinetracker.core.model.Schedule
 import kotlinx.datetime.DayOfWeek
 
 @Stable
@@ -81,6 +82,26 @@ class WeeklySchedulePickerState(
         numOfDueDaysIsValid = numOfDueDays in 1..7
     }
 
+    fun updateSelectedSchedule(schedule: Schedule.WeeklySchedule) {
+        when (schedule) {
+            is Schedule.WeeklyScheduleByNumOfDueDays -> {
+                numOfDueDays = schedule.numOfDueDays.toString()
+                specificDaysOfWeek = emptyList()
+                chooseSpecificDays = false
+                numOfDueDaysTextFieldIsEditable = true
+            }
+            is Schedule.WeeklyScheduleByDueDaysOfWeek -> {
+                numOfDueDays = schedule.dueDaysOfWeek.size.toString()
+                specificDaysOfWeek = schedule.dueDaysOfWeek
+                chooseSpecificDays = true
+                numOfDueDaysTextFieldIsEditable = false
+            }
+        }
+
+        numOfDueDaysIsValid = true
+        updateContainsErrorState()
+    }
+
     @Suppress("UNCHECKED_CAST")
     companion object {
         val Saver: Saver<WeeklySchedulePickerState, *> = listSaver(
@@ -88,7 +109,6 @@ class WeeklySchedulePickerState(
                 listOf(
                     weeklySchedulePickerState.numOfDueDays,
                     weeklySchedulePickerState.specificDaysOfWeek,
-                    weeklySchedulePickerState.numOfDueDaysIsValid,
                     weeklySchedulePickerState.selected,
                     weeklySchedulePickerState.chooseSpecificDays,
                 )
@@ -97,8 +117,8 @@ class WeeklySchedulePickerState(
                 WeeklySchedulePickerState(
                     numOfDueDays = weeklySchedulePickerStateValues[0] as String,
                     specificDaysOfWeek = weeklySchedulePickerStateValues[1] as List<DayOfWeek>,
-                    selected = weeklySchedulePickerStateValues[3] as Boolean,
-                    chooseSpecificDays = weeklySchedulePickerStateValues[4] as Boolean,
+                    selected = weeklySchedulePickerStateValues[2] as Boolean,
+                    chooseSpecificDays = weeklySchedulePickerStateValues[3] as Boolean,
                 )
             },
         )

@@ -13,15 +13,19 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,11 +42,13 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.rendox.routinetracker.add_routine.choose_routine_type.rememberChooseRoutineTypePageState
 import com.rendox.routinetracker.add_routine.choose_schedule.rememberChooseSchedulePageState
+import com.rendox.routinetracker.add_routine.choose_schedule.schedule_pickers.ScheduleTypeUi
 import com.rendox.routinetracker.add_routine.navigation.AddRoutineDestination
 import com.rendox.routinetracker.add_routine.navigation.AddRoutineNavHost
 import com.rendox.routinetracker.add_routine.set_goal.rememberSetGoalPageState
 import com.rendox.routinetracker.add_routine.tweak_routine.rememberTweakRoutinePageState
 import com.rendox.routinetracker.core.domain.di.InsertHabitUseCase
+import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.ui.helpers.LocalLocale
 import com.rendox.routinetracker.feature.agenda.R
 import kotlinx.coroutines.launch
@@ -70,13 +76,14 @@ internal fun AddRoutineRoute(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
     val coroutineScope = rememberCoroutineScope()
+    val tweakRoutinePageState = rememberTweakRoutinePageState()
     val addRoutineScreenState = rememberAddRoutineScreenState(
         navController = navController,
         navBackStackEntry = navBackStackEntry,
         chooseRoutineTypePageState = rememberChooseRoutineTypePageState(),
         setGoalPageState = rememberSetGoalPageState(),
         chooseSchedulePageState = rememberChooseSchedulePageState(),
-        tweakRoutinePageState = rememberTweakRoutinePageState(),
+        tweakRoutinePageState = tweakRoutinePageState,
         navigateBack = navigateBack,
         saveRoutine = { routine ->
             coroutineScope.launch {
@@ -86,9 +93,28 @@ internal fun AddRoutineRoute(
         },
     )
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    println("schedule converted = ${tweakRoutinePageState.convertedSchedule}")
+    val newSchedule = tweakRoutinePageState.convertedSchedule
+    val scheduleConvertedMessage = stringResource(id = R.string.schedule_converted_snackbar_message)
+    val newScheduleDisplayName = when (newSchedule) {
+        is Schedule.EveryDaySchedule -> stringResource(ScheduleTypeUi.EveryDaySchedule.titleId)
+        is Schedule.WeeklySchedule -> stringResource(ScheduleTypeUi.WeeklySchedule.titleId)
+        is Schedule.MonthlySchedule -> stringResource(ScheduleTypeUi.MonthlySchedule.titleId)
+        is Schedule.AlternateDaysSchedule -> stringResource(ScheduleTypeUi.AlternateDaysSchedule.titleId)
+        else -> ""
+    }
+    LaunchedEffect(newSchedule) {
+        if (newSchedule != null) {
+            snackbarHostState.showSnackbar(message = "$scheduleConvertedMessage $newScheduleDisplayName")
+        }
+        tweakRoutinePageState.updateScheduleConverted(null)
+    }
+
     AddRoutineScreen(
         modifier = modifier,
         addRoutineScreenState = addRoutineScreenState,
+        snackbarHostState = snackbarHostState,
     )
 
     BackHandler {
@@ -135,8 +161,11 @@ private fun DiscardCreatingNewHabitDialog(
 internal fun AddRoutineScreen(
     modifier: Modifier = Modifier,
     addRoutineScreenState: AddRoutineScreenState,
+    snackbarHostState: SnackbarHostState,
 ) {
-    Surface(modifier = modifier.fillMaxSize()) {
+    Surface(modifier = modifier
+        .fillMaxSize()
+        .navigationBarsPadding()) {
         Column(
             modifier = modifier
                 .fillMaxSize()
@@ -155,6 +184,8 @@ internal fun AddRoutineScreen(
                 addRoutineScreenState.navigateForwardButtonText.asString().uppercase()
 
             val startDayOfWeek = WeekFields.of(LocalLocale.current).firstDayOfWeek
+
+            SnackbarHost(hostState = snackbarHostState)
 
             AddRoutineBottomNavigation(
                 modifier = Modifier
@@ -252,7 +283,8 @@ fun AddHabitDestinationTopAppBar(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(152.dp)
+            .statusBarsPadding()
+            .height(112.dp)
     ) {
         Text(
             modifier = Modifier

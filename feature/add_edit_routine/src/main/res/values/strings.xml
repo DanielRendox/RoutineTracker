@@ -48,4 +48,5 @@
     <string name="days_from_start_to_end_description">start – end</string>
     <string name="discard_habit_creation_dialog_title">Discard habit creation?</string>
     <string name="discard_habit_creation">Discard</string>
+    <string name="schedule_converted_snackbar_message">"Schedule converted to"</string>
 </resources>

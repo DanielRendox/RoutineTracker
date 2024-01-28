@@ -72,6 +72,9 @@ class TweakRoutinePageState(
     val containsError: Boolean
         get() = !overallNumOfDaysIsValid
 
+    var convertedSchedule by mutableStateOf<Schedule?>(null)
+        private set
+
     fun updateStartDate(startDate: LocalDate) {
         this.startDate = startDate
     }
@@ -126,7 +129,6 @@ class TweakRoutinePageState(
     }
 
     fun updateChosenSchedule(chosenSchedule: Schedule) {
-        println("TweakRoutinePageState new schedule = $chosenSchedule")
         scheduleSupportsScheduleDeviation = chosenSchedule.supportsScheduleDeviation
         backlogEnabled = chosenSchedule.backlogEnabled
         completingAheadEnabled = chosenSchedule.completingAheadEnabled
@@ -148,6 +150,10 @@ class TweakRoutinePageState(
         this.weekStartDay = weekStartDay
     }
 
+    fun updateScheduleConverted(newSchedule: Schedule?) {
+        convertedSchedule = newSchedule
+    }
+
     companion object {
         val Saver: Saver<TweakRoutinePageState, *> = listSaver(
             save = { tweakRoutinePageState ->
@@ -162,6 +168,8 @@ class TweakRoutinePageState(
                     tweakRoutinePageState.completingAheadEnabled,
                     tweakRoutinePageState.periodSeparationEnabled,
                     tweakRoutinePageState.weekStartDay,
+                    tweakRoutinePageState.weekStartDaySettingIsEnabled,
+                    tweakRoutinePageState.scheduleSupportsScheduleDeviation,
                 )
             },
             restore = { tweakRoutinePageStateValues ->
@@ -176,6 +184,8 @@ class TweakRoutinePageState(
                     completingAheadEnabled = tweakRoutinePageStateValues[7] as Boolean,
                     periodSeparationEnabled = tweakRoutinePageStateValues[8] as Boolean?,
                     weekStartDay = tweakRoutinePageStateValues[9] as DayOfWeek?,
+                    weekStartDaySettingIsEnabled = tweakRoutinePageStateValues[10] as Boolean,
+                    scheduleSupportsScheduleDeviation = tweakRoutinePageStateValues[11] as Boolean,
                 )
             }
         )

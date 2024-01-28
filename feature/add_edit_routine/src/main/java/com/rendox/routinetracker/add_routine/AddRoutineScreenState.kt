@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
+import com.kizitonwose.calendar.core.daysOfWeek
 import com.rendox.routinetracker.add_routine.choose_routine_type.ChooseRoutineTypePageState
 import com.rendox.routinetracker.add_routine.choose_routine_type.RoutineTypeUi
 import com.rendox.routinetracker.add_routine.choose_schedule.ChooseSchedulePageState
@@ -18,6 +19,7 @@ import com.rendox.routinetracker.add_routine.navigation.yesNoHabitDestinations
 import com.rendox.routinetracker.add_routine.set_goal.SetGoalPageState
 import com.rendox.routinetracker.add_routine.tweak_routine.TweakRoutinePageState
 import com.rendox.routinetracker.core.model.Habit
+import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.ui.R
 import com.rendox.routinetracker.core.ui.helpers.UiText
 import kotlinx.datetime.DayOfWeek
@@ -98,7 +100,7 @@ class AddRoutineScreenState(
         val currentDestinationRoute = navBackStackEntry?.destination?.route ?: return
 
         if (currentDestinationRoute == navDestinations.last().route) {
-            val routine = assembleRoutine(startDayOfWeek)
+            val routine = assembleRoutine()
             saveRoutine(routine)
             return
         }
@@ -122,15 +124,15 @@ class AddRoutineScreenState(
         }
 
         if (nextDestination == AddRoutineDestination.TweakRoutine) {
-            val schedule = chooseSchedulePageState.selectedSchedulePickerState.assembleSchedule(
-                startDayOfWeek = startDayOfWeek,
-            )
-            println("AddRoutineScreenState assembled schedule: $schedule")
-            tweakRoutinePageState.updateChosenSchedule(
-                schedule
-            )
-        }
+            val chosenSchedule = chooseSchedulePageState.selectedSchedulePickerState.assembleSchedule()
+            val resultingSchedule = chosenSchedule.convertToMoreAppropriateModel(startDayOfWeek)
+            tweakRoutinePageState.updateChosenSchedule(resultingSchedule)
 
+            if (chosenSchedule != resultingSchedule) {
+                tweakRoutinePageState.updateScheduleConverted(resultingSchedule)
+                chooseSchedulePageState.updateSelectedSchedule(resultingSchedule)
+            }
+        }
         navController.navigate(nextDestination)
     }
 
@@ -141,19 +143,77 @@ class AddRoutineScreenState(
         }
     }
 
-    private fun assembleRoutine(startDayOfWeek: DayOfWeek): Habit = when (chooseRoutineTypePageState.routineType) {
+    private fun assembleRoutine(): Habit = when (chooseRoutineTypePageState.routineType) {
         is RoutineTypeUi.YesNoHabit -> Habit.YesNoHabit(
             name = setGoalPageState.routineName,
             description = setGoalPageState.routineDescription,
             schedule = chooseSchedulePageState.selectedSchedulePickerState.assembleSchedule(
                 tweakRoutinePageState = tweakRoutinePageState,
-                startDayOfWeek = startDayOfWeek,
             ),
             sessionDurationMinutes = tweakRoutinePageState.sessionDuration?.toMinutes()?.toInt(),
             defaultCompletionTime = tweakRoutinePageState.sessionTime?.toKotlinLocalTime(),
         )
 
         is RoutineTypeUi.MeasurableHabit -> TODO()
+    }
+
+    private fun Schedule.convertToMoreAppropriateModel(startDayOfWeek: DayOfWeek) = when(this) {
+        is Schedule.EveryDaySchedule -> this
+        is Schedule.WeeklyScheduleByNumOfDueDays -> {
+            if (numOfDueDays >= 7) {
+                Schedule.EveryDaySchedule(
+                    startDate = startDate,
+                    endDate = endDate,
+                )
+            } else {
+                this
+            }
+        }
+        is Schedule.WeeklyScheduleByDueDaysOfWeek -> {
+            if (dueDaysOfWeek.containsAll(DayOfWeek.values().toList())) {
+                Schedule.EveryDaySchedule(
+                    startDate = startDate,
+                    endDate = endDate,
+                )
+            } else {
+                this
+            }
+        }
+        is Schedule.MonthlyScheduleByDueDatesIndices -> {
+            val dueOnAllPossibleMonthDays = dueDatesIndices.containsAll((1..31).toList())
+            val dueOnFirstThirtyDaysAndLastDayOfMonth =
+                dueDatesIndices.containsAll((1..30).toList()) && includeLastDayOfMonth
+            if (dueOnAllPossibleMonthDays || dueOnFirstThirtyDaysAndLastDayOfMonth) {
+                Schedule.EveryDaySchedule(
+                    startDate = startDate,
+                    endDate = endDate,
+                )
+            } else {
+                this
+            }
+        }
+        is Schedule.MonthlyScheduleByNumOfDueDays -> {
+            if (numOfDueDays >= 31) {
+                Schedule.EveryDaySchedule(
+                    startDate = startDate,
+                    endDate = endDate,
+                )
+            } else {
+                this
+            }
+        }
+        is Schedule.AlternateDaysSchedule -> {
+            if (numOfDaysInPeriod == 7) {
+                Schedule.WeeklyScheduleByDueDaysOfWeek(
+                    dueDaysOfWeek = daysOfWeek(startDayOfWeek).take(numOfDueDays),
+                    startDate = startDate,
+                    endDate = endDate,
+                )
+            } else {
+                this
+            }
+        }
+        else -> this
     }
 }
 

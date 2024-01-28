@@ -115,6 +115,14 @@ private fun DayOfMonthPicker(
                 modifier = Modifier
                     .padding(horizontal = 4.dp, vertical = 2.dp)
                     .size(40.dp),
+                text = "29",
+                selected = 29 in selectedDays,
+                onToggle = { toggleDayOfMonth(29) },
+            )
+            DayPickerElement(
+                modifier = Modifier
+                    .padding(horizontal = 4.dp, vertical = 2.dp)
+                    .size(40.dp),
                 text = "30",
                 selected = 30 in selectedDays,
                 onToggle = { toggleDayOfMonth(30) },
