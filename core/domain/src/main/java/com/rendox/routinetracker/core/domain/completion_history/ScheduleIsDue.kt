@@ -88,7 +88,7 @@ private fun Schedule.ByNumOfDueDays.getNumOfDueDaysInFirstPeriod(): Int? = when 
     is Schedule.WeeklyScheduleByNumOfDueDays -> numOfDueDaysInFirstPeriod
     is Schedule.MonthlyScheduleByNumOfDueDays -> numOfDueDaysInFirstPeriod
     is Schedule.AnnualScheduleByNumOfDueDays -> numOfDueDaysInFirstPeriod
-    is Schedule.AlternateDaysSchedule -> numOfDaysInPeriod
+    is Schedule.AlternateDaysSchedule -> numOfDueDays
 }
 
 private fun Schedule.ByNumOfDueDays.getNumOfDueDays(
