@@ -1,5 +1,6 @@
 package com.rendox.routinetracker.core.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,14 +28,16 @@ fun Setting(
 ) {
     Row(
         modifier = modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .then(if (enabled) Modifier.clickable { onToggle(!isOn) } else Modifier)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(modifier = Modifier
-            .weight(1f)
-            .padding(end = 16.dp)
-            .alpha(if (enabled) 1f else 0.5f)
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 16.dp)
+                .alpha(if (enabled) 1f else 0.5f)
         ) {
             Text(text = title)
             description?.let {

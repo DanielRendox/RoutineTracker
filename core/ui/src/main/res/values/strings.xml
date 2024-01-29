@@ -56,5 +56,6 @@
 
     <string name="finished_date_completion_attempt_snackbar_message">"The habit is finished on this date."</string>
     <string name="not_started_date_completion_attempt_snackbar_message">"The habit is not started on this date."</string>
-    <string name="future_date_completion_attempt_snackbar_message">"The habit cannot be completed on future dates."</string>
+    <string name="future_date_completion_attempt_snackbar_message">"Habits can't be completed on future dates."</string>
+    <string name="toggle_dropdown_menu_visibility">Toggle dropdown menu visibility\n</string>
 </resources>

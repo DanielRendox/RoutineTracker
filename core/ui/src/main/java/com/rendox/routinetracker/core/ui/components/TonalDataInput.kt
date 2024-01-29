@@ -28,8 +28,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.rendox.routinetracker.core.ui.R
 
 const val TonalDataInputRoundedCornerPercent = 30
 
@@ -37,6 +39,8 @@ const val TonalDataInputRoundedCornerPercent = 30
 fun TonalDataInput(
     modifier: Modifier = Modifier,
     text: String,
+    onClick: () -> Unit = {},
+    disabled: Boolean = true,
 ) {
     Surface(
         modifier = modifier
@@ -45,7 +49,12 @@ fun TonalDataInput(
         shape = RoundedCornerShape(TonalDataInputRoundedCornerPercent),
         color = MaterialTheme.colorScheme.secondaryContainer,
     ) {
-        Box(contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier.then(
+                if (disabled) Modifier else Modifier.clickable(onClick = onClick)
+            ),
+            contentAlignment = Alignment.Center
+        ) {
             Text(
                 modifier = Modifier.padding(vertical = 8.dp),
                 text = text,
@@ -103,7 +112,7 @@ fun TonalDropdownMenu(
                     rotationZ = iconRotation
                 },
                 imageVector = Icons.Default.ArrowDropDown,
-                contentDescription = null,
+                contentDescription = stringResource(R.string.toggle_dropdown_menu_visibility),
             )
         }
 

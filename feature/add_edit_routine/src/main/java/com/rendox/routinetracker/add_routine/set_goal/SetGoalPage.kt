@@ -52,19 +52,19 @@ fun SetGoalPage(
             }
         )
 
-        OutlinedTextField(
-            modifier = Modifier
-                .padding(top = 16.dp, start = 16.dp, end = 16.dp)
-                .fillMaxWidth(),
-            value = setGoalPageState.routineDescription ?: "",
-            onValueChange = setGoalPageState::updateRoutineDescription,
-            label = {
-                Text(
-                    text = stringResource(
-                        id = R.string.set_goal_page_routine_description_text_field_label
-                    )
-                )
-            },
-        )
+//        OutlinedTextField(
+//            modifier = Modifier
+//                .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+//                .fillMaxWidth(),
+//            value = setGoalPageState.routineDescription ?: "",
+//            onValueChange = setGoalPageState::updateRoutineDescription,
+//            label = {
+//                Text(
+//                    text = stringResource(
+//                        id = R.string.set_goal_page_routine_description_text_field_label
+//                    )
+//                )
+//            },
+//        )
     }
 }

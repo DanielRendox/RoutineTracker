@@ -124,7 +124,7 @@ private fun RoutineCalendarScreenPortrait(
 ) {
     Column(modifier = modifier) {
         RoutineCalendar(
-            modifier = Modifier.padding(bottom = 16.dp),
+            modifier = Modifier.padding(bottom = 24.dp),
             currentMonth = currentMonth,
             firstDayOfWeek = WeekFields.of(LocalLocale.current).firstDayOfWeek,
             routineCalendarDates = routineCalendarDates,

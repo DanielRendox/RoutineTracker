@@ -29,6 +29,7 @@ class TweakRoutinePageState(
     weekStartDay: DayOfWeek? = null,
     weekStartDaySettingIsEnabled: Boolean = false,
     scheduleSupportsScheduleDeviation: Boolean = false,
+    dialogType: TweakRoutinePageDialogType? = null,
 ) {
     var startDate by mutableStateOf(startDate)
         private set
@@ -57,7 +58,7 @@ class TweakRoutinePageState(
     var overallNumOfDaysIsValid by mutableStateOf(overallNumOfDaysIsValid)
         private set
 
-    var dialogType: TweakRoutinePageDialogType? by mutableStateOf(null)
+    var dialogType: TweakRoutinePageDialogType? by mutableStateOf(dialogType)
         private set
 
     var weekStartDay by mutableStateOf(weekStartDay)
@@ -104,15 +105,17 @@ class TweakRoutinePageState(
 
     fun switchEndDateEnabled(isEnabled: Boolean) {
         if (isEnabled) {
-            endDate = startDate.plusDays(1)
-            overallNumOfDays = "2"
+            endDate = startDate
+            overallNumOfDays = "1"
         } else {
             endDate = null
             overallNumOfDays = ""
         }
     }
 
-    fun updateDialogType(dialogType: TweakRoutinePageDialogType?) {
+    fun updateDialogType(
+        dialogType: TweakRoutinePageDialogType?,
+    ) {
         this.dialogType = dialogType
     }
 
@@ -170,6 +173,7 @@ class TweakRoutinePageState(
                     tweakRoutinePageState.weekStartDay,
                     tweakRoutinePageState.weekStartDaySettingIsEnabled,
                     tweakRoutinePageState.scheduleSupportsScheduleDeviation,
+                    tweakRoutinePageState.dialogType,
                 )
             },
             restore = { tweakRoutinePageStateValues ->
@@ -186,6 +190,7 @@ class TweakRoutinePageState(
                     weekStartDay = tweakRoutinePageStateValues[9] as DayOfWeek?,
                     weekStartDaySettingIsEnabled = tweakRoutinePageStateValues[10] as Boolean,
                     scheduleSupportsScheduleDeviation = tweakRoutinePageStateValues[11] as Boolean,
+                    dialogType = tweakRoutinePageStateValues[12] as TweakRoutinePageDialogType?,
                 )
             }
         )

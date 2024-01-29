@@ -1,11 +1,14 @@
 package com.rendox.routinetracker.feature.agenda
 
+import android.content.res.Configuration
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -18,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -26,8 +30,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -73,9 +79,11 @@ internal fun AgendaRoute(
                         is IllegalDateEditAttemptException.NotStartedHabitDateEditAttemptException -> {
                             notStartedDateEditAttemptMessage
                         }
+
                         is IllegalDateEditAttemptException.FinishedHabitDateEditAttemptException -> {
                             finishedDateEditAttemptMessage
                         }
+
                         is IllegalDateEditAttemptException.FutureDateEditAttemptException -> {
                             futureDateEditAttemptMessage
                         }
@@ -179,36 +187,61 @@ internal fun AgendaScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(state = rememberScrollState())
+                .verticalScroll(rememberScrollState())
                 .padding(paddingValues),
-            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            val weekCalendarHeight = 70.dp
+
             RoutineTrackerWeekCalendar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 4.dp, bottom = 4.dp)
-                    .height(70.dp),
+                    .height(weekCalendarHeight),
                 selectedDate = currentDate,
                 initialDate = today,
                 dateOnClick = onDateChange,
                 today = today,
             )
-            AgendaList(
-                modifier = Modifier.padding(horizontal = 8.dp),
-                routineList = routineList ?: emptyList(),
-                onRoutineClick = onRoutineClick,
-                onStatusCheckmarkClick = { routine ->
+
+            if (routineList == null) return@Column
+
+            // TODO check for accessibility descriptions throughout the app
+            if (routineList.isNotEmpty()) {
+                val onStatusCheckmarkClick: (DisplayRoutine) -> Unit = { routine ->
                     when (routine.type) {
                         DisplayRoutineType.YesNoHabit -> {
+                            val numOfTimesCompleted =
+                                if (routine.numOfTimesCompleted > 0F) 0F else 1F
                             val completion = Habit.YesNoHabit.CompletionRecord(
                                 date = currentDate.toKotlinLocalDate(),
-                                numOfTimesCompleted = if (routine.numOfTimesCompleted > 0F) 0F else 1F,
+                                numOfTimesCompleted = numOfTimesCompleted,
                             )
                             insertCompletion(routine.id, completion)
                         }
                     }
-                },
-            )
+                }
+                AgendaList(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    routineList = routineList,
+                    onRoutineClick = onRoutineClick,
+                    onStatusCheckmarkClick = onStatusCheckmarkClick,
+                )
+            } else {
+                Box(
+                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    val smallTopAppBarHeight = 64.dp
+                    NothingScheduled(
+                        modifier = Modifier.padding(
+                            bottom = when (LocalConfiguration.current.orientation) {
+                                Configuration.ORIENTATION_LANDSCAPE -> 0.dp
+                                else -> smallTopAppBarHeight + weekCalendarHeight
+                            }
+                        ),
+                    )
+                }
+            }
         }
     }
 }
@@ -230,6 +263,71 @@ private fun AgendaList(
             onCheckmarkClick = onStatusCheckmarkClick,
         )
         agendaRecyclerview.adapter = adapter
+    }
+}
+
+@Composable
+fun NothingScheduled(
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Icon(
+            modifier = Modifier
+                .size(96.dp)
+                .padding(bottom = 16.dp),
+            painter = painterResource(id = R.drawable.empty_calendar_24),
+            contentDescription = null,
+        )
+        Text(
+            modifier = Modifier.padding(bottom = 4.dp),
+            text = stringResource(id = R.string.nothing_scheduled),
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                modifier = Modifier.padding(end = 4.dp),
+                text = stringResource(id = R.string.nothing_scheduled_description_try_adding_routines),
+                color = MaterialTheme.colorScheme.outline,
+            )
+            Icon(
+                modifier = Modifier.size(14.dp),
+                imageVector = Icons.Filled.Add,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.outline,
+            )
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                modifier = Modifier.padding(end = 4.dp),
+                text = stringResource(id = R.string.nothing_scheduled_description_try_toggling_routine_visibility),
+                color = MaterialTheme.colorScheme.outline,
+            )
+            Icon(
+                modifier = Modifier.size(14.dp),
+                painter = painterResource(id = R.drawable.baseline_visibility_on_24),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.outline,
+            )
+        }
+    }
+}
+
+@Preview(showSystemUi = true)
+@Composable
+private fun NothingScheduledPreview() {
+    Surface {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            NothingScheduled()
+        }
     }
 }
 

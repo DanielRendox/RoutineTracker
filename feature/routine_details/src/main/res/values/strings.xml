@@ -10,4 +10,5 @@
     <string name="longest_streak">Your longest streak</string>
 
     <string name="delete_habit_dialog_title">Are sure you want to delete this habit?</string>
+    <string name="delete_habit_icon_description">Delete habit</string>
 </resources>

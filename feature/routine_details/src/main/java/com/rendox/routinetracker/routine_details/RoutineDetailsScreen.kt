@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
@@ -161,7 +162,7 @@ internal fun RoutineDetailsScreen(
     }
     val toolbarState = rememberExitUntilCollapsedToolbarState(toolbarHeightRange)
 
-    var deleteHabitDialogIsShown by remember { mutableStateOf(false) }
+    var deleteHabitDialogIsShown by rememberSaveable { mutableStateOf(false) }
     DeleteHabitDialog(
         dialogIsVisible = deleteHabitDialogIsShown,
         onDismissRequest = { deleteHabitDialogIsShown = false },
@@ -191,7 +192,9 @@ internal fun RoutineDetailsScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = null,
+                            contentDescription = stringResource(
+                                id = R.string.delete_habit_icon_description
+                            ),
                         )
                     }
                 },

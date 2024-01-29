@@ -609,7 +609,6 @@ class ScheduleIsDueTest {
 
     @Test
     fun `AnnualScheduleByNumOfDueDays, start from routine start, due on specified days`() {
-
         val schedule = Schedule.AnnualScheduleByNumOfDueDays(
             startDate = routineStartDate,
             numOfDueDays = Random.nextInt(2, 364),

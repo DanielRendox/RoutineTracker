@@ -246,7 +246,7 @@ private fun EndDateSetting(
     }
 
     CustomIconSetting(
-        modifier = modifier.clickable { switchEndDateEnabled(endDate != null) },
+        modifier = modifier.clickable { switchEndDateEnabled(endDate == null) },
         title = stringResource(id = R.string.end_date_routine_setting_title),
         icon = {
             Icon(
@@ -294,11 +294,9 @@ private fun EndDateDisplay(
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             TonalDataInput(
-                modifier = Modifier
-                    .padding(end = 16.dp)
-                    .clickable {
-                        showEndDatePickerDialog()
-                    },
+                modifier = Modifier.padding(end = 16.dp),
+                onClick = showEndDatePickerDialog,
+                disabled = false,
                 text = endDate.format(formatter),
             )
 

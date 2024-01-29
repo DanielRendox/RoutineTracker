@@ -22,6 +22,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val useDarkTheme = isSystemInDarkTheme()
             windowInsetsController.isAppearanceLightStatusBars = !useDarkTheme
+            windowInsetsController.isAppearanceLightNavigationBars = !useDarkTheme
 
             RoutineTrackerTheme(useDarkTheme = useDarkTheme) {
                 RoutineTrackerNavHost(
