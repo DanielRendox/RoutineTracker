@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
@@ -83,7 +82,7 @@ private fun AlternateDaysInput(
 
         TextField(
             modifier = Modifier
-                .widthIn(min = 100.dp, max = 150.dp)
+                .weight(1f)
                 .wrapContentHeight(),
             value = numOfActivityDays,
             onValueChange = updateNumOfActivityDays,
@@ -109,7 +108,7 @@ private fun AlternateDaysInput(
 
         TextField(
             modifier = Modifier
-                .widthIn(min = 100.dp, max = 150.dp)
+                .weight(1f)
                 .wrapContentHeight(),
             value = numOfRestDays,
             onValueChange = updateNumOfRestDays,

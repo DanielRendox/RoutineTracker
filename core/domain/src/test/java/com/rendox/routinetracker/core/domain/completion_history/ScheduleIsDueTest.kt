@@ -146,7 +146,6 @@ class ScheduleIsDueTest {
                 schedule.isDue(validationDate = currentDate)
             ).isTrue()
         }
-        println("checkpoint 1")
 
         for (dayIndex in 3..4) {
             val currentDate = schedule.startDate.plusDays(dayIndex)
@@ -154,7 +153,6 @@ class ScheduleIsDueTest {
                 schedule.isDue(validationDate = currentDate)
             ).isFalse()
         }
-        println("checkpoint 2")
 
 
         for (dayIndex in 5..8) {
@@ -162,7 +160,6 @@ class ScheduleIsDueTest {
             assertThat(
                 schedule.isDue(validationDate = currentDate)
             ).isTrue()
-            println("checkpoint 3")
         }
 
         for (dayIndex in 9..11) {
@@ -327,7 +324,6 @@ class ScheduleIsDueTest {
 
         val firstNotDueDay = scheduleStartDate.plusDays(numOfFirstDueDays)
         for (date in firstNotDueDay..scheduleStartDate.atEndOfMonth) {
-            println("date = $date")
             assertThat(schedule.isDue(validationDate = date)).isFalse()
         }
     }

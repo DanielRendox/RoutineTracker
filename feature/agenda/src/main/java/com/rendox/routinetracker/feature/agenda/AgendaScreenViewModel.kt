@@ -35,13 +35,15 @@ class AgendaScreenViewModel(
     private val allRoutinesFlow = MutableStateFlow(emptyList<Habit>())
     private val cashedRoutinesFlow = MutableStateFlow(emptyList<DisplayRoutine>())
 
-    private val _showAllRoutinesFlow = MutableStateFlow(true)
+    private val _showAllRoutinesFlow = MutableStateFlow(false)
     val showAllRoutinesFlow = _showAllRoutinesFlow.asStateFlow()
 
     private val _currentDateFlow = MutableStateFlow(today)
     val currentDateFlow = _currentDateFlow.asStateFlow()
 
-    val visibleRoutinesFlow: StateFlow<List<DisplayRoutine>?> =
+    private val routinesAreUpdatingFlow = MutableStateFlow(true)
+
+    val visibleRoutinesFlow: StateFlow<List<DisplayRoutine>> =
         combine(
             cashedRoutinesFlow,
             _showAllRoutinesFlow,
@@ -55,7 +57,19 @@ class AgendaScreenViewModel(
             }
         }.stateIn(
             scope = viewModelScope,
-            initialValue = null,
+            initialValue = emptyList(),
+            started = SharingStarted.WhileSubscribed(5_000),
+        )
+
+    val nothingIsScheduledFlow =
+        combine(
+            routinesAreUpdatingFlow,
+            visibleRoutinesFlow,
+        ) { routinesAreUpdating, visibleRoutinesFlow ->
+            visibleRoutinesFlow.isEmpty() && !routinesAreUpdating
+        }.stateIn(
+            scope = viewModelScope,
+            initialValue = false,
             started = SharingStarted.WhileSubscribed(5_000),
         )
 
@@ -70,6 +84,7 @@ class AgendaScreenViewModel(
     }
 
     private fun updateRoutinesForDate(date: LocalDate) = viewModelScope.launch {
+        routinesAreUpdatingFlow.update { true }
         for (routine in allRoutinesFlow.value) {
             cashedRoutinesFlow.update { cashedRoutines ->
                 cashedRoutines.toMutableList().apply {
@@ -83,6 +98,7 @@ class AgendaScreenViewModel(
                 }
             }
         }
+        routinesAreUpdatingFlow.update { false }
     }
 
     private suspend fun getDisplayRoutine(habit: Habit, date: LocalDate): DisplayRoutine {
@@ -129,6 +145,7 @@ class AgendaScreenViewModel(
                 )
             }
 
+            routinesAreUpdatingFlow.update { true }
             cashedRoutinesFlow.update { cashedRoutines ->
                 cashedRoutines.toMutableList().apply {
                     val routineToUpdateIndex = indexOfFirst { it.id == routineId }
@@ -144,6 +161,7 @@ class AgendaScreenViewModel(
                     }
                 }
             }
+            routinesAreUpdatingFlow.update { false }
         }
     }
 

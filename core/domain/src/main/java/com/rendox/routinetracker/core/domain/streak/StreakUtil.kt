@@ -22,7 +22,6 @@ fun List<Streak>.getLongestStreak(): Streak? =
     maxByOrNull { it.getDurationInDays() }
 
 fun List<Streak>.joinAdjacentStreaks(): List<Streak> {
-    println("joinAdjacentStreaks input: $this")
     val resultingStreaks = mutableListOf<Streak>()
     var previousStreak = firstOrNull() ?: return emptyList()
 
@@ -35,7 +34,6 @@ fun List<Streak>.joinAdjacentStreaks(): List<Streak> {
         }
     }
     resultingStreaks.add(previousStreak)
-    println("joinAdjacentStreaks output: $resultingStreaks")
 
     return resultingStreaks
 }

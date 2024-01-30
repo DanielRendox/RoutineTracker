@@ -28,7 +28,7 @@ android {
     defaultConfig {
         applicationId = "com.rendox.routinetracker"
         versionCode = 1
-        versionName = "1.0"
+        versionName = "0.1.0"
 
         vectorDrawables {
             useSupportLibrary = true

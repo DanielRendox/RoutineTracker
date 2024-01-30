@@ -69,8 +69,6 @@ private fun RoutineStatusDay(
     includedInStreak: Boolean,
     onClick: (date: LocalDate) -> Unit,
 ) {
-    println("RoutineStatusDay: $day includedInStreak: $includedInStreak")
-
     val completedStroke = MaterialTheme.routineStatusColors.completedStroke
     val completedBackground = MaterialTheme.routineStatusColors.completedBackground
 
@@ -143,7 +141,7 @@ private fun RoutineStatusDay(
 
     Box(
         modifier = modifier
-            .padding(horizontal = 8.dp, vertical = verticalPadding)
+            .padding(horizontal = 7.dp, vertical = verticalPadding)
             .size(dayContainerSize)
             .aspectRatio(1f)
             .clip(shape = CircleShape)

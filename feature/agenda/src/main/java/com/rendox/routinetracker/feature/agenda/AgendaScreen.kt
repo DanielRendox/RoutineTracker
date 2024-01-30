@@ -58,6 +58,7 @@ internal fun AgendaRoute(
     val currentDate by viewModel.currentDateFlow.collectAsStateWithLifecycle()
     val visibleRoutines by viewModel.visibleRoutinesFlow.collectAsStateWithLifecycle()
     val showAllRoutines by viewModel.showAllRoutinesFlow.collectAsStateWithLifecycle()
+    val nothingIsScheduled by viewModel.nothingIsScheduledFlow.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -111,6 +112,7 @@ internal fun AgendaRoute(
         },
         showAllRoutines = showAllRoutines,
         snackbarHostState = snackbarHostState,
+        nothingIsScheduled = nothingIsScheduled,
     )
 }
 
@@ -119,7 +121,7 @@ internal fun AgendaRoute(
 internal fun AgendaScreen(
     modifier: Modifier = Modifier,
     currentDate: LocalDate,
-    routineList: List<DisplayRoutine>?,
+    routineList: List<DisplayRoutine>,
     today: LocalDate,
     showAllRoutines: Boolean,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
@@ -128,6 +130,7 @@ internal fun AgendaScreen(
     insertCompletion: (Long, Habit.CompletionRecord) -> Unit,
     onDateChange: (LocalDate) -> Unit,
     onNotDueRoutinesVisibilityToggle: () -> Unit,
+    nothingIsScheduled: Boolean,
 ) {
     val locale = LocalLocale.current
 
@@ -203,9 +206,6 @@ internal fun AgendaScreen(
                 today = today,
             )
 
-            if (routineList == null) return@Column
-
-            // TODO check for accessibility descriptions throughout the app
             if (routineList.isNotEmpty()) {
                 val onStatusCheckmarkClick: (DisplayRoutine) -> Unit = { routine ->
                     when (routine.type) {
@@ -226,9 +226,13 @@ internal fun AgendaScreen(
                     onRoutineClick = onRoutineClick,
                     onStatusCheckmarkClick = onStatusCheckmarkClick,
                 )
-            } else {
+            }
+
+            if(nothingIsScheduled) {
                 Box(
-                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
                     contentAlignment = Alignment.Center,
                 ) {
                     val smallTopAppBarHeight = 64.dp

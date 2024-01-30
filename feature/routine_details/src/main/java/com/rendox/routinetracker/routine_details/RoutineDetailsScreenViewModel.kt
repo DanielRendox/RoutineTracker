@@ -121,7 +121,6 @@ class RoutineDetailsScreenViewModel(
             }
             if (dataForMonthIsAlreadyLoaded) return
         }
-        println("updating month $monthToUpdate")
 
         val monthStart = monthToUpdate.atStartOfMonth().toKotlinLocalDate()
         val monthEnd = monthToUpdate.atEndOfMonth().toKotlinLocalDate()
@@ -140,7 +139,6 @@ class RoutineDetailsScreenViewModel(
         _calendarDatesFlow.update {
             it.toMutableMap().apply { putAll(calendarDateData) }
         }
-        println("calendar dates flow = ${calendarDatesFlow.value}")
     }
 
     fun onScrolledToNewMonth(newMonth: YearMonth) {

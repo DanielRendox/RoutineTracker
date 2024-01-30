@@ -95,7 +95,6 @@ internal fun AddRoutineRoute(
     )
 
     val snackbarHostState = remember { SnackbarHostState() }
-    println("schedule converted = ${tweakRoutinePageState.convertedSchedule}")
     val newSchedule = tweakRoutinePageState.convertedSchedule
     val scheduleConvertedMessage = stringResource(id = R.string.schedule_converted_snackbar_message)
     val newScheduleDisplayName = when (newSchedule) {
@@ -119,7 +118,6 @@ internal fun AddRoutineRoute(
     )
 
     BackHandler {
-        println("AddRoutineRoute back button pressed")
        dialogIsVisible = true
     }
 }

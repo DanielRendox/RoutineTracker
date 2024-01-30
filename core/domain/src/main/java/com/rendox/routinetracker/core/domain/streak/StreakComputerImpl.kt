@@ -111,8 +111,6 @@ internal class StreakComputerImpl(
             } else {
                 streaks.add(currentStreak)
             }
-
-            println("GetAllStreaksUseCase: completedDate=$completedDate, failedDate=$failedDate")
         }
 
         return streaks
