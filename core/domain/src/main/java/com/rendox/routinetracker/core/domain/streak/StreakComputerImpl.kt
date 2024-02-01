@@ -137,7 +137,6 @@ internal class StreakComputerImpl(
         completionHistory: List<Habit.CompletionRecord>,
         vacationHistory: List<Vacation>,
     ): LocalDate {
-        if (!habit.schedule.backlogEnabled) return completedDate
         val previousFailedDate = findPreviousFailedDate(
             habit = habit,
             currentDate = completedDate,

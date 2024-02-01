@@ -123,42 +123,6 @@ class StreakComputerImplTest {
         )
     }
 
-    @Test
-    fun `not due dates before the completed date are not included in the streak if backlog is disabled`() {
-        val startDate = LocalDate(2024, 1, 1)
-        val completedDate = LocalDate(2024, 1, 5)
-        val today = LocalDate(2024, 1, 31)
-
-        val schedule = Schedule.WeeklyScheduleByDueDaysOfWeek(
-            dueDaysOfWeek = listOf(DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY),
-            startDate = startDate,
-            backlogEnabled = false,
-        )
-        val habit = Habit.YesNoHabit(
-            name = "test habit",
-            schedule = schedule,
-        )
-        val completionHistory = listOf(
-            Habit.YesNoHabit.CompletionRecord(
-                date = completedDate,
-                completed = true,
-            )
-        )
-        val vacationHistory = emptyList<Vacation>()
-        val streaks = streakComputer.computeAllStreaks(
-            habit = habit,
-            completionHistory = completionHistory,
-            vacationHistory = vacationHistory,
-            today = today,
-        )
-
-        for (streak in streaks) {
-            assertThat(streak.startDate..streak.endDate).containsNoneIn(
-                startDate..completedDate.minus(DatePeriod(days = 1))
-            )
-        }
-    }
-
     @ParameterizedTest
     @CsvSource(
         "false, 2024-01-05, 2024-01-10, 2024-01-31",
