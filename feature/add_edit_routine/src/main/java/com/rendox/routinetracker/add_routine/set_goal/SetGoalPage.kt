@@ -31,7 +31,7 @@ fun SetGoalPage(
                 .fillMaxWidth(),
             value = setGoalPageState.routineName,
             onValueChange = setGoalPageState::updateRoutineName,
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             label = {
                 Text(
                     text = stringResource(

@@ -137,20 +137,20 @@ private fun RoutineCalendarScreenPortrait(
                 .height(IntrinsicSize.Max),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            CurrentStreakCard(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .weight(1f),
-                currentStreakDurationInDays = currentStreakDurationInDays,
-                currentStreakDurationInDaysString = currentStreakDurationInDaysString,
-            )
-            Spacer(modifier = Modifier.width(16.dp))
             LongestStreakCard(
                 modifier = Modifier
                     .fillMaxHeight()
                     .weight(1f),
                 longestStreakDurationInDays = longestStreakDurationInDays,
                 longestStreakDurationInDaysString = longestStreakDurationInDaysString,
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            CurrentStreakCard(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(1f),
+                currentStreakDurationInDays = currentStreakDurationInDays,
+                currentStreakDurationInDaysString = currentStreakDurationInDaysString,
             )
         }
         Spacer(modifier = Modifier.height(48.dp))
