@@ -4,7 +4,7 @@ CREATE TABLE cashedStreakEntity (
     habitId INTEGER NOT NULL,
     startDate INTEGER AS LocalDate NOT NULL,
     endDate INTEGER AS LocalDate NOT NULL,
-    PRIMARY KEY (startDate, endDate),
+    PRIMARY KEY (habitId, startDate, endDate),
     FOREIGN KEY (habitId) REFERENCES habitEntity(id)
 );
 
@@ -37,7 +37,7 @@ CREATE TABLE streakCashedPeriodEntity (
     habitId INTEGER NOT NULL,
     startDate INTEGER AS LocalDate NOT NULL,
     endDate INTEGER AS LocalDate NOT NULL,
-    PRIMARY KEY (startDate, endDate),
+    PRIMARY KEY (habitId, startDate, endDate),
     FOREIGN KEY (habitId) REFERENCES habitEntity(id)
 );
 

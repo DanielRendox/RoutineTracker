@@ -148,7 +148,7 @@ private fun RoutineStatusDay(
             .background(color = backgroundColor, shape = CircleShape)
             .border(border = BorderStroke(width = 2.dp, color = strokeColor), shape = CircleShape)
             .then(
-                if (habitStatus == null) Modifier
+                if (habitStatus == null || day.position in arrayOf(DayPosition.InDate, DayPosition.OutDate)) Modifier
                 else Modifier.clickable { onClick(day.date.toKotlinLocalDate()) }
             )
     ) {

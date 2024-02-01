@@ -11,7 +11,7 @@ import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
 
-internal class HabitStatusComputerImpl: HabitStatusComputer {
+internal class HabitStatusComputerImpl : HabitStatusComputer {
 
     /**
      * The HabitComputeStatusUseCase class is responsible for computing the [HabitStatus] based on
@@ -88,6 +88,7 @@ internal class HabitStatusComputerImpl: HabitStatusComputer {
                 numOfDueTimesOnValidationDate = numOfDueTimesOnValidationDate,
                 validationDate = validationDate,
                 today = today,
+                completedToday = completedToday,
                 completionHistory = completionHistory,
                 vacationHistory = vacationHistory,
             )
@@ -210,6 +211,7 @@ internal class HabitStatusComputerImpl: HabitStatusComputer {
         numOfDueTimesOnValidationDate: Float,
         validationDate: LocalDate,
         today: LocalDate,
+        completedToday: Boolean,
         completionHistory: List<Habit.CompletionRecord>,
         vacationHistory: List<Vacation>,
     ): Boolean {
@@ -218,9 +220,14 @@ internal class HabitStatusComputerImpl: HabitStatusComputer {
         if (habit.schedule.backlogEnabled) {
             val numOfDueTimes =
                 if (validationDate >= today) {
+                    val actualDate = if (completedToday) {
+                        today.plusDays(1)
+                    } else {
+                        today
+                    }
                     getNumOfDueTimesInPeriod(
                         habit = habit,
-                        period = today..validationDate,
+                        period = actualDate..validationDate,
                         vacationHistory = vacationHistory,
                     )
                 } else {

@@ -425,6 +425,53 @@ class HabitStatusComputerTest {
         ).isEqualTo(HabitStatus.Backlog)
     }
 
+    @Test
+    fun `bug, assert completion today completes ahead`() {
+        val schedule = Schedule.WeeklyScheduleByDueDaysOfWeek(
+            dueDaysOfWeek = listOf(
+                DayOfWeek.THURSDAY,
+                DayOfWeek.FRIDAY,
+                DayOfWeek.SATURDAY,
+            ),
+            startDayOfWeek = DayOfWeek.MONDAY,
+            backlogEnabled = true,
+            completingAheadEnabled = true,
+            periodSeparationEnabled = true,
+            startDate = LocalDate(2023, 1, 30),
+        )
+        val habit = defaultHabit.copy(id = 2L, schedule = schedule)
+        val completionHistory = listOf(
+            Habit.YesNoHabit.CompletionRecord(
+                date = LocalDate(2024, 1, 30),
+                completed = true,
+            ),
+            Habit.YesNoHabit.CompletionRecord(
+                date = LocalDate(2024, 1, 31),
+                completed = true,
+            ),
+            Habit.YesNoHabit.CompletionRecord(
+                date = LocalDate(2024, 2, 1),
+                completed = true,
+            ),
+        )
+        val assertionDates =
+            LocalDate(2024, 2, 2)..LocalDate(2024, 2, 3)
+        val resultingStatuses = assertionDates.map { date ->
+            habitStatusComputer.computeStatus(
+                validationDate = date,
+                today = LocalDate(2024, 2, 1),
+                habit = habit,
+                completionHistory = completionHistory,
+                vacationHistory = emptyList(),
+            )
+        }
+        val expectedStatuses = listOf(
+            HabitStatus.FutureDateAlreadyCompleted,
+            HabitStatus.FutureDateAlreadyCompleted,
+        )
+        assertThat(resultingStatuses).containsExactlyElementsIn(expectedStatuses)
+    }
+
     companion object {
         @JvmStatic
         fun computeStatusDataProvider() = arrayOf(
