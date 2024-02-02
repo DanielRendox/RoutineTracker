@@ -11,6 +11,7 @@ sealed class Habit {
     abstract val progress: Float?
     abstract val schedule: Schedule
     abstract val defaultCompletionTime: LocalTime?
+    abstract val numOfDueTimesPerSession: Float
 
     abstract class CompletionRecord {
         abstract val date: LocalDate
@@ -26,9 +27,11 @@ sealed class Habit {
         override val schedule: Schedule,
         override val defaultCompletionTime: LocalTime? = null,
     ) : Habit() {
+        override val numOfDueTimesPerSession: Float = 1F
+
         data class CompletionRecord(
             override val date: LocalDate,
-            override val numOfTimesCompleted: Float = 1f,
+            override val numOfTimesCompleted: Float = 1F,
         ) : Habit.CompletionRecord() {
             constructor(
                 date: LocalDate,

@@ -49,6 +49,10 @@ class CompletionHistoryRepositoryImpl(
         )
     }
 
+    override suspend fun getAllRecords(): List<Pair<Long, Habit.CompletionRecord>> {
+        return localDataSource.getAllRecords()
+    }
+
     override suspend fun insertCompletion(habitId: Long, completionRecord: Habit.CompletionRecord) {
         localDataSource.insertCompletion(habitId, completionRecord)
     }

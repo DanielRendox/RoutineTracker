@@ -2,13 +2,14 @@ package com.rendox.routinetracker.feature.agenda
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
-import com.rendox.routinetracker.core.data.habit.HabitRepository
-import com.rendox.routinetracker.core.domain.completion_history.HabitComputeStatusUseCase
+import com.rendox.routinetracker.core.domain.completion_history.GetHabitCompletionDataUseCase
 import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase
+import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase.IllegalDateEditAttemptException
+import com.rendox.routinetracker.core.domain.di.GetAllHabitsUseCase
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.HabitStatus
-import kotlinx.coroutines.Job
+import com.rendox.routinetracker.core.model.dueOrCompletedStatuses
+import com.rendox.routinetracker.core.ui.helpers.UiEvent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +17,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
@@ -26,90 +26,91 @@ import kotlinx.datetime.todayIn
 
 class AgendaScreenViewModel(
     today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
-    private val habitRepository: HabitRepository,
+    private val getAllHabits: GetAllHabitsUseCase,
     private val insertHabitCompletion: InsertHabitCompletionUseCase,
-    private val computeHabitStatus: HabitComputeStatusUseCase,
-    private val completionHistoryRepository: CompletionHistoryRepository,
+    private val getHabitCompletionData: GetHabitCompletionDataUseCase,
 ) : ViewModel() {
     private val todayFlow = MutableStateFlow(today)
     private val allRoutinesFlow = MutableStateFlow(emptyList<Habit>())
-    private val cashedRoutinesFlow = MutableStateFlow(emptyMap<LocalDate, List<DisplayRoutine>>())
-    private val _hideNotDueRoutinesFlow = MutableStateFlow(false)
+    private val cashedRoutinesFlow = MutableStateFlow(emptyList<DisplayRoutine>())
+
+    private val _showAllRoutinesFlow = MutableStateFlow(false)
+    val showAllRoutinesFlow = _showAllRoutinesFlow.asStateFlow()
 
     private val _currentDateFlow = MutableStateFlow(today)
     val currentDateFlow = _currentDateFlow.asStateFlow()
 
-    val visibleRoutinesFlow: StateFlow<List<DisplayRoutine>?> =
+    private val routinesAreUpdatingFlow = MutableStateFlow(true)
+
+    val visibleRoutinesFlow: StateFlow<List<DisplayRoutine>> =
         combine(
-            _currentDateFlow,
             cashedRoutinesFlow,
-            _hideNotDueRoutinesFlow,
-        ) { currentDate, cashedRoutines, hideNotDueRoutines ->
-            cashedRoutines[currentDate]?.let { currentDateRoutines ->
-                currentDateRoutines.filter {
-                    if (hideNotDueRoutines) {
-                        it.status in dueOrCompletedStatuses
-                    } else {
-                        it.status !in nonExistentStatuses
-                    }
-                }.sortedBy { it.id }
+            _showAllRoutinesFlow,
+        ) { cashedRoutines, showAllRoutines ->
+            cashedRoutines.filter {
+                if (showAllRoutines) {
+                    true
+                } else {
+                    it.status in dueOrCompletedStatuses
+                }
             }
         }.stateIn(
             scope = viewModelScope,
-            initialValue = null,
+            initialValue = emptyList(),
             started = SharingStarted.WhileSubscribed(5_000),
         )
 
+    val nothingIsScheduledFlow =
+        combine(
+            routinesAreUpdatingFlow,
+            visibleRoutinesFlow,
+        ) { routinesAreUpdating, visibleRoutinesFlow ->
+            visibleRoutinesFlow.isEmpty() && !routinesAreUpdating
+        }.stateIn(
+            scope = viewModelScope,
+            initialValue = false,
+            started = SharingStarted.WhileSubscribed(5_000),
+        )
+
+    private val _completionAttemptBlockedEvent: MutableStateFlow<UiEvent<IllegalDateEditAttemptException>?> =
+        MutableStateFlow(null)
+    val completionAttemptBlockedEvent = _completionAttemptBlockedEvent.asStateFlow()
+
     init {
         viewModelScope.launch {
-            allRoutinesFlow.update { habitRepository.getAllHabits() }
+            allRoutinesFlow.update { getAllHabits() }
             updateRoutinesForDate(_currentDateFlow.value)
         }
     }
 
-    private fun updateRoutinesForDate(date: LocalDate) {
-        val cashedRoutinesForDate = MutableStateFlow(emptyList<DisplayRoutine>())
-        val updateRoutineJobs = mutableListOf<Job>()
+    private fun updateRoutinesForDate(date: LocalDate) = viewModelScope.launch {
+        routinesAreUpdatingFlow.update { true }
+        cashedRoutinesFlow.update { emptyList() }
         for (routine in allRoutinesFlow.value) {
-            val job = viewModelScope.launch {
-                val routineForDate = getDisplayRoutine(routine, date)
-                cashedRoutinesForDate.update { cashedRoutines ->
-                    cashedRoutines.toMutableList().apply {
-                        add(routineForDate)
-                    }
-                }
-            }
-            updateRoutineJobs.add(job)
-        }
-        viewModelScope.launch {
-            updateRoutineJobs.joinAll()
             cashedRoutinesFlow.update { cashedRoutines ->
-                cashedRoutines.toMutableMap().apply {
-                    this[date] = cashedRoutinesForDate.value
+                cashedRoutines.toMutableList().apply {
+                    add(getDisplayRoutine(habit = routine, date = date))
                 }
             }
         }
+        routinesAreUpdatingFlow.update { false }
     }
 
     private suspend fun getDisplayRoutine(habit: Habit, date: LocalDate): DisplayRoutine {
-        val habitStatus: HabitStatus = computeHabitStatus(
-            habitId = habit.id!!,
+        val habitCompletionData = getHabitCompletionData(
             validationDate = date,
             today = todayFlow.value,
-        )
-        val numOfTimesCompleted = completionHistoryRepository.getRecordByDate(
             habitId = habit.id!!,
-            date = date,
-        )?.numOfTimesCompleted ?: 0F
+        )
 
         return DisplayRoutine(
             name = habit.name,
             id = habit.id!!,
             type = DisplayRoutineType.YesNoHabit,
-            status = habitStatus,
-            numOfTimesCompleted = numOfTimesCompleted,
+            status = habitCompletionData.habitStatus,
+            numOfTimesCompleted = habitCompletionData.numOfTimesCompleted,
             completionTime = null,
-            hasGrayedOutLook = habitStatus !in dueOrCompletedStatuses,
+            hasGrayedOutLook = habitCompletionData.habitStatus !in dueOrCompletedStatuses,
             statusToggleIsDisabled = date > todayFlow.value,
         )
     }
@@ -119,59 +120,58 @@ class AgendaScreenViewModel(
         completionRecord: Habit.CompletionRecord,
     ) {
         viewModelScope.launch {
-            insertHabitCompletion(
-                habitId = routineId,
-                completionRecord = completionRecord,
-                today = todayFlow.value,
-            )
-
-            cashedRoutinesFlow.update { cashedRoutines ->
-                val newCashedRoutinesValue = cashedRoutines.toMutableMap()
-                for ((date, oldRoutineList) in cashedRoutines) {
-                    val routine = allRoutinesFlow.value.find { it.id == routineId }?.let {
-                        getDisplayRoutine(
-                            habit = it,
-                            date = date,
-                        )
-                    }
-                    newCashedRoutinesValue[date] = oldRoutineList.toMutableList().apply {
-                        val routineToUpdateIndex = indexOf(find { it.id == routineId })
-                        if (routine == null) removeAt(routineToUpdateIndex)
-                        else set(routineToUpdateIndex, routine)
+            try {
+                insertHabitCompletion(
+                    habitId = routineId,
+                    completionRecord = completionRecord,
+                    today = todayFlow.value,
+                )
+            } catch (exception: IllegalDateEditAttemptException) {
+                _completionAttemptBlockedEvent.update {
+                    object : UiEvent<IllegalDateEditAttemptException> {
+                        override val data: IllegalDateEditAttemptException = exception
+                        override fun onConsumed() {
+                            _completionAttemptBlockedEvent.update { null }
+                        }
                     }
                 }
-                newCashedRoutinesValue
+                return@launch
             }
+
+            val routine = allRoutinesFlow.value.find { it.id == routineId }?.let {
+                getDisplayRoutine(
+                    habit = it,
+                    date = completionRecord.date,
+                )
+            }
+
+            routinesAreUpdatingFlow.update { true }
+            cashedRoutinesFlow.update { cashedRoutines ->
+                cashedRoutines.toMutableList().apply {
+                    val routineToUpdateIndex = indexOfFirst { it.id == routineId }
+                    when {
+                        routine == null && routineToUpdateIndex != -1 -> removeAt(
+                            routineToUpdateIndex
+                        )
+
+                        routine != null && routineToUpdateIndex == -1 -> add(routine)
+                        routine != null && routineToUpdateIndex != -1 -> set(
+                            routineToUpdateIndex, routine,
+                        )
+                    }
+                }
+            }
+            routinesAreUpdatingFlow.update { false }
         }
     }
 
     fun onDateChange(newDate: LocalDate) {
         _currentDateFlow.update { newDate }
-        if (!cashedRoutinesFlow.value.contains(newDate)) {
-            updateRoutinesForDate(newDate)
-        }
+        updateRoutinesForDate(newDate)
     }
 
     fun onNotDueRoutinesVisibilityToggle() {
-        _hideNotDueRoutinesFlow.update { !it }
-    }
-
-    // TODO update todayFlow when the date changes (in case the screen is opened at midnight)
-
-    companion object {
-        private val dueOrCompletedStatuses = listOf(
-            HabitStatus.Planned,
-            HabitStatus.Backlog,
-            HabitStatus.Failed,
-            HabitStatus.Completed,
-            HabitStatus.OverCompleted,
-            HabitStatus.SortedOutBacklog,
-        )
-
-        private val nonExistentStatuses = listOf(
-            HabitStatus.NotStarted,
-            HabitStatus.Finished,
-        )
+        _showAllRoutinesFlow.update { !it }
     }
 }
 

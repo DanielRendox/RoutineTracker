@@ -61,7 +61,11 @@ class CompletionHistoryRepositoryFake(
         it.first == habitId
                 && (minDate == null || minDate <= it.second.date)
                 && (maxDate == null || it.second.date <= maxDate)
-    }.map { it.second }
+    }.map { it.second }.sortedBy { it.date }
+
+    override suspend fun getAllRecords(): List<Pair<Long, Habit.CompletionRecord>> {
+        return habitData.completionHistory.value
+    }
 
     override suspend fun insertCompletion(
         habitId: Long,

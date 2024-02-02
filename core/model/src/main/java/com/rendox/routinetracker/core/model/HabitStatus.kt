@@ -62,3 +62,23 @@ enum class HabitStatus {
     /** The habit has been finished at the moment of the given date. */
     Finished,
 }
+
+val streakCreatorStatuses = listOf(
+    HabitStatus.Completed,
+    HabitStatus.OverCompleted,
+    HabitStatus.SortedOutBacklog,
+)
+
+val dueOrCompletedStatuses = listOf(
+    HabitStatus.Planned,
+    HabitStatus.Backlog,
+    HabitStatus.Failed,
+    HabitStatus.Completed,
+    HabitStatus.OverCompleted,
+    HabitStatus.SortedOutBacklog,
+)
+
+val nonExistentStatuses = listOf(
+    HabitStatus.NotStarted,
+    HabitStatus.Finished,
+)

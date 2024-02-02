@@ -28,7 +28,7 @@ android {
     defaultConfig {
         applicationId = "com.rendox.routinetracker"
         versionCode = 1
-        versionName = "1.0"
+        versionName = "0.1.0"
 
         vectorDrawables {
             useSupportLibrary = true
@@ -40,7 +40,8 @@ android {
 
     buildTypes {
         getByName("release") {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -69,4 +70,5 @@ dependencies {
     testImplementation(project(":core:testcommon"))
 
     implementation(libs.jetbrains.kotlinx.datetime)
+    implementation(libs.material)
 }

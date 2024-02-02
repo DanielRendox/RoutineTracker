@@ -23,11 +23,17 @@ interface CompletionHistoryRepository {
         maxDate: LocalDate? = null,
     ): Habit.CompletionRecord?
 
+    /**
+     * get all records for the given habit in the ascending order, if [minDate] or [maxDate] are
+     * specified, returns only the records in the given range.
+     */
     suspend fun getRecordsInPeriod(
         habitId: Long,
-        minDate: LocalDate?,
-        maxDate: LocalDate?,
+        minDate: LocalDate? = null,
+        maxDate: LocalDate? = null,
     ): List<Habit.CompletionRecord>
+
+    suspend fun getAllRecords(): List<Pair<Long, Habit.CompletionRecord>>
 
     suspend fun insertCompletion(
         habitId: Long,

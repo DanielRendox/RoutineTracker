@@ -5,6 +5,7 @@ import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
+import com.rendox.routinetracker.core.database.di.habitLocalDataModule
 import com.rendox.routinetracker.core.database.di.localDataSourceModule
 import com.rendox.routinetracker.core.logic.time.AnnualDate
 import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
@@ -17,9 +18,9 @@ import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.Month
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -38,11 +39,12 @@ class HabitLocalDataSourceImplTest : KoinTest {
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    @Before
+    @BeforeEach
     fun setUp() {
         startKoin {
             modules(
                 localDataSourceModule,
+                habitLocalDataModule,
                 testModule,
             )
         }
@@ -51,11 +53,13 @@ class HabitLocalDataSourceImplTest : KoinTest {
         RoutineTrackerDatabase.Schema.create(sqlDriver)
 
         habitLocalDataSource = HabitLocalDataSourceImpl(
-            db = get(), dispatcher = UnconfinedTestDispatcher()
+            db = get(),
+            ioDispatcher = UnconfinedTestDispatcher(),
+            scheduleLocalDataSource = get(),
         )
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         stopKoin()
     }
@@ -70,8 +74,6 @@ class HabitLocalDataSourceImplTest : KoinTest {
             progress = 0.8f,
             schedule = Schedule.EveryDaySchedule(
                 startDate = LocalDate(2023, Month.SEPTEMBER, 1),
-                vacationStartDate = LocalDate(2023, Month.SEPTEMBER, 10),
-                vacationEndDate = null,
             ),
             defaultCompletionTime = LocalTime(hour = 18, minute = 30),
         )
@@ -95,8 +97,6 @@ class HabitLocalDataSourceImplTest : KoinTest {
             dueDaysOfWeek = dueDaysOfWeek,
             startDayOfWeek = DayOfWeek.WEDNESDAY,
             startDate = LocalDate(2023, Month.SEPTEMBER, 1),
-            vacationStartDate = LocalDate(2023, Month.SEPTEMBER, 10),
-            vacationEndDate = null,
             backlogEnabled = false,
             completingAheadEnabled = false,
         )
@@ -113,7 +113,7 @@ class HabitLocalDataSourceImplTest : KoinTest {
     }
 
     @Test
-    fun getInsertRoutineWithPeriodicCustomSchedule() = runTest {
+    fun getInsertRoutineWithAlternateDaysSchedule() = runTest {
         val dueDatesIndices = listOf(1, 3, 4, 5, 8, 18, 21, 30, 31)
         val weekDaysMonthRelated = listOf(
             WeekDayMonthRelated(DayOfWeek.MONDAY, WeekDayNumberMonthRelated.First),
@@ -128,8 +128,6 @@ class HabitLocalDataSourceImplTest : KoinTest {
             weekDaysMonthRelated = weekDaysMonthRelated,
             startFromHabitStart = true,
             startDate = LocalDate(2023, Month.SEPTEMBER, 1),
-            vacationStartDate = LocalDate(2023, Month.SEPTEMBER, 10),
-            vacationEndDate = null,
             backlogEnabled = false,
             completingAheadEnabled = false,
         )
@@ -162,8 +160,6 @@ class HabitLocalDataSourceImplTest : KoinTest {
             ),
             startFromHabitStart = true,
             startDate = LocalDate(2023, Month.SEPTEMBER, 1),
-            vacationStartDate = LocalDate(2023, Month.SEPTEMBER, 10),
-            vacationEndDate = null,
             backlogEnabled = false,
             completingAheadEnabled = false,
         )
@@ -191,8 +187,6 @@ class HabitLocalDataSourceImplTest : KoinTest {
         val schedule = Schedule.CustomDateSchedule(
             dueDates = dueDates,
             startDate = LocalDate(2023, Month.SEPTEMBER, 1),
-            vacationStartDate = LocalDate(2023, Month.SEPTEMBER, 10),
-            vacationEndDate = null,
             backlogEnabled = false,
             completingAheadEnabled = false,
         )
@@ -220,8 +214,6 @@ class HabitLocalDataSourceImplTest : KoinTest {
         val schedule = Schedule.AnnualScheduleByDueDates(
             dueDates = dueDates,
             startDate = LocalDate(2023, Month.SEPTEMBER, 1),
-            vacationStartDate = LocalDate(2023, Month.SEPTEMBER, 10),
-            vacationEndDate = null,
             backlogEnabled = false,
             completingAheadEnabled = false,
             startFromHabitStart = false,

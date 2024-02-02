@@ -1,8 +1,5 @@
 package com.rendox.routinetracker.core.domain.completion_history
 
-import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
-import com.rendox.routinetracker.core.data.habit.HabitRepository
-import com.rendox.routinetracker.core.data.vacation.VacationRepository
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo
@@ -10,79 +7,67 @@ import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.HabitStatus
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.model.Vacation
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
-import kotlin.coroutines.CoroutineContext
 
+internal class HabitStatusComputerImpl : HabitStatusComputer {
 
-/**
- * The HabitComputeStatusUseCase class is responsible for computing the [HabitStatus] based on
- * various factors such as the habit's schedule, what dates are completed, and vacation periods.
- *
- * The result also depends on whether the validation date is in the past or in the future. For
- * example, when the habit has some backlog, but the validation date is in the past, the invoke
- * function will return not [HabitStatus.Backlog], but [HabitStatus.Skipped] instead. That's because
- * the user deliberately chose to skip the habit on that day. Nonetheless, if the validation date is
- * in the future, the invoke function will return [HabitStatus.Backlog] so that the user can adjust
- * their schedule to sort out this backlog later.
- *
- * Note that today is considered to be in the future.
- *
- * When the habit is on vacation, it's considered to be not due even if it's planned on schedule.
- * During the vacation, the user can still completed the habit, which will either sort out the
- * backlog (if any is present), or will complete the habit ahead.
- *
- * Each date depends on whether other dates are completed or not. For example, when one date has
- * status [HabitStatus.OverCompleted], the user will be able to skip the next planned date, which
- * will have already completed status. In the case of the previous example, with
- * backlog, the next over completed date will have status [HabitStatus.SortedOutBacklog].
- *
- * Backlog and completing ahead can be disabled by toggling the [Habit]'s [Schedule]'s properties.
- *
- * Period separation can be enabled or disabled as well. If enabled, the schedule deviation that
- * indicates backlog and how many times the habit was completed ahead will be reset at the start
- * of each period.
- *
- * @see [HabitStatus] for more details on what each status means, and when it is returned.
- */
-class HabitComputeStatusUseCase(
-    private val habitRepository: HabitRepository,
-    private val vacationRepository: VacationRepository,
-    private val completionHistoryRepository: CompletionHistoryRepository,
-    private val dispatcher: CoroutineContext = Dispatchers.Default,
-) {
-
-    suspend operator fun invoke(
-        habitId: Long,
+    /**
+     * The HabitComputeStatusUseCase class is responsible for computing the [HabitStatus] based on
+     * various factors such as the habit's schedule, what dates are completed, and vacation periods.
+     *
+     * The result also depends on whether the validation date is in the past or in the future. For
+     * example, when the habit has some backlog, but the validation date is in the past, the invoke
+     * function will return not [HabitStatus.Backlog], but [HabitStatus.Skipped] instead. That's because
+     * the user deliberately chose to skip the habit on that day. Nonetheless, if the validation date is
+     * in the future, the invoke function will return [HabitStatus.Backlog] so that the user can adjust
+     * their schedule to sort out this backlog later.
+     *
+     * Note that today is considered to be in the future except cases with skipped and already
+     * completed statuses because the user should visually see that today is included in streak.
+     *
+     * When the habit is on vacation, it's considered to be not due even if it's planned on schedule.
+     * During the vacation, the user can still completed the habit, which will either sort out the
+     * backlog (if any is present), or will complete the habit ahead.
+     *
+     * Each date depends on whether other dates are completed or not. For example, when one date has
+     * status [HabitStatus.OverCompleted], the user will be able to skip the next planned date, which
+     * will have already completed status. In the case of the previous example, with
+     * backlog, the next over completed date will have status [HabitStatus.SortedOutBacklog].
+     *
+     * Backlog and completing ahead can be disabled by toggling the [Habit]'s [Schedule]'s properties.
+     *
+     * Period separation can be enabled or disabled as well. If enabled, the schedule deviation that
+     * indicates backlog and how many times the habit was completed ahead will be reset at the start
+     * of each period.
+     *
+     * @see [HabitStatus] for more details on what each status means, and when it is returned.
+     */
+    override fun computeStatus(
         validationDate: LocalDate,
         today: LocalDate,
-    ): HabitStatus = withContext(dispatcher) {
-        val habit = habitRepository.getHabitById(habitId)
+        habit: Habit,
+        completionHistory: List<Habit.CompletionRecord>,
+        vacationHistory: List<Vacation>,
+    ): HabitStatus {
+        if (validationDate < habit.schedule.startDate) return HabitStatus.NotStarted
+        habit.schedule.endDate?.let { if (validationDate > it) return HabitStatus.Finished }
 
-        if (validationDate < habit.schedule.startDate) return@withContext HabitStatus.NotStarted
-        habit.schedule.endDate?.let { if (validationDate > it) return@withContext HabitStatus.Finished }
-
-        val completedToday = completionHistoryRepository.getRecordByDate(habit.id!!, today) != null
+        val completedToday = completionHistory.any { it.date == today }
         val scheduleDeviation = computeScheduleDeviation(
             habit = habit,
             currentDate = validationDate,
             today = today,
             completedToday = completedToday,
+            completionHistory = completionHistory,
+            vacationHistory = vacationHistory,
         )
 
-        val numOfTimesCompletedOnValidationDate = completionHistoryRepository.getRecordByDate(
-            habitId = habit.id!!,
-            date = validationDate,
-        )?.numOfTimesCompleted ?: 0f
-
-        val habitIsOnVacationAtTheMomentOfValidationDate = vacationRepository.getVacationByDate(
-            habitId = habit.id!!,
-            date = validationDate,
-        ) != null
-
+        val numOfTimesCompletedOnValidationDate =
+            completionHistory.find { it.date == validationDate }?.numOfTimesCompleted ?: 0f
+        val habitIsOnVacationAtTheMomentOfValidationDate =
+            vacationHistory.any { it.containsDate(validationDate) }
         val numOfDueTimesOnValidationDate = habit.getNumOfDueTimesOnDate(
             date = validationDate, habitIsOnVacation = habitIsOnVacationAtTheMomentOfValidationDate
         )
@@ -95,41 +80,50 @@ class HabitComputeStatusUseCase(
                 numOfTimesCompletedOnValidationDate = numOfTimesCompletedOnValidationDate,
                 numOfDueTimesOnValidationDate = numOfDueTimesOnValidationDate,
             )
-            if (completedStatus != null) return@withContext completedStatus
+            if (completedStatus != null) return completedStatus
 
-            println("validationDate $validationDate is due: $validationDate")
             val alreadyCompleted = checkIfIsAlreadyCompleted(
-                habit, scheduleDeviation, numOfDueTimesOnValidationDate, validationDate, today
+                habit = habit,
+                scheduleDeviation = scheduleDeviation,
+                numOfDueTimesOnValidationDate = numOfDueTimesOnValidationDate,
+                validationDate = validationDate,
+                today = today,
+                completedToday = completedToday,
+                completionHistory = completionHistory,
+                vacationHistory = vacationHistory,
             )
-            if (alreadyCompleted && validationDate < today) return@withContext HabitStatus.PastDateAlreadyCompleted
-            if (alreadyCompleted && validationDate >= today) return@withContext HabitStatus.FutureDateAlreadyCompleted
+            if (alreadyCompleted && validationDate <= today) return HabitStatus.PastDateAlreadyCompleted
+            if (alreadyCompleted && validationDate > today) return HabitStatus.FutureDateAlreadyCompleted
 
             if (validationDate < today) {
                 val wasCompletedLater = checkIfWasCompletedLater(
                     currentDate = validationDate,
                     numOfDueTimesOnCurrentDate = numOfDueTimesOnValidationDate,
                     habit = habit,
+                    completionHistory = completionHistory,
+                    vacationHistory = vacationHistory,
                 )
-                if (wasCompletedLater) return@withContext HabitStatus.CompletedLater
+                if (wasCompletedLater) return HabitStatus.CompletedLater
             }
 
-            return@withContext if (validationDate < today) HabitStatus.Failed else HabitStatus.Planned
+            return if (validationDate < today) HabitStatus.Failed else HabitStatus.Planned
         } else {
             val backlogStatus = deriveBacklogStatus(
-                habit,
-                scheduleDeviation,
-                numOfTimesCompletedOnValidationDate,
-                validationDate,
-                today,
+                habit = habit,
+                scheduleDeviation = scheduleDeviation,
+                numOfTimesCompletedOnValidationDate = numOfTimesCompletedOnValidationDate,
+                validationDate = validationDate,
+                today = today,
                 completedToday = completedToday,
+                vacationHistory = vacationHistory,
             )
-            if (backlogStatus != null) return@withContext backlogStatus
+            if (backlogStatus != null) return backlogStatus
 
             if (numOfTimesCompletedOnValidationDate > 0f) {
-                return@withContext HabitStatus.OverCompleted
+                return HabitStatus.OverCompleted
             }
-            if (habitIsOnVacationAtTheMomentOfValidationDate) return@withContext HabitStatus.OnVacation
-            return@withContext if (validationDate < today) HabitStatus.Skipped else HabitStatus.NotDue
+            if (habitIsOnVacationAtTheMomentOfValidationDate) return HabitStatus.OnVacation
+            return if (validationDate <= today) HabitStatus.Skipped else HabitStatus.NotDue
         }
     }
 
@@ -154,13 +148,14 @@ class HabitComputeStatusUseCase(
         else -> null
     }
 
-    private suspend fun deriveBacklogStatus(
+    private fun deriveBacklogStatus(
         habit: Habit,
         scheduleDeviation: Double,
         numOfTimesCompletedOnValidationDate: Float,
         validationDate: LocalDate,
         today: LocalDate,
         completedToday: Boolean,
+        vacationHistory: List<Vacation>,
     ): HabitStatus? {
         if (scheduleDeviation < 0.0 && habit.schedule.backlogEnabled) {
             val numOfNotDueTimes =
@@ -169,6 +164,7 @@ class HabitComputeStatusUseCase(
                     getNumOfNotDueTimesInPeriod(
                         habit = habit,
                         period = startDate..validationDate,
+                        vacationHistory = vacationHistory,
                     )
                 } else {
                     0.0
@@ -185,9 +181,10 @@ class HabitComputeStatusUseCase(
         return null
     }
 
-    private suspend fun getNumOfNotDueTimesInPeriod(
+    private fun getNumOfNotDueTimesInPeriod(
         habit: Habit,
         period: LocalDateRange,
+        vacationHistory: List<Vacation>,
     ): Double {
         var numOfNotDueTimesInPeriod = 0.0
 
@@ -195,14 +192,8 @@ class HabitComputeStatusUseCase(
             is Habit.YesNoHabit -> 1F
         }
 
-        val vacations: List<Vacation> = vacationRepository.getVacationsInPeriod(
-            habitId = habit.id!!,
-            minDate = period.start,
-            maxDate = period.endInclusive,
-        )
-
         for (date in period) {
-            val habitIsOnVacation = vacations.any { it.containsDate(date) }
+            val habitIsOnVacation = vacationHistory.any { it.containsDate(date) }
             val habitIsDue = if (habitIsOnVacation) {
                 false
             } else {
@@ -214,21 +205,30 @@ class HabitComputeStatusUseCase(
         return numOfNotDueTimesInPeriod
     }
 
-    private suspend fun checkIfIsAlreadyCompleted(
+    private fun checkIfIsAlreadyCompleted(
         habit: Habit,
         scheduleDeviation: Double,
         numOfDueTimesOnValidationDate: Float,
         validationDate: LocalDate,
         today: LocalDate,
+        completedToday: Boolean,
+        completionHistory: List<Habit.CompletionRecord>,
+        vacationHistory: List<Vacation>,
     ): Boolean {
         if (!habit.schedule.completingAheadEnabled) return false
 
         if (habit.schedule.backlogEnabled) {
             val numOfDueTimes =
                 if (validationDate >= today) {
+                    val actualDate = if (completedToday) {
+                        today.plusDays(1)
+                    } else {
+                        today
+                    }
                     getNumOfDueTimesInPeriod(
                         habit = habit,
-                        period = today..validationDate,
+                        period = actualDate..validationDate,
+                        vacationHistory = vacationHistory,
                     )
                 } else {
                     numOfDueTimesOnValidationDate.toDouble()
@@ -249,25 +249,13 @@ class HabitComputeStatusUseCase(
                 }
 
             val firstDateInPeriod = currentDatePeriod?.start
-            val firstDateToLookFor =
-                completionHistoryRepository.getFirstCompletedRecord(
-                    habitId = habit.id!!,
-                    minDate = firstDateInPeriod,
-                    maxDate = validationDate.minus(DatePeriod(days = 1)),
-                )?.date ?: return false
+            val firstDateToLookFor = completionHistory.filter {
+                val dateIsLaterThanFirstDateInPeriod =
+                    firstDateInPeriod == null || firstDateInPeriod <= it.date
+                val dateIsEarlierThanValidationDate = it.date < validationDate
+                dateIsLaterThanFirstDateInPeriod && dateIsEarlierThanValidationDate
+            }.minOfOrNull { it.date } ?: return false
             val lastDateToLookFor = validationDate.minus(DatePeriod(days = 1))
-
-            val completionRecords: List<Habit.CompletionRecord> =
-                completionHistoryRepository.getRecordsInPeriod(
-                    habitId = habit.id!!,
-                    minDate = firstDateToLookFor,
-                    maxDate = lastDateToLookFor,
-                )
-            val vacations: List<Vacation> = vacationRepository.getVacationsInPeriod(
-                habitId = habit.id!!,
-                minDate = firstDateToLookFor,
-                maxDate = lastDateToLookFor,
-            )
 
             var numOfDueTimes = 0.0
             var numOfTimesCompleted = 0.0
@@ -276,10 +264,10 @@ class HabitComputeStatusUseCase(
             while (date >= firstDateToLookFor) {
                 numOfDueTimes += habit.getNumOfDueTimesOnDate(
                     date = date,
-                    habitIsOnVacation = vacations.any { it.containsDate(date) },
+                    habitIsOnVacation = vacationHistory.any { it.containsDate(date) },
                 )
                 numOfTimesCompleted +=
-                    completionRecords.find { it.date == date }?.numOfTimesCompleted ?: 0f
+                    completionHistory.find { it.date == date }?.numOfTimesCompleted ?: 0f
 
                 if (numOfTimesCompleted - numOfDueTimes >= numOfDueTimesOnValidationDate) {
                     return true
@@ -295,11 +283,13 @@ class HabitComputeStatusUseCase(
      * @return positive value if the habit is ahead of schedule (completed even more than planned),
      * negative if behind (there is some backlog), 0 if on schedule
      */
-    private suspend fun computeScheduleDeviation(
+    private fun computeScheduleDeviation(
         habit: Habit,
         today: LocalDate,
         currentDate: LocalDate,
         completedToday: Boolean,
+        completionHistory: List<Habit.CompletionRecord>,
+        vacationHistory: List<Vacation>,
     ): Double {
         val actualDate = if (currentDate <= today) {
             currentDate.minus(DatePeriod(days = 1))
@@ -321,12 +311,10 @@ class HabitComputeStatusUseCase(
                 schedule.startDate..actualDate
             }
 
-        val numOfTimesCompleted = completionHistoryRepository.getNumOfTimesCompletedInPeriod(
-            habitId = habit.id!!,
-            minDate = period.start,
-            maxDate = period.endInclusive,
-        )
-        val numOfDueTimes = getNumOfDueTimesInPeriod(habit, period)
+        val numOfTimesCompleted = completionHistory
+            .filter { it.date in period }
+            .sumOf { it.numOfTimesCompleted.toDouble() }
+        val numOfDueTimes = getNumOfDueTimesInPeriod(habit, period, vacationHistory)
         return numOfTimesCompleted - numOfDueTimes
     }
 
@@ -334,10 +322,12 @@ class HabitComputeStatusUseCase(
      * @return true if the habit wasn't completed on the date it was planned and introduced a
      * backlog that was sorted out later
      */
-    private suspend fun checkIfWasCompletedLater(
+    private fun checkIfWasCompletedLater(
         habit: Habit,
         currentDate: LocalDate,
         numOfDueTimesOnCurrentDate: Float,
+        completionHistory: List<Habit.CompletionRecord>,
+        vacationHistory: List<Vacation>,
     ): Boolean {
         if (!habit.schedule.backlogEnabled) return false
 
@@ -350,9 +340,8 @@ class HabitComputeStatusUseCase(
             }
 
         val lastCompletedDate =
-            completionHistoryRepository.getLastCompletedRecord(habit.id!!)?.date ?: return false
+            completionHistory.maxOfOrNull { it.date } ?: return false
         val lastDateInPeriod = currentDatePeriod?.endInclusive
-
         val firstDateToLookFor = currentDate.plusDays(1)
         val lastDateToLookFor =
             if (lastDateInPeriod != null && lastDateInPeriod < lastCompletedDate) {
@@ -361,28 +350,16 @@ class HabitComputeStatusUseCase(
                 lastCompletedDate
             }
 
-        val completionRecords: List<Habit.CompletionRecord> =
-            completionHistoryRepository.getRecordsInPeriod(
-                habitId = habit.id!!,
-                minDate = firstDateToLookFor,
-                maxDate = lastDateToLookFor,
-            )
-        val vacations: List<Vacation> = vacationRepository.getVacationsInPeriod(
-            habitId = habit.id!!,
-            minDate = firstDateToLookFor,
-            maxDate = lastDateToLookFor,
-        )
-
         var numOfDueTimes = 0.0
         var numOfTimesCompleted = 0.0
 
         for (date in firstDateToLookFor..lastDateToLookFor) {
             numOfDueTimes += habit.getNumOfDueTimesOnDate(
                 date = date,
-                habitIsOnVacation = vacations.any { it.containsDate(date) },
+                habitIsOnVacation = vacationHistory.any { it.containsDate(date) },
             )
             numOfTimesCompleted +=
-                completionRecords.find { it.date == date }?.numOfTimesCompleted ?: 0f
+                completionHistory.find { it.date == date }?.numOfTimesCompleted ?: 0f
 
             val scheduleDeviation = numOfTimesCompleted - numOfDueTimes
             if (scheduleDeviation >= numOfDueTimesOnCurrentDate) return true
@@ -390,22 +367,17 @@ class HabitComputeStatusUseCase(
         return false
     }
 
-    private suspend fun getNumOfDueTimesInPeriod(
+    private fun getNumOfDueTimesInPeriod(
         habit: Habit,
         period: LocalDateRange,
+        vacationHistory: List<Vacation>,
     ): Double {
         var numOfDueTimesInPeriod = 0.0
-
-        val vacationsInPeriod = vacationRepository.getVacationsInPeriod(
-            habitId = habit.id!!,
-            minDate = period.start,
-            maxDate = period.endInclusive,
-        )
 
         for (date in period) {
             numOfDueTimesInPeriod += habit.getNumOfDueTimesOnDate(
                 date = date,
-                habitIsOnVacation = vacationsInPeriod.any { it.containsDate(date) },
+                habitIsOnVacation = vacationHistory.any { it.containsDate(date) },
             )
         }
 

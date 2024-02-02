@@ -17,3 +17,7 @@ WHERE scheduleId = :scheduleId;
 insertWeekDayMonthRelatedEntry:
 INSERT INTO weekDayMonthRelatedEntity
 VALUES (?, ?, ?, ?);
+
+deleteWeekDayMonthRelatedDays:
+DELETE FROM weekDayMonthRelatedEntity
+WHERE scheduleId = ?;

@@ -9,6 +9,7 @@ import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.rendox.routinetracker.add_routine.choose_schedule.schedule_pickers.ScheduleTypeUi
+import com.rendox.routinetracker.core.model.Schedule
 
 @Stable
 class AlternateDaysSchedulePickerState(
@@ -36,11 +37,11 @@ class AlternateDaysSchedulePickerState(
         private set
 
     fun updateNumOfActivityDays(numOfDays: String) {
-        if (numOfDays.length <= 3) numOfActivityDays = numOfDays
+        if (numOfDays.length <= 2) numOfActivityDays = numOfDays
         checkNumOfActivityDaysValidity()
     }
     fun updateNumOfRestDays(numOfDays: String) {
-        if (numOfDays.length <= 3) numOfRestDays = numOfDays
+        if (numOfDays.length <= 2) numOfRestDays = numOfDays
         checkNumOfRestDaysValidity()
     }
 
@@ -72,6 +73,14 @@ class AlternateDaysSchedulePickerState(
 
     override fun updateSelected(selected: Boolean) {
         super.updateSelected(selected)
+        numOfActivityDaysIsValid = true
+        numOfRestDaysIsValid = true
+    }
+
+    fun updateSelectedSchedule(schedule: Schedule.AlternateDaysSchedule) {
+        val numOfDueDays = schedule.numOfDueDays
+        numOfActivityDays = numOfDueDays.toString()
+        numOfRestDays = (schedule.numOfDaysInPeriod - numOfDueDays).toString()
         numOfActivityDaysIsValid = true
         numOfRestDaysIsValid = true
     }

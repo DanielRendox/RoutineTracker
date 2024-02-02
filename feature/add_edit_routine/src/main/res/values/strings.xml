@@ -37,11 +37,16 @@
     <string name="session_duration_setting_title">Session duration</string>
     <string name="session_time_setting_title">Time</string>
     <string name="backlog_setting_title">Backlog</string>
-    <string name="backlog_setting_description">When left uncompleted, the habit will continue to be displayed even on days that are not due.</string>
+    <string name="backlog_setting_description">If you fail the habit, you will be suggested to sort out the backlog on the next non-due day.</string>
     <string name="completing_ahead_setting_title">Completing ahead</string>
-    <string name="completing_ahead_setting_description">When over completed, the habit will not be displayed next time even if it\'s planned for that day.</string>
+    <string name="completing_ahead_setting_description">If you complete the habit on a non-due day, the next scheduled occurrence will be canceled.</string>
     <string name="period_separation_setting_title">Period separation</string>
     <string name="period_separation_setting_description">When enabled, all the previous backlog (and completed ahead) times will be ignored on the next period start.</string>
+    <string name="week_start_day_setting_title">Start each week from</string>
+    <string name="setting_unavailable_description">This setting is unavailable for the chosen schedule.</string>
 
     <string name="days_from_start_to_end_description">start – end</string>
+    <string name="discard_habit_creation_dialog_title">Discard habit creation?</string>
+    <string name="discard_habit_creation">Discard</string>
+    <string name="schedule_converted_snackbar_message">"Schedule converted to"</string>
 </resources>

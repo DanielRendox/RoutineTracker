@@ -4,21 +4,20 @@ import com.rendox.routinetracker.core.database.CompletionHistoryEntity
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
 import com.rendox.routinetracker.core.database.habit.model.HabitType
 import com.rendox.routinetracker.core.model.Habit
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
+import kotlin.coroutines.CoroutineContext
 
 class CompletionHistoryLocalDataSourceImpl(
     private val db: RoutineTrackerDatabase,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val ioDispatcher: CoroutineContext,
 ) : CompletionHistoryLocalDataSource {
     override suspend fun getNumOfTimesCompletedInPeriod(
         habitId: Long,
         minDate: LocalDate?,
         maxDate: LocalDate?,
     ): Double {
-        return withContext(dispatcher) {
+        return withContext(ioDispatcher) {
             db.completionHistoryEntityQueries.getNumOfTimesCompletedInPeriod(
                 habitId, minDate, maxDate
             ).executeAsOne()
@@ -28,7 +27,7 @@ class CompletionHistoryLocalDataSourceImpl(
     override suspend fun getRecordByDate(
         habitId: Long, date: LocalDate
     ): Habit.CompletionRecord? {
-        return withContext(dispatcher) {
+        return withContext(ioDispatcher) {
             db.completionHistoryEntityQueries.getRecordByDate(
                 habitId, date
             ).executeAsOneOrNull()?.toExternalModel()
@@ -40,7 +39,7 @@ class CompletionHistoryLocalDataSourceImpl(
         minDate: LocalDate?,
         maxDate: LocalDate?
     ): Habit.CompletionRecord? {
-        return withContext(dispatcher) {
+        return withContext(ioDispatcher) {
             db.completionHistoryEntityQueries.getLastRecord(habitId, minDate, maxDate)
                 .executeAsOneOrNull()?.toExternalModel()
         }
@@ -51,7 +50,7 @@ class CompletionHistoryLocalDataSourceImpl(
         minDate: LocalDate?,
         maxDate: LocalDate?,
     ): Habit.CompletionRecord? {
-        return withContext(dispatcher) {
+        return withContext(ioDispatcher) {
             db.completionHistoryEntityQueries.getFirstRecord(habitId, minDate, maxDate)
                 .executeAsOneOrNull()?.toExternalModel()
         }
@@ -62,10 +61,18 @@ class CompletionHistoryLocalDataSourceImpl(
         minDate: LocalDate?,
         maxDate: LocalDate?,
     ): List<Habit.CompletionRecord> {
-        return withContext(dispatcher) {
+        return withContext(ioDispatcher) {
             db.completionHistoryEntityQueries.getRecordsInPeriod(
                 habitId, minDate, maxDate
             ).executeAsList().map { it.toExternalModel()!! }
+        }
+    }
+
+    override suspend fun getAllRecords(): List<Pair<Long, Habit.CompletionRecord>> {
+        return withContext(ioDispatcher) {
+            db.completionHistoryEntityQueries.getAllRecords().executeAsList().map {
+                it.habitId to it.toExternalModel()!!
+            }
         }
     }
 
@@ -73,7 +80,7 @@ class CompletionHistoryLocalDataSourceImpl(
         habitId: Long,
         completionRecord: Habit.CompletionRecord,
     ) {
-        withContext(dispatcher) {
+        withContext(ioDispatcher) {
             db.completionHistoryEntityQueries.insertCompletion(
                 habitId = habitId,
                 date = completionRecord.date,
@@ -83,13 +90,13 @@ class CompletionHistoryLocalDataSourceImpl(
     }
 
     override suspend fun deleteCompletionByDate(habitId: Long, date: LocalDate) {
-        withContext(dispatcher) {
+        withContext(ioDispatcher) {
             db.completionHistoryEntityQueries.deleteCompletionByDate(habitId, date)
         }
     }
 
     private suspend fun CompletionHistoryEntity.toExternalModel(): Habit.CompletionRecord? {
-        val habitType = withContext(dispatcher) {
+        val habitType = withContext(ioDispatcher) {
             db.habitEntityQueries.getHabitById(habitId).executeAsOneOrNull()?.type
         }
         return when (habitType) {

@@ -28,5 +28,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:model"))
+
     implementation(libs.kizitonwose.calendar.compose)
+    implementation("androidx.compose.ui:ui-util")
 }

@@ -9,6 +9,8 @@ import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.rendox.routinetracker.core.model.Schedule
+import com.rendox.routinetracker.core.ui.helpers.UiEvent
+import kotlinx.datetime.DayOfWeek
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
@@ -22,9 +24,13 @@ class TweakRoutinePageState(
     overallNumOfDaysIsValid: Boolean = true,
     sessionDuration: Duration? = null,
     sessionTime: LocalTime? = null,
-    backlogEnabled: Boolean? = null,
-    completingAheadEnabled: Boolean? = null,
+    backlogEnabled: Boolean = false,
+    completingAheadEnabled: Boolean = false,
     periodSeparationEnabled: Boolean? = null,
+    weekStartDay: DayOfWeek? = null,
+    weekStartDaySettingIsEnabled: Boolean = false,
+    scheduleSupportsScheduleDeviation: Boolean = false,
+    dialogType: TweakRoutinePageDialogType? = null,
 ) {
     var startDate by mutableStateOf(startDate)
         private set
@@ -53,11 +59,23 @@ class TweakRoutinePageState(
     var overallNumOfDaysIsValid by mutableStateOf(overallNumOfDaysIsValid)
         private set
 
-    var dialogType: TweakRoutinePageDialogType? by mutableStateOf(null)
+    var dialogType: TweakRoutinePageDialogType? by mutableStateOf(dialogType)
+        private set
+
+    var weekStartDay by mutableStateOf(weekStartDay)
+        private set
+
+    var weekStartDaySettingIsEnabled by mutableStateOf(weekStartDaySettingIsEnabled)
+        private set
+
+    var scheduleSupportsScheduleDeviation by mutableStateOf(scheduleSupportsScheduleDeviation)
         private set
 
     val containsError: Boolean
         get() = !overallNumOfDaysIsValid
+
+    var scheduleConvertedEvent by mutableStateOf<UiEvent<Schedule>?>(null)
+        private set
 
     fun updateStartDate(startDate: LocalDate) {
         this.startDate = startDate
@@ -88,15 +106,17 @@ class TweakRoutinePageState(
 
     fun switchEndDateEnabled(isEnabled: Boolean) {
         if (isEnabled) {
-            endDate = startDate.plusDays(29)
-            overallNumOfDays = "30"
+            endDate = startDate
+            overallNumOfDays = "1"
         } else {
             endDate = null
             overallNumOfDays = ""
         }
     }
 
-    fun updateDialogType(dialogType: TweakRoutinePageDialogType?) {
+    fun updateDialogType(
+        dialogType: TweakRoutinePageDialogType?,
+    ) {
         this.dialogType = dialogType
     }
 
@@ -113,12 +133,9 @@ class TweakRoutinePageState(
     }
 
     fun updateChosenSchedule(chosenSchedule: Schedule) {
-        backlogEnabled =
-            if (chosenSchedule.supportsScheduleDeviation) chosenSchedule.backlogEnabled
-            else null
-        completingAheadEnabled =
-            if (chosenSchedule.supportsScheduleDeviation) chosenSchedule.completingAheadEnabled
-            else null
+        scheduleSupportsScheduleDeviation = chosenSchedule.supportsScheduleDeviation
+        backlogEnabled = chosenSchedule.backlogEnabled
+        completingAheadEnabled = chosenSchedule.completingAheadEnabled
         periodSeparationEnabled =
             if (
                 chosenSchedule is Schedule.PeriodicSchedule
@@ -126,6 +143,24 @@ class TweakRoutinePageState(
             ) {
                 chosenSchedule.periodSeparationEnabled
             } else null
+
+        weekStartDaySettingIsEnabled = when (chosenSchedule) {
+            is Schedule.WeeklySchedule -> true
+            else -> false
+        }
+    }
+
+    fun updateWeekStartDay(weekStartDay: DayOfWeek) {
+        this.weekStartDay = weekStartDay
+    }
+
+    fun updateScheduleConverted(newSchedule: Schedule) {
+        scheduleConvertedEvent = object : UiEvent<Schedule> {
+            override val data: Schedule = newSchedule
+            override fun onConsumed() {
+                scheduleConvertedEvent = null
+            }
+        }
     }
 
     companion object {
@@ -140,7 +175,11 @@ class TweakRoutinePageState(
                     tweakRoutinePageState.sessionTime,
                     tweakRoutinePageState.backlogEnabled,
                     tweakRoutinePageState.completingAheadEnabled,
-                    tweakRoutinePageState.periodSeparationEnabled
+                    tweakRoutinePageState.periodSeparationEnabled,
+                    tweakRoutinePageState.weekStartDay,
+                    tweakRoutinePageState.weekStartDaySettingIsEnabled,
+                    tweakRoutinePageState.scheduleSupportsScheduleDeviation,
+                    tweakRoutinePageState.dialogType,
                 )
             },
             restore = { tweakRoutinePageStateValues ->
@@ -151,9 +190,13 @@ class TweakRoutinePageState(
                     overallNumOfDaysIsValid = tweakRoutinePageStateValues[3] as Boolean,
                     sessionDuration = tweakRoutinePageStateValues[4] as Duration?,
                     sessionTime = tweakRoutinePageStateValues[5] as LocalTime?,
-                    backlogEnabled = tweakRoutinePageStateValues[6] as Boolean?,
-                    completingAheadEnabled = tweakRoutinePageStateValues[7] as Boolean?,
-                    periodSeparationEnabled = tweakRoutinePageStateValues[8] as Boolean?
+                    backlogEnabled = tweakRoutinePageStateValues[6] as Boolean,
+                    completingAheadEnabled = tweakRoutinePageStateValues[7] as Boolean,
+                    periodSeparationEnabled = tweakRoutinePageStateValues[8] as Boolean?,
+                    weekStartDay = tweakRoutinePageStateValues[9] as DayOfWeek?,
+                    weekStartDaySettingIsEnabled = tweakRoutinePageStateValues[10] as Boolean,
+                    scheduleSupportsScheduleDeviation = tweakRoutinePageStateValues[11] as Boolean,
+                    dialogType = tweakRoutinePageStateValues[12] as TweakRoutinePageDialogType?,
                 )
             }
         )

@@ -11,26 +11,32 @@ CREATE TABLE scheduleEntity (
     endDate INTEGER AS LocalDate,
     backlogEnabled INTEGER AS Boolean NOT NULL,
     cancelDuenessIfDoneAhead INTEGER AS Boolean NOT NULL,
-    vacationStartDate INTEGER AS LocalDate,
-    vacationEndDate INTEGER AS LocalDate,
     startDayOfWeekInWeeklySchedule INTEGER AS DayOfWeek,
     startFromHabitStartInMonthlyAndAnnualSchedule INTEGER AS Boolean,
     includeLastDayOfMonthInMonthlySchedule INTEGER AS Boolean,
     periodicSeparationEnabledInPeriodicSchedule INTEGER AS Boolean,
     numOfDueDaysInByNumOfDueDaysSchedule INTEGER AS Int,
     numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule INTEGER AS Int,
-    numOfDaysInPeriodicCustomSchedule INTEGER AS Int,
+    numOfDaysInAlternateDaysSchedule INTEGER AS Int,
     FOREIGN KEY (id) REFERENCES habitEntity(id)
 );
+
+insertSchedule:
+INSERT INTO scheduleEntity
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 getScheduleById:
 SELECT *
 FROM scheduleEntity
 WHERE id = ?;
 
-insertSchedule:
-INSERT INTO scheduleEntity
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+getAllSchedules:
+SELECT *
+FROM scheduleEntity;
+
+deleteSchedule:
+DELETE FROM scheduleEntity
+WHERE id = ?;
 
 lastInsertRowId:
 SELECT last_insert_rowid();

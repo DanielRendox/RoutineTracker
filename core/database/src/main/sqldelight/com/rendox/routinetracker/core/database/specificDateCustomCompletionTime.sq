@@ -28,3 +28,7 @@ deleteCompletionTime:
 DELETE FROM specificDateCustomCompletionTime
 WHERE routineId = ? AND date = ?;
 
+deleteAllCompletionTimesForHabit:
+DELETE FROM specificDateCustomCompletionTime
+WHERE routineId = ?;
+

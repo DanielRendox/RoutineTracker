@@ -12,7 +12,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Month
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import kotlin.random.Random
 
 class ScheduleGetPeriodRangeTest {
@@ -180,7 +180,7 @@ class ScheduleGetPeriodRangeTest {
     }
 
     @Test
-    fun periodicCustomScheduleGetPeriodRange() {
+    fun alternateDaysScheduleGetPeriodRange() {
         val routineStartDate = LocalDate(2023, Month.JULY, 6)
 
         val numOfDaysInPeriod = Random.nextInt(99)
@@ -204,59 +204,6 @@ class ScheduleGetPeriodRangeTest {
 
         val secondPeriod = secondPeriodStartDate..secondPeriodEndDate
         assertEachDateOfRangeIsInExpectedRange(schedule, secondPeriod)
-    }
-
-    @Test
-    fun assertPeriodicCustomScheduleRestartsPeriodAfterVacation() {
-        val routineStartDate = LocalDate(2023, Month.NOVEMBER, 1)
-
-        val schedule = Schedule.AlternateDaysSchedule(
-            startDate = routineStartDate,
-            numOfDueDays = 1,
-            numOfDaysInPeriod = 2,
-            vacationStartDate = LocalDate(2023, Month.NOVEMBER, 3),
-            vacationEndDate = LocalDate(2023, Month.NOVEMBER, 5),
-        )
-
-        val expectedRangeRightAfterVacation =
-            LocalDate(2023, Month.NOVEMBER, 6)..LocalDate(2023, Month.NOVEMBER, 7)
-        assertThat(
-            schedule.getPeriodRange(
-                currentDate = LocalDate(2023, Month.NOVEMBER, 6),
-                lastVacationEndDate = LocalDate(2023, Month.NOVEMBER, 5),
-            )
-        ).isEqualTo(expectedRangeRightAfterVacation)
-
-        val expectedRangeAfterVacation =
-            LocalDate(2023, Month.NOVEMBER, 8)..LocalDate(2023, Month.NOVEMBER, 9)
-        assertThat(
-            schedule.getPeriodRange(
-                currentDate = LocalDate(2023, Month.NOVEMBER, 9),
-                lastVacationEndDate = LocalDate(2023, Month.NOVEMBER, 7),
-            )
-        ).isEqualTo(expectedRangeAfterVacation)
-    }
-
-    @Test
-    fun assertPeriodicScheduleDoesNotRestartPeriodBeforeVacation() {
-        val routineStartDate = LocalDate(2023, Month.NOVEMBER, 1)
-
-        val schedule = Schedule.AlternateDaysSchedule(
-            startDate = routineStartDate,
-            numOfDueDays = 1,
-            numOfDaysInPeriod = 2,
-            vacationStartDate = LocalDate(2023, Month.NOVEMBER, 3),
-            vacationEndDate = LocalDate(2023, Month.NOVEMBER, 5),
-        )
-
-        val expectedRangeBeforeVacation =
-            LocalDate(2023, Month.NOVEMBER, 1)..LocalDate(2023, Month.NOVEMBER, 2)
-        assertThat(
-            schedule.getPeriodRange(
-                currentDate = LocalDate(2023, Month.NOVEMBER, 1),
-                lastVacationEndDate = LocalDate(2023, Month.NOVEMBER, 5),
-            )
-        ).isEqualTo(expectedRangeBeforeVacation)
     }
 
     private fun assertEachDateOfRangeIsInExpectedRange(

@@ -1,32 +1,44 @@
 package com.rendox.routinetracker.core.domain.streak
 
+import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo
-import com.rendox.routinetracker.core.model.DisplayStreak
+import com.rendox.routinetracker.core.model.Streak
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.minus
 
-fun DisplayStreak.contains(date: LocalDate): Boolean = date in startDate..endDate
-fun DisplayStreak.getDurationInDays(): Int = startDate.daysUntil(endDate) + 1
+fun Streak.contains(date: LocalDate): Boolean = date in startDate..endDate
+fun Streak.getDurationInDays(): Int = startDate.daysUntil(endDate) + 1
 
-fun List<DisplayStreak>.getCurrentStreak(today: LocalDate): DisplayStreak? =
+fun List<Streak>.getCurrentStreak(today: LocalDate): Streak? =
     firstOrNull {
         val yesterdayWasInStreak = it.contains(today.minus(DatePeriod(days = 1)))
         if (yesterdayWasInStreak) true
         else it.contains(today)
     }
 
-fun List<DisplayStreak>.getLongestStreak(): DisplayStreak? =
+fun List<Streak>.getLongestStreak(): Streak? =
     maxByOrNull { it.getDurationInDays() }
 
-fun List<DisplayStreak>.checkIfContainDate(date: LocalDate): Boolean {
-    var includedInStreak = false
-    for (streak in this) {
-        if (streak.contains(date)) {
-            includedInStreak = true
-            break
+fun List<Streak>.joinAdjacentStreaks(): List<Streak> {
+    val resultingStreaks = mutableListOf<Streak>()
+    var previousStreak = firstOrNull() ?: return emptyList()
+
+    for (currentStreak in this.drop(1).sortedBy { it.startDate }) {
+        previousStreak = if (previousStreak.endDate.plusDays(1) == currentStreak.startDate) {
+            previousStreak.joinWith(currentStreak)
+        } else {
+            resultingStreaks.add(previousStreak)
+            currentStreak
         }
     }
-    return includedInStreak
+    resultingStreaks.add(previousStreak)
+
+    return resultingStreaks
 }
+
+fun Streak.joinWith(other: Streak) = Streak(
+    startDate = this.startDate,
+    endDate = other.endDate,
+)

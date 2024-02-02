@@ -28,3 +28,7 @@ WHERE scheduleId = ? AND dueDateNumber = ?;
 insertDueDate:
 INSERT INTO dueDateEntity
 VALUES (?, ?, ?, ?);
+
+deleteDueDates:
+DELETE FROM dueDateEntity
+WHERE scheduleId = ?;

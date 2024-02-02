@@ -1,5 +1,7 @@
 package com.rendox.routinetracker.add_routine.navigation
 
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
@@ -10,7 +12,7 @@ const val addRoutineRoute = "add_routine"
 
 fun NavController.navigateToAddRoutine(
     navOptionsBuilder: NavOptionsBuilder.() -> Unit = {}
-    ) {
+) {
     this.navigate(addRoutineRoute, navOptionsBuilder)
 }
 
@@ -20,6 +22,12 @@ fun NavGraphBuilder.addRoutineScreen(
 ) {
     composable(
         route = addRoutineRoute,
+        enterTransition = {
+            fadeIn()
+        },
+        exitTransition = {
+            fadeOut()
+        },
     ) {
         AddRoutineRoute(
             navigateBackAndRecreate = navigateBackAndRecreate,

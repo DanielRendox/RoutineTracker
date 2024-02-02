@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import com.kizitonwose.calendar.compose.WeekCalendar
 import com.kizitonwose.calendar.compose.weekcalendar.rememberWeekCalendarState
 import com.rendox.routinetracker.core.ui.helpers.LocalLocale
-import kotlinx.datetime.DayOfWeek
 import java.time.LocalDate
 import java.time.format.TextStyle
 
@@ -36,7 +35,6 @@ fun RoutineTrackerWeekCalendar(
     selectedDate: LocalDate,
     modifier: Modifier = Modifier,
     initialDate: LocalDate,
-    firstDayOfWeek: DayOfWeek,
     today: LocalDate,
     dateOnClick: (LocalDate) -> Unit
 ) {
@@ -48,7 +46,7 @@ fun RoutineTrackerWeekCalendar(
         startDate = startDate,
         endDate = endDate,
         firstVisibleWeekDate = initialDate,
-        firstDayOfWeek = firstDayOfWeek,
+        firstDayOfWeek = initialDate.minusDays(3).dayOfWeek,
     )
 
     WeekCalendar(
@@ -87,7 +85,7 @@ private fun WeekCalendarDay(
 
     Box(
         modifier = modifier
-            .width(screenWidth / 9f)
+            .width(48.dp)
             .padding(2.dp)
             .clip(RoundedCornerShape(25))
             .background(color = backgroundColor)
@@ -143,7 +141,6 @@ private fun RoutineTrackerWeekCalendarPreview() {
                 .height(70.dp)
                 .fillMaxWidth(),
             initialDate = today,
-            firstDayOfWeek = DayOfWeek.MONDAY,
             dateOnClick = { selectedDate = it },
             selectedDate = selectedDate,
             today = today,

@@ -9,6 +9,7 @@ import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.rendox.routinetracker.add_routine.choose_schedule.schedule_pickers.ScheduleTypeUi
+import com.rendox.routinetracker.core.model.Schedule
 
 @Stable
 class MonthlySchedulePickerState(
@@ -101,6 +102,28 @@ class MonthlySchedulePickerState(
         numOfDueDaysIsValid = numOfDueDays in 1..31
     }
 
+    fun updateSelectedSchedule(schedule: Schedule.MonthlySchedule) {
+        when (schedule) {
+            is Schedule.MonthlyScheduleByNumOfDueDays -> {
+                numOfDueDays = schedule.numOfDueDays.toString()
+                specificDaysOfMonth = emptyList()
+                chooseSpecificDays = false
+                numOfDueDaysTextFieldIsEditable = true
+                lastDayOfMonthSelected = false
+            }
+            is Schedule.MonthlyScheduleByDueDatesIndices -> {
+                numOfDueDays = schedule.dueDatesIndices.size.toString()
+                specificDaysOfMonth = schedule.dueDatesIndices
+                chooseSpecificDays = true
+                numOfDueDaysTextFieldIsEditable = false
+                lastDayOfMonthSelected = schedule.includeLastDayOfMonth
+            }
+        }
+
+        numOfDueDaysIsValid = true
+        updateContainsErrorState()
+    }
+
     @Suppress("UNCHECKED_CAST")
     companion object {
         val Saver: Saver<MonthlySchedulePickerState, *> = listSaver(
@@ -109,7 +132,6 @@ class MonthlySchedulePickerState(
                     monthlySchedulePickerState.numOfDueDays,
                     monthlySchedulePickerState.specificDaysOfMonth,
                     monthlySchedulePickerState.lastDayOfMonthSelected,
-                    monthlySchedulePickerState.numOfDueDaysIsValid,
                     monthlySchedulePickerState.selected,
                     monthlySchedulePickerState.chooseSpecificDays,
                 )
@@ -119,8 +141,8 @@ class MonthlySchedulePickerState(
                     numOfDueDays = monthlySchedulePickerStateValues[0] as String,
                     specificDaysOfMonth = monthlySchedulePickerStateValues[1] as List<Int>,
                     lastDayOfMonthSelected = monthlySchedulePickerStateValues[2] as Boolean,
-                    selected = monthlySchedulePickerStateValues[4] as Boolean,
-                    chooseSpecificDays = monthlySchedulePickerStateValues[5] as Boolean,
+                    selected = monthlySchedulePickerStateValues[3] as Boolean,
+                    chooseSpecificDays = monthlySchedulePickerStateValues[4] as Boolean,
                 )
             }
         )

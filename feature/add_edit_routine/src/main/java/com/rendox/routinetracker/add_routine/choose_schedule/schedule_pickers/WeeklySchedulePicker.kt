@@ -100,7 +100,7 @@ private fun DayOfWeekPicker(
         for (dayOfWeek in daysOfWeek) {
             DayPickerElement(
                 modifier = Modifier
-                    .padding(horizontal = 4.dp)
+                    .padding(horizontal = 2.dp)
                     .height(40.dp)
                     .widthIn(min = 40.dp),
                 text = dayOfWeek.getDisplayName(TextStyle.SHORT, LocalLocale.current),

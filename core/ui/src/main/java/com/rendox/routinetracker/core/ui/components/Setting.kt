@@ -1,5 +1,6 @@
 package com.rendox.routinetracker.core.ui.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
@@ -22,16 +24,21 @@ fun Setting(
     description: String?,
     isOn: Boolean,
     onToggle: (Boolean) -> Unit,
+    enabled: Boolean = true,
 ) {
     Row(
         modifier = modifier
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .then(if (enabled) Modifier.clickable { onToggle(!isOn) } else Modifier)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(modifier = Modifier
-            .weight(1f)
-            .padding(end = 16.dp)) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 16.dp)
+                .alpha(if (enabled) 1f else 0.5f)
+        ) {
             Text(text = title)
             description?.let {
                 Text(
@@ -42,7 +49,11 @@ fun Setting(
                 )
             }
         }
-        Switch(checked = isOn, onCheckedChange = onToggle)
+        Switch(
+            checked = isOn,
+            onCheckedChange = onToggle,
+            enabled = enabled,
+        )
     }
 }
 

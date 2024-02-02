@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="fab_icon_description">Add a new routine</string>
+    <string name="routine_visibility_icon_toggle_all_visible_description">All routines visibile, click to hide</string>
+    <string name="routine_visibility_icon_toggle_some_routines_hidden_description">Inappropriate routines hidden, click to show</string>
+    <string name="nothing_scheduled">No habits are scheduled for this date</string>
+    <string name="nothing_scheduled_description_try_adding_routines">"Add new habits using "</string>
+    <string name="nothing_scheduled_description_try_toggling_routine_visibility">"or toggle habit visibility using"</string>
 </resources>

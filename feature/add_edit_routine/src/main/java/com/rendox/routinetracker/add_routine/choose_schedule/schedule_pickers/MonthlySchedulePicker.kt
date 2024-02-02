@@ -2,19 +2,24 @@ package com.rendox.routinetracker.add_routine.choose_schedule.schedule_pickers
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rendox.routinetracker.add_routine.choose_schedule.schedule_picker_states.MonthlySchedulePickerState
 import com.rendox.routinetracker.core.ui.R
@@ -100,7 +105,7 @@ private fun DayOfMonthPicker(
                 for (dayOfMonth in daysOfMonthRow) {
                     DayPickerElement(
                         modifier = Modifier
-                            .padding(horizontal = 4.dp, vertical = 2.dp)
+                            .padding(horizontal = 2.dp, vertical = 2.dp)
                             .size(40.dp),
                         text = dayOfMonth.toString(),
                         selected = dayOfMonth in selectedDays,
@@ -110,6 +115,14 @@ private fun DayOfMonthPicker(
             }
         }
         Row {
+            DayPickerElement(
+                modifier = Modifier
+                    .padding(horizontal = 4.dp, vertical = 2.dp)
+                    .size(40.dp),
+                text = "29",
+                selected = 29 in selectedDays,
+                onToggle = { toggleDayOfMonth(29) },
+            )
             DayPickerElement(
                 modifier = Modifier
                     .padding(horizontal = 4.dp, vertical = 2.dp)
@@ -130,12 +143,31 @@ private fun DayOfMonthPicker(
                 modifier = Modifier
                     .padding(horizontal = 4.dp, vertical = 2.dp)
                     .height(40.dp)
-                    .wrapContentWidth(),
+                    .wrapContentWidth()
+                    .widthIn(min = 40.dp),
                 text = stringResource(
                     id = com.rendox.routinetracker.feature.agenda.R.string.monthly_picker_last_day_of_month_label
                 ),
                 selected = lastDayOfMonthIsSelected,
                 onToggle = toggleLastDayOfMonth,
+            )
+        }
+    }
+}
+
+@Composable
+@Preview(device = "spec:width=480px,height=854px,dpi=640")
+private fun DayOfMonthPickerPreview() {
+    Surface {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            DayOfMonthPicker(
+                selectedDays = listOf(1, 2, 3, 4, 5, 6, 7, 8, 9),
+                lastDayOfMonthIsSelected = false,
+                toggleDayOfMonth = {},
+                toggleLastDayOfMonth = {},
             )
         }
     }

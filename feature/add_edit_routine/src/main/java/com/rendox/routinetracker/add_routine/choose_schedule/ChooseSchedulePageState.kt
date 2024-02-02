@@ -13,6 +13,7 @@ import com.rendox.routinetracker.add_routine.choose_schedule.schedule_picker_sta
 import com.rendox.routinetracker.add_routine.choose_schedule.schedule_picker_states.MonthlySchedulePickerState
 import com.rendox.routinetracker.add_routine.choose_schedule.schedule_picker_states.rememberMonthlySchedulePickerState
 import com.rendox.routinetracker.add_routine.choose_schedule.schedule_picker_states.rememberWeeklySchedulePickerState
+import com.rendox.routinetracker.core.model.Schedule
 
 @Stable
 class ChooseSchedulePageState(
@@ -41,6 +42,25 @@ class ChooseSchedulePageState(
             val isSelected = schedulePickerState.scheduleType == selectedScheduleType
             schedulePickerState.updateSelected(isSelected)
         }
+    }
+
+    fun updateSelectedSchedule(schedule: Schedule) = when (schedule) {
+        is Schedule.EveryDaySchedule -> {
+            selectSchedule(ScheduleTypeUi.EveryDaySchedule)
+        }
+        is Schedule.WeeklySchedule -> {
+            selectSchedule(ScheduleTypeUi.WeeklySchedule)
+            weeklySchedulePickerState.updateSelectedSchedule(schedule)
+        }
+        is Schedule.MonthlySchedule -> {
+            selectSchedule(ScheduleTypeUi.MonthlySchedule)
+            monthlySchedulePickerState.updateSelectedSchedule(schedule)
+        }
+        is Schedule.AlternateDaysSchedule -> {
+            selectSchedule(ScheduleTypeUi.AlternateDaysSchedule)
+            alternateDaysSchedulePickerState.updateSelectedSchedule(schedule)
+        }
+        else -> { }
     }
 
     fun triggerErrorsIfAny() {

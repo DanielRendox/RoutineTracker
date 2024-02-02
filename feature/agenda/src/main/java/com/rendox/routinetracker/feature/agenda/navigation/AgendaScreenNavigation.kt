@@ -1,5 +1,7 @@
 package com.rendox.routinetracker.feature.agenda.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
@@ -18,7 +20,15 @@ fun NavGraphBuilder.agendaScreen(
     onRoutineClick: (Long) -> Unit,
     onAddRoutineClick: () -> Unit,
 ) {
-    composable(route = agendaNavRoute) {
+    composable(
+        route = agendaNavRoute,
+        enterTransition = {
+            EnterTransition.None
+        },
+        exitTransition = {
+            ExitTransition.None
+        },
+    ) {
         AgendaRoute(
             onRoutineClick = onRoutineClick,
             onAddRoutineClick = onAddRoutineClick,

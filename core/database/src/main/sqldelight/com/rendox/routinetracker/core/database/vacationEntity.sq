@@ -39,6 +39,10 @@ WHERE habitId = :habitId
     AND (:maxDate IS NULL OR (endDate IS NULL AND startDate <= :maxDate) OR (endDate IS NOT NULL AND endDate <= :maxDate)
         OR (startDate <= :maxDate AND (endDate IS NULL OR :maxDate <= endDate)));
 
+getAllVacations:
+SELECT *
+FROM vacationEntity;
+
 insertVacation:
 INSERT INTO vacationEntity
 VALUES (?, ?, ?, ?);
@@ -46,3 +50,7 @@ VALUES (?, ?, ?, ?);
 deleteVacationById:
 DELETE FROM vacationEntity
 WHERE id = ?;
+
+deleteAllVacationsForHabit:
+DELETE FROM vacationEntity
+WHERE habitId = ?;
