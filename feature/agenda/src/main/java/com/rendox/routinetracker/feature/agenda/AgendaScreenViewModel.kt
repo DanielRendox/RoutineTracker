@@ -85,16 +85,11 @@ class AgendaScreenViewModel(
 
     private fun updateRoutinesForDate(date: LocalDate) = viewModelScope.launch {
         routinesAreUpdatingFlow.update { true }
+        cashedRoutinesFlow.update { emptyList() }
         for (routine in allRoutinesFlow.value) {
             cashedRoutinesFlow.update { cashedRoutines ->
                 cashedRoutines.toMutableList().apply {
-                    val routineToUpdateIndex = indexOfFirst { it.id == routine.id }
-                    val displayRoutine = getDisplayRoutine(habit = routine, date = date)
-                    if (routineToUpdateIndex == -1) {
-                        add(displayRoutine)
-                    } else {
-                        set(routineToUpdateIndex, displayRoutine)
-                    }
+                    add(getDisplayRoutine(habit = routine, date = date))
                 }
             }
         }
