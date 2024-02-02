@@ -23,9 +23,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase
+import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase.IllegalDateEditAttemptException
 import com.rendox.routinetracker.core.model.Habit
-import com.rendox.routinetracker.core.ui.helpers.ObserveFlowAsEvents
+import com.rendox.routinetracker.core.ui.helpers.ObserveUiEvent
 import com.rendox.routinetracker.core.ui.theme.collapsing_toolbar.CollapsingToolbarLarge
 import com.rendox.routinetracker.core.ui.theme.collapsing_toolbar.CollapsingToolbarScaffold
 import com.rendox.routinetracker.core.ui.theme.collapsing_toolbar.LargeToolbarHeightCollapsed
@@ -50,39 +50,33 @@ internal fun RoutineDetailsRoute(
     val currentMonth by viewModel.currentMonthFlow.collectAsStateWithLifecycle()
     val currentStreakDurationInDays by viewModel.currentStreakDurationInDays.collectAsStateWithLifecycle()
     val longestStreakDurationInDays by viewModel.longestStreakDurationInDays.collectAsStateWithLifecycle()
+    val completionAttemptBlockedEvent by viewModel.completionAttemptBlockedEvent.collectAsStateWithLifecycle()
+    val navigateBackEvent by viewModel.navigateBackEvent.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
-    val notStartedDateEditAttemptMessage = stringResource(
-        id = com.rendox.routinetracker.core.ui.R.string.not_started_date_completion_attempt_snackbar_message
-    )
-    val finishedDateEditAttemptMessage = stringResource(
-        id = com.rendox.routinetracker.core.ui.R.string.finished_date_completion_attempt_snackbar_message
-    )
-    val futureDateEditAttemptMessage = stringResource(
-        id = com.rendox.routinetracker.core.ui.R.string.future_date_completion_attempt_snackbar_message
-    )
-    ObserveFlowAsEvents(
-        flow = viewModel.routineDetailsScreenEventsFlow,
-        onEvent = { event ->
-            when (event) {
-                is RoutineDetailsScreenEvent.BlockedCompletionAttempt -> {
-                    val snackbarMessage = when (event.illegalDateEditAttemptException) {
-                        is InsertHabitCompletionUseCase.IllegalDateEditAttemptException.NotStartedHabitDateEditAttemptException -> {
-                            notStartedDateEditAttemptMessage
-                        }
-                        is InsertHabitCompletionUseCase.IllegalDateEditAttemptException.FinishedHabitDateEditAttemptException -> {
-                            finishedDateEditAttemptMessage
-                        }
-                        is InsertHabitCompletionUseCase.IllegalDateEditAttemptException.FutureDateEditAttemptException -> {
-                            futureDateEditAttemptMessage
-                        }
-                    }
-                    snackbarHostState.showSnackbar(message = snackbarMessage)
-                }
-                is RoutineDetailsScreenEvent.NavigateBack -> navigateBack()
-            }
+    val snackbarMessage = when (completionAttemptBlockedEvent?.data) {
+        is IllegalDateEditAttemptException.NotStartedHabitDateEditAttemptException -> {
+            stringResource(id = com.rendox.routinetracker.core.ui.R.string.not_started_date_completion_attempt_snackbar_message)
         }
-    )
+
+        is IllegalDateEditAttemptException.FinishedHabitDateEditAttemptException -> {
+            stringResource(id = com.rendox.routinetracker.core.ui.R.string.finished_date_completion_attempt_snackbar_message)
+        }
+
+        is IllegalDateEditAttemptException.FutureDateEditAttemptException -> {
+            stringResource(id = com.rendox.routinetracker.core.ui.R.string.future_date_completion_attempt_snackbar_message)
+        }
+
+        null -> ""
+    }
+
+    ObserveUiEvent(completionAttemptBlockedEvent) {
+        snackbarHostState.showSnackbar(message = snackbarMessage)
+    }
+
+    ObserveUiEvent(navigateBackEvent) {
+        navigateBack()
+    }
 
     RoutineDetailsScreen(
         modifier = modifier,

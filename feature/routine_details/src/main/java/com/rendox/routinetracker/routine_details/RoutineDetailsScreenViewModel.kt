@@ -6,6 +6,7 @@ import com.kizitonwose.calendar.core.atStartOfMonth
 import com.kizitonwose.calendar.core.yearMonth
 import com.rendox.routinetracker.core.domain.completion_history.GetHabitCompletionDataUseCase
 import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase
+import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase.IllegalDateEditAttemptException
 import com.rendox.routinetracker.core.domain.di.DeleteHabitUseCase
 import com.rendox.routinetracker.core.domain.di.GetHabitUseCase
 import com.rendox.routinetracker.core.domain.streak.GetAllStreaksUseCase
@@ -17,13 +18,12 @@ import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.HabitStatus
 import com.rendox.routinetracker.core.model.Streak
-import kotlinx.coroutines.channels.Channel
+import com.rendox.routinetracker.core.ui.helpers.UiEvent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -74,8 +74,12 @@ class RoutineDetailsScreenViewModel(
         started = SharingStarted.WhileSubscribed(5_000),
     )
 
-    private val routineDetailsScreenEventsChannel = Channel<RoutineDetailsScreenEvent>()
-    val routineDetailsScreenEventsFlow = routineDetailsScreenEventsChannel.receiveAsFlow()
+    private val _completionAttemptBlockedEvent: MutableStateFlow<UiEvent<IllegalDateEditAttemptException>?> =
+        MutableStateFlow(null)
+    val completionAttemptBlockedEvent = _completionAttemptBlockedEvent.asStateFlow()
+
+    private val _navigateBackEvent: MutableStateFlow<UiEvent<Any>?> = MutableStateFlow(null)
+    val navigateBackEvent = _navigateBackEvent.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -157,10 +161,15 @@ class RoutineDetailsScreenViewModel(
                 completionRecord = completionRecord,
                 today = todayFlow.value,
             )
-        } catch (exception: InsertHabitCompletionUseCase.IllegalDateEditAttemptException) {
-            routineDetailsScreenEventsChannel.send(
-                RoutineDetailsScreenEvent.BlockedCompletionAttempt(exception)
-            )
+        } catch (exception: IllegalDateEditAttemptException) {
+            _completionAttemptBlockedEvent.update {
+                object : UiEvent<IllegalDateEditAttemptException> {
+                    override val data: IllegalDateEditAttemptException = exception
+                    override fun onConsumed() {
+                        _completionAttemptBlockedEvent.update { null }
+                    }
+                }
+            }
         }
 
         streaksFlow.update {
@@ -176,7 +185,14 @@ class RoutineDetailsScreenViewModel(
         _habitFlow.value?.let { habit ->
             deleteHabit(habit.id!!)
         }
-        routineDetailsScreenEventsChannel.send(RoutineDetailsScreenEvent.NavigateBack)
+        _navigateBackEvent.update {
+            object : UiEvent<Any> {
+                override val data: Any = Unit
+                override fun onConsumed() {
+                    _navigateBackEvent.update { null }
+                }
+            }
+        }
     }
 
     companion object {
@@ -195,10 +211,3 @@ data class CalendarDateData(
     val numOfTimesCompleted: Float,
 )
 
-sealed interface RoutineDetailsScreenEvent {
-    class BlockedCompletionAttempt(
-        val illegalDateEditAttemptException: InsertHabitCompletionUseCase.IllegalDateEditAttemptException
-    ) : RoutineDetailsScreenEvent
-
-    object NavigateBack : RoutineDetailsScreenEvent
-}

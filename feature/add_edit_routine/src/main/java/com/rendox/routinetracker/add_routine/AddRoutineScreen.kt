@@ -25,7 +25,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,6 +50,7 @@ import com.rendox.routinetracker.add_routine.tweak_routine.rememberTweakRoutineP
 import com.rendox.routinetracker.core.domain.di.InsertHabitUseCase
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.ui.helpers.LocalLocale
+import com.rendox.routinetracker.core.ui.helpers.ObserveUiEvent
 import com.rendox.routinetracker.feature.agenda.R
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -95,7 +95,7 @@ internal fun AddRoutineRoute(
     )
 
     val snackbarHostState = remember { SnackbarHostState() }
-    val newSchedule = tweakRoutinePageState.convertedSchedule
+    val newSchedule = tweakRoutinePageState.scheduleConvertedEvent?.data
     val scheduleConvertedMessage = stringResource(id = R.string.schedule_converted_snackbar_message)
     val newScheduleDisplayName = when (newSchedule) {
         is Schedule.EveryDaySchedule -> stringResource(ScheduleTypeUi.EveryDaySchedule.titleId)
@@ -104,12 +104,13 @@ internal fun AddRoutineRoute(
         is Schedule.AlternateDaysSchedule -> stringResource(ScheduleTypeUi.AlternateDaysSchedule.titleId)
         else -> ""
     }
-    LaunchedEffect(newSchedule) {
-        if (newSchedule != null) {
-            snackbarHostState.showSnackbar(message = "$scheduleConvertedMessage $newScheduleDisplayName")
-        }
-        tweakRoutinePageState.updateScheduleConverted(null)
+
+    ObserveUiEvent(tweakRoutinePageState.scheduleConvertedEvent) {
+        snackbarHostState.showSnackbar(
+            message = "$scheduleConvertedMessage $newScheduleDisplayName"
+        )
     }
+
 
     AddRoutineScreen(
         modifier = modifier,

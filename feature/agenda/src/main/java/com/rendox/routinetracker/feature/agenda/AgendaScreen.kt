@@ -40,7 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase.IllegalDateEditAttemptException
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.ui.helpers.LocalLocale
-import com.rendox.routinetracker.core.ui.helpers.ObserveFlowAsEvents
+import com.rendox.routinetracker.core.ui.helpers.ObserveUiEvent
 import com.rendox.routinetracker.feature.agenda.databinding.AgendaRecyclerviewBinding
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toKotlinLocalDate
@@ -59,42 +59,28 @@ internal fun AgendaRoute(
     val visibleRoutines by viewModel.visibleRoutinesFlow.collectAsStateWithLifecycle()
     val showAllRoutines by viewModel.showAllRoutinesFlow.collectAsStateWithLifecycle()
     val nothingIsScheduled by viewModel.nothingIsScheduledFlow.collectAsStateWithLifecycle()
+    val completionAttemptBlockedEvent by viewModel.completionAttemptBlockedEvent.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
-
-    val notStartedDateEditAttemptMessage = stringResource(
-        id = com.rendox.routinetracker.core.ui.R.string.not_started_date_completion_attempt_snackbar_message
-    )
-    val finishedDateEditAttemptMessage = stringResource(
-        id = com.rendox.routinetracker.core.ui.R.string.finished_date_completion_attempt_snackbar_message
-    )
-    val futureDateEditAttemptMessage = stringResource(
-        id = com.rendox.routinetracker.core.ui.R.string.future_date_completion_attempt_snackbar_message
-    )
-    ObserveFlowAsEvents(
-        flow = viewModel.agendaScreenEventsFlow,
-        onEvent = { event ->
-            when (event) {
-                is AgendaScreenEvent.BlockedCompletionAttempt -> {
-                    val snackbarMessage = when (event.illegalDateEditAttemptException) {
-                        is IllegalDateEditAttemptException.NotStartedHabitDateEditAttemptException -> {
-                            notStartedDateEditAttemptMessage
-                        }
-
-                        is IllegalDateEditAttemptException.FinishedHabitDateEditAttemptException -> {
-                            finishedDateEditAttemptMessage
-                        }
-
-                        is IllegalDateEditAttemptException.FutureDateEditAttemptException -> {
-                            futureDateEditAttemptMessage
-                        }
-                    }
-                    snackbarHostState.showSnackbar(message = snackbarMessage)
-                }
-            }
+    val snackbarMessage = when (completionAttemptBlockedEvent?.data) {
+        is IllegalDateEditAttemptException.NotStartedHabitDateEditAttemptException -> {
+            stringResource(id = com.rendox.routinetracker.core.ui.R.string.not_started_date_completion_attempt_snackbar_message)
         }
-    )
 
+        is IllegalDateEditAttemptException.FinishedHabitDateEditAttemptException -> {
+            stringResource(id = com.rendox.routinetracker.core.ui.R.string.finished_date_completion_attempt_snackbar_message)
+        }
+
+        is IllegalDateEditAttemptException.FutureDateEditAttemptException -> {
+            stringResource(id = com.rendox.routinetracker.core.ui.R.string.future_date_completion_attempt_snackbar_message)
+        }
+
+        null -> ""
+    }
+
+    ObserveUiEvent(completionAttemptBlockedEvent) {
+        snackbarHostState.showSnackbar(message = snackbarMessage)
+    }
 
     AgendaScreen(
         modifier = modifier,

@@ -9,6 +9,7 @@ import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.rendox.routinetracker.core.model.Schedule
+import com.rendox.routinetracker.core.ui.helpers.UiEvent
 import kotlinx.datetime.DayOfWeek
 import java.time.Duration
 import java.time.LocalDate
@@ -73,7 +74,7 @@ class TweakRoutinePageState(
     val containsError: Boolean
         get() = !overallNumOfDaysIsValid
 
-    var convertedSchedule by mutableStateOf<Schedule?>(null)
+    var scheduleConvertedEvent by mutableStateOf<UiEvent<Schedule>?>(null)
         private set
 
     fun updateStartDate(startDate: LocalDate) {
@@ -153,8 +154,13 @@ class TweakRoutinePageState(
         this.weekStartDay = weekStartDay
     }
 
-    fun updateScheduleConverted(newSchedule: Schedule?) {
-        convertedSchedule = newSchedule
+    fun updateScheduleConverted(newSchedule: Schedule) {
+        scheduleConvertedEvent = object : UiEvent<Schedule> {
+            override val data: Schedule = newSchedule
+            override fun onConsumed() {
+                scheduleConvertedEvent = null
+            }
+        }
     }
 
     companion object {

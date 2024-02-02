@@ -9,13 +9,12 @@ import com.rendox.routinetracker.core.domain.di.GetAllHabitsUseCase
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.HabitStatus
 import com.rendox.routinetracker.core.model.dueOrCompletedStatuses
-import kotlinx.coroutines.channels.Channel
+import com.rendox.routinetracker.core.ui.helpers.UiEvent
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -73,8 +72,9 @@ class AgendaScreenViewModel(
             started = SharingStarted.WhileSubscribed(5_000),
         )
 
-    private val agendaScreenEventsChannel = Channel<AgendaScreenEvent>()
-    val agendaScreenEventsFlow = agendaScreenEventsChannel.receiveAsFlow()
+    private val _completionAttemptBlockedEvent: MutableStateFlow<UiEvent<IllegalDateEditAttemptException>?> =
+        MutableStateFlow(null)
+    val completionAttemptBlockedEvent = _completionAttemptBlockedEvent.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -132,9 +132,14 @@ class AgendaScreenViewModel(
                     today = todayFlow.value,
                 )
             } catch (exception: IllegalDateEditAttemptException) {
-                agendaScreenEventsChannel.send(
-                    AgendaScreenEvent.BlockedCompletionAttempt(exception)
-                )
+                _completionAttemptBlockedEvent.update {
+                    object : UiEvent<IllegalDateEditAttemptException> {
+                        override val data: IllegalDateEditAttemptException = exception
+                        override fun onConsumed() {
+                            _completionAttemptBlockedEvent.update { null }
+                        }
+                    }
+                }
                 return@launch
             }
 
@@ -188,10 +193,4 @@ data class DisplayRoutine(
 
 enum class DisplayRoutineType {
     YesNoHabit,
-}
-
-sealed interface AgendaScreenEvent {
-    class BlockedCompletionAttempt(
-        val illegalDateEditAttemptException: IllegalDateEditAttemptException
-    ) : AgendaScreenEvent
 }
