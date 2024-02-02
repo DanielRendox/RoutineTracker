@@ -102,7 +102,7 @@ class GetAllStreaksWithCashingUseCase(
             habit = habit,
             completionHistory = completionHistory,
             vacationHistory = vacationHistory,
-            period = period, // last period that was not computed
+            period = period,
         )
     }
 

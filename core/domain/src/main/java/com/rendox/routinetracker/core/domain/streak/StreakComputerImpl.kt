@@ -86,10 +86,9 @@ internal class StreakComputerImpl(
                         completionHistory = completionHistory,
                         vacationHistory = vacationHistory,
                     )
-                    if (todayStatus == HabitStatus.Planned) {
-                        today.minus(DatePeriod(days = 1))
-                    } else {
-                        today
+                    when (todayStatus) {
+                        HabitStatus.Planned, HabitStatus.Backlog -> today.minus(DatePeriod(days = 1))
+                        else -> today
                     }
                 }
 
