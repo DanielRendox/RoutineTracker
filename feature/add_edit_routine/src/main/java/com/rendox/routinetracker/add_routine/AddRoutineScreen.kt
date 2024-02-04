@@ -163,12 +163,11 @@ internal fun AddRoutineScreen(
     addRoutineScreenState: AddRoutineScreenState,
     snackbarHostState: SnackbarHostState,
 ) {
-    Surface(modifier = modifier
-        .fillMaxSize()
-        .navigationBarsPadding()) {
+    Surface(modifier = modifier.fillMaxSize()) {
         Column(
             modifier = modifier
                 .fillMaxSize()
+                .navigationBarsPadding()
         ) {
             AddRoutineNavHost(
                 modifier = Modifier

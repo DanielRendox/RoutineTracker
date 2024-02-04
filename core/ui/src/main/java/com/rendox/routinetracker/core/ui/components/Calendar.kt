@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
@@ -77,6 +78,7 @@ fun CalendarMonthlyPaged(
     val coroutineScope = rememberCoroutineScope()
     Column(modifier = modifier) {
         CalendarMonthTitle(
+            modifier = Modifier.wrapContentHeight(),
             currentMonth = calendarState.firstVisibleMonth.yearMonth,
             navigateToPrevious = {
                 val newMonth = calendarState.firstVisibleMonth.yearMonth.previousMonth

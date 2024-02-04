@@ -15,12 +15,8 @@ data class RoutineStatusColors(
     val failedStroke: Color,
     val vacationBackground: Color,
     val vacationStroke: Color,
-    val completedBackgroundLight: Color,
-    val failedBackgroundLight: Color,
-    val pending: Color,
-    val pendingStroke: Color,
-    val pendingAgenda: Color,
-    val pendingStrokeAgenda: Color,
+    val skippedInStreak: Color,
+    val skippedOutOfStreak: Color,
 )
 
 val routineStatusColorsLight = RoutineStatusColors(
@@ -30,12 +26,8 @@ val routineStatusColorsLight = RoutineStatusColors(
     failedStroke = routine_status_light_failed_stroke,
     vacationBackground = routine_status_light_vacation_background,
     vacationStroke = routine_status_light_vacation_stroke,
-    pending = routine_status_light_pending,
-    completedBackgroundLight = routine_status_light_skipped_in_streak,
-    failedBackgroundLight = routine_status_light_skipped_out_of_streak,
-    pendingStroke = routine_status_light_pending_stroke,
-    pendingAgenda = routine_status_light_pending_agenda,
-    pendingStrokeAgenda = routine_status_light_pending_stroke_agenda,
+    skippedInStreak = routine_status_light_skipped_in_streak,
+    skippedOutOfStreak = routine_status_light_skipped_out_of_streak,
 )
 
 val routineStatusColorsDark = RoutineStatusColors(
@@ -45,12 +37,8 @@ val routineStatusColorsDark = RoutineStatusColors(
     failedStroke = routine_status_dark_failed_stroke,
     vacationBackground = routine_status_dark_vacation_background,
     vacationStroke = routine_status_dark_vacation_stroke,
-    pending = routine_status_dark_pending,
-    completedBackgroundLight = routine_status_dark_skipped_in_streak,
-    failedBackgroundLight = routine_status_dark_skipped_out_of_streak,
-    pendingStroke = routine_status_dark_pending_stroke,
-    pendingAgenda = routine_status_dark_pending_agenda,
-    pendingStrokeAgenda = routine_status_dark_pending_stroke_agenda,
+    skippedInStreak = routine_status_dark_skipped_in_streak,
+    skippedOutOfStreak = routine_status_dark_skipped_out_of_streak,
 )
 
 val LocalRoutineStatusColors = compositionLocalOf { routineStatusColorsLight }

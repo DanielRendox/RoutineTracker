@@ -22,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -41,7 +42,6 @@ import androidx.compose.ui.unit.sp
 import androidx.recyclerview.widget.RecyclerView
 import com.rendox.routinetracker.core.model.HabitStatus
 import com.rendox.routinetracker.core.ui.helpers.getStringResourceId
-import com.rendox.routinetracker.core.ui.theme.RoutineTrackerTheme
 import com.rendox.routinetracker.core.ui.theme.routineStatusColors
 
 class AgendaListAdapter(
@@ -77,16 +77,14 @@ class AgendaListViewHolder(
         onStatusCheckmarkClick: () -> Unit,
     ) {
         composeView.setContent {
-            RoutineTrackerTheme {
-                AgendaItem(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 10.dp, end = 8.dp, top = 12.dp, bottom = 12.dp),
-                    routine = routine,
-                    onRoutineClick = onRoutineClick,
-                    onStatusCheckmarkClick = onStatusCheckmarkClick,
-                )
-            }
+            AgendaItem(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 10.dp, end = 8.dp, top = 12.dp, bottom = 12.dp),
+                routine = routine,
+                onRoutineClick = onRoutineClick,
+                onStatusCheckmarkClick = onStatusCheckmarkClick,
+            )
         }
     }
 }
@@ -98,28 +96,12 @@ fun AgendaItem(
     onRoutineClick: () -> Unit,
     onStatusCheckmarkClick: () -> Unit,
 ) {
-//    val locale = LocalLocale.current
-//    val timeFormatter =
-//        remember { DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale) }
-
     Row(
         modifier = modifier.alpha(
             if (routine.hasGrayedOutLook) 0.5f else 1f
         ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-//        if (routine.completionTime != null) {
-//            Text(
-//                modifier = Modifier
-//                    .width(100.dp)
-//                    .padding(end = 10.dp),
-//                style = MaterialTheme.typography.labelLarge,
-//                text = routine.completionTime.toJavaLocalTime().format(timeFormatter),
-//            )
-//        } else {
-//            Spacer(modifier = Modifier.width(100.dp))
-//        }
-
         StatusCheckmark(
             modifier = Modifier
                 .padding(end = 16.dp),
@@ -149,7 +131,7 @@ fun AgendaItem(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(20))
-                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .background(MaterialTheme.colorScheme.secondaryContainer)
                 ) {
                     Text(
                         modifier = Modifier
@@ -178,7 +160,7 @@ private fun StatusCheckmark(
 
     when (status) {
         HabitStatus.Failed -> {
-            backgroundColor = MaterialTheme.routineStatusColors.failedBackgroundLight
+            backgroundColor = MaterialTheme.routineStatusColors.skippedOutOfStreak
             icon = Icons.Filled.Close
             iconColor = MaterialTheme.routineStatusColors.failedStroke
         }
@@ -187,14 +169,14 @@ private fun StatusCheckmark(
         HabitStatus.Backlog, HabitStatus.PastDateAlreadyCompleted,
         HabitStatus.FutureDateAlreadyCompleted, HabitStatus.CompletedLater,
         HabitStatus.NotStarted, HabitStatus.Finished, HabitStatus.Skipped -> {
-            backgroundColor = MaterialTheme.routineStatusColors.pendingAgenda
+            backgroundColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp)
             icon = null
             iconColor = null
         }
 
         HabitStatus.Completed, HabitStatus.OverCompleted, HabitStatus.SortedOutBacklog,
         HabitStatus.PartiallyCompleted -> {
-            backgroundColor = MaterialTheme.routineStatusColors.completedBackgroundLight
+            backgroundColor = MaterialTheme.routineStatusColors.skippedInStreak
             icon = Icons.Filled.Done
             iconColor = MaterialTheme.routineStatusColors.completedStroke
         }
@@ -203,7 +185,7 @@ private fun StatusCheckmark(
     val iconSize: Dp
     if (statusToggleIsDisabled) {
         icon = Icons.Outlined.Lock
-        iconColor = MaterialTheme.routineStatusColors.pendingStrokeAgenda
+        iconColor = MaterialTheme.colorScheme.outline
         iconSize = 18.dp
     } else {
         iconSize = 24.dp

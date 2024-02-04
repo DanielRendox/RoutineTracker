@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -76,18 +77,20 @@ private fun RoutineStatusDay(
     val failedBackground = MaterialTheme.routineStatusColors.failedBackground
 
     val skippedBackground =
-        if (includedInStreak) MaterialTheme.routineStatusColors.completedBackgroundLight
-        else MaterialTheme.routineStatusColors.failedBackgroundLight
+        if (includedInStreak) MaterialTheme.routineStatusColors.skippedInStreak
+        else MaterialTheme.routineStatusColors.skippedOutOfStreak
     val skippedStroke =
         if (includedInStreak) MaterialTheme.routineStatusColors.completedStroke
         else MaterialTheme.routineStatusColors.failedStroke
+
+    val pendingColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
 
     val backgroundColor: Color = when (day.position) {
         DayPosition.InDate, DayPosition.OutDate -> Color.Transparent
         else -> when (habitStatus) {
             null -> Color.Transparent
-            HabitStatus.Planned -> MaterialTheme.routineStatusColors.pending
-            HabitStatus.Backlog -> MaterialTheme.routineStatusColors.pending
+            HabitStatus.Planned -> pendingColor
+            HabitStatus.Backlog -> pendingColor
             HabitStatus.PastDateAlreadyCompleted -> skippedBackground
             HabitStatus.FutureDateAlreadyCompleted -> Color.Transparent
             HabitStatus.NotDue -> Color.Transparent
@@ -108,8 +111,8 @@ private fun RoutineStatusDay(
         DayPosition.InDate, DayPosition.OutDate -> Color.Transparent
         else -> when (habitStatus) {
             null -> Color.Transparent
-            HabitStatus.Planned -> MaterialTheme.routineStatusColors.pendingStroke
-            HabitStatus.Backlog -> MaterialTheme.routineStatusColors.pendingStroke
+            HabitStatus.Planned -> pendingColor
+            HabitStatus.Backlog -> pendingColor
             HabitStatus.PastDateAlreadyCompleted -> skippedStroke
             HabitStatus.FutureDateAlreadyCompleted -> Color.Transparent
             HabitStatus.NotDue -> Color.Transparent

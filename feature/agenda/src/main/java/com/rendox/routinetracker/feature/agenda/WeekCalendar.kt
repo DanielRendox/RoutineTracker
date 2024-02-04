@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -75,10 +76,10 @@ private fun WeekCalendarDay(
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val backgroundColor =
         if (selected) MaterialTheme.colorScheme.primaryContainer
-        else MaterialTheme.colorScheme.surfaceVariant
+        else MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
     val foregroundColor =
         if (selected) MaterialTheme.colorScheme.primary
-        else MaterialTheme.colorScheme.outlineVariant
+        else MaterialTheme.colorScheme.surfaceColorAtElevation(48.dp)
     val todayIndicatorColor =
         if (selected) MaterialTheme.colorScheme.onPrimary
         else MaterialTheme.colorScheme.outline

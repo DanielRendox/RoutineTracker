@@ -1,12 +1,3 @@
 <resources>
     <string name="app_name">Routine Tracker</string>
-    <string name="back_icon_description">open the previous page</string>
-
-    <!-- To be used in the RoutineItemScreen -->
-    <string name="days_remaining">days remaining</string>
-    <array name="routine_item_tabs">
-        <item name="tasks">TASKS</item>
-        <item name="progress">PROGRESS</item>
-        <item name="stats">STATISTICS</item>
-    </array>
 </resources>
