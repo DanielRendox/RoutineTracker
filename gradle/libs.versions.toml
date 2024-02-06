@@ -8,7 +8,6 @@ compose = "1.4.8"
 composeBom = "2023.10.01"
 material = "1.1.2"
 androidLifecycle = "2.6.2"
-systemuicontroller = "0.30.1"
 kotlinxDatetime = "0.4.1"
 kotlinxCoroutines = "1.7.3"
 koin = "3.5.1"
@@ -50,7 +49,6 @@ androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview"
 androidx-compose-ui-viewbinding = { group = "androidx.compose.ui", name = "ui-viewbinding", version.ref = "composeViewBinding" }
 androidx-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "composeNavigation"}
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "androidxCoreSplashscreen" }
-google-accompanist-systemuicontroller = { group = "com.google.accompanist", name = "accompanist-systemuicontroller", version.ref = "systemuicontroller" }
 jetbrains-kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
 jetbrains-kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
 jetbrains-kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
