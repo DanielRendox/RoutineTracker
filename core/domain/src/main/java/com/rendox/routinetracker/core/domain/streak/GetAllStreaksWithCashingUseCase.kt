@@ -48,21 +48,19 @@ class GetAllStreaksWithCashingUseCase(
         val computedPeriods = mutableListOf<LocalDateRange>()
 
         val firstDateToLookFor = habit.schedule.startDate
-        var period = getPeriodRange(habit.schedule, firstDateToLookFor)
+        var period = getPeriodRange(habit.schedule, firstDateToLookFor)!!
 
-        val habitEndDate = habit.schedule.endDate
-
-        while (!(habitEndDate != null && period.start > habitEndDate) && !(period.contains(today))) {
+        while (!period.contains(today)) {
             val cashedStreaksContainsPeriod = cashedPeriods.any { cashedPeriod ->
                 period.isSubsetOf(cashedPeriod)
             }
             if (cashedStreaksContainsPeriod) {
-                period = getPeriodRange(habit.schedule, period.endInclusive.plusDays(1))
+                period = getPeriodRange(habit.schedule, period.endInclusive.plusDays(1)) ?: break
                 continue
             }
             computedStreaks.addAll(getStreaksInPeriod(habit, period, today))
             computedPeriods.add(period)
-            period = getPeriodRange(habit.schedule, period.endInclusive.plusDays(1))
+            period = getPeriodRange(habit.schedule, period.endInclusive.plusDays(1)) ?: break
         }
         val distinctComputedStreaks = computedStreaks.distinct()
         val actuallyNeedToInsertComputedStreaks = computedPeriods.isNotEmpty()
@@ -110,8 +108,8 @@ class GetAllStreaksWithCashingUseCase(
         private fun getPeriodRange(
             schedule: Schedule,
             currentDate: LocalDate,
-        ): LocalDateRange = when (schedule) {
-            is Schedule.PeriodicSchedule -> schedule.getPeriodRange(currentDate)!!
+        ): LocalDateRange? = when (schedule) {
+            is Schedule.PeriodicSchedule -> schedule.getPeriodRange(currentDate)
             is Schedule.EveryDaySchedule -> currentDate.withDayOfMonth(1)..currentDate.atEndOfMonth
             is Schedule.CustomDateSchedule -> throw IllegalArgumentException()
         }
