@@ -50,6 +50,8 @@ class GetAllStreaksWithCashingUseCase(
         val firstDateToLookFor = habit.schedule.startDate
         var period = getPeriodRange(habit.schedule, firstDateToLookFor)!!
 
+        if (period.start > today) return@withContext emptyList<Streak>()
+
         while (!period.contains(today)) {
             val cashedStreaksContainsPeriod = cashedPeriods.any { cashedPeriod ->
                 period.isSubsetOf(cashedPeriod)
