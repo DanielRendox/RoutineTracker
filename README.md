@@ -25,6 +25,8 @@
 
 Routine Tracker is a planner that aims to simplify managing activities that you need to perform consistently. It combines features of a planner calendar app and a habit tracker allowing you to keep all your activities in one place.
 
+The motivation for this project is simple. I couldn't find any planner or habit tracker that estimates how long it will take you to achieve a goal based on your progress. So I decided to build it myself. I aim to develop a universal solution for planning and tracking your projects as well as scheduling your daily tasks and events. 
+
 ## Features that are already available
 
 - **Flexible schedules.** The app supports daily, weekly, monthly, and alternate-day schedules. You're free to choose specific days or inform the app how many times you wish to complete the task within a period.
@@ -64,13 +66,14 @@ The app is built with modern Android technologies and is designed to follow the 
 
 It utilizes:
 
-- Jetpack Compose for the user interface, with a single Activity and no Fragments.
+- Jetpack Compose for the user interface, with a single Activity and no Fragments
 - Official Compose navigation library
 - View model for business logic separation
 - SQLDelight database for local data storage
 - Kotlin coroutines and flow for asynchronous requests
 - Koin for dependency injection
 - JUnit 5 for unit testing
+- [kotlinx-datetime](https://github.com/Kotlin/kotlinx-datetime) for working with dates
 - A super convenient [Calendar](https://github.com/kizitonwose/Calendar) library for Android. (shoutout to [@kizitonwose](https://github.com/kizitonwose))
 
 The app follows:
@@ -79,6 +82,8 @@ The app follows:
 - CLEAN architecture with both repository and use cases
 - SOLID principles
 - multi-module architecture as suggested in the [NowInAndroid modularization learning journey](https://github.com/android/nowinandroid/blob/main/docs/ModularizationLearningJourney.md). It involves convention plugins and version catalogs for managing dependencies across modules.
+
+_I embrace the possibility of utilizing Kotlin Multiplatform for porting the app to other platforms in the future, so SQLDelight, Koin, and Kotlinx-datetime are used instead of traditional Android libraries such as Hilt, Room, and java.time._
 
 ## Wanna see how it works? Here are some shortcuts
 
