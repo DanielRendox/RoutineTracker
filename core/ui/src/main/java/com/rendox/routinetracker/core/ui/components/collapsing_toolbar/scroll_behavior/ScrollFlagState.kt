@@ -1,4 +1,4 @@
-package com.rendox.routinetracker.core.ui.theme.collapsing_toolbar.scroll_behavior
+package com.rendox.routinetracker.core.ui.components.collapsing_toolbar.scroll_behavior
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

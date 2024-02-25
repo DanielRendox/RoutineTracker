@@ -26,11 +26,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase.IllegalDateEditAttemptException
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.ui.helpers.ObserveUiEvent
-import com.rendox.routinetracker.core.ui.theme.collapsing_toolbar.CollapsingToolbarLarge
-import com.rendox.routinetracker.core.ui.theme.collapsing_toolbar.CollapsingToolbarScaffold
-import com.rendox.routinetracker.core.ui.theme.collapsing_toolbar.LargeToolbarHeightCollapsed
-import com.rendox.routinetracker.core.ui.theme.collapsing_toolbar.LargeToolbarHeightExpanded
-import com.rendox.routinetracker.core.ui.theme.collapsing_toolbar.scroll_behavior.rememberExitUntilCollapsedToolbarState
+import com.rendox.routinetracker.core.ui.components.collapsing_toolbar.CollapsingToolbarLarge
+import com.rendox.routinetracker.core.ui.components.collapsing_toolbar.CollapsingToolbarScaffold
+import com.rendox.routinetracker.core.ui.components.collapsing_toolbar.LargeToolbarHeightCollapsed
+import com.rendox.routinetracker.core.ui.components.collapsing_toolbar.LargeToolbarHeightExpanded
+import com.rendox.routinetracker.core.ui.components.collapsing_toolbar.scroll_behavior.rememberExitUntilCollapsedToolbarState
 import com.rendox.routinetracker.feature.routine_details.R
 import com.rendox.routinetracker.routine_details.calendar.RoutineCalendarScreen
 import kotlinx.datetime.LocalDate

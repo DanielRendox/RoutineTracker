@@ -1,4 +1,4 @@
-package com.rendox.routinetracker.core.ui.theme.collapsing_toolbar
+package com.rendox.routinetracker.core.ui.components.collapsing_toolbar
 
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Box
@@ -39,8 +39,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.util.lerp
-import com.rendox.routinetracker.core.ui.theme.collapsing_toolbar.scroll_behavior.ToolbarState
-import com.rendox.routinetracker.core.ui.theme.collapsing_toolbar.scroll_behavior.rememberExitUntilCollapsedToolbarState
+import com.rendox.routinetracker.core.ui.components.collapsing_toolbar.scroll_behavior.ToolbarState
+import com.rendox.routinetracker.core.ui.components.collapsing_toolbar.scroll_behavior.rememberExitUntilCollapsedToolbarState
 import kotlin.math.roundToInt
 
 val LargeToolbarHeightExpanded = 152.dp

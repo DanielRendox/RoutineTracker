@@ -1,4 +1,4 @@
-package com.rendox.routinetracker.core.ui.theme.collapsing_toolbar
+package com.rendox.routinetracker.core.ui.components.collapsing_toolbar
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Box
@@ -34,8 +34,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.rendox.routinetracker.core.ui.theme.collapsing_toolbar.scroll_behavior.ToolbarState
-import com.rendox.routinetracker.core.ui.theme.collapsing_toolbar.scroll_behavior.rememberExitUntilCollapsedToolbarState
+import com.rendox.routinetracker.core.ui.components.collapsing_toolbar.scroll_behavior.ToolbarState
+import com.rendox.routinetracker.core.ui.components.collapsing_toolbar.scroll_behavior.rememberExitUntilCollapsedToolbarState
 
 @Composable
 fun CollapsingToolbarScaffold(
