@@ -1,20 +1,19 @@
 package com.rendox.routinetracker.feature.agenda
 
 import android.content.res.Configuration
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,8 +23,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -103,7 +100,6 @@ internal fun AgendaRoute(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun AgendaScreen(
     modifier: Modifier = Modifier,
@@ -126,45 +122,6 @@ internal fun AgendaScreen(
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
         },
-        topBar = {
-            val dateFormatter =
-                remember { DateTimeFormatter.ofPattern("d MMM yyyy", locale) }
-            TopAppBar(
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
-                ),
-                title = {
-                    Text(
-                        text = if (currentDate == today) {
-                            stringResource(id = com.rendox.routinetracker.core.ui.R.string.today)
-                        } else {
-                            currentDate.format(dateFormatter)
-                        }
-                    )
-                },
-                actions = {
-                    Row {
-                        IconButton(onClick = onNotDueRoutinesVisibilityToggle) {
-                            if (showAllRoutines) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.baseline_visibility_on_24),
-                                    contentDescription = stringResource(
-                                        id = R.string.routine_visibility_icon_toggle_all_visible_description
-                                    ),
-                                )
-                            } else {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.baseline_visibility_off_24),
-                                    contentDescription = stringResource(
-                                        id = R.string.routine_visibility_icon_toggle_some_routines_hidden_description
-                                    ),
-                                )
-                            }
-                        }
-                    }
-                }
-            )
-        },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddRoutineClick) {
                 Icon(
@@ -172,67 +129,125 @@ internal fun AgendaScreen(
                     contentDescription = stringResource(id = R.string.fab_icon_description),
                 )
             }
-        }
+        },
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .navigationBarsPadding()
-                .verticalScroll(rememberScrollState())
-                .padding(paddingValues),
-        ) {
-            val weekCalendarHeight = 70.dp
-
-            RoutineTrackerWeekCalendar(
+        Box(modifier = Modifier.padding(paddingValues)) {
+            val dateFormatter =
+                remember { DateTimeFormatter.ofPattern("d MMM yyyy", locale) }
+            AgendaTopAppBar(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 4.dp, bottom = 4.dp)
-                    .height(weekCalendarHeight),
-                selectedDate = currentDate,
-                initialDate = today,
-                dateOnClick = onDateChange,
-                today = today,
+                    .height(64.dp),
+                title = if (currentDate == today) {
+                    stringResource(id = com.rendox.routinetracker.core.ui.R.string.today)
+                } else {
+                    currentDate.format(dateFormatter)
+                },
+                showAllRoutines = showAllRoutines,
+                onNotDueRoutinesVisibilityToggle = onNotDueRoutinesVisibilityToggle,
             )
 
-            if (routineList.isNotEmpty()) {
-                val onStatusCheckmarkClick: (DisplayRoutine) -> Unit = { routine ->
-                    when (routine.type) {
-                        DisplayRoutineType.YesNoHabit -> {
-                            val numOfTimesCompleted =
-                                if (routine.numOfTimesCompleted > 0F) 0F else 1F
-                            val completion = Habit.YesNoHabit.CompletionRecord(
-                                date = currentDate.toKotlinLocalDate(),
-                                numOfTimesCompleted = numOfTimesCompleted,
-                            )
-                            insertCompletion(routine.id, completion)
-                        }
-                    }
-                }
-                AgendaList(
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    routineList = routineList,
-                    onRoutineClick = onRoutineClick,
-                    onStatusCheckmarkClick = onStatusCheckmarkClick,
+            Column(modifier = Modifier.fillMaxSize()) {
+                Spacer(
+                    modifier = Modifier
+                        .height(64.dp)
+                        .systemBarsPadding()
                 )
-            }
 
-            if(nothingIsScheduled) {
-                Box(
+                val weekCalendarHeight = 70.dp
+                RoutineTrackerWeekCalendar(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    val smallTopAppBarHeight = 64.dp
-                    NothingScheduled(
-                        modifier = Modifier.padding(
-                            bottom = when (LocalConfiguration.current.orientation) {
-                                Configuration.ORIENTATION_LANDSCAPE -> 0.dp
-                                else -> smallTopAppBarHeight + weekCalendarHeight
+                        .padding(top = 4.dp, bottom = 4.dp)
+                        .height(weekCalendarHeight),
+                    selectedDate = currentDate,
+                    initialDate = today,
+                    dateOnClick = onDateChange,
+                    today = today,
+                )
+
+                if (routineList.isNotEmpty()) {
+                    val onStatusCheckmarkClick: (DisplayRoutine) -> Unit = { routine ->
+                        when (routine.type) {
+                            DisplayRoutineType.YesNoHabit -> {
+                                val numOfTimesCompleted =
+                                    if (routine.numOfTimesCompleted > 0F) 0F else 1F
+                                val completion = Habit.YesNoHabit.CompletionRecord(
+                                    date = currentDate.toKotlinLocalDate(),
+                                    numOfTimesCompleted = numOfTimesCompleted,
+                                )
+                                insertCompletion(routine.id, completion)
                             }
-                        ),
+                        }
+                    }
+                    AgendaList(
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        routineList = routineList,
+                        onRoutineClick = onRoutineClick,
+                        onStatusCheckmarkClick = onStatusCheckmarkClick,
                     )
                 }
+
+                if (nothingIsScheduled) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        val smallTopAppBarHeight = 64.dp
+                        NothingScheduled(
+                            modifier = Modifier.padding(
+                                bottom = when (LocalConfiguration.current.orientation) {
+                                    Configuration.ORIENTATION_LANDSCAPE -> 0.dp
+                                    else -> smallTopAppBarHeight + weekCalendarHeight
+                                }
+                            ),
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AgendaTopAppBar(
+    modifier: Modifier = Modifier,
+    title: String,
+    showAllRoutines: Boolean,
+    onNotDueRoutinesVisibilityToggle: () -> Unit,
+) {
+    Row(
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.surface),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            modifier = Modifier
+                .padding(16.dp)
+                .weight(1F),
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+        )
+        IconButton(
+            modifier = Modifier.padding(end = 4.dp),
+            onClick = onNotDueRoutinesVisibilityToggle
+        ) {
+            if (showAllRoutines) {
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_visibility_on_24),
+                    contentDescription = stringResource(
+                        id = R.string.routine_visibility_icon_toggle_all_visible_description
+                    ),
+                )
+            } else {
+                Icon(
+                    painter = painterResource(id = R.drawable.baseline_visibility_off_24),
+                    contentDescription = stringResource(
+                        id = R.string.routine_visibility_icon_toggle_some_routines_hidden_description
+                    ),
+                )
             }
         }
     }
