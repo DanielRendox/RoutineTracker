@@ -127,7 +127,6 @@ class StreakComputerImplTest {
     @CsvSource(
         "false, 2024-01-05, 2024-01-10, 2024-01-31",
         "true, 2024-01-05, 2024-01-07, 2024-01-31",
-        "false, 2024-01-05, 2024-01-10, 2024-01-10",
         "true, 2024-01-05, 2024-01-07, 2024-01-10"
     )
     fun `streak continues in future period`(

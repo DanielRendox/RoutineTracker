@@ -18,8 +18,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialogDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -139,7 +139,7 @@ private fun DatePickerCalendarContentPortrait(
 ) {
     Column(modifier = modifier) {
         DatePickerTitles(selectedDate = selectedDate)
-        Divider(modifier = Modifier.padding(bottom = 4.dp))
+        HorizontalDivider(modifier = Modifier.padding(bottom = 4.dp))
         DatePickerCalendar(
             modifier = Modifier.padding(
                 start = 12.dp,

@@ -11,8 +11,8 @@ interface InsertHabitCompletionUseCase {
     )
 
     sealed class IllegalDateEditAttemptException : Exception() {
-        object FutureDateEditAttemptException : IllegalDateEditAttemptException()
-        object FinishedHabitDateEditAttemptException : IllegalDateEditAttemptException()
-        object NotStartedHabitDateEditAttemptException : IllegalDateEditAttemptException()
+        data object FutureDateEditAttemptException : IllegalDateEditAttemptException()
+        data object FinishedHabitDateEditAttemptException : IllegalDateEditAttemptException()
+        data object NotStartedHabitDateEditAttemptException : IllegalDateEditAttemptException()
     }
 }

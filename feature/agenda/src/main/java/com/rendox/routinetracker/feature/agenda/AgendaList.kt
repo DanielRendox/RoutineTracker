@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -134,16 +133,28 @@ fun AgendaItem(
                         .background(MaterialTheme.colorScheme.secondaryContainer)
                 ) {
                     Text(
-                        modifier = Modifier
-                            .padding(horizontal = 2.dp)
-                            .paddingFromBaseline(2.dp),
+                        modifier = Modifier.padding(horizontal = 2.dp),
                         text = stringResource(id = routine.status.getStringResourceId()),
-                        fontSize = 11.sp,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.Normal
+                        ),
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                     )
                 }
             }
         }
+    }
+}
+
+@Preview
+@Composable
+private fun AgendaItemPreview() {
+    Surface {
+        AgendaItem(
+            routine = routines[0],
+            onRoutineClick = {},
+            onStatusCheckmarkClick = {},
+        )
     }
 }
 

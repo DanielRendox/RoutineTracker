@@ -23,9 +23,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rendox.routinetracker.core.model.Schedule
+import com.rendox.routinetracker.core.ui.R
 import com.rendox.routinetracker.core.ui.components.WrapTextContent
 import com.rendox.routinetracker.core.ui.helpers.LocalLocale
-import com.rendox.routinetracker.core.ui.R
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.toJavaLocalTime
@@ -71,7 +71,7 @@ fun RoutineProperties(
                     modifier = Modifier
                         .padding(bottom = 3.dp)
                         .fillMaxWidth(),
-                    progress = it,
+                    progress = { it },
                     strokeCap = StrokeCap.Round,
                 )
             }
@@ -138,20 +138,6 @@ fun RoutineProperties(
                     iconContentDescription = routineTimeIconContentDescription,
                 )
             }
-
-//            numericalValueHabitUnit?.let {
-//                RoutineDetailLabel(
-//                    modifier = Modifier.weight(weight = 3.7f, fill = false),
-//                    icon = painterResource(
-//                        id = com.rendox.routinetracker.feature.routine_details.R.drawable.baseline_check_circle_24
-//                    ),
-//                    text = deriveAmountOfWorkPerSession(
-//                        numOfUnitsPerSession = it.numOfUnitsPerSession,
-//                        unitsOfMeasure = it.unitsOfMeasure,
-//                        sessionUnit = it.sessionUnit,
-//                    ),
-//                )
-//            }
         }
     }
 }

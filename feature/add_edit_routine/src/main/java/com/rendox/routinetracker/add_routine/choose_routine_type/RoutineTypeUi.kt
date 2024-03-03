@@ -11,14 +11,14 @@ sealed class RoutineTypeUi(
     @StringRes val descriptionId: Int,
     val inDevelopment: Boolean,
 ) {
-    object YesNoHabit : RoutineTypeUi(
+    data object YesNoHabit : RoutineTypeUi(
         routineTypeId = 1,
         titleId = R.string.yes_no_habit_title,
         descriptionId = R.string.yes_no_habit_description,
         inDevelopment = false,
     )
 
-    object MeasurableHabit : RoutineTypeUi(
+    data object MeasurableHabit : RoutineTypeUi(
         routineTypeId = 2,
         titleId = R.string.measurable_habit_title,
         descriptionId = R.string.measurable_habit_description,

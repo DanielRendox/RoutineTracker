@@ -38,7 +38,8 @@ internal fun Project.addLocalTestDependencies(
     commonExtension.apply {
         dependencies {
             add("testImplementation", libs.findLibrary("androidx-test-core").get())
-            add("testImplementation", libs.findLibrary("junit-bom").get())
+            val junitBom = libs.findLibrary("junit-bom").get()
+            add("testImplementation", platform(junitBom))
             add("testImplementation", "org.junit.jupiter:junit-jupiter-api")
             add("testImplementation", "org.junit.jupiter:junit-jupiter-engine")
             add("testImplementation", "org.junit.vintage:junit-vintage-engine")
@@ -58,20 +59,6 @@ internal fun Project.addAndroidTestDependencies(
         dependencies {
             add("androidTestImplementation", libs.findLibrary("androidx-test-ext-junit").get())
             add("androidTestImplementation", libs.findLibrary("google-truth").get())
-        }
-    }
-}
-
-internal fun Project.addKoinDependencies(
-    commonExtension: CommonExtension<*, *, *, *, *>,
-) {
-    commonExtension.apply {
-        dependencies {
-            val bom = libs.findLibrary("insert-koin-bom").get()
-            add("implementation", platform(bom))
-            add("implementation", "io.insert-koin:koin-android")
-            add("implementation", "io.insert-koin:koin-test")
-            add("implementation", "io.insert-koin:koin-android-test")
         }
     }
 }

@@ -8,8 +8,8 @@ import com.rendox.routinetracker.feature.agenda.R
 sealed class ScheduleTypeUi(
     @StringRes val titleId: Int
 ) {
-    object EveryDaySchedule : ScheduleTypeUi(titleId = R.string.schedule_type_label_every_day)
-    object WeeklySchedule : ScheduleTypeUi(titleId = R.string.schedule_type_label_weekly)
-    object MonthlySchedule : ScheduleTypeUi(titleId = R.string.schedule_type_label_monthly)
-    object AlternateDaysSchedule : ScheduleTypeUi(titleId = R.string.schedule_type_label_alternate_days)
+    data object EveryDaySchedule : ScheduleTypeUi(titleId = R.string.schedule_type_label_every_day)
+    data object WeeklySchedule : ScheduleTypeUi(titleId = R.string.schedule_type_label_weekly)
+    data object MonthlySchedule : ScheduleTypeUi(titleId = R.string.schedule_type_label_monthly)
+    data object AlternateDaysSchedule : ScheduleTypeUi(titleId = R.string.schedule_type_label_alternate_days)
 }

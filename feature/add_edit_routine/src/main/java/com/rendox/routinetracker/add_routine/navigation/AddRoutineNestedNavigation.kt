@@ -22,22 +22,22 @@ sealed class AddRoutineDestination(
     val route: String,
     @StringRes val screenTitleId: Int,
 ) {
-    object ChooseRoutineType : AddRoutineDestination(
+    data object ChooseRoutineType : AddRoutineDestination(
         route = "choose_routine_type_route",
         screenTitleId = R.string.choose_routine_type_page_name,
     )
 
-    object SetGoal : AddRoutineDestination(
+    data object SetGoal : AddRoutineDestination(
         route = "set_goal_route",
         screenTitleId = R.string.set_goal_page_name,
     )
 
-    object ChooseSchedule : AddRoutineDestination(
+    data object ChooseSchedule : AddRoutineDestination(
         route = "choose_schedule_route",
         screenTitleId = R.string.choose_schedule_page_name,
     )
 
-    object TweakRoutine : AddRoutineDestination(
+    data object TweakRoutine : AddRoutineDestination(
         route = "tweak_habit_screen",
         screenTitleId = R.string.tweak_routine_page_name,
     )

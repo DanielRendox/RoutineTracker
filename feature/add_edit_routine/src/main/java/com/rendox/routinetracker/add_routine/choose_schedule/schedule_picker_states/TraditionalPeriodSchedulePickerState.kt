@@ -3,7 +3,6 @@ package com.rendox.routinetracker.add_routine.choose_schedule.schedule_picker_st
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.rendox.routinetracker.add_routine.choose_schedule.schedule_picker_states.SchedulePickerState
 
 sealed class TraditionalPeriodSchedulePickerState(
     numOfDueDays: String = "1",
