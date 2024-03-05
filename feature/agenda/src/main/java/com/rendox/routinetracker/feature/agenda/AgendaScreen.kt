@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
@@ -147,7 +149,9 @@ internal fun AgendaScreen(
                 onNotDueRoutinesVisibilityToggle = onNotDueRoutinesVisibilityToggle,
             )
 
-            Column(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
                 Spacer(
                     modifier = Modifier
                         .height(64.dp)
@@ -180,12 +184,14 @@ internal fun AgendaScreen(
                             }
                         }
                     }
-                    AgendaList(
-                        modifier = Modifier.padding(horizontal = 8.dp),
-                        routineList = routineList,
-                        onRoutineClick = onRoutineClick,
-                        onStatusCheckmarkClick = onStatusCheckmarkClick,
-                    )
+                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                        AgendaList(
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            routineList = routineList,
+                            onRoutineClick = onRoutineClick,
+                            onStatusCheckmarkClick = onStatusCheckmarkClick,
+                        )
+                    }
                 }
 
                 if (nothingIsScheduled) {
