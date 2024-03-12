@@ -92,7 +92,7 @@ _I embrace the possibility of utilizing Kotlin Multiplatform for porting the app
 
 2. Heavy form validation and sharing data between screens in the [`add_routine`](https://github.com/DanielRendox/RoutineTracker/tree/main/feature/add_edit_routine/src/main/java/com/rendox/routinetracker/add_routine) feature module.
 
-3. Collapsing toolbar in Jetpack Compose built as suggested [here](https://medium.com/kotlin-and-kotlin-for-android/collapsing-toolbar-in-jetpack-compose-problem-solutions-and-alternatives-34c9c5986ea0): [`CollapsingToolbarLarge.kt`](https://github.com/DanielRendox/RoutineTracker/blob/main/core/ui/src/main/java/com/rendox/routinetracker/core/ui/theme/collapsing_toolbar/CollapsingToolbarLarge.kt)
+3. Collapsing toolbar in Jetpack Compose built as suggested [here](https://medium.com/kotlin-and-kotlin-for-android/collapsing-toolbar-in-jetpack-compose-problem-solutions-and-alternatives-34c9c5986ea0): [`CollapsingToolbarLarge.kt`](https://github.com/DanielRendox/RoutineTracker/blob/main/core/ui/src/main/java/com/rendox/routinetracker/core/ui/components/collapsing_toolbar/CollapsingToolbarLarge.kt)
 
 4. Feature modules do not access the repository directly, everything is done through use cases. But at the same time, we avoid boilerplate by making use of Kotlin functional interfaces. 😎 Example: [`HabitDomainModule.kt`](https://github.com/DanielRendox/RoutineTracker/blob/2ff5195e96f7c710f62f8cf0ac5ca081c1854aa9/core/domain/src/main/java/com/rendox/routinetracker/core/domain/di/HabitDomainModule.kt)
 
