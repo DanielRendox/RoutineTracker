@@ -54,7 +54,7 @@ The motivation for this project is simple. I couldn't find any planner or habit 
 
 ## Get the app
 
-You can install the app from the [GitHub releases](https://github.com/DanielRendox/RoutineTracker/releases) page (make sure to turn off installing from Unknown sources in your Android device settings beforehand) or build it yourself by [cloning the project](help.github.com/articles/cloning-a-repository) and launching it in the latest version of [Android Studio](https://developer.android.com/studio).
+You can install the app from the [GitHub releases](https://github.com/DanielRendox/RoutineTracker/releases) page (make sure to turn off installing from Unknown sources in your Android device settings beforehand) or build it yourself by [cloning the project](https://docs.github.com/articles/cloning-a-repository) and launching it in the latest version of [Android Studio](https://developer.android.com/studio).
 
 ## What do you think?
 
