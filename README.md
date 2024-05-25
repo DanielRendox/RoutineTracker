@@ -54,7 +54,7 @@ The motivation for this project is simple. I couldn't find any planner or habit 
 
 ## Get the app
 
-You can install the app from the [GitHub releases](https://github.com/DanielRendox/RoutineTracker/releases) page (make sure to turn off installing from Unknown sources in your Android device settings beforehand) or build it yourself by [cloning the project](https://docs.github.com/articles/cloning-a-repository) and launching it in the latest version of [Android Studio](https://developer.android.com/studio).
+You can install the app from the [GitHub releases](https://github.com/DanielRendox/RoutineTracker/releases) page or build it yourself by [cloning the project](https://docs.github.com/articles/cloning-a-repository) and launching it in the latest version of [Android Studio](https://developer.android.com/studio).
 
 ## What do you think?
 
@@ -85,7 +85,7 @@ The app follows:
 
 _I embrace the possibility of utilizing Kotlin Multiplatform for porting the app to other platforms in the future, so SQLDelight, Koin, and Kotlinx-datetime are used instead of traditional Android libraries such as Hilt, Room, and java.time._
 
-## The Cool Stuff
+## Some Technical Stuff
 
 1. [`ScheduleIsDue.kt`](https://github.com/DanielRendox/RoutineTracker/blob/main/core/domain/src/main/java/com/rendox/routinetracker/core/domain/completion_history/ScheduleIsDue.kt) contains an extension function that determines whether an activity is due or not. This is the simple part. *It’s thoroughly tested in the [`ScheduleIsDueTest.kt`](https://github.com/DanielRendox/RoutineTracker/blob/main/core/domain/src/test/java/com/rendox/routinetracker/core/domain/completion_history/ScheduleIsDueTest.kt)*
    However, since we also need to account for the habit’s progress, a more complicated logic is required. This is where [`HabitStatusComputerImpl.kt`](https://github.com/DanielRendox/RoutineTracker/blob/main/core/domain/src/main/java/com/rendox/routinetracker/core/domain/completion_history/HabitStatusComputerImpl.kt) comes into play. This class is responsible for computing one of the [`HabitStatus`](https://github.com/DanielRendox/RoutineTracker/blob/main/core/model/src/main/java/com/rendox/routinetracker/core/model/HabitStatus.kt)es, which is in the end displayed to the user.  This functionality is *thoroughly tested in the [`HabitStatusComputerImplTest.kt`](https://github.com/DanielRendox/RoutineTracker/blob/main/core/domain/src/test/java/com/rendox/routinetracker/core/domain/completion_history/HabitStatusComputerImplTest.kt).*
