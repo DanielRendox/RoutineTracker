@@ -172,7 +172,7 @@ class AddRoutineScreenState(
             }
         }
         is Schedule.WeeklyScheduleByDueDaysOfWeek -> {
-            if (dueDaysOfWeek.containsAll(DayOfWeek.values().toList())) {
+            if (dueDaysOfWeek.containsAll(java.time.DayOfWeek.entries)) {
                 Schedule.EveryDaySchedule(
                     startDate = startDate,
                     endDate = endDate,
