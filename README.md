@@ -54,7 +54,7 @@ The motivation for this project is simple. I couldn't find any planner or habit 
 
 ## Get the app
 
-You can install the app from the [GitHub releases](https://github.com/DanielRendox/RoutineTracker/releases) page (make sure to turn off installing from Unknown sources in your Android device settings beforehand) or build it yourself by [cloning the project](help.github.com/articles/cloning-a-repository) and launching it in the latest version of [Android Studio](https://developer.android.com/studio).
+You can install the app from the [GitHub releases](https://github.com/DanielRendox/RoutineTracker/releases) page or build it yourself by [cloning the project](https://docs.github.com/articles/cloning-a-repository) and launching it in the latest version of [Android Studio](https://developer.android.com/studio).
 
 ## What do you think?
 
@@ -85,31 +85,36 @@ The app follows:
 
 _I embrace the possibility of utilizing Kotlin Multiplatform for porting the app to other platforms in the future, so SQLDelight, Koin, and Kotlinx-datetime are used instead of traditional Android libraries such as Hilt, Room, and java.time._
 
-## Wanna see how it works? Here are some shortcuts
+## Some Technical Stuff
 
 1. [`ScheduleIsDue.kt`](https://github.com/DanielRendox/RoutineTracker/blob/main/core/domain/src/main/java/com/rendox/routinetracker/core/domain/completion_history/ScheduleIsDue.kt) contains an extension function that determines whether an activity is due or not. This is the simple part. *It’s thoroughly tested in the [`ScheduleIsDueTest.kt`](https://github.com/DanielRendox/RoutineTracker/blob/main/core/domain/src/test/java/com/rendox/routinetracker/core/domain/completion_history/ScheduleIsDueTest.kt)*
    However, since we also need to account for the habit’s progress, a more complicated logic is required. This is where [`HabitStatusComputerImpl.kt`](https://github.com/DanielRendox/RoutineTracker/blob/main/core/domain/src/main/java/com/rendox/routinetracker/core/domain/completion_history/HabitStatusComputerImpl.kt) comes into play. This class is responsible for computing one of the [`HabitStatus`](https://github.com/DanielRendox/RoutineTracker/blob/main/core/model/src/main/java/com/rendox/routinetracker/core/model/HabitStatus.kt)es, which is in the end displayed to the user.  This functionality is *thoroughly tested in the [`HabitStatusComputerImplTest.kt`](https://github.com/DanielRendox/RoutineTracker/blob/main/core/domain/src/test/java/com/rendox/routinetracker/core/domain/completion_history/HabitStatusComputerImplTest.kt).*
 
 2. Heavy form validation and sharing data between screens in the [`add_routine`](https://github.com/DanielRendox/RoutineTracker/tree/main/feature/add_edit_routine/src/main/java/com/rendox/routinetracker/add_routine) feature module.
 
-3. Collapsing toolbar in Jetpack Compose built as suggested [here](https://medium.com/kotlin-and-kotlin-for-android/collapsing-toolbar-in-jetpack-compose-problem-solutions-and-alternatives-34c9c5986ea0): [`CollapsingToolbarLarge.kt`](https://github.com/DanielRendox/RoutineTracker/blob/main/core/ui/src/main/java/com/rendox/routinetracker/core/ui/theme/collapsing_toolbar/CollapsingToolbarLarge.kt)
+3. Collapsing toolbar in Jetpack Compose built as suggested [here](https://medium.com/kotlin-and-kotlin-for-android/collapsing-toolbar-in-jetpack-compose-problem-solutions-and-alternatives-34c9c5986ea0): [`CollapsingToolbarLarge.kt`](https://github.com/DanielRendox/RoutineTracker/blob/main/core/ui/src/main/java/com/rendox/routinetracker/core/ui/components/collapsing_toolbar/CollapsingToolbarLarge.kt)
 
 4. Feature modules do not access the repository directly, everything is done through use cases. But at the same time, we avoid boilerplate by making use of Kotlin functional interfaces. 😎 Example: [`HabitDomainModule.kt`](https://github.com/DanielRendox/RoutineTracker/blob/2ff5195e96f7c710f62f8cf0ac5ca081c1854aa9/core/domain/src/main/java/com/rendox/routinetracker/core/domain/di/HabitDomainModule.kt)
 
+5. State for handling one-time events, no SharedFlows and Channels involved. After each observation of the event, the state is reset back to its default value. This is unified with the help of extensions in [`UiEvent.kt`](https://github.com/DanielRendox/RoutineTracker/blob/main/core/ui/src/main/java/com/rendox/routinetracker/core/ui/helpers/UiEvent.kt) Rationale:
+    - state can't be lost in any scenario ([read more](https://medium.com/androiddevelopers/viewmodel-one-off-event-antipatterns-16a1da869b95));
+    - easy to use not only in `ViewModel`s, but also in plain state holder classes;
+    - ensures immediate response to new events (such as when a snackbar needs to be updated immediately upon a new event, instead of waiting for the previous message to disappear).
+
 ## Module structure
 
-| Name  | Responsibility |
-| --- | --- |
-| `app` | Serves as an entry point of the app and brings everything together |
-| `build-logic` | Contains convention plugins that reduce the gradle boilerplate for declaring dependencies in the modules |
-| `core:data` | Contains repository classes that serve as a single source of truth for accessing data from the offline database and data that comes from the network. Although Routine Tracker doesn’t fetch data from the network yet, this layer is implemented to follow the best practices. |
-| `core:database` | On-device local database |
-| `core:domain` | The heart of the app, which contains logic for determining whether the habit is due or not, computing streaks, etc. It operates on data that comes from the data layer. |
-| `core:logic` | Utilities and helper classes written in raw Kotlin and not dependent on Android SDK. |
-| `core:model` | Kotlin data classes and enums used throughout the app for abstraction |
-| `core:testcommon` | Common testing logic and fake classes that are used in tests throughout the app. |
-| `core:ui` | Jetpack Compose components, theming logic, and helpers for Android. |
-| `feature` | User interface with View Models, functionality associated with a specific feature or user journey. |
+| Name              | Responsibility                                                                                                                                                                                                                                                                  |
+|-------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `app`             | Serves as an entry point of the app and brings everything together                                                                                                                                                                                                              |
+| `build-logic`     | Contains convention plugins that reduce the gradle boilerplate for declaring dependencies in the modules                                                                                                                                                                        |
+| `core:data`       | Contains repository classes that serve as a single source of truth for accessing data from the offline database and data that comes from the network. Although Routine Tracker doesn’t fetch data from the network yet, this layer is implemented to follow the best practices. |
+| `core:database`   | On-device local database                                                                                                                                                                                                                                                        |
+| `core:domain`     | The heart of the app, which contains logic for determining whether the habit is due or not, computing streaks, etc. It operates on data that comes from the data layer.                                                                                                         |
+| `core:logic`      | Utilities and helper classes written in raw Kotlin and not dependent on Android SDK.                                                                                                                                                                                            |
+| `core:model`      | Kotlin data classes and enums used throughout the app for abstraction                                                                                                                                                                                                           |
+| `core:testcommon` | Common testing logic and fake classes that are used in tests throughout the app.                                                                                                                                                                                                |
+| `core:ui`         | Jetpack Compose components, theming logic, and helpers for Android.                                                                                                                                                                                                             |
+| `feature`         | User interface with View Models, functionality associated with a specific feature or user journey.                                                                                                                                                                              |
 
 ## Let’s work together!
 
