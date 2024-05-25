@@ -7,7 +7,7 @@ plugins {
 
 android {
 
-    namespace = "com.rendox.routinetracker.feature.agenda"
+    namespace = "com.rendox.routinetracker.feature.add_edit_routine"
 
     flavorDimensions += "minSdk"
 
