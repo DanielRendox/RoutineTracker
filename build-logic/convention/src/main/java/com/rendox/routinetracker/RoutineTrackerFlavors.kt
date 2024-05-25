@@ -21,7 +21,7 @@ enum class RoutineTrackerFlavor(
 }
 
 fun configureFlavors(
-    commonExtension: CommonExtension<*, *, *, *, *>,
+    commonExtension: CommonExtension<*, *, *, *, *, *>,
     flavorConfigurationBlock: ProductFlavor.(flavor: RoutineTrackerFlavor) -> Unit = {}
 ) {
     commonExtension.apply {

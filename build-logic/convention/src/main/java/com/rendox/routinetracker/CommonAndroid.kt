@@ -5,7 +5,7 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.dependencies
 
 internal fun configureBuildTypes(
-    commonExtension: CommonExtension<*, *, *, *, *>,
+    commonExtension: CommonExtension<*, *, *, *, *, *>,
 ) {
     commonExtension.apply {
         buildTypes {
@@ -21,7 +21,7 @@ internal fun configureBuildTypes(
 }
 
 internal fun configurePackaging(
-    commonExtension: CommonExtension<*, *, *, *, *>,
+    commonExtension: CommonExtension<*, *, *, *, *, *>,
 ) {
     commonExtension.apply {
         packaging {
@@ -33,7 +33,7 @@ internal fun configurePackaging(
 }
 
 internal fun Project.addLocalTestDependencies(
-    commonExtension: CommonExtension<*, *, *, *, *>,
+    commonExtension: CommonExtension<*, *, *, *, *, *>,
 ) {
     commonExtension.apply {
         dependencies {
@@ -53,7 +53,7 @@ internal fun Project.addLocalTestDependencies(
 }
 
 internal fun Project.addAndroidTestDependencies(
-    commonExtension: CommonExtension<*, *, *, *, *>,
+    commonExtension: CommonExtension<*, *, *, *, *, *>,
 ) {
     commonExtension.apply {
         dependencies {

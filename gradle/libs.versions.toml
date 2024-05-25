@@ -25,7 +25,7 @@ composeNavigation = "2.7.7"
 androidxCoreSplashscreen = "1.0.1"
 
 #noinspection GradleDependency, AndroidGradlePluginVersion
-androidGradlePlugin = "8.2.0"
+androidGradlePlugin = "8.4.0"
 kotlinPlugin = "1.9.10"
 appcompat = "1.6.1"
 com-google-android-material-material = "1.11.0"
