@@ -10,7 +10,6 @@ appcompat = "1.6.1"
 com-google-android-material-material = "1.11.0"
 composeBom = "2024.02.01"
 composeCalendar = "2.5.0"
-composeCompiler = "1.5.10"
 composeNavigation = "2.7.7"
 composeRuntime = "1.6.2"
 composeViewBinding = "1.6.2"
@@ -20,8 +19,7 @@ espresso = "3.5.1"
 googleTruth = "1.4.2"
 junitBom = "5.10.2"
 koin = "3.5.3"
-kotlin = "1.9.22"
-kotlinPlugin = "1.9.10"
+kotlin = "2.0.0"
 kotlinxCoroutines = "1.8.0"
 kotlinxDatetime = "0.5.0"
 material = "1.2.0"
@@ -53,6 +51,7 @@ app-cash-sqldelight-coroutines-extensions-jvm = { group = "app.cash.sqldelight",
 app-cash-sqldelight-primitive-adapters = { group = "app.cash.sqldelight", name = "primitive-adapters", version.ref = "sqldelight" }
 app-cash-sqldelight-sqlite-driver = { group = "app.cash.sqldelight", name = "sqlite-driver", version.ref = "sqldelight" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+compose-compiler-gradlePlugin = { group = "org.jetbrains.kotlin", name = "compose-compiler-gradle-plugin", version.ref = "kotlin" }
 google-truth = { group = "com.google.truth", name = "truth", version.ref = "googleTruth" }
 insert-koin-bom = { group = "io.insert-koin", name = "koin-bom", version.ref = "koin" }
 jetbrains-kotlin-bom = { group = "org.jetbrains.kotlin", name = "kotlin-bom", version.ref = "kotlin" }
@@ -69,7 +68,8 @@ sqldelight-gradlePlugin = { group = "app.cash.sqldelight", name = "gradle-plugin
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
 android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
 app-cash-sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
-jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinPlugin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 org-jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 
 [bundles]

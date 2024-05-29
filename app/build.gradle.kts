@@ -57,6 +57,10 @@ android {
     }
 }
 
+composeCompiler {
+    reportsDestination = layout.buildDirectory.dir("compose_compiler")
+}
+
 dependencies {
     implementation(project(":core:data"))
     implementation(project(":core:database"))

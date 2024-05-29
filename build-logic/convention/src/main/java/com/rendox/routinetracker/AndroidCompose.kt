@@ -3,6 +3,9 @@ package com.rendox.routinetracker
 import com.android.build.api.dsl.CommonExtension
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.assign
+import org.gradle.kotlin.dsl.configure
+import org.jetbrains.kotlin.compose.compiler.gradle.ComposeCompilerGradlePluginExtension
 
 /**
  * Configure Compose-specific options
@@ -10,13 +13,11 @@ import org.gradle.kotlin.dsl.dependencies
 internal fun Project.configureAndroidCompose(
     commonExtension: CommonExtension<*, *, *, *, *, *>,
 ) {
+    pluginManager.apply("org.jetbrains.kotlin.plugin.compose")
+
     commonExtension.apply {
         buildFeatures {
             compose = true
-        }
-
-        composeOptions {
-            kotlinCompilerExtensionVersion = libs.findVersion("composeCompiler").get().toString()
         }
 
         dependencies {
@@ -43,5 +44,9 @@ internal fun Project.configureAndroidCompose(
             add("debugImplementation", "androidx.compose.ui:ui-tooling")
             add("debugImplementation", "androidx.compose.ui:ui-test-manifest")
         }
+    }
+
+    extensions.configure<ComposeCompilerGradlePluginExtension> {
+        reportsDestination = layout.buildDirectory.dir("compose_compiler")
     }
 }

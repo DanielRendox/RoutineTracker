@@ -8,6 +8,8 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.getByType
+import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 
 class AndroidApplicationConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -24,6 +26,10 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 configurePackaging(this)
                 addLocalTestDependencies(this)
                 addAndroidTestDependencies(this)
+            }
+
+            extensions.getByType<KotlinAndroidProjectExtension>().apply {
+                configureKotlinAndroid(this)
             }
 
             dependencies {
