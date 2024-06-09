@@ -24,13 +24,13 @@ kotlin {
 
                 implementation(libs.app.cash.sqldelight.coroutines.extensions)
                 implementation(libs.app.cash.sqldelight.primitive.adapters)
-                implementation(libs.app.cash.sqldelight.sqlite.driver)
             }
         }
 
         androidMain {
             dependencies {
                 implementation(libs.app.cash.sqldelight.android.driver)
+                implementation(libs.app.cash.sqldelight.sqlite.driver)
             }
         }
 
