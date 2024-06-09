@@ -47,7 +47,8 @@ androidx-test-core = { group = "androidx.test", name = "core", version.ref = "an
 androidx-test-espresso = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxJunit" }
 app-cash-sqldelight-android-driver = { group = "app.cash.sqldelight", name = "android-driver", version.ref = "sqldelight" }
-app-cash-sqldelight-coroutines-extensions-jvm = { group = "app.cash.sqldelight", name = "coroutines-extensions-jvm", version.ref = "sqldelight" }
+app-cash-sqldelight-native-driver = { group = "app.cash.sqldelight", name = "native-driver", version.ref = "sqldelight" }
+app-cash-sqldelight-coroutines-extensions = { group = "app.cash.sqldelight", name = "coroutines-extensions", version.ref = "sqldelight" }
 app-cash-sqldelight-primitive-adapters = { group = "app.cash.sqldelight", name = "primitive-adapters", version.ref = "sqldelight" }
 app-cash-sqldelight-sqlite-driver = { group = "app.cash.sqldelight", name = "sqlite-driver", version.ref = "sqldelight" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }

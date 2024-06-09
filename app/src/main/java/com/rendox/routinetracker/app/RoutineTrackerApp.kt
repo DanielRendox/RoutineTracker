@@ -26,9 +26,9 @@ class RoutineTrackerApp: Application() {
         startKoin {
             androidContext(this@RoutineTrackerApp)
             modules(
-                localDataSourceModule,
-                habitLocalDataModule,
-                completionTimeLocalDataModule,
+                com.rendox.routinetracker.core.database.di.localDataSourceModule,
+                com.rendox.routinetracker.core.database.di.habitLocalDataModule,
+                com.rendox.routinetracker.core.database.di.completionTimeLocalDataModule,
                 streakLocalDataModule,
 
                 routineDataModule,
