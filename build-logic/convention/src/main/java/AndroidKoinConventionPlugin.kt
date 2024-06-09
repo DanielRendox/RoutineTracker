@@ -10,8 +10,8 @@ class AndroidKoinConventionPlugin : Plugin<Project> {
                 val bom = libs.findLibrary("insert-koin-bom").get()
                 add("implementation", platform(bom))
                 add("implementation", "io.insert-koin:koin-android")
-                add("implementation", "io.insert-koin:koin-test")
-                add("implementation", "io.insert-koin:koin-android-test")
+                add("testImplementation", "io.insert-koin:koin-test")
+                add("androidTestImplementation", "io.insert-koin:koin-android-test")
             }
         }
     }
