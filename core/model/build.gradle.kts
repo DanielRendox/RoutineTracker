@@ -1,9 +1,18 @@
 plugins {
-    id("routinetracker.jvm.library")
+    id("routinetracker.kmp.library")
 }
 
-dependencies {
-    implementation(project(":core:logic"))
+kotlin {
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation(project(":core:logic"))
+                implementation(libs.jetbrains.kotlinx.datetime)
+            }
+        }
+    }
+}
 
-    implementation(libs.jetbrains.kotlinx.datetime)
+android {
+    namespace = "com.rendox.routinetracker.core.model"
 }

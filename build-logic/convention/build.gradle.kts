@@ -52,6 +52,10 @@ gradlePlugin {
             id = "routinetracker.jvm.library"
             implementationClass = "JvmLibraryConventionPlugin"
         }
+        register("kmpLibrary") {
+            id = "routinetracker.kmp.library"
+            implementationClass = "KmpLibraryConventionPlugin"
+        }
         register("androidKoin") {
             id = "routinetracker.android.koin"
             implementationClass = "AndroidKoinConventionPlugin"
