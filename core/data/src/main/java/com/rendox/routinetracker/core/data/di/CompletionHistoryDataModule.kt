@@ -8,8 +8,8 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val completionHistoryDataModule = module {
-    single<CompletionHistoryLocalDataSource> {
-        CompletionHistoryLocalDataSourceImpl(
+    single<com.rendox.routinetracker.core.database.completion_history.CompletionHistoryLocalDataSource> {
+        com.rendox.routinetracker.core.database.completion_history.CompletionHistoryLocalDataSourceImpl(
             db = get(),
             ioDispatcher = get(qualifier = named("ioDispatcher")),
         )

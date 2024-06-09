@@ -5,7 +5,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 
 class CompletionTimeRepositoryImpl(
-    private val localDataSource: CompletionTimeLocalDataSource,
+    private val localDataSource: com.rendox.routinetracker.core.database.completion_time.CompletionTimeLocalDataSource,
 ) : CompletionTimeRepository {
 
     override suspend fun getCompletionTime(routineId: Long, date: LocalDate): LocalTime? {

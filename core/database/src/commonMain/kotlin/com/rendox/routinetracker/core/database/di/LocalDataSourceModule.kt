@@ -53,9 +53,9 @@ val localDataSourceModule = module {
             ),
             scheduleEntityAdapter = ScheduleEntity.Adapter(
                 typeAdapter = EnumColumnAdapter(),
-                startDateAdapter = localDateAdapter,
-                endDateAdapter = localDateAdapter,
-                startDayOfWeekInWeeklyScheduleAdapter = dayOfWeekAdapter,
+                startDateAdapter = com.rendox.routinetracker.core.database.di.localDateAdapter,
+                endDateAdapter = com.rendox.routinetracker.core.database.di.localDateAdapter,
+                startDayOfWeekInWeeklyScheduleAdapter = com.rendox.routinetracker.core.database.di.dayOfWeekAdapter,
                 numOfDueDaysInByNumOfDueDaysScheduleAdapter = IntColumnAdapter,
                 numOfDueDaysInFirstPeriodInByNumOfDueDaysScheduleAdapter = IntColumnAdapter,
                 numOfDaysInAlternateDaysScheduleAdapter = IntColumnAdapter,
@@ -70,25 +70,25 @@ val localDataSourceModule = module {
                 weekDayNumberMonthRelatedAdapter = EnumColumnAdapter(),
             ),
             specificDateCustomCompletionTimeAdapter = SpecificDateCustomCompletionTime.Adapter(
-                dateAdapter = localDateAdapter,
+                dateAdapter = com.rendox.routinetracker.core.database.di.localDateAdapter,
                 completionTimeHourAdapter = IntColumnAdapter,
                 completionTimeMinuteAdapter = IntColumnAdapter,
             ),
             completionHistoryEntityAdapter = CompletionHistoryEntity.Adapter(
-                dateAdapter = localDateAdapter,
+                dateAdapter = com.rendox.routinetracker.core.database.di.localDateAdapter,
                 numOfTimesCompletedAdapter = FloatColumnAdapter,
             ),
             vacationEntityAdapter = VacationEntity.Adapter(
-                startDateAdapter = localDateAdapter,
-                endDateAdapter = localDateAdapter,
+                startDateAdapter = com.rendox.routinetracker.core.database.di.localDateAdapter,
+                endDateAdapter = com.rendox.routinetracker.core.database.di.localDateAdapter,
             ),
             cashedStreakEntityAdapter = CashedStreakEntity.Adapter(
-                startDateAdapter = localDateAdapter,
-                endDateAdapter = localDateAdapter,
+                startDateAdapter = com.rendox.routinetracker.core.database.di.localDateAdapter,
+                endDateAdapter = com.rendox.routinetracker.core.database.di.localDateAdapter,
             ),
             streakCashedPeriodEntityAdapter = StreakCashedPeriodEntity.Adapter(
-                startDateAdapter = localDateAdapter,
-                endDateAdapter = localDateAdapter,
+                startDateAdapter = com.rendox.routinetracker.core.database.di.localDateAdapter,
+                endDateAdapter = com.rendox.routinetracker.core.database.di.localDateAdapter,
             ),
         )
     }

@@ -9,8 +9,8 @@ import org.koin.dsl.module
 
 val completionTimeDataModule = module {
 
-    single<CompletionTimeLocalDataSource> {
-        CompletionTimeLocalDataSourceImpl(
+    single<com.rendox.routinetracker.core.database.completion_time.CompletionTimeLocalDataSource> {
+        com.rendox.routinetracker.core.database.completion_time.CompletionTimeLocalDataSourceImpl(
             db = get(),
             ioDispatcher = get(qualifier = named("ioDispatcher")),
         )

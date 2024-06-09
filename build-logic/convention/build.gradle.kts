@@ -60,9 +60,17 @@ gradlePlugin {
             id = "routinetracker.android.koin"
             implementationClass = "AndroidKoinConventionPlugin"
         }
+        register("kmpKoin") {
+            id = "routinetracker.kmp.koin"
+            implementationClass = "KmpKoinConventionPlugin"
+        }
         register("instrumentationTestRunner") {
             id = "routinetracker.android.library.instrumentationtestrunner"
             implementationClass = "AndroidLibraryInstrumentationTestRunner"
+        }
+        register("kmpInstrumentationTestRunner") {
+            id = "routinetracker.kmp.library.instrumentationtestrunner"
+            implementationClass = "KmpLibraryInstrumentationTestRunner"
         }
     }
 }

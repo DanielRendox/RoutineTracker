@@ -1,7 +1,7 @@
 plugins {
-    id("routinetracker.android.library")
-    id("routinetracker.android.koin")
-    id("routinetracker.android.library.instrumentationtestrunner")
+    id("routinetracker.kmp.library")
+    id("routinetracker.kmp.koin")
+    id("routinetracker.kmp.library.instrumentationtestrunner")
     alias(libs.plugins.app.cash.sqldelight)
 }
 
@@ -9,6 +9,47 @@ sqldelight {
     databases {
         create("RoutineTrackerDatabase") {
             packageName.set("com.rendox.routinetracker.core.database")
+        }
+    }
+}
+
+kotlin {
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation(project(":core:logic"))
+                implementation(project(":core:model"))
+
+                implementation(libs.jetbrains.kotlinx.datetime)
+
+                implementation(libs.app.cash.sqldelight.coroutines.extensions)
+                implementation(libs.app.cash.sqldelight.primitive.adapters)
+                implementation(libs.app.cash.sqldelight.sqlite.driver)
+            }
+        }
+
+        androidMain {
+            dependencies {
+                implementation(libs.app.cash.sqldelight.android.driver)
+            }
+        }
+
+        androidUnitTest {
+            dependencies {
+                implementation(libs.jetbrains.kotlinx.coroutines.test)
+            }
+        }
+
+        androidInstrumentedTest {
+            dependencies {
+                implementation(libs.jetbrains.kotlinx.coroutines.test)
+            }
+        }
+
+        nativeMain {
+            dependencies {
+                implementation(libs.app.cash.sqldelight.native.driver)
+            }
         }
     }
 }
@@ -34,19 +75,4 @@ android {
             }
         }
     }
-}
-
-dependencies {
-    implementation(project(":core:logic"))
-    implementation(project(":core:model"))
-
-    implementation(libs.jetbrains.kotlinx.datetime)
-
-    implementation(libs.app.cash.sqldelight.android.driver)
-    implementation(libs.app.cash.sqldelight.coroutines.extensions.jvm)
-    implementation(libs.app.cash.sqldelight.primitive.adapters)
-    implementation(libs.app.cash.sqldelight.sqlite.driver)
-
-    testImplementation(libs.jetbrains.kotlinx.coroutines.test)
-    androidTestImplementation(libs.jetbrains.kotlinx.coroutines.test)
 }

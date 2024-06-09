@@ -11,7 +11,7 @@ import kotlin.coroutines.CoroutineContext
 class CompletionHistoryLocalDataSourceImpl(
     private val db: RoutineTrackerDatabase,
     private val ioDispatcher: CoroutineContext,
-) : CompletionHistoryLocalDataSource {
+) : com.rendox.routinetracker.core.database.completion_history.CompletionHistoryLocalDataSource {
     override suspend fun getNumOfTimesCompletedInPeriod(
         habitId: Long,
         minDate: LocalDate?,

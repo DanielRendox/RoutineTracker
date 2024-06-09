@@ -5,7 +5,7 @@ import com.rendox.routinetracker.core.model.Habit
 import kotlinx.datetime.LocalDate
 
 class CompletionHistoryRepositoryImpl(
-    private val localDataSource: CompletionHistoryLocalDataSource
+    private val localDataSource: com.rendox.routinetracker.core.database.completion_history.CompletionHistoryLocalDataSource
 ): CompletionHistoryRepository {
     override suspend fun getNumOfTimesCompletedInPeriod(
         habitId: Long,

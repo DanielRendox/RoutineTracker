@@ -10,7 +10,7 @@ import kotlin.coroutines.CoroutineContext
 class CompletionTimeLocalDataSourceImpl(
     private val db: RoutineTrackerDatabase,
     private val ioDispatcher: CoroutineContext,
-) : CompletionTimeLocalDataSource {
+) : com.rendox.routinetracker.core.database.completion_time.CompletionTimeLocalDataSource {
 
     override suspend fun getCompletionTime(routineId: Long, date: LocalDate): LocalTime? {
         return withContext(ioDispatcher) {

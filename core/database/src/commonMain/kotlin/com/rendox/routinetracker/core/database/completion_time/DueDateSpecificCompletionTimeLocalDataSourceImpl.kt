@@ -9,7 +9,7 @@ import kotlin.coroutines.CoroutineContext
 class DueDateSpecificCompletionTimeLocalDataSourceImpl(
     private val db: RoutineTrackerDatabase,
     private val ioDispatcher: CoroutineContext,
-) : DueDateSpecificCompletionTimeLocalDataSource {
+) : com.rendox.routinetracker.core.database.completion_time.DueDateSpecificCompletionTimeLocalDataSource {
     override suspend fun getDueDateSpecificCompletionTime(
         scheduleId: Long, dueDateNumber: Int
     ): LocalTime? = withContext(ioDispatcher) {

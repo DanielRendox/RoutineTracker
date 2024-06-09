@@ -4,7 +4,7 @@ import com.rendox.routinetracker.core.database.completion_time.DueDateSpecificCo
 import kotlinx.datetime.LocalTime
 
 class DueDateSpecificCompletionTimeRepositoryImpl(
-    private val localDataSource: DueDateSpecificCompletionTimeLocalDataSource
+    private val localDataSource: com.rendox.routinetracker.core.database.completion_time.DueDateSpecificCompletionTimeLocalDataSource
 ) : DueDateSpecificCompletionTimeRepository {
     override suspend fun getDueDateSpecificCompletionTime(
         scheduleId: Long, dueDateNumber: Int
