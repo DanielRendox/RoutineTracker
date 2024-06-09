@@ -71,7 +71,7 @@ private fun Schedule.WeeklySchedule.weeklyScheduleGetPeriodDateRange(
         while (startPeriodDate.dayOfWeek != startDayOfWeek && startPeriodDate != startDate) {
             startPeriodDate = startPeriodDate.minus(DatePeriod(days = 1))
         }
-        val endDateDayOfWeekIndex = startDayOfWeek!!.value - 1
+        val endDateDayOfWeekIndex = startDayOfWeek!!.ordinal - 1
         val endDateDayOfWeek = if (endDateDayOfWeekIndex == 0) {
             DayOfWeek.SUNDAY
         } else {

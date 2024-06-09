@@ -1,7 +1,35 @@
 plugins {
-    id("routinetracker.android.library")
-    id("routinetracker.android.koin")
-    id("routinetracker.android.library.instrumentationtestrunner")
+    id("routinetracker.kmp.library")
+    id("routinetracker.kmp.koin")
+    id("routinetracker.kmp.library.instrumentationtestrunner")
+}
+
+kotlin {
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation(project(":core:data"))
+                implementation(project(":core:database"))
+                implementation(project(":core:model"))
+                implementation(project(":core:logic"))
+
+                implementation(libs.jetbrains.kotlinx.datetime)
+                implementation(libs.jetbrains.kotlinx.coroutines.core)
+            }
+        }
+
+        androidMain {
+            dependencies {
+                implementation(libs.app.cash.sqldelight.sqlite.driver)
+            }
+        }
+
+        androidUnitTest {
+            dependencies {
+                implementation(libs.jetbrains.kotlinx.coroutines.test)
+            }
+        }
+    }
 }
 
 android {
@@ -25,16 +53,4 @@ android {
             }
         }
     }
-}
-
-dependencies {
-    implementation(project(":core:data"))
-    implementation(project(":core:database"))
-    implementation(project(":core:model"))
-    implementation(project(":core:logic"))
-
-    implementation(libs.app.cash.sqldelight.sqlite.driver)
-    implementation(libs.jetbrains.kotlinx.datetime)
-
-    testImplementation(libs.jetbrains.kotlinx.coroutines.test)
 }
