@@ -1,7 +1,28 @@
 plugins {
-    id("routinetracker.android.library")
-    id("routinetracker.android.koin")
-    id("routinetracker.android.library.instrumentationtestrunner")
+    id("routinetracker.kmp.library")
+    id("routinetracker.kmp.koin")
+    id("routinetracker.kmp.library.instrumentationtestrunner")
+}
+
+kotlin {
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation(project(":core:database"))
+                implementation(project(":core:model"))
+                implementation(project(":core:logic"))
+
+                implementation(libs.jetbrains.kotlinx.datetime)
+            }
+        }
+
+        androidInstrumentedTest {
+            dependencies {
+                implementation(project(":core:testcommon"))
+                implementation(libs.jetbrains.kotlinx.coroutines.test)
+            }
+        }
+    }
 }
 
 android {
@@ -25,15 +46,4 @@ android {
             }
         }
     }
-}
-
-dependencies {
-    implementation(project(":core:database"))
-    implementation(project(":core:model"))
-    implementation(project(":core:logic"))
-
-    implementation(libs.jetbrains.kotlinx.datetime)
-
-    androidTestImplementation(project(":core:testcommon"))
-    androidTestImplementation(libs.jetbrains.kotlinx.coroutines.test)
 }
