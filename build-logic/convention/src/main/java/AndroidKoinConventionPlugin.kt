@@ -11,7 +11,6 @@ class AndroidKoinConventionPlugin : Plugin<Project> {
                 add("implementation", platform(bom))
                 add("implementation", "io.insert-koin:koin-android")
                 add("testImplementation", "io.insert-koin:koin-test")
-                add("androidTestImplementation", "io.insert-koin:koin-android-test")
             }
         }
     }
