@@ -138,6 +138,7 @@ class RoutineDetailsScreenViewModel(
                 status = completionData.habitStatus,
                 includedInStreak = streaksFlow.value.any { it.contains(date) },
                 numOfTimesCompleted = completionData.numOfTimesCompleted,
+                isPastDate = date <= todayFlow.value,
             )
         }
         _calendarDatesFlow.update {
@@ -209,5 +210,6 @@ data class CalendarDateData(
     val status: HabitStatus,
     val includedInStreak: Boolean,
     val numOfTimesCompleted: Float,
+    val isPastDate: Boolean,
 )
 

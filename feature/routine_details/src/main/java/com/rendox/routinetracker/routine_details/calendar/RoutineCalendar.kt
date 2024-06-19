@@ -57,6 +57,7 @@ fun RoutineCalendar(
                 habitStatus = calendarDate?.status,
                 includedInStreak = calendarDate?.includedInStreak ?: false,
                 onClick = onDateClick,
+                isPastDate = calendarDate?.isPastDate ?: false,
             )
         },
     )
@@ -68,6 +69,7 @@ private fun RoutineStatusDay(
     day: CalendarDay,
     habitStatus: HabitStatus?,
     includedInStreak: Boolean,
+    isPastDate: Boolean,
     onClick: (date: LocalDate) -> Unit,
 ) {
     val completedStroke = MaterialTheme.routineStatusColors.completedStroke
@@ -91,16 +93,14 @@ private fun RoutineStatusDay(
             null -> Color.Transparent
             HabitStatus.Planned -> pendingColor
             HabitStatus.Backlog -> pendingColor
-            HabitStatus.PastDateAlreadyCompleted -> skippedBackground
-            HabitStatus.FutureDateAlreadyCompleted -> Color.Transparent
-            HabitStatus.NotDue -> Color.Transparent
+            HabitStatus.AlreadyCompleted -> if (isPastDate) skippedBackground else Color.Transparent
+            HabitStatus.NotDue -> if (isPastDate) skippedBackground else Color.Transparent
             HabitStatus.OnVacation -> MaterialTheme.routineStatusColors.vacationBackground
             HabitStatus.Failed -> failedBackground
             HabitStatus.Completed -> completedBackground
             HabitStatus.PartiallyCompleted -> completedBackground
             HabitStatus.OverCompleted -> completedBackground
             HabitStatus.SortedOutBacklog -> completedBackground
-            HabitStatus.Skipped -> skippedBackground
             HabitStatus.CompletedLater -> skippedBackground
             HabitStatus.NotStarted -> Color.Transparent
             HabitStatus.Finished -> Color.Transparent
@@ -113,16 +113,14 @@ private fun RoutineStatusDay(
             null -> Color.Transparent
             HabitStatus.Planned -> pendingColor
             HabitStatus.Backlog -> pendingColor
-            HabitStatus.PastDateAlreadyCompleted -> skippedStroke
-            HabitStatus.FutureDateAlreadyCompleted -> Color.Transparent
-            HabitStatus.NotDue -> Color.Transparent
+            HabitStatus.AlreadyCompleted -> if (isPastDate) skippedStroke else Color.Transparent
+            HabitStatus.NotDue -> if (isPastDate) skippedStroke else Color.Transparent
             HabitStatus.OnVacation -> MaterialTheme.routineStatusColors.vacationStroke
             HabitStatus.Failed -> failedStroke
             HabitStatus.Completed -> completedStroke
             HabitStatus.PartiallyCompleted -> completedStroke
             HabitStatus.OverCompleted -> completedStroke
             HabitStatus.SortedOutBacklog -> completedStroke
-            HabitStatus.Skipped -> skippedStroke
             HabitStatus.CompletedLater -> skippedStroke
             HabitStatus.NotStarted -> Color.Transparent
             HabitStatus.Finished -> Color.Transparent
@@ -151,7 +149,11 @@ private fun RoutineStatusDay(
             .background(color = backgroundColor, shape = CircleShape)
             .border(border = BorderStroke(width = 2.dp, color = strokeColor), shape = CircleShape)
             .then(
-                if (habitStatus == null || day.position in arrayOf(DayPosition.InDate, DayPosition.OutDate)) Modifier
+                if (habitStatus == null || day.position in arrayOf(
+                        DayPosition.InDate,
+                        DayPosition.OutDate
+                    )
+                ) Modifier
                 else Modifier.clickable { onClick(day.date.toKotlinLocalDate()) }
             )
     ) {

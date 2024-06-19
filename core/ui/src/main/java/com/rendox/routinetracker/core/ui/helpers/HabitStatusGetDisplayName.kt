@@ -7,9 +7,7 @@ fun HabitStatus.getStringResourceId(): Int = when (this) {
     HabitStatus.Planned -> R.string.habit_status_planned
     HabitStatus.Backlog -> R.string.habit_status_backlog
     HabitStatus.NotDue -> R.string.habit_status_not_due
-    HabitStatus.Skipped -> R.string.habit_status_not_due
-    HabitStatus.PastDateAlreadyCompleted -> R.string.habit_status_already_completed
-    HabitStatus.FutureDateAlreadyCompleted -> R.string.habit_status_already_completed
+    HabitStatus.AlreadyCompleted -> R.string.habit_status_already_completed
     HabitStatus.CompletedLater -> R.string.habit_status_completed_later
     HabitStatus.Completed -> R.string.habit_status_completed
     HabitStatus.PartiallyCompleted -> R.string.habit_status_partially_completed

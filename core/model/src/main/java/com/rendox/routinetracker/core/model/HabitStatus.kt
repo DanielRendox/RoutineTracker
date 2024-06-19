@@ -13,20 +13,11 @@ enum class HabitStatus {
     /** The habit is not due on this day because of its frequency */
     NotDue,
 
-    /** The user didn't complete the day and didn't need to, because of the habit's frequency. */
-    Skipped,
-
     /**
      * Although the habit is due on this date, which is in the past, the user may skip it
      * because they had over completed one of the days earlier.
      */
-    PastDateAlreadyCompleted,
-
-    /**
-     * Although the habit is due on this date, which is in the future, the user may skip it
-     * because they had over completed one of the days earlier.
-     */
-    FutureDateAlreadyCompleted,
+    AlreadyCompleted,
 
     /**
      * The routine was due but the user failed to complete it on that day.
@@ -76,9 +67,4 @@ val dueOrCompletedStatuses = listOf(
     HabitStatus.Completed,
     HabitStatus.OverCompleted,
     HabitStatus.SortedOutBacklog,
-)
-
-val nonExistentStatuses = listOf(
-    HabitStatus.NotStarted,
-    HabitStatus.Finished,
 )

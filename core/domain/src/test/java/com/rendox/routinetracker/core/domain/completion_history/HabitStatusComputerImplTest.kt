@@ -306,7 +306,7 @@ class HabitStatusComputerImplTest {
                 ),
                 vacationHistory = emptyList(),
             )
-        ).isEqualTo(HabitStatus.PastDateAlreadyCompleted)
+        ).isEqualTo(HabitStatus.AlreadyCompleted)
     }
 
     @ParameterizedTest
@@ -466,8 +466,8 @@ class HabitStatusComputerImplTest {
             )
         }
         val expectedStatuses = listOf(
-            HabitStatus.FutureDateAlreadyCompleted,
-            HabitStatus.FutureDateAlreadyCompleted,
+            HabitStatus.AlreadyCompleted,
+            HabitStatus.AlreadyCompleted,
         )
         assertThat(resultingStatuses).containsExactlyElementsIn(expectedStatuses)
     }
@@ -528,7 +528,7 @@ class HabitStatusComputerImplTest {
                 HabitStatus.NotDue,
             ),
             arrayOf(
-                "future date, already completed, assert status is FutureDateAlreadyCompleted",
+                "future date, already completed, assert status is AlreadyCompleted",
                 LocalDate(2023, 12, 13),
                 LocalDate(2023, 12, 9),
                 1F,
@@ -538,7 +538,7 @@ class HabitStatusComputerImplTest {
                     LocalDate(2023, 12, 8),
                     LocalDate(2023, 12, 9),
                 ),
-                HabitStatus.FutureDateAlreadyCompleted,
+                HabitStatus.AlreadyCompleted,
             ),
             arrayOf(
                 "past date, due, not completed, assert status is Failed",
@@ -599,7 +599,7 @@ class HabitStatusComputerImplTest {
                     LocalDate(2023, 12, 8),
                     LocalDate(2023, 12, 11),
                 ),
-                HabitStatus.PastDateAlreadyCompleted,
+                HabitStatus.AlreadyCompleted,
             ),
             arrayOf(
                 "over completed and sorted out backlog on 2023-12-13, assert CompletedLater on 2023-12-06",
@@ -631,7 +631,7 @@ class HabitStatusComputerImplTest {
                 LocalDate(2023, 12, 18),
                 5F,
                 arrayOf(LocalDate(2023, 12, 13)),
-                HabitStatus.PastDateAlreadyCompleted,
+                HabitStatus.AlreadyCompleted,
             ),
             arrayOf(
                 "date before habit start date, assert status is NotStarted",
@@ -647,7 +647,7 @@ class HabitStatusComputerImplTest {
                 LocalDate(2024, 1, 1),
                 0F,
                 emptyArray<LocalDate>(),
-                HabitStatus.Skipped,
+                HabitStatus.NotDue,
             ),
         )
     }

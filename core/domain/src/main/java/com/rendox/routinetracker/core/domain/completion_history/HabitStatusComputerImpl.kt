@@ -19,7 +19,7 @@ internal class HabitStatusComputerImpl : HabitStatusComputer {
      *
      * The result also depends on whether the validation date is in the past or in the future. For
      * example, when the habit has some backlog, but the validation date is in the past, the invoke
-     * function will return not [HabitStatus.Backlog], but [HabitStatus.Skipped] instead. That's because
+     * function will return not [HabitStatus.Backlog], but [HabitStatus.NotDue] instead. That's because
      * the user deliberately chose to skip the habit on that day. Nonetheless, if the validation date is
      * in the future, the invoke function will return [HabitStatus.Backlog] so that the user can adjust
      * their schedule to sort out this backlog later.
@@ -92,8 +92,7 @@ internal class HabitStatusComputerImpl : HabitStatusComputer {
                 completionHistory = completionHistory,
                 vacationHistory = vacationHistory,
             )
-            if (alreadyCompleted && validationDate <= today) return HabitStatus.PastDateAlreadyCompleted
-            if (alreadyCompleted && validationDate > today) return HabitStatus.FutureDateAlreadyCompleted
+            if (alreadyCompleted) return HabitStatus.AlreadyCompleted
 
             if (validationDate < today) {
                 val wasCompletedLater = checkIfWasCompletedLater(
@@ -123,7 +122,7 @@ internal class HabitStatusComputerImpl : HabitStatusComputer {
                 return HabitStatus.OverCompleted
             }
             if (habitIsOnVacationAtTheMomentOfValidationDate) return HabitStatus.OnVacation
-            return if (validationDate <= today) HabitStatus.Skipped else HabitStatus.NotDue
+            return HabitStatus.NotDue
         }
     }
 
