@@ -642,12 +642,40 @@ class HabitStatusComputerImplTest {
                 HabitStatus.NotStarted,
             ),
             arrayOf(
-                "past date, not due, not completed, no backlog, assert status is Skipped",
+                "past date, not due, not completed, no backlog, assert status is NotDue",
                 LocalDate(2023, 12, 5),
                 LocalDate(2024, 1, 1),
                 0F,
                 emptyArray<LocalDate>(),
                 HabitStatus.NotDue,
+            ),
+            arrayOf(
+                "past date, not due, not completed, backlog, assert status is NotDue",
+                LocalDate(2023, 12, 8),
+                LocalDate(2023, 12, 9),
+                0F,
+                emptyArray<LocalDate>(),
+                HabitStatus.NotDue,
+            ),
+            arrayOf(
+                "past date, not due, completed, backlog, assert status is SortedOutBacklog",
+                LocalDate(2023, 12, 8),
+                LocalDate(2023, 12, 9),
+                1F,
+                arrayOf(LocalDate(2023, 12, 8)),
+                HabitStatus.SortedOutBacklog,
+            ),
+            arrayOf(
+                "past date, not due, completed, no backlog, assert status is OverCompleted",
+                LocalDate(2023, 12, 8),
+                LocalDate(2023, 12, 9),
+                1F,
+                arrayOf(
+                    LocalDate(2023, 12, 6),
+                    LocalDate(2023, 12, 7),
+                    LocalDate(2023, 12, 8),
+                ),
+                HabitStatus.OverCompleted,
             ),
         )
     }

@@ -54,130 +54,105 @@ internal class HabitStatusComputerImpl : HabitStatusComputer {
         if (validationDate < habit.schedule.startDate) return HabitStatus.NotStarted
         habit.schedule.endDate?.let { if (validationDate > it) return HabitStatus.Finished }
 
-        val completedToday = completionHistory.any { it.date == today }
-        val scheduleDeviation = computeScheduleDeviation(
+        val numOfTimesCompleted = completionHistory
+            .find { it.date == validationDate }
+            ?.numOfTimesCompleted ?: 0f
+
+        val scheduleDeviation by lazy {
+            computeScheduleDeviation(
+                habit = habit,
+                currentDate = validationDate,
+                today = today,
+                completionHistory = completionHistory,
+                vacationHistory = vacationHistory,
+            )
+        }
+        val completedToday = completionHistory.find { it.date == today } != null
+        val hasBacklog by lazy {
+            checkIfHasBacklog(
+                habit = habit,
+                scheduleDeviation = scheduleDeviation,
+                validationDate = validationDate,
+                today = today,
+                completedToday = completedToday,
+                vacationHistory = vacationHistory,
+            )
+        }
+
+        val isOnVacation = vacationHistory.any { it.containsDate(validationDate) }
+        if (isOnVacation) {
+            return if (numOfTimesCompleted > 0f) {
+                if (hasBacklog) HabitStatus.SortedOutBacklog else HabitStatus.OverCompleted
+            } else {
+                HabitStatus.OnVacation
+            }
+        }
+
+        val numOfDueTimes = habit.getNumOfDueTimesOnDate(
+            date = validationDate,
+            habitIsOnVacation = false,
+        )
+
+        if (numOfTimesCompleted > 0f) {
+            return when {
+                numOfTimesCompleted == numOfDueTimes -> HabitStatus.Completed
+                numOfTimesCompleted < numOfDueTimes -> HabitStatus.PartiallyCompleted
+                else -> if (hasBacklog) HabitStatus.SortedOutBacklog else HabitStatus.OverCompleted
+            }
+        }
+
+        if (numOfDueTimes <= 0f) {
+            return if (validationDate >= today && hasBacklog) {
+                HabitStatus.Backlog
+            } else {
+                HabitStatus.NotDue
+            }
+        }
+
+        val isAlreadyCompleted = checkIfIsAlreadyCompleted(
             habit = habit,
-            currentDate = validationDate,
+            scheduleDeviation = scheduleDeviation,
+            numOfDueTimesOnValidationDate = numOfDueTimes,
+            validationDate = validationDate,
             today = today,
             completedToday = completedToday,
             completionHistory = completionHistory,
             vacationHistory = vacationHistory,
         )
+        if (isAlreadyCompleted) return HabitStatus.AlreadyCompleted
 
-        val numOfTimesCompletedOnValidationDate =
-            completionHistory.find { it.date == validationDate }?.numOfTimesCompleted ?: 0f
-        val habitIsOnVacationAtTheMomentOfValidationDate =
-            vacationHistory.any { it.containsDate(validationDate) }
-        val numOfDueTimesOnValidationDate = habit.getNumOfDueTimesOnDate(
-            date = validationDate, habitIsOnVacation = habitIsOnVacationAtTheMomentOfValidationDate
+        if (validationDate >= today) return HabitStatus.Planned
+
+        val isCompletedLater = checkIfWasCompletedLater(
+            habit = habit,
+            currentDate = validationDate,
+            numOfDueTimesOnCurrentDate = numOfDueTimes,
+            completionHistory = completionHistory,
+            vacationHistory = vacationHistory,
         )
-
-        val validationDateIsDue = numOfDueTimesOnValidationDate > 0f
-        if (validationDateIsDue) {
-            val completedStatus = deriveCompletedStatusWhenPlanned(
-                habit = habit,
-                scheduleDeviation = scheduleDeviation,
-                numOfTimesCompletedOnValidationDate = numOfTimesCompletedOnValidationDate,
-                numOfDueTimesOnValidationDate = numOfDueTimesOnValidationDate,
-            )
-            if (completedStatus != null) return completedStatus
-
-            val alreadyCompleted = checkIfIsAlreadyCompleted(
-                habit = habit,
-                scheduleDeviation = scheduleDeviation,
-                numOfDueTimesOnValidationDate = numOfDueTimesOnValidationDate,
-                validationDate = validationDate,
-                today = today,
-                completedToday = completedToday,
-                completionHistory = completionHistory,
-                vacationHistory = vacationHistory,
-            )
-            if (alreadyCompleted) return HabitStatus.AlreadyCompleted
-
-            if (validationDate < today) {
-                val wasCompletedLater = checkIfWasCompletedLater(
-                    currentDate = validationDate,
-                    numOfDueTimesOnCurrentDate = numOfDueTimesOnValidationDate,
-                    habit = habit,
-                    completionHistory = completionHistory,
-                    vacationHistory = vacationHistory,
-                )
-                if (wasCompletedLater) return HabitStatus.CompletedLater
-            }
-
-            return if (validationDate < today) HabitStatus.Failed else HabitStatus.Planned
-        } else {
-            val backlogStatus = deriveBacklogStatus(
-                habit = habit,
-                scheduleDeviation = scheduleDeviation,
-                numOfTimesCompletedOnValidationDate = numOfTimesCompletedOnValidationDate,
-                validationDate = validationDate,
-                today = today,
-                completedToday = completedToday,
-                vacationHistory = vacationHistory,
-            )
-            if (backlogStatus != null) return backlogStatus
-
-            if (numOfTimesCompletedOnValidationDate > 0f) {
-                return HabitStatus.OverCompleted
-            }
-            if (habitIsOnVacationAtTheMomentOfValidationDate) return HabitStatus.OnVacation
-            return HabitStatus.NotDue
-        }
+        return if (isCompletedLater) HabitStatus.CompletedLater else HabitStatus.Failed
     }
 
-    private fun deriveCompletedStatusWhenPlanned(
+    private fun checkIfHasBacklog(
         habit: Habit,
         scheduleDeviation: Double,
-        numOfTimesCompletedOnValidationDate: Float,
-        numOfDueTimesOnValidationDate: Float,
-    ): HabitStatus? = when {
-        numOfTimesCompletedOnValidationDate == numOfDueTimesOnValidationDate ->
-            HabitStatus.Completed
-
-        numOfTimesCompletedOnValidationDate > numOfDueTimesOnValidationDate -> {
-            if (scheduleDeviation < 0.0 && habit.schedule.backlogEnabled) {
-                HabitStatus.SortedOutBacklog
-            } else {
-                HabitStatus.OverCompleted
-            }
-        }
-
-        numOfTimesCompletedOnValidationDate > 0f -> HabitStatus.PartiallyCompleted
-        else -> null
-    }
-
-    private fun deriveBacklogStatus(
-        habit: Habit,
-        scheduleDeviation: Double,
-        numOfTimesCompletedOnValidationDate: Float,
         validationDate: LocalDate,
         today: LocalDate,
         completedToday: Boolean,
         vacationHistory: List<Vacation>,
-    ): HabitStatus? {
+    ): Boolean {
         if (scheduleDeviation < 0.0 && habit.schedule.backlogEnabled) {
-            val numOfNotDueTimes =
-                if (validationDate >= today) {
-                    val startDate = if (completedToday) today.plusDays(1) else today
-                    getNumOfNotDueTimesInPeriod(
-                        habit = habit,
-                        period = startDate..validationDate,
-                        vacationHistory = vacationHistory,
-                    )
-                } else {
-                    0.0
-                }
-            if (scheduleDeviation <= -numOfNotDueTimes) {
-                if (numOfTimesCompletedOnValidationDate > 0f) {
-                    return HabitStatus.SortedOutBacklog
-                }
-                if (validationDate >= today) {
-                    return HabitStatus.Backlog
-                }
-            }
+            val numOfNotDueTimes = if (validationDate >= today) {
+                val startDate = if (completedToday) today.plusDays(1) else today
+                getNumOfNotDueTimesInPeriod(
+                    habit = habit,
+                    period = startDate..validationDate,
+                    vacationHistory = vacationHistory,
+                )
+            } else 0.0
+            if (scheduleDeviation <= -numOfNotDueTimes) return true
         }
-        return null
+        return false
     }
 
     private fun getNumOfNotDueTimesInPeriod(
@@ -286,13 +261,13 @@ internal class HabitStatusComputerImpl : HabitStatusComputer {
         habit: Habit,
         today: LocalDate,
         currentDate: LocalDate,
-        completedToday: Boolean,
         completionHistory: List<Habit.CompletionRecord>,
         vacationHistory: List<Vacation>,
     ): Double {
         val actualDate = if (currentDate <= today) {
             currentDate.minus(DatePeriod(days = 1))
         } else {
+            val completedToday = completionHistory.any { it.date == today }
             if (completedToday) {
                 today
             } else {
