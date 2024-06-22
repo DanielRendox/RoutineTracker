@@ -132,10 +132,9 @@ To give you a better understanding of what independent periods means, if you try
 
 ## A couple of nuances
 
-1. **You may have noticed that not all of the schedules from [`Schedule.kt`](https://github.com/DanielRendox/RoutineTracker/blob/develop/core/model/src/main/java/com/rendox/routinetracker/core/model/Schedule.kt) are available when creating a habit.** This is due to performance considerations. Users are not allowed to add habits that repeat annually or input 3-digit numbers for `AlternateDaysSchedule`. We could add support for these in the future, but only if we find good use cases for them. However, we plan to add `AnnualSchedule`, `CustomDateSchedule`, and `MonthlyScheduleByDueDatesIndices` for tasks and events, which could be implemented as separate types of activities, in the future.
+1. **You may have noticed that not all of the schedules from [`Schedule.kt`](https://github.com/DanielRendox/RoutineTracker/blob/develop/core/model/src/main/java/com/rendox/routinetracker/core/model/Schedule.kt) are available when creating a habit.** This is primarily due to performance considerations, but aside from that, these schedules are not really suitable for habits. With the current design of the app, it doesn't make sense to display streaks, such as for an annual schedule. However, these schedules will later be used for tasks and events, which will be implemented as separate types of activities in the future.
 
-2. **Routine Tracker restricts completing activities on future dates.** Certain statuses can be displayed exclusively in the past or in the future. For example, future due days always have a Planned status; they can’t be marked as Failed. A due date acquires Failed status only when it becomes a past date.
-   If today is due, it will have Planned status throughout the entire day. If it gets completed, it will change to Completed status. However, if it isn’t marked as completed, it will change to Failed status— BUT ONLY TOMORROW.
+2. **Routine Tracker restricts completing activities on future dates** to align with the app's underlying principles. Certain habit statuses can be displayed exclusively in the past or in the future. For example, future due days always have a `Planned` status; they can’t be marked as `Failed`. A due date acquires `Failed` status only when it becomes a past date. For example, if today is due, it will have `Planned` status all day long. And if it doesn't get completed, it will be changed to `Failed` but only on the next day.
 
 ## Limitations of this approach
 
