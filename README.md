@@ -85,6 +85,9 @@ The app follows:
 
 _I embrace the possibility of utilizing Kotlin Multiplatform for porting the app to other platforms in the future, so SQLDelight, Koin, and Kotlinx-datetime are used instead of traditional Android libraries such as Hilt, Room, and java.time._
 
+## Branching strategy
+The project's branching strategy is simple. All the development work takes place in the `develop` branch whereas the `main` branch contains the code that is used in production. `feature` branches must be first merged into `develop`. Once the new features are implemented and tested, they are finally merged into `main` followed by the release of a new version of the app. When contributing to the project, please submit your pull requests to the `develop` branch.
+
 ## Documentation
 For more information about [how Routine Tracker works](https://github.com/DanielRendox/RoutineTracker/blob/develop/docs/HowDoesRoutineTrackerWork.md) internally, navigate to the [docs folder](https://github.com/DanielRendox/RoutineTracker/tree/develop/docs). You can also use AI tools like [phorm.ai](https://www.phorm.ai/) to ask questions about the entire repo. Make sure the develop branch is checked out because it contains the most up-to-date content.
 
