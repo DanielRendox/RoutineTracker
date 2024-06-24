@@ -60,5 +60,9 @@ gradlePlugin {
             id = "routinetracker.android.library.instrumentationtestrunner"
             implementationClass = "AndroidLibraryInstrumentationTestRunner"
         }
+        register("lint") {
+            id = "routinetracker.lint"
+            implementationClass = "StaticAnalysisConventionPlugin"
+        }
     }
 }

@@ -2,6 +2,7 @@ plugins {
     id("routinetracker.android.library")
     id("routinetracker.android.koin")
     id("routinetracker.android.library.instrumentationtestrunner")
+    id("routinetracker.lint")
     alias(libs.plugins.app.cash.sqldelight)
 }
 

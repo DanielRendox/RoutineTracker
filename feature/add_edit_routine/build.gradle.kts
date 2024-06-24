@@ -3,6 +3,7 @@ plugins {
     id("routinetracker.android.library.compose")
     id("routinetracker.android.koin")
     id("routinetracker.android.library.instrumentationtestrunner")
+    id("routinetracker.lint")
 }
 
 android {
