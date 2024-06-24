@@ -50,7 +50,7 @@ private fun Project.createTask(
     val inputFiles = fileTree(
         mapOf("dir" to "src", "include" to "**/*.kt"),
     )
-    val outputDir = "${project.layout.buildDirectory}/reports/ktlint/"
+    val outputDir = "${project.layout.buildDirectory.asFile.get().path}/reports/ktlint/"
     val editorConfigPath = "${rootDir.path}/.editorconfig"
 
     tasks.register<JavaExec>(
