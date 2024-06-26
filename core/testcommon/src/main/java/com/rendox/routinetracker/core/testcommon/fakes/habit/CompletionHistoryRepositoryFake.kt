@@ -76,6 +76,18 @@ class CompletionHistoryRepositoryFake(
         }
     }
 
+    override suspend fun insertCompletions(completions: Map<Long, List<Habit.CompletionRecord>>) {
+        val updatedCompletionHistory = habitData.completionHistory.value.toMutableList()
+
+        for ((habitId, completionRecords) in completions) {
+            for (completionRecord in completionRecords) {
+                updatedCompletionHistory.add(habitId to completionRecord)
+            }
+        }
+
+        habitData.completionHistory.update { updatedCompletionHistory }
+    }
+
     override suspend fun deleteCompletionByDate(habitId: Long, date: LocalDate) {
         habitData.completionHistory.update { completionHistory ->
             val completionIndex = completionHistory.indexOfFirst {

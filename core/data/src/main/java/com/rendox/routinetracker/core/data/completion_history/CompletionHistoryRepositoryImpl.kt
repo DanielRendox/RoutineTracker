@@ -6,7 +6,7 @@ import kotlinx.datetime.LocalDate
 
 class CompletionHistoryRepositoryImpl(
     private val localDataSource: CompletionHistoryLocalDataSource
-): CompletionHistoryRepository {
+) : CompletionHistoryRepository {
     override suspend fun getNumOfTimesCompletedInPeriod(
         habitId: Long,
         minDate: LocalDate?,
@@ -55,6 +55,12 @@ class CompletionHistoryRepositoryImpl(
 
     override suspend fun insertCompletion(habitId: Long, completionRecord: Habit.CompletionRecord) {
         localDataSource.insertCompletion(habitId, completionRecord)
+    }
+
+    override suspend fun insertCompletions(
+        completions: Map<Long, List<Habit.CompletionRecord>>
+    ) {
+        localDataSource.insertCompletions(completions)
     }
 
     override suspend fun deleteCompletionByDate(habitId: Long, date: LocalDate) {

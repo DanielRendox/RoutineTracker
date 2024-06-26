@@ -1,13 +1,19 @@
 package com.rendox.routinetracker.core.logic.time
 
+import kotlinx.datetime.Clock
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Month
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
+import kotlinx.datetime.todayIn
 
 val epochDate = LocalDate(1970, 1, 1)
+
+val today: LocalDate
+    get() = Clock.System.todayIn(TimeZone.currentSystemDefault())
 
 /**
  * Returns this date with another day of month.
@@ -26,3 +32,4 @@ val LocalDate.nextMonth
 val LocalDate.atEndOfMonth get() = nextMonth - DatePeriod(days = 1)
 
 fun LocalDate.plusDays(daysNumber: Int) = plus(DatePeriod(days = daysNumber))
+fun LocalDate.minusDays(daysNumber: Int) = minus(DatePeriod(days = daysNumber))

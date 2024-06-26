@@ -67,6 +67,7 @@ dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:ui"))
     implementation(project(":core:domain"))
+    implementation(project(":core:logic"))
 
     implementation(project(":feature:add_edit_routine"))
     implementation(project(":feature:agenda"))

@@ -17,6 +17,12 @@ class HabitRepositoryFake(
         }
     }
 
+    override suspend fun insertHabits(habits: List<Habit>) {
+        habitData.listOfHabits.update {
+            it.toMutableList().apply { addAll(habits) }
+        }
+    }
+
     override suspend fun getAllHabits(): List<Habit> = habitData.listOfHabits.value
 
     override suspend fun deleteHabit(id: Long) = habitData.listOfHabits.update {

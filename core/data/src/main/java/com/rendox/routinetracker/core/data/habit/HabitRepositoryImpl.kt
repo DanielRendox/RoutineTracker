@@ -10,6 +10,10 @@ class HabitRepositoryImpl(
         localDataSource.insertHabit(habit)
     }
 
+    override suspend fun insertHabits(habits: List<Habit>) {
+        localDataSource.insertHabits(habits)
+    }
+
     override suspend fun getHabitById(id: Long): Habit {
         return localDataSource.getHabitById(habitId = id)
     }

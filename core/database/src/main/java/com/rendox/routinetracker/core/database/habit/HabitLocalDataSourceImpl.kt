@@ -24,6 +24,19 @@ class HabitLocalDataSourceImpl(
         }
     }
 
+    override suspend fun insertHabits(habits: List<Habit>) = withContext(ioDispatcher) {
+        db.habitEntityQueries.transaction {
+            for (habit in habits) {
+                when (habit) {
+                    is Habit.YesNoHabit -> {
+                        insertYesNoHabit(habit)
+                        scheduleLocalDataSource.insertSchedule(habit.schedule)
+                    }
+                }
+            }
+        }
+    }
+
     private fun insertYesNoHabit(habit: Habit.YesNoHabit) {
         db.habitEntityQueries.insertHabit(
             id = habit.id,
@@ -53,6 +66,10 @@ class HabitLocalDataSourceImpl(
                     habitEntity.toExternalModel(schedule)
                 }
         }
+    }
+
+    override suspend fun checkIfIsEmpty(): Boolean = withContext(ioDispatcher) {
+        db.habitEntityQueries.getNumOfHabits().executeAsOne().let { it == 0L }
     }
 
     override suspend fun deleteHabitById(habitId: Long) {

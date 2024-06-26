@@ -1,8 +1,10 @@
 package com.rendox.routinetracker.app
 
 import android.app.Application
+import com.rendox.routinetracker.core.data.DatabasePrepopulator
 import com.rendox.routinetracker.core.data.di.completionHistoryDataModule
 import com.rendox.routinetracker.core.data.di.completionTimeDataModule
+import com.rendox.routinetracker.core.data.di.databasePrepopulatorModule
 import com.rendox.routinetracker.core.data.di.routineDataModule
 import com.rendox.routinetracker.core.data.di.streakDataModule
 import com.rendox.routinetracker.core.data.di.vacationDataModule
@@ -17,10 +19,20 @@ import com.rendox.routinetracker.core.domain.di.habitDomainModule
 import com.rendox.routinetracker.core.domain.di.streakDomainModule
 import com.rendox.routinetracker.feature.agenda.di.agendaScreenModule
 import com.rendox.routinetracker.routine_details.di.routineDetailsModule
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
+import org.koin.core.qualifier.named
+import kotlin.coroutines.CoroutineContext
 
 class RoutineTrackerApp: Application() {
+    private val ioDispatcher by inject<CoroutineContext>(qualifier = named("ioDispatcher"))
+    private val applicationScope = CoroutineScope(SupervisorJob())
+    private val databasePrepopulator by inject<DatabasePrepopulator>()
+
     override fun onCreate() {
         super.onCreate()
         startKoin {
@@ -36,6 +48,7 @@ class RoutineTrackerApp: Application() {
                 completionTimeDataModule,
                 vacationDataModule,
                 streakDataModule,
+                databasePrepopulatorModule,
 
                 domainModule,
                 habitDomainModule,
@@ -46,6 +59,10 @@ class RoutineTrackerApp: Application() {
                 agendaScreenModule,
                 routineDetailsModule,
             )
+        }
+
+        applicationScope.launch(ioDispatcher) {
+            databasePrepopulator.prepopulateDatabase()
         }
     }
 }

@@ -89,6 +89,23 @@ class CompletionHistoryLocalDataSourceImpl(
         }
     }
 
+    override suspend fun insertCompletions(
+        completions: Map<Long, List<Habit.CompletionRecord>>
+    ) = withContext(ioDispatcher) {
+        println("CompletionHistoryLocalDataSourceImpl.insertCompletions()")
+        db.completionHistoryEntityQueries.transaction {
+            for ((habitId, completionRecords) in completions) {
+                for (completion in completionRecords) {
+                    db.completionHistoryEntityQueries.insertCompletion(
+                        habitId = habitId,
+                        date = completion.date,
+                        numOfTimesCompleted = completion.numOfTimesCompleted,
+                    )
+                }
+            }
+        }
+    }
+
     override suspend fun deleteCompletionByDate(habitId: Long, date: LocalDate) {
         withContext(ioDispatcher) {
             db.completionHistoryEntityQueries.deleteCompletionByDate(habitId, date)

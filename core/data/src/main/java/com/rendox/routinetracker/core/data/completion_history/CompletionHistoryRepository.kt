@@ -40,6 +40,10 @@ interface CompletionHistoryRepository {
         completionRecord: Habit.CompletionRecord,
     )
 
+    suspend fun insertCompletions(
+        completions: Map<Long, List<Habit.CompletionRecord>>
+    )
+
     suspend fun deleteCompletionByDate(
         habitId: Long,
         date: LocalDate,

@@ -27,6 +27,9 @@ SELECT *
 FROM habitEntity
 ORDER BY id;
 
+getNumOfHabits:
+SELECT COUNT(id) FROM habitEntity;
+
 deleteHabitById:
 DELETE FROM habitEntity
 WHERE id = ?;
