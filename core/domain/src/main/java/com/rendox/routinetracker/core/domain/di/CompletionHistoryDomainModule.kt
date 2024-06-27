@@ -36,7 +36,7 @@ val completionHistoryDomainModule = module {
 
     single<GetAgendaUseCase> {
         GetAgendaUseCaseImpl(
-            getAllHabits = get(),
+            habitRepository = get(),
             vacationRepository = get(),
             completionHistoryRepository = get(),
             habitStatusComputer = get(),

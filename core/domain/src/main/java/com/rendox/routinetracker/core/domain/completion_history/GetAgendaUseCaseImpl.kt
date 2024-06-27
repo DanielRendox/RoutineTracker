@@ -20,7 +20,7 @@ class GetAgendaUseCaseImpl(
         today: LocalDate,
     ): Map<Habit, HabitCompletionData> {
         val (habits, habitsRetrievalDuration) = measureTimeMillisForResult {
-            habitRepository.getAllHabits()
+            habitRepository.getAllOngoingHabits(validationDate)
         }
         println("GetAgendaUseCase retrieved habits in $habitsRetrievalDuration ms")
         val (completionHistory, completionsRetrievalDuration) = measureTimeMillisForResult {

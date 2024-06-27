@@ -2,6 +2,7 @@ package com.rendox.routinetracker.core.data.habit
 
 import com.rendox.routinetracker.core.database.habit.HabitLocalDataSource
 import com.rendox.routinetracker.core.model.Habit
+import kotlinx.datetime.LocalDate
 
 class HabitRepositoryImpl(
     private val localDataSource: HabitLocalDataSource,
@@ -20,6 +21,10 @@ class HabitRepositoryImpl(
 
     override suspend fun getAllHabits(): List<Habit> {
         return localDataSource.getAllHabits()
+    }
+
+    override suspend fun getAllOngoingHabits(currentDate: LocalDate): List<Habit> {
+        return localDataSource.getAllOngoingHabits(currentDate)
     }
 
     override suspend fun deleteHabit(id: Long) {

@@ -5,6 +5,7 @@ import com.rendox.routinetracker.core.database.habit.model.HabitType
 import com.rendox.routinetracker.core.database.habit.model.toExternalModel
 import com.rendox.routinetracker.core.model.Habit
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.LocalDate
 import kotlin.coroutines.CoroutineContext
 
 class HabitLocalDataSourceImpl(
@@ -60,6 +61,19 @@ class HabitLocalDataSourceImpl(
     override suspend fun getAllHabits(): List<Habit> = withContext(ioDispatcher) {
         db.habitEntityQueries.transactionWithResult {
             db.habitEntityQueries.getAllHabits()
+                .executeAsList()
+                .map { habitEntity ->
+                    val schedule = scheduleLocalDataSource.getScheduleById(habitEntity.id)
+                    habitEntity.toExternalModel(schedule)
+                }
+        }
+    }
+
+    override suspend fun getAllOngoingHabits(
+        currentDate: LocalDate
+    ): List<Habit> = withContext(ioDispatcher) {
+        db.habitEntityQueries.transactionWithResult {
+            db.habitEntityQueries.getAllRelevantHabits(currentDate)
                 .executeAsList()
                 .map { habitEntity ->
                     val schedule = scheduleLocalDataSource.getScheduleById(habitEntity.id)

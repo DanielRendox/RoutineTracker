@@ -27,6 +27,11 @@ SELECT *
 FROM habitEntity
 ORDER BY id;
 
+getAllRelevantHabits:
+SELECT h.* FROM habitEntity h
+JOIN scheduleEntity s ON h.id = s.id
+WHERE s.startDate <= :currentDate AND (s.endDate IS NULL OR s.endDate >= :currentDate);
+
 getNumOfHabits:
 SELECT COUNT(id) FROM habitEntity;
 
