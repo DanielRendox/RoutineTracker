@@ -1,5 +1,7 @@
 package com.rendox.routinetracker.core.domain.di
 
+import com.rendox.routinetracker.core.domain.completion_history.GetAgendaUseCase
+import com.rendox.routinetracker.core.domain.completion_history.GetAgendaUseCaseImpl
 import com.rendox.routinetracker.core.domain.completion_history.GetHabitCompletionDataUseCase
 import com.rendox.routinetracker.core.domain.completion_history.GetHabitCompletionDataUseCaseIndependentPeriods
 import com.rendox.routinetracker.core.domain.completion_history.HabitStatusComputer
@@ -29,6 +31,15 @@ val completionHistoryDomainModule = module {
             completionHistoryRepository = get(),
             habitStatusComputer = get(),
             defaultDispatcher = get(qualifier = named("defaultDispatcher")),
+        )
+    }
+
+    single<GetAgendaUseCase> {
+        GetAgendaUseCaseImpl(
+            getAllHabits = get(),
+            vacationRepository = get(),
+            completionHistoryRepository = get(),
+            habitStatusComputer = get(),
         )
     }
 }

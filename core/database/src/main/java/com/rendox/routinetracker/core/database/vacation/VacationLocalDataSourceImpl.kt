@@ -2,6 +2,8 @@ package com.rendox.routinetracker.core.database.vacation
 
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
 import com.rendox.routinetracker.core.database.VacationEntity
+import com.rendox.routinetracker.core.logic.time.LocalDateRange
+import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Vacation
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
@@ -55,11 +57,12 @@ class VacationLocalDataSourceImpl(
         }
     }
 
-    override suspend fun getAllVacations(): List<Pair<Long, Vacation>> {
+    override suspend fun getAllVacations(): Map<Long, List<Vacation>> {
         return withContext(ioDispatcher) {
-            db.vacationEntityQueries.getAllVacations().executeAsList().map {
-                Pair(it.habitId, it.toExternalModel())
-            }
+            db.vacationEntityQueries.getAllVacations().executeAsList().groupBy(
+                keySelector = { it.habitId },
+                valueTransform = { it.toExternalModel() },
+            )
         }
     }
 

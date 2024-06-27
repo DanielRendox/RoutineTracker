@@ -42,8 +42,11 @@ class VacationRepositoryFake(
 
     }.map { it.second }
 
-    override suspend fun getAllVacations(): List<Pair<Long, Vacation>> {
-        return habitData.vacationHistory.value
+    override suspend fun getAllVacations(): Map<Long, List<Vacation>> {
+        return habitData.vacationHistory.value.groupBy(
+            keySelector = { it.first },
+            valueTransform = { it.second },
+        )
     }
 
     override suspend fun insertVacation(habitId: Long, vacation: Vacation) {

@@ -14,15 +14,10 @@ val habitDomainModule = module {
     }
 
     single {
-        GetAllHabitsUseCase(get<HabitRepository>()::getAllHabits)
-    }
-
-    single {
         DeleteHabitUseCase(get<HabitRepository>()::deleteHabit)
     }
 }
 
 fun interface InsertHabitUseCase : suspend (Habit) -> Unit
 fun interface GetHabitUseCase : suspend (Long) -> Habit
-fun interface GetAllHabitsUseCase : suspend () -> List<Habit>
 fun interface DeleteHabitUseCase : suspend (Long) -> Unit

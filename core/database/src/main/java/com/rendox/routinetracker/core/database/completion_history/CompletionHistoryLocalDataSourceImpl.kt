@@ -68,11 +68,17 @@ class CompletionHistoryLocalDataSourceImpl(
         }
     }
 
-    override suspend fun getAllRecords(): List<Pair<Long, Habit.CompletionRecord>> {
+    override suspend fun getAllRecords(): Map<Long, List<Habit.CompletionRecord>> {
         return withContext(ioDispatcher) {
-            db.completionHistoryEntityQueries.getAllRecords().executeAsList().map {
-                it.habitId to it.toExternalModel()!!
-            }
+            db.completionHistoryEntityQueries.getAllRecords().executeAsList().groupBy(
+                keySelector = { it.habitId },
+                valueTransform = {
+                    Habit.YesNoHabit.CompletionRecord(
+                        date = it.date,
+                        numOfTimesCompleted = it.numOfTimesCompleted,
+                    )
+                },
+            )
         }
     }
 
@@ -123,6 +129,17 @@ class CompletionHistoryLocalDataSourceImpl(
             )
 
             null -> null
+        }
+    }
+
+    private fun CompletionHistoryEntity.toExternalModel(
+        habit: Habit,
+    ): Habit.CompletionRecord {
+        return when (habit) {
+            is Habit.YesNoHabit -> Habit.YesNoHabit.CompletionRecord(
+                date = date,
+                numOfTimesCompleted = numOfTimesCompleted,
+            )
         }
     }
 }

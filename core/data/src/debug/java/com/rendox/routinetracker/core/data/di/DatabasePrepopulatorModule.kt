@@ -8,7 +8,7 @@ import org.koin.dsl.module
 val databasePrepopulatorModule = module {
     single<DatabasePrepopulator> {
         DatabasePrepopulatorRandom(
-            habitsGenerator = RandomHabitsGenerator(numOfHabits = 100),
+            habitsGenerator = RandomHabitsGenerator(numOfHabits = 50),
             habitLocalDataSource = get(),
             completionHistoryLocalDataSource = get(),
         )

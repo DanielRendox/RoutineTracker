@@ -58,7 +58,6 @@ internal fun AgendaRoute(
     val currentDate by viewModel.currentDateFlow.collectAsStateWithLifecycle()
     val visibleRoutines by viewModel.visibleRoutinesFlow.collectAsStateWithLifecycle()
     val showAllRoutines by viewModel.showAllRoutinesFlow.collectAsStateWithLifecycle()
-    val nothingIsScheduled by viewModel.nothingIsScheduledFlow.collectAsStateWithLifecycle()
     val completionAttemptBlockedEvent by viewModel.completionAttemptBlockedEvent.collectAsStateWithLifecycle()
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -98,7 +97,6 @@ internal fun AgendaRoute(
         },
         showAllRoutines = showAllRoutines,
         snackbarHostState = snackbarHostState,
-        nothingIsScheduled = nothingIsScheduled,
     )
 }
 
@@ -106,7 +104,7 @@ internal fun AgendaRoute(
 internal fun AgendaScreen(
     modifier: Modifier = Modifier,
     currentDate: LocalDate,
-    routineList: List<DisplayRoutine>,
+    routineList: List<DisplayRoutine>?,
     today: LocalDate,
     showAllRoutines: Boolean,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
@@ -115,7 +113,6 @@ internal fun AgendaScreen(
     insertCompletion: (Long, Habit.CompletionRecord) -> Unit,
     onDateChange: (LocalDate) -> Unit,
     onNotDueRoutinesVisibilityToggle: () -> Unit,
-    nothingIsScheduled: Boolean,
 ) {
     val locale = LocalLocale.current
 
@@ -170,7 +167,7 @@ internal fun AgendaScreen(
                     today = today,
                 )
 
-                if (routineList.isNotEmpty()) {
+                if (routineList?.isNotEmpty() == true) {
                     val onStatusCheckmarkClick: (DisplayRoutine) -> Unit = { routine ->
                         when (routine.type) {
                             DisplayRoutineType.YesNoHabit -> {
@@ -194,7 +191,7 @@ internal fun AgendaScreen(
                     }
                 }
 
-                if (nothingIsScheduled) {
+                if (routineList?.isEmpty() == true) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()

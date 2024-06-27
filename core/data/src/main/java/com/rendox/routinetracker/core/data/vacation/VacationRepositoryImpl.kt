@@ -27,7 +27,7 @@ class VacationRepositoryImpl(
         return localDataSource.getVacationsInPeriod(habitId, minDate, maxDate)
     }
 
-    override suspend fun getAllVacations(): List<Pair<Long, Vacation>> {
+    override suspend fun getAllVacations(): Map<Long, List<Vacation>> {
         return localDataSource.getAllVacations()
     }
 
