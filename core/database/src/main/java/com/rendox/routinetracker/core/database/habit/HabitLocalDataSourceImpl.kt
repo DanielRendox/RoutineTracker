@@ -1,8 +1,9 @@
 package com.rendox.routinetracker.core.database.habit
 
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
-import com.rendox.routinetracker.core.database.habit.model.HabitType
-import com.rendox.routinetracker.core.database.habit.model.toExternalModel
+import com.rendox.routinetracker.core.database.habit.schedule.ScheduleLocalDataSource
+import com.rendox.routinetracker.core.database.model.habit.HabitType
+import com.rendox.routinetracker.core.database.model.habit.toExternalModel
 import com.rendox.routinetracker.core.model.Habit
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate

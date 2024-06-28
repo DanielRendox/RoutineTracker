@@ -1,4 +1,4 @@
-package com.rendox.routinetracker.core.database.habit
+package com.rendox.routinetracker.core.database.habit.due_dates
 
 interface DueDateLocalDataSource {
     fun insertDueDates(dueDates: List<Int>, scheduleId: Long)
