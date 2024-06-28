@@ -4,24 +4,6 @@ import com.rendox.routinetracker.core.model.Habit
 import kotlinx.datetime.LocalDate
 
 interface CompletionHistoryLocalDataSource {
-    suspend fun getNumOfTimesCompletedInPeriod(
-        habitId: Long,
-        minDate: LocalDate?,
-        maxDate: LocalDate?,
-    ): Double
-
-    suspend fun getRecordByDate(habitId: Long, date: LocalDate): Habit.CompletionRecord?
-    suspend fun getLastCompletedRecord(
-        habitId: Long,
-        minDate: LocalDate?,
-        maxDate: LocalDate?,
-    ): Habit.CompletionRecord?
-
-    suspend fun getFirstCompletedRecord(
-        habitId: Long,
-        minDate: LocalDate?,
-        maxDate: LocalDate?,
-    ): Habit.CompletionRecord?
 
     suspend fun getRecordsInPeriod(
         habitId: Long,

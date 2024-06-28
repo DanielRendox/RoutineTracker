@@ -7,37 +7,6 @@ import kotlinx.datetime.LocalDate
 class CompletionHistoryRepositoryImpl(
     private val localDataSource: CompletionHistoryLocalDataSource
 ) : CompletionHistoryRepository {
-    override suspend fun getNumOfTimesCompletedInPeriod(
-        habitId: Long,
-        minDate: LocalDate?,
-        maxDate: LocalDate?
-    ): Double {
-        return localDataSource.getNumOfTimesCompletedInPeriod(
-            habitId, minDate, maxDate
-        )
-    }
-
-    override suspend fun getRecordByDate(habitId: Long, date: LocalDate): Habit.CompletionRecord? {
-        return localDataSource.getRecordByDate(
-            habitId, date
-        )
-    }
-
-    override suspend fun getLastCompletedRecord(
-        habitId: Long,
-        minDate: LocalDate?,
-        maxDate: LocalDate?,
-    ): Habit.CompletionRecord? {
-        return localDataSource.getLastCompletedRecord(habitId, minDate, maxDate)
-    }
-
-    override suspend fun getFirstCompletedRecord(
-        habitId: Long,
-        minDate: LocalDate?,
-        maxDate: LocalDate?,
-    ): Habit.CompletionRecord? {
-        return localDataSource.getFirstCompletedRecord(habitId, minDate, maxDate)
-    }
 
     override suspend fun getRecordsInPeriod(
         habitId: Long,

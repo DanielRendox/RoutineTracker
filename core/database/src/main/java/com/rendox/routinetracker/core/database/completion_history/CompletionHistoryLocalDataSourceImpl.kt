@@ -2,7 +2,7 @@ package com.rendox.routinetracker.core.database.completion_history
 
 import com.rendox.routinetracker.core.database.CompletionHistoryEntity
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
-import com.rendox.routinetracker.core.database.habit.model.HabitType
+import com.rendox.routinetracker.core.database.model.habit.HabitType
 import com.rendox.routinetracker.core.model.Habit
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
@@ -12,49 +12,6 @@ class CompletionHistoryLocalDataSourceImpl(
     private val db: RoutineTrackerDatabase,
     private val ioDispatcher: CoroutineContext,
 ) : CompletionHistoryLocalDataSource {
-    override suspend fun getNumOfTimesCompletedInPeriod(
-        habitId: Long,
-        minDate: LocalDate?,
-        maxDate: LocalDate?,
-    ): Double {
-        return withContext(ioDispatcher) {
-            db.completionHistoryEntityQueries.getNumOfTimesCompletedInPeriod(
-                habitId, minDate, maxDate
-            ).executeAsOne()
-        }
-    }
-
-    override suspend fun getRecordByDate(
-        habitId: Long, date: LocalDate
-    ): Habit.CompletionRecord? {
-        return withContext(ioDispatcher) {
-            db.completionHistoryEntityQueries.getRecordByDate(
-                habitId, date
-            ).executeAsOneOrNull()?.toExternalModel()
-        }
-    }
-
-    override suspend fun getLastCompletedRecord(
-        habitId: Long,
-        minDate: LocalDate?,
-        maxDate: LocalDate?
-    ): Habit.CompletionRecord? {
-        return withContext(ioDispatcher) {
-            db.completionHistoryEntityQueries.getLastRecord(habitId, minDate, maxDate)
-                .executeAsOneOrNull()?.toExternalModel()
-        }
-    }
-
-    override suspend fun getFirstCompletedRecord(
-        habitId: Long,
-        minDate: LocalDate?,
-        maxDate: LocalDate?,
-    ): Habit.CompletionRecord? {
-        return withContext(ioDispatcher) {
-            db.completionHistoryEntityQueries.getFirstRecord(habitId, minDate, maxDate)
-                .executeAsOneOrNull()?.toExternalModel()
-        }
-    }
 
     override suspend fun getRecordsInPeriod(
         habitId: Long,
@@ -129,17 +86,6 @@ class CompletionHistoryLocalDataSourceImpl(
             )
 
             null -> null
-        }
-    }
-
-    private fun CompletionHistoryEntity.toExternalModel(
-        habit: Habit,
-    ): Habit.CompletionRecord {
-        return when (habit) {
-            is Habit.YesNoHabit -> Habit.YesNoHabit.CompletionRecord(
-                date = date,
-                numOfTimesCompleted = numOfTimesCompleted,
-            )
         }
     }
 }

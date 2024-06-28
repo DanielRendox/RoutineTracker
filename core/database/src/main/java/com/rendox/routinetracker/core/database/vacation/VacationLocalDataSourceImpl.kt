@@ -2,8 +2,6 @@ package com.rendox.routinetracker.core.database.vacation
 
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
 import com.rendox.routinetracker.core.database.VacationEntity
-import com.rendox.routinetracker.core.logic.time.LocalDateRange
-import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Vacation
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
@@ -13,35 +11,6 @@ class VacationLocalDataSourceImpl(
     private val db: RoutineTrackerDatabase,
     private val ioDispatcher: CoroutineContext,
 ): VacationLocalDataSource {
-    override suspend fun getVacationByDate(habitId: Long, date: LocalDate): Vacation? {
-        return withContext(ioDispatcher) {
-            db.vacationEntityQueries.getVacationByDate(habitId, date)
-                .executeAsOneOrNull()?.toExternalModel()
-        }
-    }
-
-    override suspend fun getPreviousVacation(habitId: Long, currentDate: LocalDate): Vacation? {
-        return withContext(ioDispatcher) {
-            val previousVacation = db.vacationEntityQueries.getPreviousVacation(
-                habitId = habitId,
-                currentDate = currentDate,
-            ).executeAsOneOrNull()
-            previousVacation?.let {
-                Vacation(
-                    id = it.id,
-                    startDate = it.startDate,
-                    endDate = it.endDate,
-                )
-            }
-        }
-    }
-
-    override suspend fun getLastVacation(habitId: Long): Vacation? {
-        return withContext(ioDispatcher) {
-            db.vacationEntityQueries.getLastVacation(habitId)
-                .executeAsOneOrNull()?.toExternalModel()
-        }
-    }
 
     override suspend fun getVacationsInPeriod(
         habitId: Long,

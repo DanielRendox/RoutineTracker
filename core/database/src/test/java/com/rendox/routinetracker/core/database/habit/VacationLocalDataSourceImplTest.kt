@@ -126,24 +126,4 @@ class VacationLocalDataSourceImplTest : KoinTest {
         val expectedVacations = vacationsList.filter { it.id!! >= 2L }
         assertThat(resultingVacations).containsExactlyElementsIn(expectedVacations)
     }
-
-    @Test
-    fun `assert get vacation by date returns vacation that contains date`() = runTest {
-        val resultingVacation = vacationLocalDataSource.getVacationByDate(
-            habitId = habitId,
-            date = LocalDate(2023, 1, 10),
-        )
-        val expectedVacation = vacationsList.find { it.id == 2L }
-        assertThat(resultingVacation).isEqualTo(expectedVacation)
-    }
-
-    @Test
-    fun `assert previous vacation returns vacation that ends before current date`() = runTest {
-        val resultingVacation = vacationLocalDataSource.getPreviousVacation(
-            habitId = habitId,
-            currentDate = LocalDate(2023, 9, 30),
-        )
-        val expectedVacation = vacationsList.find { it.id == 5L }
-        assertThat(resultingVacation).isEqualTo(expectedVacation)
-    }
 }

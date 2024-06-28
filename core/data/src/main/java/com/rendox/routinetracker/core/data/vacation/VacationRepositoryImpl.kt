@@ -7,17 +7,6 @@ import kotlinx.datetime.LocalDate
 class VacationRepositoryImpl(
     private val localDataSource: VacationLocalDataSource
 ): VacationRepository {
-    override suspend fun getVacationByDate(habitId: Long, date: LocalDate): Vacation? {
-        return localDataSource.getVacationByDate(habitId, date)
-    }
-
-    override suspend fun getPreviousVacation(habitId: Long, currentDate: LocalDate): Vacation? {
-        return localDataSource.getPreviousVacation(habitId, currentDate)
-    }
-
-    override suspend fun getLastVacation(habitId: Long): Vacation? {
-        return localDataSource.getLastVacation(habitId)
-    }
 
     override suspend fun getVacationsInPeriod(
         habitId: Long,

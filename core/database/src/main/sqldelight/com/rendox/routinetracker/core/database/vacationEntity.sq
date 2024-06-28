@@ -8,27 +8,6 @@ CREATE TABLE vacationEntity (
     FOREIGN KEY (habitId) REFERENCES habitEntity(id)
 );
 
-getVacationByDate:
-SELECT *
-FROM vacationEntity
-WHERE habitId = :habitId AND startDate <= :date AND (endDate IS NULL OR :date <= endDate);
-
-getPreviousVacation:
-SELECT *
-FROM vacationEntity
-WHERE habitId = :habitId
-    AND (endDate IS NOT NULL)
-    AND (endDate < :currentDate)
-ORDER BY startDate DESC
-LIMIT 1;
-
-getLastVacation:
-SELECT *
-FROM vacationEntity
-WHERE habitId = :habitId
-ORDER BY startDate DESC
-LIMIT 1;
-
 getVacationsInPeriod:
 SELECT *
 FROM vacationEntity
