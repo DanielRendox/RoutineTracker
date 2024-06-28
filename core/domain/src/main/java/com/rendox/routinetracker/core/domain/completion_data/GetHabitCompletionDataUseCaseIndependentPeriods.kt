@@ -1,7 +1,9 @@
-package com.rendox.routinetracker.core.domain.completion_history
+package com.rendox.routinetracker.core.domain.completion_data
 
 import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
 import com.rendox.routinetracker.core.data.vacation.VacationRepository
+import com.rendox.routinetracker.core.domain.habit_status.HabitStatusComputer
+import com.rendox.routinetracker.core.domain.schedule.getPeriodRange
 import com.rendox.routinetracker.core.domain.di.GetHabitUseCase
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.rangeTo
@@ -41,7 +43,7 @@ class GetHabitCompletionDataUseCaseIndependentPeriods(
 
         val completionHistory = if (period != null) {
             completionHistoryRepository.getRecordsInPeriod(
-                habitId = habitId,
+                habit = habit,
                 minDate = period.start,
                 maxDate = period.endInclusive,
             )

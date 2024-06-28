@@ -1,8 +1,8 @@
 package com.rendox.routinetracker.core.domain.streak
 
-import com.rendox.routinetracker.core.domain.completion_history.HabitStatusComputer
-import com.rendox.routinetracker.core.domain.completion_history.getPeriodRange
-import com.rendox.routinetracker.core.domain.completion_history.isDue
+import com.rendox.routinetracker.core.domain.habit_status.HabitStatusComputer
+import com.rendox.routinetracker.core.domain.schedule.getPeriodRange
+import com.rendox.routinetracker.core.domain.schedule.isDue
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo

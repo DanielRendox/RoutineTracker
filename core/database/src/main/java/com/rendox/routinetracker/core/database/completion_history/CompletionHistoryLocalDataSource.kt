@@ -6,7 +6,7 @@ import kotlinx.datetime.LocalDate
 interface CompletionHistoryLocalDataSource {
 
     suspend fun getRecordsInPeriod(
-        habitId: Long,
+        habit: Habit,
         minDate: LocalDate?,
         maxDate: LocalDate?,
     ): List<Habit.CompletionRecord>

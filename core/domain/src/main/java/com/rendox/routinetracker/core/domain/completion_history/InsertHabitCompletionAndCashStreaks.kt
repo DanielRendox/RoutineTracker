@@ -53,7 +53,7 @@ class InsertHabitCompletionAndCashStreaks(
         ) ?: return
 
         val completionHistory = completionHistoryRepository.getRecordsInPeriod(
-            habitId = habit.id!!,
+            habit = habit,
             minDate = cashedPeriod.start,
             maxDate = cashedPeriod.endInclusive,
         )

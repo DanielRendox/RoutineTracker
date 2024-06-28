@@ -10,7 +10,7 @@ interface CompletionHistoryRepository {
      * specified, returns only the records in the given range.
      */
     suspend fun getRecordsInPeriod(
-        habitId: Long,
+        habit: Habit,
         minDate: LocalDate? = null,
         maxDate: LocalDate? = null,
     ): List<Habit.CompletionRecord>

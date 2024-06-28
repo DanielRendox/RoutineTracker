@@ -1,8 +1,7 @@
 package com.rendox.routinetracker.core.database.completion_history
 
-import com.rendox.routinetracker.core.database.CompletionHistoryEntity
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
-import com.rendox.routinetracker.core.database.model.habit.HabitType
+import com.rendox.routinetracker.core.database.model.toExternalModel
 import com.rendox.routinetracker.core.model.Habit
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
@@ -14,14 +13,14 @@ class CompletionHistoryLocalDataSourceImpl(
 ) : CompletionHistoryLocalDataSource {
 
     override suspend fun getRecordsInPeriod(
-        habitId: Long,
+        habit: Habit,
         minDate: LocalDate?,
         maxDate: LocalDate?,
     ): List<Habit.CompletionRecord> {
         return withContext(ioDispatcher) {
             db.completionHistoryEntityQueries.getRecordsInPeriod(
-                habitId, minDate, maxDate
-            ).executeAsList().map { it.toExternalModel()!! }
+                habit.id!!, minDate, maxDate
+            ).executeAsList().map { it.toExternalModel(habit) }
         }
     }
 
@@ -55,7 +54,6 @@ class CompletionHistoryLocalDataSourceImpl(
     override suspend fun insertCompletions(
         completions: Map<Long, List<Habit.CompletionRecord>>
     ) = withContext(ioDispatcher) {
-        println("CompletionHistoryLocalDataSourceImpl.insertCompletions()")
         db.completionHistoryEntityQueries.transaction {
             for ((habitId, completionRecords) in completions) {
                 for (completion in completionRecords) {
@@ -72,20 +70,6 @@ class CompletionHistoryLocalDataSourceImpl(
     override suspend fun deleteCompletionByDate(habitId: Long, date: LocalDate) {
         withContext(ioDispatcher) {
             db.completionHistoryEntityQueries.deleteCompletionByDate(habitId, date)
-        }
-    }
-
-    private suspend fun CompletionHistoryEntity.toExternalModel(): Habit.CompletionRecord? {
-        val habitType = withContext(ioDispatcher) {
-            db.habitEntityQueries.getHabitById(habitId).executeAsOneOrNull()?.type
-        }
-        return when (habitType) {
-            HabitType.YesNoHabit -> Habit.YesNoHabit.CompletionRecord(
-                date = date,
-                numOfTimesCompleted = numOfTimesCompleted,
-            )
-
-            null -> null
         }
     }
 }

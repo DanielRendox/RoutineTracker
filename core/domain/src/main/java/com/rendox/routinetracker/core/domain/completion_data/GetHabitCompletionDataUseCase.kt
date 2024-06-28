@@ -1,4 +1,4 @@
-package com.rendox.routinetracker.core.domain.completion_history
+package com.rendox.routinetracker.core.domain.completion_data
 
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.model.HabitCompletionData

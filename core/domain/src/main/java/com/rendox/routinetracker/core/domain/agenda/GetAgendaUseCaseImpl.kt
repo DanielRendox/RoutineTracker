@@ -1,8 +1,9 @@
-package com.rendox.routinetracker.core.domain.completion_history
+package com.rendox.routinetracker.core.domain.agenda
 
 import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
 import com.rendox.routinetracker.core.data.habit.HabitRepository
 import com.rendox.routinetracker.core.data.vacation.VacationRepository
+import com.rendox.routinetracker.core.domain.habit_status.HabitStatusComputer
 import com.rendox.routinetracker.core.logic.measureTimeMillisForResult
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.HabitCompletionData

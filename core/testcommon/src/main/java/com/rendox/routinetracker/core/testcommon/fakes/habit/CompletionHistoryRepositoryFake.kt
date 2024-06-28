@@ -10,11 +10,11 @@ class CompletionHistoryRepositoryFake(
 ) : CompletionHistoryRepository {
 
     override suspend fun getRecordsInPeriod(
-        habitId: Long,
+        habit: Habit,
         minDate: LocalDate?,
         maxDate: LocalDate?
     ): List<Habit.CompletionRecord> = habitData.completionHistory.value.filter {
-        it.first == habitId
+        it.first == habit.id!!
                 && (minDate == null || minDate <= it.second.date)
                 && (maxDate == null || it.second.date <= maxDate)
     }.map { it.second }.sortedBy { it.date }

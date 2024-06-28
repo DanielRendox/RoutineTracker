@@ -9,12 +9,12 @@ class CompletionHistoryRepositoryImpl(
 ) : CompletionHistoryRepository {
 
     override suspend fun getRecordsInPeriod(
-        habitId: Long,
+        habit: Habit,
         minDate: LocalDate?,
         maxDate: LocalDate?,
     ): List<Habit.CompletionRecord> {
         return localDataSource.getRecordsInPeriod(
-            habitId, minDate, maxDate
+            habit, minDate, maxDate
         )
     }
 

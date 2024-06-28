@@ -1,11 +1,11 @@
 package com.rendox.routinetracker.core.domain.di
 
-import com.rendox.routinetracker.core.domain.completion_history.GetAgendaUseCase
-import com.rendox.routinetracker.core.domain.completion_history.GetAgendaUseCaseImpl
-import com.rendox.routinetracker.core.domain.completion_history.GetHabitCompletionDataUseCase
-import com.rendox.routinetracker.core.domain.completion_history.GetHabitCompletionDataUseCaseIndependentPeriods
-import com.rendox.routinetracker.core.domain.completion_history.HabitStatusComputer
-import com.rendox.routinetracker.core.domain.completion_history.HabitStatusComputerImpl
+import com.rendox.routinetracker.core.domain.agenda.GetAgendaUseCase
+import com.rendox.routinetracker.core.domain.agenda.GetAgendaUseCaseImpl
+import com.rendox.routinetracker.core.domain.completion_data.GetHabitCompletionDataUseCase
+import com.rendox.routinetracker.core.domain.completion_data.GetHabitCompletionDataUseCaseIndependentPeriods
+import com.rendox.routinetracker.core.domain.habit_status.HabitStatusComputer
+import com.rendox.routinetracker.core.domain.habit_status.HabitStatusComputerImpl
 import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase
 import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionAndCashStreaks
 import org.koin.core.qualifier.named

@@ -1,8 +1,8 @@
 package com.rendox.routinetracker.core.domain.streak
 
 import com.google.common.truth.Truth.assertThat
-import com.rendox.routinetracker.core.domain.completion_history.HabitStatusComputer
-import com.rendox.routinetracker.core.domain.completion_history.HabitStatusComputerImpl
+import com.rendox.routinetracker.core.domain.habit_status.HabitStatusComputer
+import com.rendox.routinetracker.core.domain.habit_status.HabitStatusComputerImpl
 import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.Streak
