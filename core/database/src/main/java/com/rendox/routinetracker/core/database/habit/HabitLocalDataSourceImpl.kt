@@ -1,10 +1,12 @@
 package com.rendox.routinetracker.core.database.habit
 
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
-import com.rendox.routinetracker.core.database.habit.model.HabitType
-import com.rendox.routinetracker.core.database.habit.model.toExternalModel
+import com.rendox.routinetracker.core.database.habit.schedule.ScheduleLocalDataSource
+import com.rendox.routinetracker.core.database.model.habit.HabitType
+import com.rendox.routinetracker.core.database.model.habit.toExternalModel
 import com.rendox.routinetracker.core.model.Habit
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.LocalDate
 import kotlin.coroutines.CoroutineContext
 
 class HabitLocalDataSourceImpl(
@@ -19,6 +21,19 @@ class HabitLocalDataSourceImpl(
                 is Habit.YesNoHabit -> {
                     insertYesNoHabit(habit)
                     scheduleLocalDataSource.insertSchedule(habit.schedule)
+                }
+            }
+        }
+    }
+
+    override suspend fun insertHabits(habits: List<Habit>) = withContext(ioDispatcher) {
+        db.habitEntityQueries.transaction {
+            for (habit in habits) {
+                when (habit) {
+                    is Habit.YesNoHabit -> {
+                        insertYesNoHabit(habit)
+                        scheduleLocalDataSource.insertSchedule(habit.schedule)
+                    }
                 }
             }
         }
@@ -53,6 +68,23 @@ class HabitLocalDataSourceImpl(
                     habitEntity.toExternalModel(schedule)
                 }
         }
+    }
+
+    override suspend fun getAllOngoingHabits(
+        currentDate: LocalDate
+    ): List<Habit> = withContext(ioDispatcher) {
+        db.habitEntityQueries.transactionWithResult {
+            db.habitEntityQueries.getAllRelevantHabits(currentDate)
+                .executeAsList()
+                .map { habitEntity ->
+                    val schedule = scheduleLocalDataSource.getScheduleById(habitEntity.id)
+                    habitEntity.toExternalModel(schedule)
+                }
+        }
+    }
+
+    override suspend fun checkIfIsEmpty(): Boolean = withContext(ioDispatcher) {
+        db.habitEntityQueries.getNumOfHabits().executeAsOne().let { it == 0L }
     }
 
     override suspend fun deleteHabitById(habitId: Long) {

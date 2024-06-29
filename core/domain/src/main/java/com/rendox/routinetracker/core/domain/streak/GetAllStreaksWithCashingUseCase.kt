@@ -3,7 +3,7 @@ package com.rendox.routinetracker.core.domain.streak
 import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
 import com.rendox.routinetracker.core.data.streaks.StreakRepository
 import com.rendox.routinetracker.core.data.vacation.VacationRepository
-import com.rendox.routinetracker.core.domain.completion_history.getPeriodRange
+import com.rendox.routinetracker.core.domain.schedule.getPeriodRange
 import com.rendox.routinetracker.core.domain.di.GetHabitUseCase
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.atEndOfMonth
@@ -25,13 +25,7 @@ class GetAllStreaksWithCashingUseCase(
     private val defaultDispatcher: CoroutineContext,
     private val streakRepository: StreakRepository,
     private val streakComputer: StreakComputer,
-) : GetAllStreaksUseCaseImpl(
-    getHabit = getHabit,
-    completionHistoryRepository = completionHistoryRepository,
-    vacationHistoryRepository = vacationHistoryRepository,
-    defaultDispatcher = defaultDispatcher,
-    streakComputer = streakComputer,
-) {
+) : GetAllStreaksUseCase {
     override suspend operator fun invoke(
         habitId: Long,
         today: LocalDate,
@@ -88,7 +82,7 @@ class GetAllStreaksWithCashingUseCase(
         today: LocalDate,
     ): List<Streak> {
         val completionHistory = completionHistoryRepository.getRecordsInPeriod(
-            habitId = habit.id!!,
+            habit = habit,
             minDate = period.start,
             maxDate = period.endInclusive,
         )

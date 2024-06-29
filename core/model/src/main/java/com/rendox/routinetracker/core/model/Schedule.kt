@@ -146,6 +146,20 @@ sealed class Schedule {
     ) : PeriodicSchedule(), ByNumOfDueDays {
         override val correspondingPeriod: DatePeriod
             get() = DatePeriod(days = numOfDaysInPeriod)
+
+        init {
+            check(numOfDueDays <= MAX_NUM_OF_DUE_DAYS) {
+                "The number of due dates shouldn't be higher than ($MAX_NUM_OF_DUE_DAYS)."
+            }
+            check(numOfDaysInPeriod <= MAX_NUM_OF_NOT_DUE_DAYS + MAX_NUM_OF_DUE_DAYS) {
+                "The number of not due dates shouldn't be higher than ($MAX_NUM_OF_NOT_DUE_DAYS)."
+            }
+        }
+
+        companion object {
+            const val MAX_NUM_OF_DUE_DAYS = 99
+            const val MAX_NUM_OF_NOT_DUE_DAYS = 99
+        }
     }
 
     data class CustomDateSchedule(

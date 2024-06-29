@@ -13,36 +13,6 @@ INSERT OR REPLACE
 INTO completionHistoryEntity
 VALUES (?, ?, ?);
 
-getNumOfTimesCompletedInPeriod:
-SELECT TOTAL(numOfTimesCompleted)
-FROM completionHistoryEntity
-WHERE habitId = :habitId
-    AND (:minDate IS NULL OR :minDate <= date)
-    AND (:maxDate IS NULL OR date <= :maxDate);
-
-getRecordByDate:
-SELECT *
-FROM completionHistoryEntity
-WHERE habitId = ? AND date = ?;
-
-getLastRecord:
-SELECT *
-FROM completionHistoryEntity
-WHERE habitId = :habitId
-    AND (:minDate IS NULL OR :minDate <= date)
-    AND (:maxDate IS NULL OR date <= :maxDate)
-ORDER BY date DESC
-LIMIT 1;
-
-getFirstRecord:
-SELECT *
-FROM completionHistoryEntity
-WHERE habitId = :habitId
-    AND (:minDate IS NULL OR :minDate <= date)
-    AND (:maxDate IS NULL OR date <= :maxDate)
-ORDER BY date ASC
-LIMIT 1;
-
 getRecordsInPeriod:
 SELECT *
 FROM completionHistoryEntity
@@ -51,9 +21,14 @@ WHERE habitId = :habitId
     AND (:maxDate IS NULL OR date <= :maxDate)
 ORDER BY date ASC;
 
-getAllRecords:
-SELECT *
-FROM completionHistoryEntity;
+getMultiHabitRecords:
+SELECT * FROM completionHistoryEntity
+WHERE (habitId IN :habitIds1 AND (:minDate1 <= date) AND (date <= :maxDate1)) OR
+    (habitId IN :habitIds2 AND (:minDate2 <= date) AND (date <= :maxDate2)) OR
+    (habitId IN :habitIds3 AND (:minDate3 <= date) AND (date <= :maxDate3)) OR
+    (habitId IN :habitIds4 AND (:minDate4 <= date) AND (date <= :maxDate4)) OR
+    (habitId IN :habitIds5 AND (:minDate5 <= date) AND (date <= :maxDate5))
+ORDER BY habitId ASC, date ASC;
 
 deleteCompletionByDate:
 DELETE FROM completionHistoryEntity

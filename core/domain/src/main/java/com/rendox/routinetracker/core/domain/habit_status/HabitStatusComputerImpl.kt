@@ -1,5 +1,7 @@
-package com.rendox.routinetracker.core.domain.completion_history
+package com.rendox.routinetracker.core.domain.habit_status
 
+import com.rendox.routinetracker.core.domain.schedule.getPeriodRange
+import com.rendox.routinetracker.core.domain.schedule.isDue
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo

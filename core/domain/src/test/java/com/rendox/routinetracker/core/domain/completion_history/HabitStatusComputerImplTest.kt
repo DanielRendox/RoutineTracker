@@ -1,6 +1,9 @@
 package com.rendox.routinetracker.core.domain.completion_history
 
 import com.google.common.truth.Truth.assertThat
+import com.rendox.routinetracker.core.domain.habit_status.HabitStatusComputer
+import com.rendox.routinetracker.core.domain.habit_status.HabitStatusComputerImpl
+import com.rendox.routinetracker.core.domain.schedule.isDue
 import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.Habit

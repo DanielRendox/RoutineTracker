@@ -1,4 +1,4 @@
-package com.rendox.routinetracker.core.domain.completion_history
+package com.rendox.routinetracker.core.domain.habit_status
 
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.HabitStatus

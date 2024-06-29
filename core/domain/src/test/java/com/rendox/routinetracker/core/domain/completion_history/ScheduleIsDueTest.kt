@@ -1,6 +1,7 @@
 package com.rendox.routinetracker.core.domain.completion_history
 
 import com.google.common.truth.Truth.assertThat
+import com.rendox.routinetracker.core.domain.schedule.isDue
 import com.rendox.routinetracker.core.logic.time.AnnualDate
 import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
 import com.rendox.routinetracker.core.logic.time.WeekDayNumberMonthRelated

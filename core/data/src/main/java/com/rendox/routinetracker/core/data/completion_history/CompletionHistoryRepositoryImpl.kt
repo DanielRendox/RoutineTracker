@@ -1,60 +1,38 @@
 package com.rendox.routinetracker.core.data.completion_history
 
 import com.rendox.routinetracker.core.database.completion_history.CompletionHistoryLocalDataSource
+import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.model.Habit
 import kotlinx.datetime.LocalDate
 
 class CompletionHistoryRepositoryImpl(
     private val localDataSource: CompletionHistoryLocalDataSource
-): CompletionHistoryRepository {
-    override suspend fun getNumOfTimesCompletedInPeriod(
-        habitId: Long,
-        minDate: LocalDate?,
-        maxDate: LocalDate?
-    ): Double {
-        return localDataSource.getNumOfTimesCompletedInPeriod(
-            habitId, minDate, maxDate
-        )
-    }
-
-    override suspend fun getRecordByDate(habitId: Long, date: LocalDate): Habit.CompletionRecord? {
-        return localDataSource.getRecordByDate(
-            habitId, date
-        )
-    }
-
-    override suspend fun getLastCompletedRecord(
-        habitId: Long,
-        minDate: LocalDate?,
-        maxDate: LocalDate?,
-    ): Habit.CompletionRecord? {
-        return localDataSource.getLastCompletedRecord(habitId, minDate, maxDate)
-    }
-
-    override suspend fun getFirstCompletedRecord(
-        habitId: Long,
-        minDate: LocalDate?,
-        maxDate: LocalDate?,
-    ): Habit.CompletionRecord? {
-        return localDataSource.getFirstCompletedRecord(habitId, minDate, maxDate)
-    }
+) : CompletionHistoryRepository {
 
     override suspend fun getRecordsInPeriod(
-        habitId: Long,
+        habit: Habit,
         minDate: LocalDate?,
         maxDate: LocalDate?,
     ): List<Habit.CompletionRecord> {
         return localDataSource.getRecordsInPeriod(
-            habitId, minDate, maxDate
+            habit, minDate, maxDate
         )
     }
 
-    override suspend fun getAllRecords(): List<Pair<Long, Habit.CompletionRecord>> {
-        return localDataSource.getAllRecords()
+    override suspend fun getMultiHabitRecords(
+        habitsToPeriods: List<Pair<List<Habit>, LocalDateRange>>
+    ): Map<Long, List<Habit.CompletionRecord>> {
+        return localDataSource.getMultiHabitRecords(habitsToPeriods)
     }
 
     override suspend fun insertCompletion(habitId: Long, completionRecord: Habit.CompletionRecord) {
         localDataSource.insertCompletion(habitId, completionRecord)
+    }
+
+    override suspend fun insertCompletions(
+        completions: Map<Long, List<Habit.CompletionRecord>>
+    ) {
+        localDataSource.insertCompletions(completions)
     }
 
     override suspend fun deleteCompletionByDate(habitId: Long, date: LocalDate) {

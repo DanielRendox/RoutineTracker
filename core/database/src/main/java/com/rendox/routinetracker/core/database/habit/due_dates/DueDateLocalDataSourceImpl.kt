@@ -1,4 +1,4 @@
-package com.rendox.routinetracker.core.database.habit
+package com.rendox.routinetracker.core.database.habit.due_dates
 
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
 

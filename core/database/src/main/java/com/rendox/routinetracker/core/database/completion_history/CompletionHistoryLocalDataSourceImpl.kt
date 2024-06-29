@@ -1,8 +1,9 @@
 package com.rendox.routinetracker.core.database.completion_history
 
-import com.rendox.routinetracker.core.database.CompletionHistoryEntity
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
-import com.rendox.routinetracker.core.database.habit.model.HabitType
+import com.rendox.routinetracker.core.database.model.toExternalModel
+import com.rendox.routinetracker.core.logic.time.LocalDateRange
+import com.rendox.routinetracker.core.logic.time.epochDate
 import com.rendox.routinetracker.core.model.Habit
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
@@ -12,68 +13,58 @@ class CompletionHistoryLocalDataSourceImpl(
     private val db: RoutineTrackerDatabase,
     private val ioDispatcher: CoroutineContext,
 ) : CompletionHistoryLocalDataSource {
-    override suspend fun getNumOfTimesCompletedInPeriod(
-        habitId: Long,
-        minDate: LocalDate?,
-        maxDate: LocalDate?,
-    ): Double {
-        return withContext(ioDispatcher) {
-            db.completionHistoryEntityQueries.getNumOfTimesCompletedInPeriod(
-                habitId, minDate, maxDate
-            ).executeAsOne()
-        }
-    }
-
-    override suspend fun getRecordByDate(
-        habitId: Long, date: LocalDate
-    ): Habit.CompletionRecord? {
-        return withContext(ioDispatcher) {
-            db.completionHistoryEntityQueries.getRecordByDate(
-                habitId, date
-            ).executeAsOneOrNull()?.toExternalModel()
-        }
-    }
-
-    override suspend fun getLastCompletedRecord(
-        habitId: Long,
-        minDate: LocalDate?,
-        maxDate: LocalDate?
-    ): Habit.CompletionRecord? {
-        return withContext(ioDispatcher) {
-            db.completionHistoryEntityQueries.getLastRecord(habitId, minDate, maxDate)
-                .executeAsOneOrNull()?.toExternalModel()
-        }
-    }
-
-    override suspend fun getFirstCompletedRecord(
-        habitId: Long,
-        minDate: LocalDate?,
-        maxDate: LocalDate?,
-    ): Habit.CompletionRecord? {
-        return withContext(ioDispatcher) {
-            db.completionHistoryEntityQueries.getFirstRecord(habitId, minDate, maxDate)
-                .executeAsOneOrNull()?.toExternalModel()
-        }
-    }
 
     override suspend fun getRecordsInPeriod(
-        habitId: Long,
+        habit: Habit,
         minDate: LocalDate?,
         maxDate: LocalDate?,
     ): List<Habit.CompletionRecord> {
         return withContext(ioDispatcher) {
             db.completionHistoryEntityQueries.getRecordsInPeriod(
-                habitId, minDate, maxDate
-            ).executeAsList().map { it.toExternalModel()!! }
+                habit.id!!, minDate, maxDate
+            ).executeAsList().map { it.toExternalModel(habit) }
         }
     }
 
-    override suspend fun getAllRecords(): List<Pair<Long, Habit.CompletionRecord>> {
-        return withContext(ioDispatcher) {
-            db.completionHistoryEntityQueries.getAllRecords().executeAsList().map {
-                it.habitId to it.toExternalModel()!!
-            }
+    override suspend fun getMultiHabitRecords(
+        habitsToPeriods: List<Pair<List<Habit>, LocalDateRange>>,
+    ): Map<Long, List<Habit.CompletionRecord>> = withContext(ioDispatcher) {
+        require(habitsToPeriods.size <= 5) {
+            "Only up to 5 habit types can be queried at once"
         }
+
+        val habits = habitsToPeriods.flatMap { it.first }
+        db.completionHistoryEntityQueries
+            // this is a nasty workaround because SQLDelight does not support dynamic queries
+            .getMultiHabitRecords(
+                habitIds1 = habitsToPeriods.getOrNull(0)?.first?.map { it.id!! } ?: emptyList(),
+                habitIds2 = habitsToPeriods.getOrNull(1)?.first?.map { it.id!! } ?: emptyList(),
+                habitIds3 = habitsToPeriods.getOrNull(2)?.first?.map { it.id!! } ?: emptyList(),
+                habitIds4 = habitsToPeriods.getOrNull(3)?.first?.map { it.id!! } ?: emptyList(),
+                habitIds5 = habitsToPeriods.getOrNull(4)?.first?.map { it.id!! } ?: emptyList(),
+                minDate1 = habitsToPeriods.getOrNull(0)?.second?.start ?: epochDate,
+                minDate2 = habitsToPeriods.getOrNull(1)?.second?.start ?: epochDate,
+                minDate3 = habitsToPeriods.getOrNull(2)?.second?.start ?: epochDate,
+                minDate4 = habitsToPeriods.getOrNull(3)?.second?.start ?: epochDate,
+                minDate5 = habitsToPeriods.getOrNull(4)?.second?.start ?: epochDate,
+                maxDate1 = habitsToPeriods.getOrNull(0)?.second?.endInclusive ?: epochDate,
+                maxDate2 = habitsToPeriods.getOrNull(1)?.second?.endInclusive ?: epochDate,
+                maxDate3 = habitsToPeriods.getOrNull(2)?.second?.endInclusive ?: epochDate,
+                maxDate4 = habitsToPeriods.getOrNull(3)?.second?.endInclusive ?: epochDate,
+                maxDate5 = habitsToPeriods.getOrNull(4)?.second?.endInclusive ?: epochDate,
+            )
+            .executeAsList()
+            .groupBy(
+                keySelector = { it.habitId },
+                valueTransform = { entity ->
+                    when (habits.first { it.id == entity.habitId }) {
+                        is Habit.YesNoHabit -> Habit.YesNoHabit.CompletionRecord(
+                            date = entity.date,
+                            numOfTimesCompleted = entity.numOfTimesCompleted,
+                        )
+                    }
+                },
+            )
     }
 
     override suspend fun insertCompletion(
@@ -89,23 +80,25 @@ class CompletionHistoryLocalDataSourceImpl(
         }
     }
 
-    override suspend fun deleteCompletionByDate(habitId: Long, date: LocalDate) {
-        withContext(ioDispatcher) {
-            db.completionHistoryEntityQueries.deleteCompletionByDate(habitId, date)
+    override suspend fun insertCompletions(
+        completions: Map<Long, List<Habit.CompletionRecord>>
+    ) = withContext(ioDispatcher) {
+        db.completionHistoryEntityQueries.transaction {
+            for ((habitId, completionRecords) in completions) {
+                for (completion in completionRecords) {
+                    db.completionHistoryEntityQueries.insertCompletion(
+                        habitId = habitId,
+                        date = completion.date,
+                        numOfTimesCompleted = completion.numOfTimesCompleted,
+                    )
+                }
+            }
         }
     }
 
-    private suspend fun CompletionHistoryEntity.toExternalModel(): Habit.CompletionRecord? {
-        val habitType = withContext(ioDispatcher) {
-            db.habitEntityQueries.getHabitById(habitId).executeAsOneOrNull()?.type
-        }
-        return when (habitType) {
-            HabitType.YesNoHabit -> Habit.YesNoHabit.CompletionRecord(
-                date = date,
-                numOfTimesCompleted = numOfTimesCompleted,
-            )
-
-            null -> null
+    override suspend fun deleteCompletionByDate(habitId: Long, date: LocalDate) {
+        withContext(ioDispatcher) {
+            db.completionHistoryEntityQueries.deleteCompletionByDate(habitId, date)
         }
     }
 }

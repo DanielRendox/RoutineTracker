@@ -1,4 +1,4 @@
-import com.rendox.routinetracker.core.database.habit.model.ScheduleType;
+import com.rendox.routinetracker.core.database.model.schedule.ScheduleType;
 import kotlin.Boolean;
 import kotlin.Int;
 import kotlinx.datetime.DayOfWeek;
@@ -29,10 +29,6 @@ getScheduleById:
 SELECT *
 FROM scheduleEntity
 WHERE id = ?;
-
-getAllSchedules:
-SELECT *
-FROM scheduleEntity;
 
 deleteSchedule:
 DELETE FROM scheduleEntity
