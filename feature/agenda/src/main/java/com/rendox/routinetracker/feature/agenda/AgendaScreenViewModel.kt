@@ -23,7 +23,6 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
-import kotlin.system.measureTimeMillis
 
 class AgendaScreenViewModel(
     today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
@@ -68,26 +67,23 @@ class AgendaScreenViewModel(
     }
 
     private suspend fun updateRoutinesForDate(date: LocalDate) {
-        val duration = measureTimeMillis {
-            val agenda = getAgenda(
-                validationDate = date,
-                today = todayFlow.value,
+        val agenda = getAgenda(
+            validationDate = date,
+            today = todayFlow.value,
+        )
+        val routines = agenda.map { (habit, habitCompletionData) ->
+            DisplayRoutine(
+                name = habit.name,
+                id = habit.id!!,
+                type = DisplayRoutineType.YesNoHabit,
+                status = habitCompletionData.habitStatus,
+                numOfTimesCompleted = habitCompletionData.numOfTimesCompleted,
+                completionTime = null,
+                hasGrayedOutLook = habitCompletionData.habitStatus !in dueOrCompletedStatuses,
+                statusToggleIsDisabled = date > todayFlow.value,
             )
-            val routines = agenda.map { (habit, habitCompletionData) ->
-                DisplayRoutine(
-                    name = habit.name,
-                    id = habit.id!!,
-                    type = DisplayRoutineType.YesNoHabit,
-                    status = habitCompletionData.habitStatus,
-                    numOfTimesCompleted = habitCompletionData.numOfTimesCompleted,
-                    completionTime = null,
-                    hasGrayedOutLook = habitCompletionData.habitStatus !in dueOrCompletedStatuses,
-                    statusToggleIsDisabled = date > todayFlow.value,
-                )
-            }
-            agendaFlow.update { routines }
         }
-        println("AgendaScreenViewModel updated routines for $date in $duration ms")
+        agendaFlow.update { routines }
     }
 
     fun onRoutineComplete(

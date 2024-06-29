@@ -5,12 +5,10 @@ import com.rendox.routinetracker.core.data.habit.HabitRepository
 import com.rendox.routinetracker.core.data.vacation.VacationRepository
 import com.rendox.routinetracker.core.domain.habit_status.HabitStatusComputer
 import com.rendox.routinetracker.core.domain.schedule.getPeriodRange
-import com.rendox.routinetracker.core.logic.measureTimeMillisForResult
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.HabitCompletionData
-import com.rendox.routinetracker.core.model.HabitStatus
 import com.rendox.routinetracker.core.model.Schedule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -27,52 +25,31 @@ class GetAgendaUseCaseImpl(
         validationDate: LocalDate,
         today: LocalDate,
     ): Map<Habit, HabitCompletionData> = withContext(Dispatchers.IO) {
-        val (habits, habitsRetrievalDuration) = measureTimeMillisForResult {
-            habitRepository.getAllOngoingHabits(validationDate)
-        }
+        val habits = habitRepository.getAllOngoingHabits(validationDate)
         if (habits.isEmpty()) return@withContext emptyMap()
-        println("GetAgendaUseCase retrieved habits in $habitsRetrievalDuration ms")
 
-        val (periodsToQuery, duration) = measureTimeMillisForResult {
-            habits.groupByPeriods(validationDate)
-        }
-        println("GetAgendaUseCase expanded periods in $duration ms")
-        for (period in periodsToQuery) {
-            println("GetAgendaUseCase Expanded Period ${period.second} for habits: ${period.first.map { it.name }} ")
-        }
-        val (completionHistory, completionsRetrievalDuration) = measureTimeMillisForResult {
-            completionHistoryRepository.getMultiHabitRecords(periodsToQuery)
-        }
-        println("GetAgendaUseCase retrieved completions in $completionsRetrievalDuration ms")
-        println("GetAgendaUseCase completions: $completionHistory")
-        val (vacationHistory, vacationsRetrievalDuration) = measureTimeMillisForResult {
-            vacationRepository.getMultiHabitVacations(
-                habitsToPeriods = periodsToQuery.map { (habits, period) ->
-                    habits.map { it.id!! } to period
-                }
-            )
-        }
-        println("GetAgendaUseCase retrieved vacation history in $vacationsRetrievalDuration ms")
-        println("GetAgendaUseCase vacations: $vacationHistory")
-        val (result, statusComputationDuration) = measureTimeMillisForResult {
-            habits.associateWith { habit ->
-                val habitCompletionHistory = completionHistory[habit.id!!] ?: emptyList()
-                val status = habitStatusComputer.computeStatus(
-                    validationDate = validationDate,
-                    today = today,
-                    habit = habit,
-                    completionHistory = habitCompletionHistory,
-                    vacationHistory = vacationHistory[habit.id!!] ?: emptyList(),
-                )
-                val numOfTimesCompleted = habitCompletionHistory.find {
-                    it.date == validationDate
-                }?.numOfTimesCompleted ?: 0f
-                HabitCompletionData(status, numOfTimesCompleted)
+        val periodsToQuery = habits.groupByPeriods(validationDate)
+        val completionHistory = completionHistoryRepository.getMultiHabitRecords(periodsToQuery)
+        val vacationHistory = vacationRepository.getMultiHabitVacations(
+            habitsToPeriods = periodsToQuery.map { (habits, period) ->
+                habits.map { it.id!! } to period
             }
+        )
+
+        habits.associateWith { habit ->
+            val habitCompletionHistory = completionHistory[habit.id!!] ?: emptyList()
+            val status = habitStatusComputer.computeStatus(
+                validationDate = validationDate,
+                today = today,
+                habit = habit,
+                completionHistory = habitCompletionHistory,
+                vacationHistory = vacationHistory[habit.id!!] ?: emptyList(),
+            )
+            val numOfTimesCompleted = habitCompletionHistory.find {
+                it.date == validationDate
+            }?.numOfTimesCompleted ?: 0f
+            HabitCompletionData(status, numOfTimesCompleted)
         }
-        println("GetAgendaUseCase computed statuses in $statusComputationDuration ms")
-        println("GetAgendaUseCase habits on vacations: ${result.filterValues { it.habitStatus == HabitStatus.OnVacation } }")
-        result
     }
 
     companion object {
