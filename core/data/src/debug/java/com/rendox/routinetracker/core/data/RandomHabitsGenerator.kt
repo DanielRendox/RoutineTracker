@@ -2,13 +2,16 @@ package com.rendox.routinetracker.core.data
 
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.minusDays
+import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.random
 import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.logic.time.today
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Schedule
+import com.rendox.routinetracker.core.model.Vacation
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.daysUntil
 import kotlin.math.roundToInt
 import kotlin.random.Random
 import kotlin.random.nextInt
@@ -27,11 +30,9 @@ class RandomHabitsGenerator(
         )
     }
 
-    fun generateCompletionHistory(
-        habit: Habit
-    ): List<Habit.CompletionRecord> {
+    fun generateCompletionHistory(habit: Habit): List<Habit.CompletionRecord> {
         val schedule = habit.schedule
-        val entireHistory = (habit.schedule.startDate..currentDate).shuffled()
+        val entireHistory = (schedule.startDate..currentDate).shuffled()
         val completionRate = when (schedule) {
             is Schedule.EveryDaySchedule -> 0.9F
             is Schedule.WeeklyScheduleByDueDaysOfWeek -> schedule.dueDaysOfWeek.size / 7.0F
@@ -49,6 +50,31 @@ class RandomHabitsGenerator(
                     completed = true,
                 )
             }
+        }
+    }
+
+    fun generateVacationHistory(
+        habit: Habit,
+        frequencyDays: IntRange = 20..40,
+        durationDays: IntRange = 0..15,
+    ): List<Vacation> = buildList {
+        var startDate = habit.schedule.startDate
+        while (startDate <= currentDate) {
+            val isVacationStarter = Random.nextBoolean()
+            if (!isVacationStarter) {
+                startDate = startDate.plusDays(Random.nextInt(frequencyDays))
+                continue
+            }
+
+            val endDate = if (startDate.daysUntil(currentDate) < 20 && Random.nextBoolean()) {
+                null
+            } else {
+                startDate.plusDays(Random.nextInt(durationDays))
+            }
+            add(Vacation(startDate = startDate, endDate = endDate))
+
+            if (endDate == null) break
+            startDate = endDate.plusDays(Random.nextInt(frequencyDays))
         }
     }
 

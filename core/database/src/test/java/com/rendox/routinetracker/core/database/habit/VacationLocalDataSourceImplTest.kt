@@ -12,9 +12,11 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.toLocalDate
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -32,48 +34,6 @@ class VacationLocalDataSourceImplTest : KoinTest {
     }
 
     private val habitId = 1L
-    private val vacationsList = listOf(
-        Vacation(
-            id = 1,
-            startDate = LocalDate(2023, 1, 1),
-            endDate = LocalDate(2023, 1, 3),
-        ),  
-        Vacation(
-            id = 2,
-            startDate = LocalDate(2023, 1, 5),
-            endDate = LocalDate(2023, 1, 11),
-        ),
-        Vacation(
-            id = 3,
-            startDate = LocalDate(2023, 1, 15),
-            endDate = LocalDate(2023, 1, 20),
-        ),
-        Vacation(
-            id = 4,
-            startDate = LocalDate(2023, 5, 25),
-            endDate = LocalDate(2023, 5, 30),
-        ),
-        Vacation(
-            id = 5,
-            startDate = LocalDate(2023, 6, 1),
-            endDate = LocalDate(2023, 6, 8),
-        ),
-        Vacation(
-            id = 6,
-            startDate = LocalDate(2023, 9, 30),
-            endDate = LocalDate(2023, 9, 30),
-        ),
-        Vacation(
-            id = 7,
-            startDate = LocalDate(2023, 10, 1),
-            endDate = LocalDate(2023, 11, 1),
-        ),
-        Vacation(
-            id = 8,
-            startDate = LocalDate(2023, 11, 20),
-            endDate = null,
-        ),
-    )
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @BeforeEach
@@ -91,39 +51,53 @@ class VacationLocalDataSourceImplTest : KoinTest {
         vacationLocalDataSource = VacationLocalDataSourceImpl(
             db = get(), ioDispatcher = UnconfinedTestDispatcher()
         )
-        
-        for (vacation in vacationsList) {
-            vacationLocalDataSource.insertVacation(
-                habitId = habitId,
-                vacation = vacation,
-            )
-        }
     }
 
     @AfterEach
     fun tearDown() {
         stopKoin()
     }
-    
-    @Test
-    fun `assert get vacations in period returns vacations within date range`() = runTest {
-        val resultingVacations = vacationLocalDataSource.getVacationsInPeriod(
-            habitId = habitId,
-            minDate = LocalDate(2023, 1, 13),
-            maxDate = LocalDate(2023, 6, 10),
-        )
-        val expectedVacations = vacationsList.filter { it.id in 3L..5L }
-        assertThat(resultingVacations).containsExactlyElementsIn(expectedVacations)
-    }
 
-    @Test
-    fun `assert get vacations in period returns vacations that contain max and min dates`() = runTest {
+    @ParameterizedTest
+    @CsvSource(
+        "2024-06-03, 2024-07-02, true, true",
+        "2024-06-03, 2024-07-01, true, true",
+        "2024-06-08, 2024-07-02, true, true",
+        "2024-06-03, 2024-06-10, true, true",
+        "2024-06-10, 2024-08-01, true, true",
+        "2024-06-10, 2024-06-20, true, true",
+        "2024-05-01, 2024-05-02, false, true",
+        "2024-08-01, 2024-08-02, false, true",
+        "2025-01-01, 2025-01-02, true, false",
+        "2024-05-01, 2024-05-02, false, false",
+        "2024-01-01, 2025-01-01, true, false",
+    )
+    fun testGetVacationsInPeriodCompletedVacation(
+        minDate: String,
+        maxDate: String,
+        shouldContain: Boolean,
+        vacationCompleted: Boolean,
+    ) = runTest {
+        val vacation = Vacation(
+            id = 1L,
+            startDate = LocalDate(2024, 6, 8),
+            endDate = if (vacationCompleted) {
+                LocalDate(2024, 7, 1)
+            } else null,
+        )
+        vacationLocalDataSource.insertVacation(
+            habitId = habitId,
+            vacation = vacation,
+        )
         val resultingVacations = vacationLocalDataSource.getVacationsInPeriod(
             habitId = habitId,
-            minDate = LocalDate(2023, 1, 10),
-            maxDate = LocalDate(2023, 11, 20),
+            minDate = minDate.toLocalDate(),
+            maxDate = maxDate.toLocalDate(),
         )
-        val expectedVacations = vacationsList.filter { it.id!! >= 2L }
-        assertThat(resultingVacations).containsExactlyElementsIn(expectedVacations)
+        if (shouldContain) {
+            assertThat(resultingVacations).containsExactly(vacation)
+        } else {
+            assertThat(resultingVacations).isEmpty()
+        }
     }
 }

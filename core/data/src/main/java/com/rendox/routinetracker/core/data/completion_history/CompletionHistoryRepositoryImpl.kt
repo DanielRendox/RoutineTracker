@@ -1,6 +1,7 @@
 package com.rendox.routinetracker.core.data.completion_history
 
 import com.rendox.routinetracker.core.database.completion_history.CompletionHistoryLocalDataSource
+import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.model.Habit
 import kotlinx.datetime.LocalDate
 
@@ -18,8 +19,10 @@ class CompletionHistoryRepositoryImpl(
         )
     }
 
-    override suspend fun getAllRecords(): Map<Long, List<Habit.CompletionRecord>> {
-        return localDataSource.getAllRecords()
+    override suspend fun getMultiHabitRecords(
+        habitsToPeriods: List<Pair<List<Habit>, LocalDateRange>>
+    ): Map<Long, List<Habit.CompletionRecord>> {
+        return localDataSource.getMultiHabitRecords(habitsToPeriods)
     }
 
     override suspend fun insertCompletion(habitId: Long, completionRecord: Habit.CompletionRecord) {

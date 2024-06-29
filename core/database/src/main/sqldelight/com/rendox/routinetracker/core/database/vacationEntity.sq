@@ -9,18 +9,24 @@ CREATE TABLE vacationEntity (
 );
 
 getVacationsInPeriod:
-SELECT *
-FROM vacationEntity
+SELECT * FROM vacationEntity
 WHERE habitId = :habitId
-    -- vacation's period is within minDate..maxDate or vacation contains either minDate or maxDate
-    AND (:minDate IS NULL OR :minDate <= startDate
-        OR (startDate <= :minDate AND (endDate IS NULL OR :minDate <= endDate)))
-    AND (:maxDate IS NULL OR (endDate IS NULL AND startDate <= :maxDate) OR (endDate IS NOT NULL AND endDate <= :maxDate)
-        OR (startDate <= :maxDate AND (endDate IS NULL OR :maxDate <= endDate)));
+    AND (endDate IS NULL OR :minDate <= endDate) AND :maxDate >= startDate
+ORDER BY startDate ASC;
 
-getAllVacations:
-SELECT *
-FROM vacationEntity;
+getMultiHabitVacations:
+SELECT * FROM vacationEntity
+WHERE (habitId IN :habitIds1
+            AND (endDate IS NULL OR :minDate1 <= endDate) AND :maxDate1 >= startDate) OR
+        (habitId IN :habitIds2
+            AND (endDate IS NULL OR :minDate2 <= endDate) AND :maxDate2 >= startDate) OR
+        (habitId IN :habitIds3
+            AND (endDate IS NULL OR :minDate3 <= endDate) AND :maxDate3 >= startDate) OR
+        (habitId IN :habitIds4
+            AND (endDate IS NULL OR :minDate4 <= endDate) AND :maxDate4 >= startDate) OR
+        (habitId IN :habitIds5
+            AND (endDate IS NULL OR :minDate5 <= endDate) AND :maxDate5 >= startDate)
+ORDER BY habitId ASC, startDate ASC;
 
 insertVacation:
 INSERT INTO vacationEntity

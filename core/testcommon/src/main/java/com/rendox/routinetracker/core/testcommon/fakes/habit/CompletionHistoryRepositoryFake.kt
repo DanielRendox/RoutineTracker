@@ -1,6 +1,7 @@
 package com.rendox.routinetracker.core.testcommon.fakes.habit
 
 import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
+import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.model.Habit
 import kotlinx.coroutines.flow.update
 import kotlinx.datetime.LocalDate
@@ -19,11 +20,10 @@ class CompletionHistoryRepositoryFake(
                 && (maxDate == null || it.second.date <= maxDate)
     }.map { it.second }.sortedBy { it.date }
 
-    override suspend fun getAllRecords(): Map<Long, List<Habit.CompletionRecord>> {
-        return habitData.completionHistory.value.groupBy(
-            keySelector = { it.first },
-            valueTransform = { it.second },
-        )
+    override suspend fun getMultiHabitRecords(
+        habitsToPeriods: List<Pair<List<Habit>, LocalDateRange>>
+    ): Map<Long, List<Habit.CompletionRecord>> {
+        return getAllRecords()
     }
 
     override suspend fun insertCompletion(
@@ -58,5 +58,12 @@ class CompletionHistoryRepositoryFake(
                 completionHistory
             }
         }
+    }
+
+    private fun getAllRecords(): Map<Long, List<Habit.CompletionRecord>> {
+        return habitData.completionHistory.value.groupBy(
+            keySelector = { it.first },
+            valueTransform = { it.second },
+        )
     }
 }
