@@ -37,9 +37,8 @@ fun RoutineTrackerWeekCalendar(
     modifier: Modifier = Modifier,
     initialDate: LocalDate,
     today: LocalDate,
-    dateOnClick: (LocalDate) -> Unit
+    dateOnClick: (LocalDate) -> Unit,
 ) {
-
     val startDate = remember { initialDate.minusDays(500) }
     val endDate = remember { initialDate.plusDays(500) }
 
@@ -61,7 +60,7 @@ fun RoutineTrackerWeekCalendar(
                 selected = selectedDate == it.date,
                 onClick = dateOnClick,
             )
-        }
+        },
     )
 }
 
@@ -75,14 +74,23 @@ private fun WeekCalendarDay(
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val backgroundColor =
-        if (selected) MaterialTheme.colorScheme.primaryContainer
-        else MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
+        if (selected) {
+            MaterialTheme.colorScheme.primaryContainer
+        } else {
+            MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
+        }
     val foregroundColor =
-        if (selected) MaterialTheme.colorScheme.primary
-        else MaterialTheme.colorScheme.surfaceColorAtElevation(48.dp)
+        if (selected) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.surfaceColorAtElevation(48.dp)
+        }
     val todayIndicatorColor =
-        if (selected) MaterialTheme.colorScheme.onPrimary
-        else MaterialTheme.colorScheme.outline
+        if (selected) {
+            MaterialTheme.colorScheme.onPrimary
+        } else {
+            MaterialTheme.colorScheme.outline
+        }
 
     Box(
         modifier = modifier
@@ -90,7 +98,7 @@ private fun WeekCalendarDay(
             .padding(2.dp)
             .clip(RoundedCornerShape(25))
             .background(color = backgroundColor)
-            .clickable { onClick(date) }
+            .clickable { onClick(date) },
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
@@ -106,7 +114,7 @@ private fun WeekCalendarDay(
                     .weight(1.4f)
                     .fillMaxWidth(),
                 color = foregroundColor,
-                shape = RoundedCornerShape(15)
+                shape = RoundedCornerShape(15),
             ) {
                 Box {
                     Text(
@@ -125,7 +133,7 @@ private fun WeekCalendarDay(
                     .width(screenWidth / 27f)
                     .clip(RoundedCornerShape(100))
                     .background(color = todayIndicatorColor)
-                    .align(Alignment.BottomCenter)
+                    .align(Alignment.BottomCenter),
             )
         }
     }

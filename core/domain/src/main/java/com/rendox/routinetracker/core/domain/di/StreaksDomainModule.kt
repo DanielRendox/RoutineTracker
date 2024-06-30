@@ -13,13 +13,6 @@ val streakDomainModule = module {
     }
 
     single<GetAllStreaksUseCase> {
-//        GetAllStreaksUseCaseImpl(
-//            getHabit = get(),
-//            completionHistoryRepository = get(),
-//            vacationHistoryRepository = get(),
-//            defaultDispatcher = get(qualifier = named("defaultDispatcher")),
-//            streakComputer = get(),
-//        )
         GetAllStreaksWithCashingUseCase(
             getHabit = get(),
             completionHistoryRepository = get(),

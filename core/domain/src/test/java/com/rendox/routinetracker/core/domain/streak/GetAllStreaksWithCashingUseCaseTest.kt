@@ -17,6 +17,7 @@ import com.rendox.routinetracker.core.testcommon.fakes.habit.HabitData
 import com.rendox.routinetracker.core.testcommon.fakes.habit.HabitRepositoryFake
 import com.rendox.routinetracker.core.testcommon.fakes.habit.StreakRepositoryFake
 import com.rendox.routinetracker.core.testcommon.fakes.habit.VacationRepositoryFake
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -29,7 +30,6 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.koin.test.KoinTest
 import org.koin.test.get
-import kotlin.coroutines.CoroutineContext
 
 class GetAllStreaksWithCashingUseCaseTest : KoinTest {
 
@@ -42,7 +42,7 @@ class GetAllStreaksWithCashingUseCaseTest : KoinTest {
         id = habitId,
         name = "Test habit",
         schedule = Schedule.EveryDaySchedule(
-            startDate = LocalDate(2023, 11, 1)
+            startDate = LocalDate(2023, 11, 1),
         ),
     )
 

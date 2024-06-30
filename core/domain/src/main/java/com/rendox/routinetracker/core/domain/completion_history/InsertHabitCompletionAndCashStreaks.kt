@@ -32,7 +32,7 @@ class InsertHabitCompletionAndCashStreaks(
     override suspend fun invoke(
         habitId: Long,
         completionRecord: Habit.CompletionRecord,
-        today: LocalDate
+        today: LocalDate,
     ) {
         super.invoke(habitId, completionRecord, today)
         cashStreaks(

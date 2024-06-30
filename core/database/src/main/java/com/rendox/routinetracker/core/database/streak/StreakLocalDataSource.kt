@@ -7,7 +7,7 @@ import kotlinx.datetime.LocalDate
 interface StreakLocalDataSource {
     suspend fun insertStreaks(
         streaks: List<Pair<Long, Streak>>,
-        periods: List<Pair<Long, LocalDateRange>>
+        periods: List<Pair<Long, LocalDateRange>>,
     )
 
     suspend fun getAllStreaks(habitId: Long): List<Streak>
@@ -21,7 +21,8 @@ interface StreakLocalDataSource {
     suspend fun getAllCashedPeriods(habitId: Long): List<LocalDateRange>
 
     suspend fun getCashedPeriod(
-        habitId: Long, dateInPeriod: LocalDate
+        habitId: Long,
+        dateInPeriod: LocalDate,
     ): LocalDateRange?
 
     suspend fun deleteStreaksInPeriod(

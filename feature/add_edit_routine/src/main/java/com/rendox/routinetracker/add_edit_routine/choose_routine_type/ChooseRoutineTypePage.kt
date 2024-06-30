@@ -30,7 +30,7 @@ fun ChooseRoutineTypePage(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         AddHabitDestinationTopAppBar(
-            destination = AddRoutineDestination.ChooseRoutineType
+            destination = AddRoutineDestination.ChooseRoutineType,
         )
 
         for (routineType in habitTypes) {

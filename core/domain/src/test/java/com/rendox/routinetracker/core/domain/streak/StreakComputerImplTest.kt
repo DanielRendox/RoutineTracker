@@ -5,9 +5,9 @@ import com.rendox.routinetracker.core.domain.habit_status.HabitStatusComputer
 import com.rendox.routinetracker.core.domain.habit_status.HabitStatusComputerImpl
 import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo
-import com.rendox.routinetracker.core.model.Streak
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Schedule
+import com.rendox.routinetracker.core.model.Streak
 import com.rendox.routinetracker.core.model.Vacation
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DayOfWeek
@@ -51,7 +51,7 @@ class StreakComputerImplTest {
             Streak(
                 startDate = streakStart,
                 endDate = streakEnd,
-            )
+            ),
         )
     }
 
@@ -68,7 +68,7 @@ class StreakComputerImplTest {
             Habit.YesNoHabit.CompletionRecord(
                 date = completedDate,
                 completed = true,
-            )
+            ),
         )
         val vacationHistory = emptyList<Vacation>()
 
@@ -82,7 +82,7 @@ class StreakComputerImplTest {
             Streak(
                 startDate = completedDate,
                 endDate = completedDate,
-            )
+            ),
         )
     }
 
@@ -105,7 +105,7 @@ class StreakComputerImplTest {
             Habit.YesNoHabit.CompletionRecord(
                 date = completedDateString.toLocalDate(),
                 completed = true,
-            )
+            ),
         )
         val vacationHistory = emptyList<Vacation>()
         val streaks = streakComputer.computeAllStreaks(
@@ -119,7 +119,7 @@ class StreakComputerImplTest {
             Streak(
                 startDate = streakStart,
                 endDate = streakEnd,
-            )
+            ),
         )
     }
 
@@ -127,7 +127,7 @@ class StreakComputerImplTest {
     @CsvSource(
         "false, 2024-01-05, 2024-01-10, 2024-01-31",
         "true, 2024-01-05, 2024-01-07, 2024-01-31",
-        "true, 2024-01-05, 2024-01-07, 2024-01-10"
+        "true, 2024-01-05, 2024-01-07, 2024-01-10",
     )
     fun `streak continues in future period`(
         periodSeparationEnabled: Boolean,
@@ -150,7 +150,7 @@ class StreakComputerImplTest {
             Habit.YesNoHabit.CompletionRecord(
                 date = completedDate,
                 completed = true,
-            )
+            ),
         )
         val vacationHistory = emptyList<Vacation>()
         val streaks = streakComputer.computeAllStreaks(
@@ -163,7 +163,7 @@ class StreakComputerImplTest {
             Streak(
                 startDate = streakStartDateString.toLocalDate(),
                 endDate = streakEndDateString.toLocalDate(),
-            )
+            ),
         )
     }
 
@@ -184,7 +184,7 @@ class StreakComputerImplTest {
             Habit.YesNoHabit.CompletionRecord(
                 date = completedDate,
                 completed = true,
-            )
+            ),
         )
         val vacationHistory = emptyList<Vacation>()
         val streaks = streakComputer.computeAllStreaks(
@@ -388,13 +388,13 @@ class StreakComputerImplTest {
             Habit.YesNoHabit.CompletionRecord(
                 date = completedDate,
                 completed = true,
-            )
+            ),
         )
         val vacationHistory = listOf(
             Vacation(
                 startDate = LocalDate(2024, 1, 5),
                 endDate = LocalDate(2024, 1, 5),
-            )
+            ),
         )
         val streaks = streakComputer.computeAllStreaks(
             habit = habit,
@@ -406,7 +406,7 @@ class StreakComputerImplTest {
             Streak(
                 startDate = startDate,
                 endDate = startDate.plusDays(6),
-            )
+            ),
         )
     }
 
@@ -426,7 +426,7 @@ class StreakComputerImplTest {
             Vacation(
                 startDate = LocalDate(2024, 1, 5),
                 endDate = LocalDate(2024, 1, 5),
-            )
+            ),
         )
         val streaks = streakComputer.computeAllStreaks(
             habit = habit,

@@ -12,26 +12,23 @@ internal fun ScheduleEntity.toEveryDaySchedule() = Schedule.EveryDaySchedule(
     endDate = endDate,
 )
 
-
-internal fun ScheduleEntity.toWeeklyScheduleByDueDaysOfWeek(
-    dueDates: List<Int>,
-) = Schedule.WeeklyScheduleByDueDaysOfWeek(
-    dueDaysOfWeek = dueDates.map { it.toDayOfWeek() },
-    startDayOfWeek = startDayOfWeekInWeeklySchedule,
-    startDate = startDate,
-    endDate = endDate,
-    backlogEnabled = backlogEnabled,
-    completingAheadEnabled = cancelDuenessIfDoneAhead,
-)
-
-internal fun ScheduleEntity.toWeeklyScheduleByNumOfDueDays() =
-    Schedule.WeeklyScheduleByNumOfDueDays(
-        numOfDueDays = numOfDueDaysInByNumOfDueDaysSchedule!!,
-        numOfDueDaysInFirstPeriod = numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule,
+internal fun ScheduleEntity.toWeeklyScheduleByDueDaysOfWeek(dueDates: List<Int>) =
+    Schedule.WeeklyScheduleByDueDaysOfWeek(
+        dueDaysOfWeek = dueDates.map { it.toDayOfWeek() },
+        startDayOfWeek = startDayOfWeekInWeeklySchedule,
         startDate = startDate,
         endDate = endDate,
-        startDayOfWeek = startDayOfWeekInWeeklySchedule,
+        backlogEnabled = backlogEnabled,
+        completingAheadEnabled = cancelDuenessIfDoneAhead,
     )
+
+internal fun ScheduleEntity.toWeeklyScheduleByNumOfDueDays() = Schedule.WeeklyScheduleByNumOfDueDays(
+    numOfDueDays = numOfDueDaysInByNumOfDueDaysSchedule!!,
+    numOfDueDaysInFirstPeriod = numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule,
+    startDate = startDate,
+    endDate = endDate,
+    startDayOfWeek = startDayOfWeekInWeeklySchedule,
+)
 
 internal fun ScheduleEntity.toMonthlyScheduleByDueDatesIndices(
     dueDatesIndices: List<Int>,
@@ -47,14 +44,13 @@ internal fun ScheduleEntity.toMonthlyScheduleByDueDatesIndices(
     completingAheadEnabled = cancelDuenessIfDoneAhead,
 )
 
-internal fun ScheduleEntity.toMonthlyScheduleByNumOfDueDays() =
-    Schedule.MonthlyScheduleByNumOfDueDays(
-        numOfDueDays = numOfDueDaysInByNumOfDueDaysSchedule!!,
-        numOfDueDaysInFirstPeriod = numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule,
-        startFromHabitStart = startFromHabitStartInMonthlyAndAnnualSchedule!!,
-        startDate = startDate,
-        endDate = endDate,
-    )
+internal fun ScheduleEntity.toMonthlyScheduleByNumOfDueDays() = Schedule.MonthlyScheduleByNumOfDueDays(
+    numOfDueDays = numOfDueDaysInByNumOfDueDaysSchedule!!,
+    numOfDueDaysInFirstPeriod = numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule,
+    startFromHabitStart = startFromHabitStartInMonthlyAndAnnualSchedule!!,
+    startDate = startDate,
+    endDate = endDate,
+)
 
 internal fun ScheduleEntity.toAlternateDaySchedule() = Schedule.AlternateDaysSchedule(
     numOfDueDays = numOfDueDaysInByNumOfDueDaysSchedule!!,
@@ -65,9 +61,7 @@ internal fun ScheduleEntity.toAlternateDaySchedule() = Schedule.AlternateDaysSch
     completingAheadEnabled = cancelDuenessIfDoneAhead,
 )
 
-internal fun ScheduleEntity.toCustomDateSchedule(
-    dueDatesIndices: List<Int>,
-) = Schedule.CustomDateSchedule(
+internal fun ScheduleEntity.toCustomDateSchedule(dueDatesIndices: List<Int>) = Schedule.CustomDateSchedule(
     dueDates = dueDatesIndices.map { it.toLocalDate() },
     startDate = startDate,
     endDate = endDate,
@@ -75,9 +69,7 @@ internal fun ScheduleEntity.toCustomDateSchedule(
     completingAheadEnabled = cancelDuenessIfDoneAhead,
 )
 
-internal fun ScheduleEntity.toAnnualScheduleByDueDates(
-    dueDates: List<Int>,
-) = Schedule.AnnualScheduleByDueDates(
+internal fun ScheduleEntity.toAnnualScheduleByDueDates(dueDates: List<Int>) = Schedule.AnnualScheduleByDueDates(
     dueDates = dueDates.map { it.toAnnualDate() },
     startFromHabitStart = startFromHabitStartInMonthlyAndAnnualSchedule!!,
     startDate = startDate,
@@ -86,11 +78,10 @@ internal fun ScheduleEntity.toAnnualScheduleByDueDates(
     completingAheadEnabled = cancelDuenessIfDoneAhead,
 )
 
-internal fun ScheduleEntity.toAnnualScheduleByNumOfDueDays() =
-    Schedule.AnnualScheduleByNumOfDueDays(
-        numOfDueDays = numOfDueDaysInByNumOfDueDaysSchedule!!,
-        numOfDueDaysInFirstPeriod = numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule,
-        startFromHabitStart = startFromHabitStartInMonthlyAndAnnualSchedule!!,
-        startDate = startDate,
-        endDate = endDate,
-    )
+internal fun ScheduleEntity.toAnnualScheduleByNumOfDueDays() = Schedule.AnnualScheduleByNumOfDueDays(
+    numOfDueDays = numOfDueDaysInByNumOfDueDaysSchedule!!,
+    numOfDueDaysInFirstPeriod = numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule,
+    startFromHabitStart = startFromHabitStartInMonthlyAndAnnualSchedule!!,
+    startDate = startDate,
+    endDate = endDate,
+)

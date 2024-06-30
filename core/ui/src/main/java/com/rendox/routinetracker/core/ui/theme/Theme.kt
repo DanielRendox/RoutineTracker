@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.dp
 import com.rendox.routinetracker.core.ui.helpers.LocalLocale
 import com.rendox.routinetracker.core.ui.helpers.getLocale
 
-
 private val LightColors = lightColorScheme(
     primary = md_theme_light_primary,
     onPrimary = md_theme_light_onPrimary,
@@ -48,7 +47,6 @@ private val LightColors = lightColorScheme(
     outlineVariant = md_theme_light_outlineVariant,
     scrim = md_theme_light_scrim,
 )
-
 
 private val DarkColors = darkColorScheme(
     primary = md_theme_dark_primary,
@@ -103,11 +101,11 @@ fun RoutineTrackerTheme(
 
     CompositionLocalProvider(
         LocalRoutineStatusColors provides routineStatusColors,
-        LocalLocale provides getLocale()
+        LocalLocale provides getLocale(),
     ) {
         MaterialTheme(
             colorScheme = colors,
-            content = content
+            content = content,
         )
     }
 }

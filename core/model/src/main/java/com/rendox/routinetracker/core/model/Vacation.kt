@@ -7,7 +7,5 @@ data class Vacation(
     val startDate: LocalDate,
     val endDate: LocalDate?,
 ) {
-    fun containsDate(date: LocalDate): Boolean {
-        return date >= startDate && (endDate == null || date <= endDate)
-    }
+    fun containsDate(date: LocalDate): Boolean = date >= startDate && (endDate == null || date <= endDate)
 }

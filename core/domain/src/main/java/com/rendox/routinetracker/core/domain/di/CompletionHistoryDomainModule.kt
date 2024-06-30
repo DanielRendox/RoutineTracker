@@ -4,10 +4,10 @@ import com.rendox.routinetracker.core.domain.agenda.GetAgendaUseCase
 import com.rendox.routinetracker.core.domain.agenda.GetAgendaUseCaseImpl
 import com.rendox.routinetracker.core.domain.completion_data.GetHabitCompletionDataUseCase
 import com.rendox.routinetracker.core.domain.completion_data.GetHabitCompletionDataUseCaseIndependentPeriods
+import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionAndCashStreaks
+import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase
 import com.rendox.routinetracker.core.domain.habit_status.HabitStatusComputer
 import com.rendox.routinetracker.core.domain.habit_status.HabitStatusComputerImpl
-import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase
-import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionAndCashStreaks
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 

@@ -10,11 +10,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.ui.helpers.UiEvent
-import kotlinx.datetime.DayOfWeek
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
+import kotlinx.datetime.DayOfWeek
 
 @Stable
 class TweakRoutinePageState(
@@ -114,9 +114,7 @@ class TweakRoutinePageState(
         }
     }
 
-    fun updateDialogType(
-        dialogType: TweakRoutinePageDialogType?,
-    ) {
+    fun updateDialogType(dialogType: TweakRoutinePageDialogType?) {
         this.dialogType = dialogType
     }
 
@@ -138,11 +136,13 @@ class TweakRoutinePageState(
         completingAheadEnabled = chosenSchedule.completingAheadEnabled
         periodSeparationEnabled =
             if (
-                chosenSchedule is Schedule.PeriodicSchedule
-                && chosenSchedule.supportsPeriodSeparation
+                chosenSchedule is Schedule.PeriodicSchedule &&
+                chosenSchedule.supportsPeriodSeparation
             ) {
                 chosenSchedule.periodSeparationEnabled
-            } else null
+            } else {
+                null
+            }
 
         weekStartDaySettingIsEnabled = when (chosenSchedule) {
             is Schedule.WeeklySchedule -> true
@@ -198,16 +198,15 @@ class TweakRoutinePageState(
                     scheduleSupportsScheduleDeviation = tweakRoutinePageStateValues[11] as Boolean,
                     dialogType = tweakRoutinePageStateValues[12] as TweakRoutinePageDialogType?,
                 )
-            }
+            },
         )
     }
 }
 
 @Composable
-fun rememberTweakRoutinePageState() =
-    rememberSaveable(saver = TweakRoutinePageState.Saver) {
-        TweakRoutinePageState()
-    }
+fun rememberTweakRoutinePageState() = rememberSaveable(saver = TweakRoutinePageState.Saver) {
+    TweakRoutinePageState()
+}
 
 enum class TweakRoutinePageDialogType {
     StartDatePicker,

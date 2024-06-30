@@ -44,7 +44,7 @@ fun ScheduleTypeOption(
     ) {
         RadioButton(
             selected = selected,
-            onClick = onSelected
+            onClick = onSelected,
         )
 
         val textInteractionSource = remember { MutableInteractionSource() }
@@ -73,7 +73,7 @@ fun NumOfDueDaysInput(
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         TextField(
             modifier = Modifier
@@ -98,10 +98,10 @@ fun NumOfDueDaysInput(
                 if (!numOfDueDaysIsValid) {
                     Icon(
                         painter = painterResource(
-                            id = R.drawable.baseline_error_24
+                            id = R.drawable.baseline_error_24,
                         ),
                         contentDescription = stringResource(
-                            id = R.string.error_message_num_of_days_is_not_valid
+                            id = R.string.error_message_num_of_days_is_not_valid,
                         ),
                         tint = MaterialTheme.colorScheme.error,
                     )
@@ -164,7 +164,6 @@ fun DayPickerElement(
         tonalElevation = 1.dp,
         shape = RoundedCornerShape(30),
     ) {
-
         Box(contentAlignment = Alignment.Center) {
             Text(
                 modifier = Modifier.padding(4.dp),
@@ -174,9 +173,8 @@ fun DayPickerElement(
                     MaterialTheme.colorScheme.onPrimaryContainer
                 } else {
                     MaterialTheme.colorScheme.onSurfaceVariant
-                }
+                },
             )
         }
     }
 }
-

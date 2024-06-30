@@ -6,7 +6,7 @@ import androidx.compose.runtime.setValue
 import com.rendox.routinetracker.add_edit_routine.choose_schedule.schedule_pickers.ScheduleTypeUi
 
 sealed class SchedulePickerState(
-    selected: Boolean
+    selected: Boolean,
 ) {
     abstract val scheduleType: ScheduleTypeUi
 

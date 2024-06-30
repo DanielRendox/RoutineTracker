@@ -55,13 +55,12 @@ class SetGoalPageState(
                     routineDescription = setGoalScreenStateValues[1] as String?,
                     routineNameIsValid = setGoalScreenStateValues[2] as Boolean,
                 )
-            }
+            },
         )
     }
 }
 
 @Composable
-fun rememberSetGoalPageState() =
-    rememberSaveable(saver = SetGoalPageState.Saver) {
-        SetGoalPageState()
-    }
+fun rememberSetGoalPageState() = rememberSaveable(saver = SetGoalPageState.Saver) {
+    SetGoalPageState()
+}

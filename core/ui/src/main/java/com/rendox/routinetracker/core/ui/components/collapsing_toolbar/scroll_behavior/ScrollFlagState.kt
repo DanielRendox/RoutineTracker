@@ -6,8 +6,8 @@ import androidx.compose.runtime.setValue
 
 abstract class ScrollFlagState(
     heightRange: IntRange,
-    scrollValue: Int
-): ToolbarState {
+    scrollValue: Int,
+) : ToolbarState {
 
     init {
         require(heightRange.first >= 0 && heightRange.last >= heightRange.first) {

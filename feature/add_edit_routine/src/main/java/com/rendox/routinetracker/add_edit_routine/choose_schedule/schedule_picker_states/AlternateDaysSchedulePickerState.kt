@@ -18,7 +18,7 @@ class AlternateDaysSchedulePickerState(
     numOfRestDays: String = "",
     numOfRestDaysIsValid: Boolean = true,
     numOfActivityDaysIsValid: Boolean = true,
-): SchedulePickerState(selected = selected) {
+) : SchedulePickerState(selected = selected) {
     override val scheduleType = ScheduleTypeUi.AlternateDaysSchedule
 
     val containsError: Boolean
@@ -54,7 +54,6 @@ class AlternateDaysSchedulePickerState(
         }
         numOfActivityDaysIsValid = numOfActivityDays > 0
     }
-
 
     private fun checkNumOfRestDaysValidity() {
         val numOfRestDays = try {
@@ -104,13 +103,12 @@ class AlternateDaysSchedulePickerState(
                     numOfRestDaysIsValid = customSchedulePickerStateValues[3] as Boolean,
                     numOfActivityDaysIsValid = customSchedulePickerStateValues[4] as Boolean,
                 )
-            }
+            },
         )
     }
 }
 
 @Composable
-fun rememberAlternateDaysSchedulePickerState() =
-    rememberSaveable(saver = AlternateDaysSchedulePickerState.Saver) {
-        AlternateDaysSchedulePickerState()
-    }
+fun rememberAlternateDaysSchedulePickerState() = rememberSaveable(saver = AlternateDaysSchedulePickerState.Saver) {
+    AlternateDaysSchedulePickerState()
+}

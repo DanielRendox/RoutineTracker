@@ -35,8 +35,8 @@ fun SetGoalPage(
             label = {
                 Text(
                     text = stringResource(
-                        id = R.string.set_goal_page_routine_name_text_field_label
-                    )
+                        id = R.string.set_goal_page_routine_name_text_field_label,
+                    ),
                 )
             },
             singleLine = true,
@@ -45,11 +45,11 @@ fun SetGoalPage(
                 if (!setGoalPageState.routineNameIsValid) {
                     Text(
                         text = stringResource(
-                            id = R.string.set_goal_page_empty_routine_name_error_message
-                        )
+                            id = R.string.set_goal_page_empty_routine_name_error_message,
+                        ),
                     )
                 }
-            }
+            },
         )
 
 //        OutlinedTextField(

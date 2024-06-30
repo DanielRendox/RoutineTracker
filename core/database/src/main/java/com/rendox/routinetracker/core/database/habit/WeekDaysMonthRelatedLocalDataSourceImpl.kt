@@ -10,7 +10,7 @@ internal class WeekDaysMonthRelatedLocalDataSourceImpl(
 ) : WeekDaysMonthRelatedLocalDataSource {
     override fun insertWeekDaysMonthRelated(
         scheduleId: Long,
-        weekDaysMonthRelated: List<WeekDayMonthRelated>
+        weekDaysMonthRelated: List<WeekDayMonthRelated>,
     ) = db.weekDayMonthRelatedEntityQueries.transaction {
         for (weekDayMonthRelated in weekDaysMonthRelated) {
             db.weekDayMonthRelatedEntityQueries.insertWeekDayMonthRelatedEntry(

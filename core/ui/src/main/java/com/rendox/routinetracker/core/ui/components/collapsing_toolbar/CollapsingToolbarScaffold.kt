@@ -70,9 +70,9 @@ fun CollapsingToolbarScaffold(
                 Box(modifier = Modifier.statusBarsPadding()) {
                     Column(
                         modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .verticalScroll(scrollState),
+                        Modifier
+                            .fillMaxSize()
+                            .verticalScroll(scrollState),
                     ) {
                         val toolbarExpandedHeight =
                             with(LocalDensity.current) {
@@ -80,9 +80,9 @@ fun CollapsingToolbarScaffold(
                             }
                         Spacer(
                             modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .height(toolbarExpandedHeight),
+                            Modifier
+                                .fillMaxWidth()
+                                .height(toolbarExpandedHeight),
                         )
                         content()
                     }
@@ -95,9 +95,7 @@ fun CollapsingToolbarScaffold(
 
 @Preview
 @Composable
-fun CollapsingToolbarScaffoldPreview(
-    @PreviewParameter(LoremIpsum::class) longText: String,
-) {
+fun CollapsingToolbarScaffoldPreview(@PreviewParameter(LoremIpsum::class) longText: String) {
     val toolbarHeightRange =
         with(LocalDensity.current) {
             LargeToolbarHeightCollapsed.roundToPx()..LargeToolbarHeightExpanded.roundToPx()
@@ -140,11 +138,11 @@ fun CollapsingToolbarScaffoldPreview(
     ) {
         Text(
             modifier =
-                Modifier.padding(
-                    top = LargeToolbarBottomPadding,
-                    start = 16.dp,
-                    end = 16.dp,
-                ),
+            Modifier.padding(
+                top = LargeToolbarBottomPadding,
+                start = 16.dp,
+                end = 16.dp,
+            ),
             text = longText,
             style = MaterialTheme.typography.bodySmall,
         )

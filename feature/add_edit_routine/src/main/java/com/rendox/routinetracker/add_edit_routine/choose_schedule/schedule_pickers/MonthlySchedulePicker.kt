@@ -146,7 +146,7 @@ private fun DayOfMonthPicker(
                     .wrapContentWidth()
                     .widthIn(min = 40.dp),
                 text = stringResource(
-                    id = R.string.monthly_picker_last_day_of_month_label
+                    id = R.string.monthly_picker_last_day_of_month_label,
                 ),
                 selected = lastDayOfMonthIsSelected,
                 onToggle = toggleLastDayOfMonth,

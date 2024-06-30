@@ -33,10 +33,10 @@ import com.rendox.routinetracker.core.ui.components.collapsing_toolbar.scroll_be
 import com.rendox.routinetracker.core.ui.helpers.ObserveUiEvent
 import com.rendox.routinetracker.feature.routine_details.R
 import com.rendox.routinetracker.routine_details.calendar.RoutineCalendarScreen
+import java.time.YearMonth
 import kotlinx.datetime.LocalDate
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
-import java.time.YearMonth
 
 @Composable
 internal fun RoutineDetailsRoute(
@@ -56,15 +56,21 @@ internal fun RoutineDetailsRoute(
     val snackbarHostState = remember { SnackbarHostState() }
     val snackbarMessage = when (completionAttemptBlockedEvent?.data) {
         is IllegalDateEditAttemptException.NotStartedHabitDateEditAttemptException -> {
-            stringResource(id = com.rendox.routinetracker.core.ui.R.string.not_started_date_completion_attempt_snackbar_message)
+            stringResource(
+                id = com.rendox.routinetracker.core.ui.R.string.not_started_date_completion_attempt_snackbar_message,
+            )
         }
 
         is IllegalDateEditAttemptException.FinishedHabitDateEditAttemptException -> {
-            stringResource(id = com.rendox.routinetracker.core.ui.R.string.finished_date_completion_attempt_snackbar_message)
+            stringResource(
+                id = com.rendox.routinetracker.core.ui.R.string.finished_date_completion_attempt_snackbar_message,
+            )
         }
 
         is IllegalDateEditAttemptException.FutureDateEditAttemptException -> {
-            stringResource(id = com.rendox.routinetracker.core.ui.R.string.future_date_completion_attempt_snackbar_message)
+            stringResource(
+                id = com.rendox.routinetracker.core.ui.R.string.future_date_completion_attempt_snackbar_message,
+            )
         }
 
         null -> ""
@@ -110,7 +116,7 @@ private fun DeleteHabitDialog(
             onDismissRequest = onDismissRequest,
             text = {
                 Text(
-                    text = stringResource(id = R.string.delete_habit_dialog_title)
+                    text = stringResource(id = R.string.delete_habit_dialog_title),
                 )
             },
             dismissButton = {
@@ -124,8 +130,8 @@ private fun DeleteHabitDialog(
                 FilledTonalButton(onClick = onConfirmButtonClicked) {
                     Text(
                         text = stringResource(
-                            id = com.rendox.routinetracker.core.ui.R.string.delete
-                        ).replaceFirstChar { it.titlecase() }
+                            id = com.rendox.routinetracker.core.ui.R.string.delete,
+                        ).replaceFirstChar { it.titlecase() },
                     )
                 }
             },
@@ -148,7 +154,7 @@ internal fun RoutineDetailsScreen(
     onScrolledToNewMonth: (YearMonth) -> Unit,
 ) {
     val iconDescription: String = stringResource(
-        id = com.rendox.routinetracker.core.ui.R.string.back
+        id = com.rendox.routinetracker.core.ui.R.string.back,
     )
 
     val toolbarHeightRange = with(LocalDensity.current) {
@@ -182,12 +188,12 @@ internal fun RoutineDetailsScreen(
                 },
                 actions = {
                     IconButton(
-                        onClick = { deleteHabitDialogIsShown = true }
+                        onClick = { deleteHabitDialogIsShown = true },
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
                             contentDescription = stringResource(
-                                id = R.string.delete_habit_icon_description
+                                id = R.string.delete_habit_icon_description,
                             ),
                         )
                     }

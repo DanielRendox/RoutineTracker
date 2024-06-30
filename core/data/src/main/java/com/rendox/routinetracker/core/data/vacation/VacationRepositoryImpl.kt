@@ -6,30 +6,26 @@ import com.rendox.routinetracker.core.model.Vacation
 import kotlinx.datetime.LocalDate
 
 class VacationRepositoryImpl(
-    private val localDataSource: VacationLocalDataSource
-): VacationRepository {
+    private val localDataSource: VacationLocalDataSource,
+) : VacationRepository {
 
     override suspend fun getVacationsInPeriod(
         habitId: Long,
         minDate: LocalDate,
         maxDate: LocalDate,
-    ): List<Vacation> {
-        return localDataSource.getVacationsInPeriod(habitId, minDate, maxDate)
-    }
+    ): List<Vacation> = localDataSource.getVacationsInPeriod(habitId, minDate, maxDate)
 
     override suspend fun getMultiHabitVacations(
-        habitsToPeriods: List<Pair<List<Long>, LocalDateRange>>
-    ): Map<Long, List<Vacation>> {
-        return localDataSource.getMultiHabitVacations(habitsToPeriods)
-    }
+        habitsToPeriods: List<Pair<List<Long>, LocalDateRange>>,
+    ): Map<Long, List<Vacation>> = localDataSource.getMultiHabitVacations(habitsToPeriods)
 
-    override suspend fun insertVacation(habitId: Long, vacation: Vacation) {
-        return localDataSource.insertVacation(habitId, vacation)
-    }
+    override suspend fun insertVacation(
+        habitId: Long,
+        vacation: Vacation,
+    ) = localDataSource.insertVacation(habitId, vacation)
 
-    override suspend fun insertVacations(habitIdsToVacations: Map<Long, List<Vacation>>) {
-        return localDataSource.insertVacations(habitIdsToVacations)
-    }
+    override suspend fun insertVacations(habitIdsToVacations: Map<Long, List<Vacation>>) =
+        localDataSource.insertVacations(habitIdsToVacations)
 
     override suspend fun deleteVacationById(id: Long) {
         localDataSource.deleteVacationById(id)

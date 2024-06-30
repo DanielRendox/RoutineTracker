@@ -60,7 +60,7 @@ fun CollapsingToolbarLarge(
             start = 3.dp,
             stop = 0.dp,
             fraction = toolbarState.progress,
-        )
+        ),
     )
 
     val dynamicToolbarHeight = with(LocalDensity.current) {
@@ -74,14 +74,13 @@ fun CollapsingToolbarLarge(
                 drawRect(color = toolbarColor)
             }
             .statusBarsPadding()
-            .height(dynamicToolbarHeight)
+            .height(dynamicToolbarHeight),
     ) {
         val textCompressionRatio = 0.7857F
         CollapsingTextLayout(
             progress = toolbarState.progress,
             textCompressionRatio = textCompressionRatio,
         ) {
-
             val textSizeWithoutCompression = 1F
             val textSize: Float = lerp(
                 start = textCompressionRatio,
@@ -106,11 +105,15 @@ fun CollapsingToolbarLarge(
                 else -> 16.dp
             }
 
-            val textStartPadding = if (navigationIcon == null) titleStartPadding else lerp(
-                start = 0.dp,
-                stop = titleStartPadding,
-                fraction = toolbarState.progress,
-            )
+            val textStartPadding = if (navigationIcon == null) {
+                titleStartPadding
+            } else {
+                lerp(
+                    start = 0.dp,
+                    stop = titleStartPadding,
+                    fraction = toolbarState.progress,
+                )
+            }
 
             Text(
                 modifier = Modifier
@@ -127,7 +130,7 @@ fun CollapsingToolbarLarge(
                 maxLines = if (toolbarState.progress > 0.1F) 2 else 1,
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.headlineMedium.copy(
-                    textMotion = TextMotion.Animated
+                    textMotion = TextMotion.Animated,
                 ),
             )
 
@@ -144,7 +147,7 @@ fun CollapsingToolbarLarge(
                 Spacer(modifier = Modifier)
             }
 
-            if (actions != null){
+            if (actions != null) {
                 Box(
                     modifier = Modifier
                         .height(LargeToolbarHeightCollapsed)
@@ -232,13 +235,13 @@ private fun CollapsibleTopAppBarPreview() {
             Spacer(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(PaddingValues(top = LargeToolbarHeightExpanded).calculateTopPadding())
+                    .height(PaddingValues(top = LargeToolbarHeightExpanded).calculateTopPadding()),
             )
             repeat(50) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(64.dp)
+                        .height(64.dp),
                 ) {
                     Text(
                         text = "Hello world",
@@ -270,6 +273,6 @@ private fun CollapsibleTopAppBarPreview() {
                     )
                 }
             }
-        }
+        },
     )
 }

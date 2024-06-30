@@ -7,7 +7,7 @@ import kotlinx.datetime.LocalDate
 
 open class InsertHabitCompletionUseCaseImpl(
     private val completionHistoryRepository: CompletionHistoryRepository,
-    private val getHabit: GetHabitUseCase
+    private val getHabit: GetHabitUseCase,
 ) : InsertHabitCompletionUseCase {
 
     /**
@@ -27,7 +27,7 @@ open class InsertHabitCompletionUseCaseImpl(
         if (completionRecord.date < habit.schedule.startDate) {
             throw InsertHabitCompletionUseCase.IllegalDateEditAttemptException.NotStartedHabitDateEditAttemptException()
         }
-        habit.schedule.endDate?.let {  endDate ->
+        habit.schedule.endDate?.let { endDate ->
             if (completionRecord.date > endDate) {
                 throw InsertHabitCompletionUseCase.IllegalDateEditAttemptException.FinishedHabitDateEditAttemptException()
             }

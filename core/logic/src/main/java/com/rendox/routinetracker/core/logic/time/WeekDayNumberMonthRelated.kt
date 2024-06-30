@@ -17,7 +17,7 @@ enum class WeekDayNumberMonthRelated {
     Third,
     Forth,
     Fifth,
-    Last;
+    Last,
 }
 
 /**
@@ -34,21 +34,18 @@ fun LocalDate.deriveWeekDayRelativeToMonthNumber(): WeekDayNumberMonthRelated {
     return counter.deriveExplicitWeekDayRelativeToMonth()
 }
 
-private fun Int.deriveExplicitWeekDayRelativeToMonth(): WeekDayNumberMonthRelated {
-    return when (this) {
-        1 -> WeekDayNumberMonthRelated.First
-        2 -> WeekDayNumberMonthRelated.Second
-        3 -> WeekDayNumberMonthRelated.Third
-        4 -> WeekDayNumberMonthRelated.Forth
-        5 -> WeekDayNumberMonthRelated.Fifth
-        else -> {
-            throw IllegalArgumentException("Counter value should be in the range 1..5")
-        }
+private fun Int.deriveExplicitWeekDayRelativeToMonth(): WeekDayNumberMonthRelated = when (this) {
+    1 -> WeekDayNumberMonthRelated.First
+    2 -> WeekDayNumberMonthRelated.Second
+    3 -> WeekDayNumberMonthRelated.Third
+    4 -> WeekDayNumberMonthRelated.Forth
+    5 -> WeekDayNumberMonthRelated.Fifth
+    else -> {
+        throw IllegalArgumentException("Counter value should be in the range 1..5")
     }
 }
 
-fun LocalDate.isLastWeekDayInMonth(): Boolean =
-    this.findDateOfLastWeekDayInMonth() == this
+fun LocalDate.isLastWeekDayInMonth(): Boolean = this.findDateOfLastWeekDayInMonth() == this
 
 /**
  * Returns the last date in month that is the same weekday as the weekday of this date.
@@ -73,8 +70,7 @@ fun WeekDayMonthRelated.matches(validationDate: LocalDate): Boolean {
     if (validationDate.dayOfWeek != this.dayOfWeek) return false
 
     if (
-        this.weekDayNumberMonthRelated == WeekDayNumberMonthRelated.Last
-        &&
+        this.weekDayNumberMonthRelated == WeekDayNumberMonthRelated.Last &&
         validationDate.isLastWeekDayInMonth()
     ) {
         return true

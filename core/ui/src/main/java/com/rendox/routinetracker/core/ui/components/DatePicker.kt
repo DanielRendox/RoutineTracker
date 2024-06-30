@@ -62,8 +62,8 @@ fun SingleDatePickerDialog(
     Dialog(
         onDismissRequest = { dismissButtonOnClick() },
         properties = DialogProperties(
-            usePlatformDefaultWidth = !isInLandscapeMode
-        )
+            usePlatformDefaultWidth = !isInLandscapeMode,
+        ),
     ) {
         Surface(
             shape = MaterialTheme.shapes.large,
@@ -113,7 +113,7 @@ private fun DatePickerTitles(
             modifier = Modifier.padding(
                 start = textStartPadding,
                 top = 16.dp,
-                bottom = selectDateTextBottomPadding
+                bottom = selectDateTextBottomPadding,
             ),
             text = stringResource(id = R.string.date_picker_supporting_text),
             style = MaterialTheme.typography.bodySmall,
@@ -184,7 +184,7 @@ private fun DatePickerCalendarContentLandscape(
                 .padding(start = 16.dp)
                 .width(DividerDefaults.Thickness)
                 .background(color = DividerDefaults.color)
-                .fillMaxHeight()
+                .fillMaxHeight(),
         )
         Column(
             modifier = Modifier
@@ -192,13 +192,13 @@ private fun DatePickerCalendarContentLandscape(
                 .padding(
                     start = 12.dp,
                     end = 12.dp,
-                )
+                ),
         ) {
             DatePickerCalendar(
                 modifier = Modifier
                     .padding(
                         top = 20.dp,
-                        bottom = 8.dp
+                        bottom = 8.dp,
                     )
                     .height(250.dp),
                 selectedDate = selectedDate,
@@ -225,13 +225,13 @@ private fun DialogButtons(
     Row(modifier = modifier) {
         TextButton(
             onClick = onDismissButtonClicked,
-            modifier = Modifier.padding(end = 8.dp)
+            modifier = Modifier.padding(end = 8.dp),
         ) {
             Text(text = stringResource(android.R.string.cancel))
         }
         TextButton(
             onClick = onConfirmButtonClicked,
-            modifier = Modifier
+            modifier = Modifier,
         ) {
             Text(text = stringResource(android.R.string.ok))
         }
@@ -270,7 +270,7 @@ private fun DatePickerCalendar(
                         MaterialTheme.colorScheme.primary
                     } else {
                         Color.Transparent
-                    }
+                    },
                 )
                 .border(
                     border = BorderStroke(
@@ -287,9 +287,9 @@ private fun DatePickerCalendar(
                     onClick = { onDateClicked(calendarDay.date) },
                     interactionSource = clickInteractionSource,
                     indication = null,
-                    enabled = calendarDay.position !in notCurrentMonthDates
-                            && dateIsEnabled(calendarDay.date),
-                )
+                    enabled = calendarDay.position !in notCurrentMonthDates &&
+                        dateIsEnabled(calendarDay.date),
+                ),
         ) {
             Text(
                 modifier = Modifier.align(Alignment.Center),
@@ -300,7 +300,7 @@ private fun DatePickerCalendar(
                     calendarDay.date == selectedDate -> MaterialTheme.colorScheme.onPrimary
                     !dateIsEnabled(calendarDay.date) -> MaterialTheme.colorScheme.outlineVariant
                     else -> MaterialTheme.colorScheme.onSurface
-                }
+                },
             )
         }
     }

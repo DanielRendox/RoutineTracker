@@ -31,7 +31,7 @@ fun RoutineTrackerNavHost(
             },
             navigateBack = {
                 navController.navigateUp()
-            }
+            },
         )
         agendaScreen(
             onRoutineClick = {
@@ -41,12 +41,12 @@ fun RoutineTrackerNavHost(
             },
             onAddRoutineClick = { navController.navigateToAddRoutine() },
         )
-        routineDetailsScreen (
+        routineDetailsScreen(
             popBackStack = {
                 navController.navigateToAgenda {
                     popUpTo(route = agendaNavRoute) { inclusive = true }
                 }
-            }
+            },
         )
     }
 }

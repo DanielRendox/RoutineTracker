@@ -9,10 +9,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rendox.routinetracker.add_edit_routine.AddHabitDestinationTopAppBar
-import com.rendox.routinetracker.add_edit_routine.choose_schedule.schedule_pickers.ScheduleTypeUi
 import com.rendox.routinetracker.add_edit_routine.choose_schedule.schedule_pickers.AlternateDaysSchedulePicker
 import com.rendox.routinetracker.add_edit_routine.choose_schedule.schedule_pickers.EveryDaySchedulePicker
 import com.rendox.routinetracker.add_edit_routine.choose_schedule.schedule_pickers.MonthlySchedulePicker
+import com.rendox.routinetracker.add_edit_routine.choose_schedule.schedule_pickers.ScheduleTypeUi
 import com.rendox.routinetracker.add_edit_routine.choose_schedule.schedule_pickers.WeeklySchedulePicker
 import com.rendox.routinetracker.add_edit_routine.navigation.AddRoutineDestination
 
@@ -59,6 +59,6 @@ fun ChooseSchedulePage(
 @Composable
 fun ChooseSchedulePagePreview() {
     ChooseSchedulePage(
-        chooseSchedulePageState = rememberChooseSchedulePageState()
+        chooseSchedulePageState = rememberChooseSchedulePageState(),
     )
 }

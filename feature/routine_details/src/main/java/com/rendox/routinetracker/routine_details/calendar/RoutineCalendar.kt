@@ -28,10 +28,10 @@ import com.rendox.routinetracker.core.model.HabitStatus
 import com.rendox.routinetracker.core.ui.components.CalendarMonthlyPaged
 import com.rendox.routinetracker.core.ui.theme.routineStatusColors
 import com.rendox.routinetracker.routine_details.CalendarDateData
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.toKotlinLocalDate
 import java.time.DayOfWeek
 import java.time.YearMonth
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.toKotlinLocalDate
 
 @Composable
 fun RoutineCalendar(
@@ -79,11 +79,17 @@ private fun RoutineStatusDay(
     val failedBackground = MaterialTheme.routineStatusColors.failedBackground
 
     val skippedBackground =
-        if (includedInStreak) MaterialTheme.routineStatusColors.skippedInStreak
-        else MaterialTheme.routineStatusColors.skippedOutOfStreak
+        if (includedInStreak) {
+            MaterialTheme.routineStatusColors.skippedInStreak
+        } else {
+            MaterialTheme.routineStatusColors.skippedOutOfStreak
+        }
     val skippedStroke =
-        if (includedInStreak) MaterialTheme.routineStatusColors.completedStroke
-        else MaterialTheme.routineStatusColors.failedStroke
+        if (includedInStreak) {
+            MaterialTheme.routineStatusColors.completedStroke
+        } else {
+            MaterialTheme.routineStatusColors.failedStroke
+        }
 
     val pendingColor = MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)
 
@@ -149,13 +155,17 @@ private fun RoutineStatusDay(
             .background(color = backgroundColor, shape = CircleShape)
             .border(border = BorderStroke(width = 2.dp, color = strokeColor), shape = CircleShape)
             .then(
-                if (habitStatus == null || day.position in arrayOf(
+                if (habitStatus == null ||
+                    day.position in arrayOf(
                         DayPosition.InDate,
-                        DayPosition.OutDate
+                        DayPosition.OutDate,
                     )
-                ) Modifier
-                else Modifier.clickable { onClick(day.date.toKotlinLocalDate()) }
-            )
+                ) {
+                    Modifier
+                } else {
+                    Modifier.clickable { onClick(day.date.toKotlinLocalDate()) }
+                },
+            ),
     ) {
         Text(
             modifier = Modifier.align(Alignment.Center),

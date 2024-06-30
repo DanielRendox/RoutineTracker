@@ -96,7 +96,7 @@ internal class ScheduleLocalDataSourceImpl(
 
             ScheduleType.WeeklyScheduleByDueDaysOfWeek ->
                 scheduleEntity.toWeeklyScheduleByDueDaysOfWeek(
-                    dueDates = dueDateLocalDataSource.getDueDates(habitId)
+                    dueDates = dueDateLocalDataSource.getDueDates(habitId),
                 )
 
             ScheduleType.MonthlyScheduleByNumOfDueDays ->
@@ -113,13 +113,13 @@ internal class ScheduleLocalDataSourceImpl(
 
             ScheduleType.AnnualScheduleByDueDates ->
                 scheduleEntity.toAnnualScheduleByDueDates(
-                    dueDates = dueDateLocalDataSource.getDueDates(habitId)
+                    dueDates = dueDateLocalDataSource.getDueDates(habitId),
                 )
 
             ScheduleType.AlternateDaysSchedule -> scheduleEntity.toAlternateDaySchedule()
 
             ScheduleType.CustomDateSchedule -> scheduleEntity.toCustomDateSchedule(
-                dueDatesIndices = dueDateLocalDataSource.getDueDates(habitId)
+                dueDatesIndices = dueDateLocalDataSource.getDueDates(habitId),
             )
         }
     }

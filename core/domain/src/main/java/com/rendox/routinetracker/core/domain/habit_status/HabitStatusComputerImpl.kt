@@ -151,7 +151,9 @@ internal class HabitStatusComputerImpl : HabitStatusComputer {
                     period = startDate..validationDate,
                     vacationHistory = vacationHistory,
                 )
-            } else 0.0
+            } else {
+                0.0
+            }
             if (scheduleDeviation <= -numOfNotDueTimes) return true
         }
         return false

@@ -19,6 +19,7 @@ import com.rendox.routinetracker.core.database.schedule.WeekDayMonthRelatedEntit
 import com.rendox.routinetracker.core.logic.time.AnnualDate
 import com.rendox.routinetracker.core.logic.time.epochDate
 import com.rendox.routinetracker.core.logic.time.plusDays
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
@@ -26,7 +27,6 @@ import kotlinx.datetime.Month
 import kotlinx.datetime.daysUntil
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
-import kotlin.coroutines.CoroutineContext
 
 val localDataSourceModule = module {
     single<CoroutineContext>(named("ioDispatcher")) {
@@ -37,7 +37,7 @@ val localDataSourceModule = module {
         AndroidSqliteDriver(
             schema = RoutineTrackerDatabase.Schema,
             context = get(),
-            name = "routinetracker.db"
+            name = "routinetracker.db",
         )
     }
 

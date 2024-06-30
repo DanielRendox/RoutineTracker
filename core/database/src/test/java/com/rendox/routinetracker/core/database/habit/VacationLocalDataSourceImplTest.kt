@@ -1,8 +1,8 @@
 package com.rendox.routinetracker.core.database.habit
 
-import com.google.common.truth.Truth.assertThat
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
+import com.google.common.truth.Truth.assertThat
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
 import com.rendox.routinetracker.core.database.di.localDataSourceModule
 import com.rendox.routinetracker.core.database.vacation.VacationLocalDataSource
@@ -51,7 +51,8 @@ class VacationLocalDataSourceImplTest : KoinTest {
         RoutineTrackerDatabase.Schema.create(sqlDriver)
 
         vacationLocalDataSource = VacationLocalDataSourceImpl(
-            db = get(), ioDispatcher = UnconfinedTestDispatcher()
+            db = get(),
+            ioDispatcher = UnconfinedTestDispatcher(),
         )
     }
 
@@ -85,7 +86,9 @@ class VacationLocalDataSourceImplTest : KoinTest {
             startDate = LocalDate(2024, 6, 8),
             endDate = if (vacationCompleted) {
                 LocalDate(2024, 7, 1)
-            } else null,
+            } else {
+                null
+            },
         )
         vacationLocalDataSource.insertVacation(
             habitId = habitId,
@@ -123,7 +126,7 @@ class VacationLocalDataSourceImplTest : KoinTest {
                     id = 3L,
                     startDate = LocalDate(2024, 10, 1),
                     endDate = null,
-                )
+                ),
             ),
             3L to emptyList(),
             4L to listOf(
@@ -131,7 +134,7 @@ class VacationLocalDataSourceImplTest : KoinTest {
                     id = 4L,
                     startDate = LocalDate(2024, 6, 3),
                     endDate = LocalDate(2024, 7, 2),
-                )
+                ),
             ),
         )
         vacationLocalDataSource.insertVacations(habitIdsToVacations = habitIdsToVacations)
@@ -139,7 +142,7 @@ class VacationLocalDataSourceImplTest : KoinTest {
             habitsToPeriods = listOf(
                 listOf(1L, 2L) to LocalDate(2024, 6, 1)..LocalDate(2024, 7, 1),
                 listOf(3L, 4L) to LocalDate(2024, 6, 3)..LocalDate(2024, 6, 3),
-            )
+            ),
         )
         val expectedResult = mapOf(
             1L to habitIdsToVacations.getValue(1L).take(1),

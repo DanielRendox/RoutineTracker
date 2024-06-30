@@ -51,9 +51,9 @@ fun TonalDataInput(
     ) {
         Box(
             modifier = Modifier.then(
-                if (disabled) Modifier else Modifier.clickable(onClick = onClick)
+                if (disabled) Modifier else Modifier.clickable(onClick = onClick),
             ),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Text(
                 modifier = Modifier.padding(vertical = 8.dp),

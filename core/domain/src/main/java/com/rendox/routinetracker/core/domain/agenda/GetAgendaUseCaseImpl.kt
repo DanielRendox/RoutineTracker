@@ -33,7 +33,7 @@ class GetAgendaUseCaseImpl(
         val vacationHistory = vacationRepository.getMultiHabitVacations(
             habitsToPeriods = periodsToQuery.map { (habits, period) ->
                 habits.map { it.id!! } to period
-            }
+            },
         )
 
         habits.associateWith { habit ->
@@ -54,39 +54,38 @@ class GetAgendaUseCaseImpl(
 
     companion object {
         /*
-        * There may be too many entries so retrieving all of them at once may be inefficient.
-        * We must retrieve only ones that are in the validation date's period.
-        *
-        * At the same time, getting completions for each habit separately may be
-        * inefficient as well, especially when there are lots of them.
-        *
-        * So we do something in between. We group habits by their schedule and get completions
-        * for each group separately. This works because habits with the same schedule type will
-        * have about the same period.
-        *
-        * This function computes this period for each group.
-        */
-        private fun List<Habit>.groupByPeriods(
-            validationDate: LocalDate
-        ): List<Pair<List<Habit>, LocalDateRange>> = groupBy { habit ->
-            val schedule = habit.schedule
-            when (schedule) {
-                is Schedule.NonPeriodicSchedule -> 0
-                is Schedule.WeeklySchedule -> 1
-                is Schedule.MonthlySchedule -> 2
-                is Schedule.AnnualSchedule -> 3
-                is Schedule.AlternateDaysSchedule -> 4
-            }
-        }.map { (_, habits) ->
-            val periods = habits.map { habit ->
-                when (val schedule = habit.schedule) {
-                    is Schedule.PeriodicSchedule -> schedule.getPeriodRange(validationDate)!!
-                    is Schedule.NonPeriodicSchedule -> validationDate..validationDate
+         * There may be too many entries so retrieving all of them at once may be inefficient.
+         * We must retrieve only ones that are in the validation date's period.
+         *
+         * At the same time, getting completions for each habit separately may be
+         * inefficient as well, especially when there are lots of them.
+         *
+         * So we do something in between. We group habits by their schedule and get completions
+         * for each group separately. This works because habits with the same schedule type will
+         * have about the same period.
+         *
+         * This function computes this period for each group.
+         */
+        private fun List<Habit>.groupByPeriods(validationDate: LocalDate): List<Pair<List<Habit>, LocalDateRange>> =
+            groupBy { habit ->
+                val schedule = habit.schedule
+                when (schedule) {
+                    is Schedule.NonPeriodicSchedule -> 0
+                    is Schedule.WeeklySchedule -> 1
+                    is Schedule.MonthlySchedule -> 2
+                    is Schedule.AnnualSchedule -> 3
+                    is Schedule.AlternateDaysSchedule -> 4
                 }
+            }.map { (_, habits) ->
+                val periods = habits.map { habit ->
+                    when (val schedule = habit.schedule) {
+                        is Schedule.PeriodicSchedule -> schedule.getPeriodRange(validationDate)!!
+                        is Schedule.NonPeriodicSchedule -> validationDate..validationDate
+                    }
+                }
+                val minDate = periods.minOf { it.start }
+                val maxDate = periods.maxOf { it.endInclusive }
+                habits to minDate..maxDate
             }
-            val minDate = periods.minOf { it.start }
-            val maxDate = periods.maxOf { it.endInclusive }
-            habits to minDate..maxDate
-        }
     }
 }

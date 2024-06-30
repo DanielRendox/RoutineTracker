@@ -13,8 +13,11 @@ class GetHabitCompletionTimeUseCaseImpl(
     private val getHabit: GetHabitUseCase,
     private val completionTimeRepository: CompletionTimeRepository,
     private val dueDateSpecificCompletionTimeRepository: DueDateSpecificCompletionTimeRepository,
-): GetHabitCompletionTimeUseCase {
-    override suspend operator fun invoke(habitId: Long, date: LocalDate): LocalTime? {
+) : GetHabitCompletionTimeUseCase {
+    override suspend operator fun invoke(
+        habitId: Long,
+        date: LocalDate,
+    ): LocalTime? {
         val completionTimeFromSpecificDate =
             completionTimeRepository.getCompletionTime(habitId, date)
         completionTimeFromSpecificDate?.let { return it }
@@ -22,7 +25,8 @@ class GetHabitCompletionTimeUseCaseImpl(
         val habit = getHabit(habitId)
         val completionTimeFromSchedule = date.getIndex(habit.schedule)?.let {
             dueDateSpecificCompletionTimeRepository.getDueDateSpecificCompletionTime(
-                scheduleId = habitId, dueDateNumber = it
+                scheduleId = habitId,
+                dueDateNumber = it,
             )
         }
         completionTimeFromSchedule?.let { return it }
@@ -30,14 +34,12 @@ class GetHabitCompletionTimeUseCaseImpl(
         return habit.defaultCompletionTime
     }
 
-    private fun LocalDate.getIndex(schedule: Schedule): Int? {
-        return when (schedule) {
-            is Schedule.EveryDaySchedule -> null
-            is Schedule.ByNumOfDueDays -> null
-            is Schedule.WeeklyScheduleByDueDaysOfWeek -> dayOfWeek.toInt()
-            is Schedule.MonthlyScheduleByDueDatesIndices -> dayOfMonth
-            is Schedule.AnnualScheduleByDueDates -> AnnualDate(month, dayOfMonth).toInt()
-            is Schedule.CustomDateSchedule -> this.toInt()
-        }
+    private fun LocalDate.getIndex(schedule: Schedule): Int? = when (schedule) {
+        is Schedule.EveryDaySchedule -> null
+        is Schedule.ByNumOfDueDays -> null
+        is Schedule.WeeklyScheduleByDueDaysOfWeek -> dayOfWeek.toInt()
+        is Schedule.MonthlyScheduleByDueDatesIndices -> dayOfMonth
+        is Schedule.AnnualScheduleByDueDates -> AnnualDate(month, dayOfMonth).toInt()
+        is Schedule.CustomDateSchedule -> this.toInt()
     }
 }

@@ -6,7 +6,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 
 class ExitUntilCollapsedState(
     heightRange: IntRange,
-    scrollValue: Int = 0
+    scrollValue: Int = 0,
 ) : ScrollFlagState(heightRange, scrollValue) {
 
     override val offset: Float = 0f
@@ -31,24 +31,22 @@ class ExitUntilCollapsedState(
                     mapOf(
                         minHeightKey to it.minHeight,
                         maxHeightKey to it.maxHeight,
-                        scrollValueKey to it.scrollValue
+                        scrollValueKey to it.scrollValue,
                     )
                 },
                 restore = {
                     ExitUntilCollapsedState(
                         heightRange = (it[minHeightKey] as Int)..(it[maxHeightKey] as Int),
-                        scrollValue = it[scrollValueKey] as Int
+                        scrollValue = it[scrollValueKey] as Int,
                     )
-                }
+                },
             )
         }
     }
 }
 
 @Composable
-fun rememberExitUntilCollapsedToolbarState(
-    toolbarHeightRange: IntRange
-): ToolbarState = rememberSaveable(saver = ExitUntilCollapsedState.Saver) {
-    ExitUntilCollapsedState(heightRange = toolbarHeightRange)
-}
-
+fun rememberExitUntilCollapsedToolbarState(toolbarHeightRange: IntRange): ToolbarState =
+    rememberSaveable(saver = ExitUntilCollapsedState.Saver) {
+        ExitUntilCollapsedState(heightRange = toolbarHeightRange)
+    }

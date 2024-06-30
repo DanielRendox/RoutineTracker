@@ -11,7 +11,7 @@ import androidx.compose.runtime.setValue
 
 @Stable
 class ChooseRoutineTypePageState(
-    routineType: RoutineTypeUi = RoutineTypeUi.YesNoHabit
+    routineType: RoutineTypeUi = RoutineTypeUi.YesNoHabit,
 ) {
     var routineType: RoutineTypeUi by mutableStateOf(routineType)
         private set
@@ -27,7 +27,7 @@ class ChooseRoutineTypePageState(
             },
             restore = { chooseRoutineTypeStateValues ->
                 ChooseRoutineTypePageState(
-                    routineType = RoutineTypeUi.getTypeById(chooseRoutineTypeStateValues[0])
+                    routineType = RoutineTypeUi.getTypeById(chooseRoutineTypeStateValues[0]),
                 )
             },
         )
@@ -35,8 +35,6 @@ class ChooseRoutineTypePageState(
 }
 
 @Composable
-fun rememberChooseRoutineTypePageState() =
-    rememberSaveable(saver = ChooseRoutineTypePageState.Saver) {
-        ChooseRoutineTypePageState()
-    }
-
+fun rememberChooseRoutineTypePageState() = rememberSaveable(saver = ChooseRoutineTypePageState.Saver) {
+    ChooseRoutineTypePageState()
+}

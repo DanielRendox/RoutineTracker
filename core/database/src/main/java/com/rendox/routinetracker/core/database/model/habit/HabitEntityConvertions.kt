@@ -11,13 +11,13 @@ fun HabitEntity.toExternalModel(schedule: Schedule) = when (this.type) {
     )
 }
 
-private fun HabitEntity.toYesNoRoutine(
-    schedule: Schedule,
-): Habit {
+private fun HabitEntity.toYesNoRoutine(schedule: Schedule): Habit {
     val defaultCompletionTime =
         if (defaultCompletionTimeHour != null && defaultCompletionTimeMinute != null) {
             LocalTime(hour = defaultCompletionTimeHour, minute = defaultCompletionTimeMinute)
-        } else null
+        } else {
+            null
+        }
 
     return Habit.YesNoHabit(
         id = id,

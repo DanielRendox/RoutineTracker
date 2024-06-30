@@ -7,6 +7,7 @@ import com.rendox.routinetracker.core.logic.time.atEndOfMonth
 import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.Schedule
+import kotlin.random.Random
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
@@ -14,7 +15,6 @@ import kotlinx.datetime.Month
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import org.junit.jupiter.api.Test
-import kotlin.random.Random
 
 class ScheduleGetPeriodRangeTest {
 
@@ -208,7 +208,8 @@ class ScheduleGetPeriodRangeTest {
     }
 
     private fun assertEachDateOfRangeIsInExpectedRange(
-        schedule: Schedule.PeriodicSchedule, range: LocalDateRange
+        schedule: Schedule.PeriodicSchedule,
+        range: LocalDateRange,
     ) {
         for (date in range) {
             assertThat(schedule.getPeriodRange(date)).isEqualTo(range)

@@ -46,11 +46,11 @@ import com.rendox.routinetracker.core.ui.components.TonalDataInput
 import com.rendox.routinetracker.core.ui.components.TonalDropdownMenu
 import com.rendox.routinetracker.core.ui.helpers.LocalLocale
 import com.rendox.routinetracker.feature.add_edit_routine.R
-import kotlinx.datetime.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.time.temporal.WeekFields
+import kotlinx.datetime.DayOfWeek
 
 @Composable
 fun TweakRoutinePage(
@@ -67,7 +67,7 @@ fun TweakRoutinePage(
                 confirmButtonOnClick = {
                     tweakRoutinePageState.updateStartDate(it)
                     tweakRoutinePageState.updateDialogType(null)
-                }
+                },
             )
         }
 
@@ -83,7 +83,7 @@ fun TweakRoutinePage(
                 },
                 dateIsEnabled = {
                     it >= tweakRoutinePageState.startDate
-                }
+                },
             )
         }
 
@@ -91,7 +91,7 @@ fun TweakRoutinePage(
     }
 
     Column(
-        modifier = modifier.verticalScroll(rememberScrollState())
+        modifier = modifier.verticalScroll(rememberScrollState()),
     ) {
         AddHabitDestinationTopAppBar(
             modifier = Modifier.padding(bottom = 8.dp),
@@ -110,7 +110,7 @@ fun TweakRoutinePage(
                     .fillMaxWidth()
                     .clickable {
                         tweakRoutinePageState.updateDialogType(
-                            dialogType = TweakRoutinePageDialogType.StartDatePicker
+                            dialogType = TweakRoutinePageDialogType.StartDatePicker,
                         )
                     },
                 startDate = tweakRoutinePageState.startDate,
@@ -136,16 +136,16 @@ fun TweakRoutinePage(
                 onOverallNumOfDaysChange = tweakRoutinePageState::updateOverallNumOfDays,
                 showEndDatePickerDialog = {
                     tweakRoutinePageState.updateDialogType(
-                        TweakRoutinePageDialogType.EndDatePicker
+                        TweakRoutinePageDialogType.EndDatePicker,
                     )
-                }
+                },
             )
         }
 
         Spacer(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(16.dp)
+                .height(16.dp),
         )
 
         Column {
@@ -195,7 +195,7 @@ fun TweakRoutinePage(
         Spacer(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(12.dp)
+                .height(12.dp),
         )
     }
 }
@@ -222,7 +222,7 @@ private fun StartDateSetting(
                         stringResource(id = com.rendox.routinetracker.core.ui.R.string.today)
                     } else {
                         startDate.format(formatter)
-                    }
+                    },
                 )
             },
         )
@@ -304,7 +304,7 @@ private fun EndDateDisplay(
                 modifier = Modifier.padding(8.dp),
                 painter = painterResource(id = R.drawable.baseline_error_24),
                 contentDescription = stringResource(
-                    id = R.string.error_message_num_of_days_is_not_valid
+                    id = R.string.error_message_num_of_days_is_not_valid,
                 ),
                 tint = if (overallNumOfDaysIsValid) {
                     Color.Transparent
@@ -344,7 +344,7 @@ private fun WeekStartDayPickerSetting(
         title = stringResource(id = R.string.week_start_day_setting_title),
         trailingComponent = {
             val daysOfWeek = daysOfWeek(
-                firstDayOfWeek = WeekFields.of(LocalLocale.current).firstDayOfWeek
+                firstDayOfWeek = WeekFields.of(LocalLocale.current).firstDayOfWeek,
             )
             TonalDropdownMenu(
                 expanded = weekStartDatePickerIsExpanded,
@@ -359,9 +359,9 @@ private fun WeekStartDayPickerSetting(
                 },
                 options = daysOfWeek.map {
                     it.getDisplayName(TextStyle.FULL, LocalLocale.current)
-                }
+                },
             )
-        }
+        },
     )
 }
 
@@ -370,7 +370,7 @@ private fun WeekStartDayPickerSetting(
 fun TweakRoutinePagePreview() {
     Surface {
         TweakRoutinePage(
-            tweakRoutinePageState = rememberTweakRoutinePageState()
+            tweakRoutinePageState = rememberTweakRoutinePageState(),
         )
     }
 }

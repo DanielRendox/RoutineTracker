@@ -4,10 +4,13 @@ import kotlinx.datetime.LocalTime
 
 interface DueDateSpecificCompletionTimeLocalDataSource {
     suspend fun getDueDateSpecificCompletionTime(
-        scheduleId: Long, dueDateNumber: Int
+        scheduleId: Long,
+        dueDateNumber: Int,
     ): LocalTime?
 
     suspend fun updateDueDateSpecificCompletionTime(
-        newTime: LocalTime, scheduleId: Long, dueDateNumber: Int
+        newTime: LocalTime,
+        scheduleId: Long,
+        dueDateNumber: Int,
     )
 }

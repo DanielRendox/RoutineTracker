@@ -50,9 +50,7 @@ val yesNoHabitDestinations = listOf(
     AddRoutineDestination.TweakRoutine,
 )
 
-internal fun NavController.navigate(
-    destination: AddRoutineDestination
-) {
+internal fun NavController.navigate(destination: AddRoutineDestination) {
     navigate(destination.route)
 }
 
@@ -89,12 +87,12 @@ internal fun AddRoutineNavHost(
         }
         composable(route = AddRoutineDestination.SetGoal.route) {
             SetGoalPage(
-                setGoalPageState = addRoutineScreenState.setGoalPageState
+                setGoalPageState = addRoutineScreenState.setGoalPageState,
             )
         }
         composable(route = AddRoutineDestination.ChooseSchedule.route) {
             ChooseSchedulePage(
-                chooseSchedulePageState = addRoutineScreenState.chooseSchedulePageState
+                chooseSchedulePageState = addRoutineScreenState.chooseSchedulePageState,
             )
         }
         composable(route = AddRoutineDestination.TweakRoutine.route) {

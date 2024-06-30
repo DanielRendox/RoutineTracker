@@ -3,8 +3,8 @@ package com.rendox.routinetracker.core.domain.streak
 import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
 import com.rendox.routinetracker.core.data.streaks.StreakRepository
 import com.rendox.routinetracker.core.data.vacation.VacationRepository
-import com.rendox.routinetracker.core.domain.schedule.getPeriodRange
 import com.rendox.routinetracker.core.domain.di.GetHabitUseCase
+import com.rendox.routinetracker.core.domain.schedule.getPeriodRange
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.atEndOfMonth
 import com.rendox.routinetracker.core.logic.time.isSubsetOf

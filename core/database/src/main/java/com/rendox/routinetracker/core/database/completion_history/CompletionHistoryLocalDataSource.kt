@@ -13,7 +13,7 @@ interface CompletionHistoryLocalDataSource {
     ): List<Habit.CompletionRecord>
 
     suspend fun getMultiHabitRecords(
-        habitsToPeriods: List<Pair<List<Habit>, LocalDateRange>>
+        habitsToPeriods: List<Pair<List<Habit>, LocalDateRange>>,
     ): Map<Long, List<Habit.CompletionRecord>>
 
     suspend fun insertCompletion(
@@ -21,9 +21,7 @@ interface CompletionHistoryLocalDataSource {
         completionRecord: Habit.CompletionRecord,
     )
 
-    suspend fun insertCompletions(
-        completions: Map<Long, List<Habit.CompletionRecord>>
-    )
+    suspend fun insertCompletions(completions: Map<Long, List<Habit.CompletionRecord>>)
 
     suspend fun deleteCompletionByDate(
         habitId: Long,

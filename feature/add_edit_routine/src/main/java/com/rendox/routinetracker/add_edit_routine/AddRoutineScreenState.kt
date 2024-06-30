@@ -65,7 +65,7 @@ class AddRoutineScreenState(
 
         navigateBackButtonText = when (navBackStackEntry?.destination?.route) {
             navDestinations.first().route -> UiText.StringResource(
-                resId = com.rendox.routinetracker.feature.add_edit_routine.R.string.discard_habit_creation
+                resId = com.rendox.routinetracker.feature.add_edit_routine.R.string.discard_habit_creation,
             )
             else -> UiText.StringResource(resId = R.string.back)
         }
@@ -84,10 +84,10 @@ class AddRoutineScreenState(
     val containsError: Boolean
         get() {
             val currentRoute = navBackStackEntry?.destination?.route
-            return currentRoute == AddRoutineDestination.ChooseRoutineType.route
-                    || (currentRoute == AddRoutineDestination.SetGoal.route && setGoalPageState.containsError)
-                    || (currentRoute == AddRoutineDestination.ChooseSchedule.route && chooseSchedulePageState.containsError)
-                    || (currentRoute == AddRoutineDestination.TweakRoutine.route && tweakRoutinePageState.containsError)
+            return currentRoute == AddRoutineDestination.ChooseRoutineType.route ||
+                (currentRoute == AddRoutineDestination.SetGoal.route && setGoalPageState.containsError) ||
+                (currentRoute == AddRoutineDestination.ChooseSchedule.route && chooseSchedulePageState.containsError) ||
+                (currentRoute == AddRoutineDestination.TweakRoutine.route && tweakRoutinePageState.containsError)
         }
 
     fun navigateBackOrCancel() {
@@ -156,7 +156,7 @@ class AddRoutineScreenState(
         )
     }
 
-    private fun Schedule.convertToMoreAppropriateModel(startDayOfWeek: DayOfWeek) = when(this) {
+    private fun Schedule.convertToMoreAppropriateModel(startDayOfWeek: DayOfWeek) = when (this) {
         is Schedule.EveryDaySchedule -> this
         is Schedule.WeeklyScheduleByNumOfDueDays -> {
             if (numOfDueDays >= 7) {

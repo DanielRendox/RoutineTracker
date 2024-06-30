@@ -52,16 +52,16 @@ import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.ui.helpers.LocalLocale
 import com.rendox.routinetracker.core.ui.helpers.ObserveUiEvent
 import com.rendox.routinetracker.feature.add_edit_routine.R
+import java.time.temporal.WeekFields
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
-import java.time.temporal.WeekFields
 
 @Composable
 internal fun AddRoutineRoute(
     modifier: Modifier = Modifier,
     navigateBackAndRecreate: () -> Unit,
     navigateBack: () -> Unit,
-    insertHabit: InsertHabitUseCase = koinInject()
+    insertHabit: InsertHabitUseCase = koinInject(),
 ) {
     var dialogIsVisible by rememberSaveable { mutableStateOf(false) }
     DiscardCreatingNewHabitDialog(
@@ -107,10 +107,9 @@ internal fun AddRoutineRoute(
 
     ObserveUiEvent(tweakRoutinePageState.scheduleConvertedEvent) {
         snackbarHostState.showSnackbar(
-            message = "$scheduleConvertedMessage $newScheduleDisplayName"
+            message = "$scheduleConvertedMessage $newScheduleDisplayName",
         )
     }
-
 
     AddRoutineScreen(
         modifier = modifier,
@@ -119,7 +118,7 @@ internal fun AddRoutineRoute(
     )
 
     BackHandler {
-       dialogIsVisible = true
+        dialogIsVisible = true
     }
 }
 
@@ -167,7 +166,7 @@ internal fun AddRoutineScreen(
         Column(
             modifier = modifier
                 .fillMaxSize()
-                .navigationBarsPadding()
+                .navigationBarsPadding(),
         ) {
             AddRoutineNavHost(
                 modifier = Modifier
@@ -232,7 +231,7 @@ private fun AddRoutineBottomNavigation(
         currentScreenNumber?.let {
             NavigationProgressIndicator(
                 currentScreenNumber = it,
-                numOfScreens = numOfScreens
+                numOfScreens = numOfScreens,
             )
         }
 
@@ -266,9 +265,12 @@ private fun NavigationProgressIndicator(
                         shape = CircleShape,
                     )
                     .background(
-                        color = if (filledBackground) MaterialTheme.colorScheme.primary
-                        else Color.Transparent
-                    )
+                        color = if (filledBackground) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            Color.Transparent
+                        },
+                    ),
             )
         }
     }
@@ -283,7 +285,7 @@ fun AddHabitDestinationTopAppBar(
         modifier = modifier
             .fillMaxWidth()
             .statusBarsPadding()
-            .height(112.dp)
+            .height(112.dp),
     ) {
         Text(
             modifier = Modifier

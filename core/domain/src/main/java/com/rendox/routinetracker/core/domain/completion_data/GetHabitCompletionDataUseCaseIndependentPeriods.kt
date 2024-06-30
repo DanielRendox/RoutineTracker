@@ -2,16 +2,16 @@ package com.rendox.routinetracker.core.domain.completion_data
 
 import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
 import com.rendox.routinetracker.core.data.vacation.VacationRepository
+import com.rendox.routinetracker.core.domain.di.GetHabitUseCase
 import com.rendox.routinetracker.core.domain.habit_status.HabitStatusComputer
 import com.rendox.routinetracker.core.domain.schedule.getPeriodRange
-import com.rendox.routinetracker.core.domain.di.GetHabitUseCase
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.HabitCompletionData
 import com.rendox.routinetracker.core.model.Schedule
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
-import kotlin.coroutines.CoroutineContext
 
 class GetHabitCompletionDataUseCaseIndependentPeriods(
     private val getHabit: GetHabitUseCase,
@@ -47,7 +47,9 @@ class GetHabitCompletionDataUseCaseIndependentPeriods(
                 minDate = period.start,
                 maxDate = period.endInclusive,
             )
-        } else emptyList()
+        } else {
+            emptyList()
+        }
 
         val vacationHistory = if (period != null) {
             vacationRepository.getVacationsInPeriod(
@@ -55,7 +57,9 @@ class GetHabitCompletionDataUseCaseIndependentPeriods(
                 minDate = period.start,
                 maxDate = period.endInclusive,
             )
-        } else emptyList()
+        } else {
+            emptyList()
+        }
 
         validationDates.associateWith { date ->
             val habitStatus = habitStatusComputer.computeStatus(
@@ -90,7 +94,6 @@ class GetHabitCompletionDataUseCaseIndependentPeriods(
 
         val requestedDatesIsIncorrectRange = requestedDates.endInclusive < requestedDates.start
         if (requestedDatesIsIncorrectRange) return null
-
 
         val minDate = requestedDates.start
         val requestedStart = when {

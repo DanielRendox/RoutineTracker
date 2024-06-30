@@ -49,15 +49,17 @@ class AgendaListAdapter(
     private val onCheckmarkClick: (DisplayRoutine) -> Unit,
 ) : RecyclerView.Adapter<AgendaListViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AgendaListViewHolder {
-        return AgendaListViewHolder(ComposeView(parent.context))
-    }
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int,
+    ): AgendaListViewHolder = AgendaListViewHolder(ComposeView(parent.context))
 
-    override fun getItemCount(): Int {
-        return routineList.size
-    }
+    override fun getItemCount(): Int = routineList.size
 
-    override fun onBindViewHolder(holder: AgendaListViewHolder, position: Int) {
+    override fun onBindViewHolder(
+        holder: AgendaListViewHolder,
+        position: Int,
+    ) {
         val routine = routineList[position]
         holder.bind(
             routine = routine,
@@ -68,7 +70,7 @@ class AgendaListAdapter(
 }
 
 class AgendaListViewHolder(
-    private val composeView: ComposeView
+    private val composeView: ComposeView,
 ) : RecyclerView.ViewHolder(composeView) {
     fun bind(
         routine: DisplayRoutine,
@@ -97,7 +99,7 @@ fun AgendaItem(
 ) {
     Row(
         modifier = modifier.alpha(
-            if (routine.hasGrayedOutLook) 0.5f else 1f
+            if (routine.hasGrayedOutLook) 0.5f else 1f,
         ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -116,7 +118,7 @@ fun AgendaItem(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
                     onClick = onRoutineClick,
-                )
+                ),
         ) {
             Column {
                 Text(
@@ -130,13 +132,13 @@ fun AgendaItem(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(20))
-                        .background(MaterialTheme.colorScheme.secondaryContainer)
+                        .background(MaterialTheme.colorScheme.secondaryContainer),
                 ) {
                     Text(
                         modifier = Modifier.padding(horizontal = 2.dp),
                         text = stringResource(id = routine.status.getStringResourceId()),
                         style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.Normal
+                            fontWeight = FontWeight.Normal,
                         ),
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                     )
@@ -178,14 +180,16 @@ private fun StatusCheckmark(
 
         HabitStatus.Planned, HabitStatus.OnVacation, HabitStatus.NotDue,
         HabitStatus.Backlog, HabitStatus.AlreadyCompleted,
-        HabitStatus.CompletedLater, HabitStatus.NotStarted, HabitStatus.Finished -> {
+        HabitStatus.CompletedLater, HabitStatus.NotStarted, HabitStatus.Finished,
+        -> {
             backgroundColor = MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp)
             icon = null
             iconColor = null
         }
 
         HabitStatus.Completed, HabitStatus.OverCompleted, HabitStatus.SortedOutBacklog,
-        HabitStatus.PartiallyCompleted -> {
+        HabitStatus.PartiallyCompleted,
+        -> {
             backgroundColor = MaterialTheme.routineStatusColors.skippedInStreak
             icon = Icons.Filled.Done
             iconColor = MaterialTheme.routineStatusColors.completedStroke
@@ -211,8 +215,8 @@ private fun StatusCheckmark(
                     Modifier
                 } else {
                     Modifier.clickable(onClick = onClick)
-                }
-            )
+                },
+            ),
     ) {
         icon?.let {
             Icon(
@@ -230,7 +234,6 @@ private fun StatusCheckmark(
 @Preview(showSystemUi = true)
 @Composable
 private fun AgendaItemInListPreview() {
-
     Surface(modifier = Modifier.fillMaxSize()) {
         Column {
             for (routine in routines) {
@@ -285,5 +288,5 @@ private val routines = listOf(
         statusToggleIsDisabled = false,
         type = DisplayRoutineType.YesNoHabit,
         numOfTimesCompleted = 0f,
-    )
+    ),
 )

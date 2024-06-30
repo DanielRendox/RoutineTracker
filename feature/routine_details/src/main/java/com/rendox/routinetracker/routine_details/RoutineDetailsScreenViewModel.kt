@@ -19,6 +19,7 @@ import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.HabitStatus
 import com.rendox.routinetracker.core.model.Streak
 import com.rendox.routinetracker.core.ui.helpers.UiEvent
+import java.time.YearMonth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -33,7 +34,6 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toKotlinLocalDate
 import kotlinx.datetime.todayIn
-import java.time.YearMonth
 
 class RoutineDetailsScreenViewModel(
     today: LocalDate = Clock.System.todayIn(TimeZone.currentSystemDefault()),
@@ -94,9 +94,7 @@ class RoutineDetailsScreenViewModel(
         }
     }
 
-    private suspend fun updateMonthsWithMargin(
-        forceUpdate: Boolean = false
-    ) {
+    private suspend fun updateMonthsWithMargin(forceUpdate: Boolean = false) {
         // delete all other months because the data may be outdated
         if (forceUpdate) {
             val start = _currentMonthFlow.value.minusMonths(NUM_OF_MONTHS_TO_LOAD_AHEAD.toLong())
@@ -114,11 +112,13 @@ class RoutineDetailsScreenViewModel(
         }
     }
 
-
     /**
      * @param forceUpdate update the data even if it's already loaded
      */
-    private suspend fun updateMonth(monthToUpdate: YearMonth, forceUpdate: Boolean = false) {
+    private suspend fun updateMonth(
+        monthToUpdate: YearMonth,
+        forceUpdate: Boolean = false,
+    ) {
         if (!forceUpdate) {
             val dataForMonthIsAlreadyLoaded = _calendarDatesFlow.value.keys.any {
                 it.toJavaLocalDate().yearMonth == monthToUpdate

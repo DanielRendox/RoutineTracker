@@ -24,7 +24,7 @@ fun NavGraphBuilder.routineDetailsScreen(popBackStack: () -> Unit) {
     composable(
         route = "$routineDetailsRoute/{$routineIdArg}",
         arguments = listOf(
-            navArgument(routineIdArg) { type = NavType.LongType }
+            navArgument(routineIdArg) { type = NavType.LongType },
         ),
         enterTransition = {
             EnterTransition.None

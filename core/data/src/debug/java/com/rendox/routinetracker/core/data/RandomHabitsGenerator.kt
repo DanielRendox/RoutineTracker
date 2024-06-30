@@ -9,12 +9,12 @@ import com.rendox.routinetracker.core.logic.time.today
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.model.Vacation
-import kotlinx.datetime.DayOfWeek
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.daysUntil
 import kotlin.math.roundToInt
 import kotlin.random.Random
 import kotlin.random.nextInt
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.daysUntil
 
 class RandomHabitsGenerator(
     private val numOfHabits: Int,
@@ -82,39 +82,49 @@ class RandomHabitsGenerator(
         val scheduleTypeIndex = Random.nextInt(6)
         val startDate = startDateRange.random()
         if (scheduleTypeIndex == 0) return Schedule.EveryDaySchedule(startDate = startDate)
-        if (scheduleTypeIndex == 1) return Schedule.WeeklyScheduleByNumOfDueDays(
-            startDate = startDate,
-            numOfDueDays = Random.nextInt(1..6),
-        )
-        if (scheduleTypeIndex == 2) return Schedule.MonthlyScheduleByNumOfDueDays(
-            startDate = startDate,
-            numOfDueDays = Random.nextInt(1..30),
-        )
+        if (scheduleTypeIndex == 1) {
+            return Schedule.WeeklyScheduleByNumOfDueDays(
+                startDate = startDate,
+                numOfDueDays = Random.nextInt(1..6),
+            )
+        }
+        if (scheduleTypeIndex == 2) {
+            return Schedule.MonthlyScheduleByNumOfDueDays(
+                startDate = startDate,
+                numOfDueDays = Random.nextInt(1..30),
+            )
+        }
         val backlogEnabled = Random.nextBoolean()
         val completingAheadEnabled = Random.nextBoolean()
-        if (scheduleTypeIndex == 3) return Schedule.WeeklyScheduleByDueDaysOfWeek(
-            startDate = startDate,
-            dueDaysOfWeek = DayOfWeek.entries.shuffled().take(Random.nextInt(1..6)),
-            backlogEnabled = backlogEnabled,
-            completingAheadEnabled = completingAheadEnabled,
-        )
-        if (scheduleTypeIndex == 4) return Schedule.MonthlyScheduleByDueDatesIndices(
-            startDate = startDate,
-            dueDatesIndices = (1..31).shuffled().take(Random.nextInt(1..30)),
-            includeLastDayOfMonth = Random.nextBoolean(),
-            backlogEnabled = backlogEnabled,
-            completingAheadEnabled = completingAheadEnabled,
-        )
+        if (scheduleTypeIndex == 3) {
+            return Schedule.WeeklyScheduleByDueDaysOfWeek(
+                startDate = startDate,
+                dueDaysOfWeek = DayOfWeek.entries.shuffled().take(Random.nextInt(1..6)),
+                backlogEnabled = backlogEnabled,
+                completingAheadEnabled = completingAheadEnabled,
+            )
+        }
+        if (scheduleTypeIndex == 4) {
+            return Schedule.MonthlyScheduleByDueDatesIndices(
+                startDate = startDate,
+                dueDatesIndices = (1..31).shuffled().take(Random.nextInt(1..30)),
+                includeLastDayOfMonth = Random.nextBoolean(),
+                backlogEnabled = backlogEnabled,
+                completingAheadEnabled = completingAheadEnabled,
+            )
+        }
         val numOfDueDays = Random.nextInt(1..Schedule.AlternateDaysSchedule.MAX_NUM_OF_DUE_DAYS)
         val numOfNotDueDays =
             Random.nextInt(1..Schedule.AlternateDaysSchedule.MAX_NUM_OF_NOT_DUE_DAYS)
-        if (scheduleTypeIndex == 5) return Schedule.AlternateDaysSchedule(
-            startDate = startDate,
-            numOfDueDays = numOfDueDays,
-            numOfDaysInPeriod = numOfDueDays + numOfNotDueDays,
-            backlogEnabled = backlogEnabled,
-            completingAheadEnabled = completingAheadEnabled,
-        )
+        if (scheduleTypeIndex == 5) {
+            return Schedule.AlternateDaysSchedule(
+                startDate = startDate,
+                numOfDueDays = numOfDueDays,
+                numOfDaysInPeriod = numOfDueDays + numOfNotDueDays,
+                backlogEnabled = backlogEnabled,
+                completingAheadEnabled = completingAheadEnabled,
+            )
+        }
         throw IllegalStateException("Unknown schedule type index: $scheduleTypeIndex")
     }
 }

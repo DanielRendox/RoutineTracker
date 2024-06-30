@@ -44,7 +44,7 @@ class WeeklySchedulePickerState(
         chooseSpecificDays = !chooseSpecificDays
         numOfDueDaysTextFieldIsEditable = !chooseSpecificDays
 
-        if (chooseSpecificDays && specificDaysOfWeek.isEmpty()){
+        if (chooseSpecificDays && specificDaysOfWeek.isEmpty()) {
             val numOfDueDays = try {
                 this.numOfDueDays.toInt()
             } catch (e: NumberFormatException) {
@@ -126,7 +126,6 @@ class WeeklySchedulePickerState(
 }
 
 @Composable
-fun rememberWeeklySchedulePickerState() =
-    rememberSaveable(saver = WeeklySchedulePickerState.Saver) {
-        WeeklySchedulePickerState()
-    }
+fun rememberWeeklySchedulePickerState() = rememberSaveable(saver = WeeklySchedulePickerState.Saver) {
+    WeeklySchedulePickerState()
+}

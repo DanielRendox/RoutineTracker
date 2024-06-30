@@ -3,16 +3,16 @@ package com.rendox.routinetracker.add_edit_routine.choose_schedule
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
-import com.rendox.routinetracker.add_edit_routine.choose_schedule.schedule_pickers.ScheduleTypeUi
-import com.rendox.routinetracker.add_edit_routine.choose_schedule.schedule_picker_states.EveryDaySchedulePickerState
-import com.rendox.routinetracker.add_edit_routine.choose_schedule.schedule_picker_states.SchedulePickerState
 import com.rendox.routinetracker.add_edit_routine.choose_schedule.schedule_picker_states.AlternateDaysSchedulePickerState
-import com.rendox.routinetracker.add_edit_routine.choose_schedule.schedule_picker_states.rememberAlternateDaysSchedulePickerState
-import com.rendox.routinetracker.add_edit_routine.choose_schedule.schedule_picker_states.WeeklySchedulePickerState
-import com.rendox.routinetracker.add_edit_routine.choose_schedule.schedule_picker_states.rememberEveryDaySchedulePickerState
+import com.rendox.routinetracker.add_edit_routine.choose_schedule.schedule_picker_states.EveryDaySchedulePickerState
 import com.rendox.routinetracker.add_edit_routine.choose_schedule.schedule_picker_states.MonthlySchedulePickerState
+import com.rendox.routinetracker.add_edit_routine.choose_schedule.schedule_picker_states.SchedulePickerState
+import com.rendox.routinetracker.add_edit_routine.choose_schedule.schedule_picker_states.WeeklySchedulePickerState
+import com.rendox.routinetracker.add_edit_routine.choose_schedule.schedule_picker_states.rememberAlternateDaysSchedulePickerState
+import com.rendox.routinetracker.add_edit_routine.choose_schedule.schedule_picker_states.rememberEveryDaySchedulePickerState
 import com.rendox.routinetracker.add_edit_routine.choose_schedule.schedule_picker_states.rememberMonthlySchedulePickerState
 import com.rendox.routinetracker.add_edit_routine.choose_schedule.schedule_picker_states.rememberWeeklySchedulePickerState
+import com.rendox.routinetracker.add_edit_routine.choose_schedule.schedule_pickers.ScheduleTypeUi
 import com.rendox.routinetracker.core.model.Schedule
 
 @Stable
@@ -23,9 +23,9 @@ class ChooseSchedulePageState(
     val alternateDaysSchedulePickerState: AlternateDaysSchedulePickerState,
 ) {
     val containsError: Boolean
-        get() = (weeklySchedulePickerState.selected && weeklySchedulePickerState.containsError)
-                || (monthlySchedulePickerState.selected && monthlySchedulePickerState.containsError)
-                || (alternateDaysSchedulePickerState.selected && alternateDaysSchedulePickerState.containsError)
+        get() = (weeklySchedulePickerState.selected && weeklySchedulePickerState.containsError) ||
+            (monthlySchedulePickerState.selected && monthlySchedulePickerState.containsError) ||
+            (alternateDaysSchedulePickerState.selected && alternateDaysSchedulePickerState.containsError)
 
     private val schedulePickerStateList: List<SchedulePickerState> = listOf(
         everyDaySchedulePickerState,
@@ -87,4 +87,3 @@ fun rememberChooseSchedulePageState(
         alternateDaysSchedulePickerState,
     )
 }
-

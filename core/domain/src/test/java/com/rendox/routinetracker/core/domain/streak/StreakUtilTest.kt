@@ -29,14 +29,14 @@ class StreakUtilTest {
     @Test
     fun assertStreakContainsDateWithinStartAndEndDates() {
         assertThat(
-            streaks.first().contains(LocalDate(2023, 1, 6))
+            streaks.first().contains(LocalDate(2023, 1, 6)),
         ).isTrue()
     }
-    
+
     @Test
     fun assertStreakDoesNotContainDateThatIsNotWithinDateRange() {
         assertThat(
-            streaks[3].contains(date = LocalDate(2023, 4, 11))
+            streaks[3].contains(date = LocalDate(2023, 4, 11)),
         ).isFalse()
     }
 
@@ -48,11 +48,11 @@ class StreakUtilTest {
     @Test
     fun getCurrentStreakTest() {
         assertThat(
-            streaks.getCurrentStreak(LocalDate(2023, 4, 11))
+            streaks.getCurrentStreak(LocalDate(2023, 4, 11)),
         ).isEqualTo(streaks.last())
 
         assertThat(
-            streaks.take(3).getCurrentStreak(LocalDate(2023, 3, 5))
+            streaks.take(3).getCurrentStreak(LocalDate(2023, 3, 5)),
         ).isEqualTo(streaks[2])
     }
 
@@ -109,7 +109,7 @@ class StreakUtilTest {
             Streak(
                 startDate = LocalDate(2022, 1, 1),
                 endDate = LocalDate(2022, 1, 30),
-            )
+            ),
         )
     }
 
@@ -138,7 +138,7 @@ class StreakUtilTest {
             Streak(
                 startDate = LocalDate(2022, 1, 1),
                 endDate = LocalDate(2022, 1, 10),
-            )
+            ),
         )
         assertThat(streaks.joinAdjacentStreaks()).containsExactlyElementsIn(streaks)
     }
@@ -158,7 +158,7 @@ class StreakUtilTest {
             Streak(
                 startDate = LocalDate(2022, 1, 1),
                 endDate = LocalDate(2022, 1, 2),
-            )
+            ),
         )
     }
 }

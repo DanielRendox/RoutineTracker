@@ -2,16 +2,17 @@ package com.rendox.routinetracker.core.database.completion_time
 
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
 import com.rendox.routinetracker.core.database.schedule.GetCompletionTime
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalTime
-import kotlin.coroutines.CoroutineContext
 
 class DueDateSpecificCompletionTimeLocalDataSourceImpl(
     private val db: RoutineTrackerDatabase,
     private val ioDispatcher: CoroutineContext,
 ) : DueDateSpecificCompletionTimeLocalDataSource {
     override suspend fun getDueDateSpecificCompletionTime(
-        scheduleId: Long, dueDateNumber: Int
+        scheduleId: Long,
+        dueDateNumber: Int,
     ): LocalTime? = withContext(ioDispatcher) {
         db.dueDateEntityQueries
             .getCompletionTime(scheduleId, dueDateNumber)
@@ -20,7 +21,9 @@ class DueDateSpecificCompletionTimeLocalDataSourceImpl(
     }
 
     override suspend fun updateDueDateSpecificCompletionTime(
-        newTime: LocalTime, scheduleId: Long, dueDateNumber: Int
+        newTime: LocalTime,
+        scheduleId: Long,
+        dueDateNumber: Int,
     ) = withContext(ioDispatcher) {
         db.dueDateEntityQueries.updateCompletionTime(
             completionTimeHour = newTime.hour,
@@ -30,9 +33,10 @@ class DueDateSpecificCompletionTimeLocalDataSourceImpl(
         )
     }
 
-    private fun GetCompletionTime.toExternalModel(): LocalTime? {
-        return if (completionTimeHour != null && completionTimeMinute != null) {
+    private fun GetCompletionTime.toExternalModel(): LocalTime? =
+        if (completionTimeHour != null && completionTimeMinute != null) {
             LocalTime(hour = completionTimeHour, minute = completionTimeMinute)
-        } else null
-    }
+        } else {
+            null
+        }
 }

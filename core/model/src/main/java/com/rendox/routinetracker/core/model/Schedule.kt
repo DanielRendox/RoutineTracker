@@ -72,7 +72,8 @@ sealed class Schedule {
         override val endDate: LocalDate? = null,
 
         override val periodSeparationEnabled: Boolean = true,
-    ) : WeeklySchedule(), ByNumOfDueDays {
+    ) : WeeklySchedule(),
+        ByNumOfDueDays {
         override val backlogEnabled: Boolean = true
         override val completingAheadEnabled: Boolean = true
         override val supportsScheduleDeviation = false
@@ -121,7 +122,8 @@ sealed class Schedule {
 
         override val startDate: LocalDate,
         override val endDate: LocalDate? = null,
-    ) : MonthlySchedule(), ByNumOfDueDays {
+    ) : MonthlySchedule(),
+        ByNumOfDueDays {
         override val backlogEnabled: Boolean = true
         override val completingAheadEnabled: Boolean = true
         override val supportsScheduleDeviation = false
@@ -143,7 +145,8 @@ sealed class Schedule {
 
         override val startDate: LocalDate,
         override val endDate: LocalDate? = null,
-    ) : PeriodicSchedule(), ByNumOfDueDays {
+    ) : PeriodicSchedule(),
+        ByNumOfDueDays {
         override val correspondingPeriod: DatePeriod
             get() = DatePeriod(days = numOfDaysInPeriod)
 
@@ -202,7 +205,8 @@ sealed class Schedule {
 
         override val startDate: LocalDate,
         override val endDate: LocalDate? = null,
-    ) : AnnualSchedule(), ByNumOfDueDays {
+    ) : AnnualSchedule(),
+        ByNumOfDueDays {
         override val backlogEnabled: Boolean = true
         override val completingAheadEnabled: Boolean = true
         override val supportsScheduleDeviation = false
@@ -214,4 +218,3 @@ sealed class Schedule {
         }
     }
 }
-

@@ -166,7 +166,7 @@ class HabitStatusComputerImplTest {
                 Habit.YesNoHabit.CompletionRecord(
                     date = LocalDate(2023, 12, 7), // Wednesday
                     numOfTimesCompleted = 2F,
-                )
+                ),
             ),
             vacationHistory = emptyList(),
         )
@@ -187,7 +187,7 @@ class HabitStatusComputerImplTest {
                     Vacation(
                         startDate = vacationStartDate,
                         endDate = vacationEndDate,
-                    )
+                    ),
                 ),
             )
             assertThat(habitStatus).isEqualTo(HabitStatus.OnVacation)
@@ -199,9 +199,7 @@ class HabitStatusComputerImplTest {
         val vacationStartDate = LocalDate(2023, 12, 4)
         val vacationEndDate = LocalDate(2023, 12, 10)
 
-        val habitStatusComputer = HabitStatusComputerImpl(
-
-        )
+        val habitStatusComputer = HabitStatusComputerImpl()
 
         for (currentDate in vacationStartDate..vacationEndDate) {
             val habitStatus = habitStatusComputer.computeStatus(
@@ -215,7 +213,7 @@ class HabitStatusComputerImplTest {
                     Vacation(
                         startDate = vacationStartDate,
                         endDate = vacationEndDate,
-                    )
+                    ),
                 ),
             )
             assertThat(habitStatus).isEqualTo(HabitStatus.OverCompleted)
@@ -249,7 +247,7 @@ class HabitStatusComputerImplTest {
                     Vacation(
                         startDate = vacationStartDate,
                         endDate = vacationEndDate,
-                    )
+                    ),
                 ),
             )
             resultingStatuses.add(habitStatus)
@@ -276,7 +274,7 @@ class HabitStatusComputerImplTest {
     @ParameterizedTest
     @CsvSource("2023-12-09", "2023-12-10")
     fun `backlog disabled, negative schedule deviation, assert over completing completes ahead`(
-        validationDateString: String
+        validationDateString: String,
     ) {
         val schedule = Schedule.WeeklyScheduleByDueDaysOfWeek(
             dueDaysOfWeek = listOf(
@@ -308,7 +306,7 @@ class HabitStatusComputerImplTest {
                     ),
                 ),
                 vacationHistory = emptyList(),
-            )
+            ),
         ).isEqualTo(HabitStatus.AlreadyCompleted)
     }
 
@@ -336,10 +334,10 @@ class HabitStatusComputerImplTest {
                     Habit.YesNoHabit.CompletionRecord(
                         date = LocalDate(2024, 1, 10),
                         numOfTimesCompleted = 1F,
-                    )
+                    ),
                 ),
                 vacationHistory = emptyList(),
-            )
+            ),
         ).isEqualTo(expectedStatus)
     }
 
@@ -363,10 +361,10 @@ class HabitStatusComputerImplTest {
                     Habit.YesNoHabit.CompletionRecord(
                         date = LocalDate(2024, 1, 11),
                         numOfTimesCompleted = 1F,
-                    )
+                    ),
                 ),
                 vacationHistory = emptyList(),
-            )
+            ),
         ).isEqualTo(HabitStatus.Backlog)
     }
 
@@ -397,7 +395,7 @@ class HabitStatusComputerImplTest {
                     ),
                 ),
                 vacationHistory = emptyList(),
-            )
+            ),
         ).isEqualTo(HabitStatus.PartiallyCompleted) // not CompletedLater
     }
 
@@ -421,10 +419,10 @@ class HabitStatusComputerImplTest {
                     Habit.YesNoHabit.CompletionRecord(
                         date = LocalDate(2024, 1, 8),
                         numOfTimesCompleted = 0.5F,
-                    )
+                    ),
                 ),
                 vacationHistory = emptyList(),
-            )
+            ),
         ).isEqualTo(HabitStatus.Backlog)
     }
 

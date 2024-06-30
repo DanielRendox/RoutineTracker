@@ -10,9 +10,7 @@ import com.rendox.routinetracker.feature.agenda.AgendaRoute
 
 const val agendaNavRoute = "agenda_route"
 
-fun NavController.navigateToAgenda(
-    navOptionsBuilder: NavOptionsBuilder.() -> Unit = {},
-) {
+fun NavController.navigateToAgenda(navOptionsBuilder: NavOptionsBuilder.() -> Unit = {}) {
     this.navigate(agendaNavRoute, navOptionsBuilder)
 }
 

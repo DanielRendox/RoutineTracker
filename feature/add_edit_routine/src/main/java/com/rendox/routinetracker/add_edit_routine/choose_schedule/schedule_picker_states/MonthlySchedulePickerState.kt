@@ -86,8 +86,11 @@ class MonthlySchedulePickerState(
         lastDayOfMonthSelected = !lastDayOfMonthSelected
         val numOfDueDays = this.numOfDueDays.toInt()
         this.numOfDueDays =
-            if (lastDayOfMonthSelected) (numOfDueDays + 1).toString()
-            else (numOfDueDays - 1).toString()
+            if (lastDayOfMonthSelected) {
+                (numOfDueDays + 1).toString()
+            } else {
+                (numOfDueDays - 1).toString()
+            }
         checkNumOfDueDaysValidity()
         updateContainsErrorState()
     }
@@ -144,13 +147,12 @@ class MonthlySchedulePickerState(
                     selected = monthlySchedulePickerStateValues[3] as Boolean,
                     chooseSpecificDays = monthlySchedulePickerStateValues[4] as Boolean,
                 )
-            }
+            },
         )
     }
 }
 
 @Composable
-fun rememberMonthlySchedulePickerState() =
-    rememberSaveable(saver = MonthlySchedulePickerState.Saver) {
-        MonthlySchedulePickerState()
-    }
+fun rememberMonthlySchedulePickerState() = rememberSaveable(saver = MonthlySchedulePickerState.Saver) {
+    MonthlySchedulePickerState()
+}

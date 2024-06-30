@@ -21,7 +21,7 @@ class EveryDaySchedulePickerState(
             },
             restore = { everyDayScheduleStateValues ->
                 EveryDaySchedulePickerState(
-                    selected = everyDayScheduleStateValues.first()
+                    selected = everyDayScheduleStateValues.first(),
                 )
             },
         )
@@ -29,7 +29,6 @@ class EveryDaySchedulePickerState(
 }
 
 @Composable
-fun rememberEveryDaySchedulePickerState() =
-    rememberSaveable(saver = EveryDaySchedulePickerState.Saver) {
-        EveryDaySchedulePickerState()
-    }
+fun rememberEveryDaySchedulePickerState() = rememberSaveable(saver = EveryDaySchedulePickerState.Saver) {
+    EveryDaySchedulePickerState()
+}

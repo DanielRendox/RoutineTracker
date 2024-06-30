@@ -71,7 +71,7 @@ private fun AlternateDaysInput(
             modifier = Modifier.padding(end = 16.dp),
             painter = painterResource(id = R.drawable.baseline_error_24),
             contentDescription = stringResource(
-                id = R.string.error_message_num_of_days_is_not_valid
+                id = R.string.error_message_num_of_days_is_not_valid,
             ),
             tint = if (!numOfActivityDaysIsValid || !numOfRestDaysIsValid) {
                 MaterialTheme.colorScheme.error
@@ -89,7 +89,7 @@ private fun AlternateDaysInput(
             placeholder = {
                 Text(
                     text = stringResource(
-                        id = R.string.alternate_days_picker_activity_text_field_placeholder
+                        id = R.string.alternate_days_picker_activity_text_field_placeholder,
                     ),
                     style = MaterialTheme.typography.bodyMedium,
                 )
@@ -115,7 +115,7 @@ private fun AlternateDaysInput(
             placeholder = {
                 Text(
                     text = stringResource(
-                        id = R.string.alternate_days_picker_rest_text_field_placeholder
+                        id = R.string.alternate_days_picker_rest_text_field_placeholder,
                     ),
                     style = MaterialTheme.typography.bodyMedium,
                 )

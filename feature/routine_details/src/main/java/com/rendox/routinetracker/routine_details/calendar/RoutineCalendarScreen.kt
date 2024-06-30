@@ -33,13 +33,13 @@ import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.ui.helpers.LocalLocale
 import com.rendox.routinetracker.feature.routine_details.R
 import com.rendox.routinetracker.routine_details.CalendarDateData
+import java.time.YearMonth
+import java.time.temporal.WeekFields
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.todayIn
-import java.time.YearMonth
-import java.time.temporal.WeekFields
 
 @Composable
 fun RoutineCalendarScreen(
@@ -206,7 +206,7 @@ private fun CurrentStreakCard(
         modifier = modifier,
         icon = painterResource(R.drawable.baseline_commit_24),
         title = "$currentStreakDurationInDays $currentStreakDurationInDaysString",
-        bodyText = stringResource(id = R.string.current_streak)
+        bodyText = stringResource(id = R.string.current_streak),
     )
 }
 
@@ -220,7 +220,7 @@ private fun LongestStreakCard(
         modifier = modifier,
         icon = painterResource(R.drawable.trophy_24),
         title = "$longestStreakDurationInDays $longestStreakDurationInDaysString",
-        bodyText = stringResource(id = R.string.longest_streak)
+        bodyText = stringResource(id = R.string.longest_streak),
     )
 }
 
@@ -258,8 +258,9 @@ private fun RoutineStreakCard(
 }
 
 @Preview(
-    showSystemUi = true, showBackground = true,
-    device = "spec:parent=pixel_5, orientation=landscape"
+    showSystemUi = true,
+    showBackground = true,
+    device = "spec:parent=pixel_5, orientation=landscape",
 )
 @Composable
 private fun RoutineDetailsScreenPreview() {

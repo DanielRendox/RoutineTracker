@@ -98,7 +98,7 @@ internal class StreakComputerImpl(
             val currentStreak = Streak(startDate = streakStartDate, endDate = streakEndDate)
             val someStreakAlreadyIncludesCurrentStreak = streaks.any { saveStreak ->
                 saveStreak.startDate <= currentStreak.startDate &&
-                        saveStreak.endDate >= currentStreak.endDate
+                    saveStreak.endDate >= currentStreak.endDate
             }
             if (someStreakAlreadyIncludesCurrentStreak) continue
 
@@ -120,7 +120,7 @@ internal class StreakComputerImpl(
         habit: Habit,
         completionHistory: List<Habit.CompletionRecord>,
         vacationHistory: List<Vacation>,
-        period: LocalDateRange
+        period: LocalDateRange,
     ): List<Streak> = computeAllStreaks(
         today = today,
         habit = habit,

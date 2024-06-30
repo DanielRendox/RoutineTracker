@@ -6,7 +6,7 @@ import com.rendox.routinetracker.feature.add_edit_routine.R
 
 @Immutable
 sealed class ScheduleTypeUi(
-    @StringRes val titleId: Int
+    @StringRes val titleId: Int,
 ) {
     data object EveryDaySchedule : ScheduleTypeUi(titleId = R.string.schedule_type_label_every_day)
     data object WeeklySchedule : ScheduleTypeUi(titleId = R.string.schedule_type_label_weekly)

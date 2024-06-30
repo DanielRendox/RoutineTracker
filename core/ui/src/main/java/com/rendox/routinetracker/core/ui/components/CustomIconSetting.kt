@@ -37,7 +37,7 @@ fun CustomIconSetting(
                 icon?.let { it(Modifier.padding(end = 16.dp)) }
                 Text(
                     modifier = Modifier.padding(top = 16.dp, bottom = 16.dp, end = 16.dp),
-                    text = title
+                    text = title,
                 )
             }
             trailingComponent?.let { it() }

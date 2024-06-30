@@ -37,7 +37,7 @@ fun Setting(
             modifier = Modifier
                 .weight(1f)
                 .padding(end = 16.dp)
-                .alpha(if (enabled) 1f else 0.5f)
+                .alpha(if (enabled) 1f else 0.5f),
         ) {
             Text(text = title)
             description?.let {

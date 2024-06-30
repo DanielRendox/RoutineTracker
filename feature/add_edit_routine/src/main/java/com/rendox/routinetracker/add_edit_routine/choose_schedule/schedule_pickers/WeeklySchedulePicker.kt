@@ -22,9 +22,9 @@ import com.rendox.routinetracker.add_edit_routine.choose_schedule.schedule_picke
 import com.rendox.routinetracker.add_edit_routine.choose_schedule.schedule_picker_states.rememberWeeklySchedulePickerState
 import com.rendox.routinetracker.core.ui.R
 import com.rendox.routinetracker.core.ui.helpers.LocalLocale
-import kotlinx.datetime.DayOfWeek
 import java.time.format.TextStyle
 import java.time.temporal.WeekFields
+import kotlinx.datetime.DayOfWeek
 
 @Composable
 fun WeeklySchedulePicker(

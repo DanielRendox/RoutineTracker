@@ -6,6 +6,6 @@ import kotlinx.datetime.LocalTime
 interface GetHabitCompletionTimeUseCase {
     suspend operator fun invoke(
         habitId: Long,
-        date: LocalDate
+        date: LocalDate,
     ): LocalTime?
 }

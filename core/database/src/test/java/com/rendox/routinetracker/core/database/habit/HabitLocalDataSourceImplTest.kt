@@ -3,7 +3,6 @@ package com.rendox.routinetracker.core.database.habit
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
 import com.rendox.routinetracker.core.database.di.habitLocalDataModule
 import com.rendox.routinetracker.core.database.di.localDataSourceModule
@@ -13,6 +12,7 @@ import com.rendox.routinetracker.core.logic.time.WeekDayNumberMonthRelated
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Schedule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
@@ -119,7 +119,7 @@ class HabitLocalDataSourceImplTest : KoinTest {
             WeekDayMonthRelated(DayOfWeek.MONDAY, WeekDayNumberMonthRelated.First),
             WeekDayMonthRelated(DayOfWeek.WEDNESDAY, WeekDayNumberMonthRelated.First),
             WeekDayMonthRelated(DayOfWeek.THURSDAY, WeekDayNumberMonthRelated.Third),
-            WeekDayMonthRelated(DayOfWeek.FRIDAY, WeekDayNumberMonthRelated.Last)
+            WeekDayMonthRelated(DayOfWeek.FRIDAY, WeekDayNumberMonthRelated.Last),
         )
 
         val schedule = Schedule.MonthlyScheduleByDueDatesIndices(
@@ -156,7 +156,7 @@ class HabitLocalDataSourceImplTest : KoinTest {
                 WeekDayMonthRelated(
                     dayOfWeek = DayOfWeek.TUESDAY,
                     weekDayNumberMonthRelated = WeekDayNumberMonthRelated.Third,
-                )
+                ),
             ),
             startFromHabitStart = true,
             startDate = LocalDate(2023, Month.SEPTEMBER, 1),

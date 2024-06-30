@@ -12,25 +12,22 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toKotlinLocalDate
 import kotlinx.datetime.todayIn
 
-fun SchedulePickerState.assembleSchedule(
-    tweakRoutinePageState: TweakRoutinePageState? = null,
-): Schedule = when (this) {
+fun SchedulePickerState.assembleSchedule(tweakRoutinePageState: TweakRoutinePageState? = null): Schedule = when (this) {
     is EveryDaySchedulePickerState -> assembleEveryDaySchedule(tweakRoutinePageState)
     is WeeklySchedulePickerState -> assembleWeeklySchedule(tweakRoutinePageState)
     is MonthlySchedulePickerState -> assembleMonthlySchedule(tweakRoutinePageState)
     is AlternateDaysSchedulePickerState -> assembleAlternateDaysSchedule(tweakRoutinePageState)
 }
 
-private fun assembleEveryDaySchedule(
-    tweakRoutinePageState: TweakRoutinePageState?
-): Schedule.EveryDaySchedule = Schedule.EveryDaySchedule(
-    startDate = tweakRoutinePageState?.startDate?.toKotlinLocalDate()
-        ?: Clock.System.todayIn(TimeZone.currentSystemDefault()),
-    endDate = tweakRoutinePageState?.endDate?.toKotlinLocalDate(),
-)
+private fun assembleEveryDaySchedule(tweakRoutinePageState: TweakRoutinePageState?): Schedule.EveryDaySchedule =
+    Schedule.EveryDaySchedule(
+        startDate = tweakRoutinePageState?.startDate?.toKotlinLocalDate()
+            ?: Clock.System.todayIn(TimeZone.currentSystemDefault()),
+        endDate = tweakRoutinePageState?.endDate?.toKotlinLocalDate(),
+    )
 
 private fun WeeklySchedulePickerState.assembleWeeklySchedule(
-    tweakRoutinePageState: TweakRoutinePageState? = null
+    tweakRoutinePageState: TweakRoutinePageState? = null,
 ): Schedule = if (specificDaysOfWeek.isNotEmpty() && chooseSpecificDays) {
     if (tweakRoutinePageState != null) {
         Schedule.WeeklyScheduleByDueDaysOfWeek(
@@ -64,7 +61,7 @@ private fun WeeklySchedulePickerState.assembleWeeklySchedule(
 }
 
 private fun MonthlySchedulePickerState.assembleMonthlySchedule(
-    tweakRoutinePageState: TweakRoutinePageState?
+    tweakRoutinePageState: TweakRoutinePageState?,
 ): Schedule = if (specificDaysOfMonth.isNotEmpty() && chooseSpecificDays) {
     if (tweakRoutinePageState != null) {
         Schedule.MonthlyScheduleByDueDatesIndices(
