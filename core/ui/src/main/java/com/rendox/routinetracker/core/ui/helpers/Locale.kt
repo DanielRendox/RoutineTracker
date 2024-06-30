@@ -1,13 +1,14 @@
 package com.rendox.routinetracker.core.ui.helpers
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.core.os.ConfigurationCompat
 import java.util.Locale
 
-val LocalLocale = compositionLocalOf { Locale.getDefault() }
+val LocalLocale: ProvidableCompositionLocal<Locale> = compositionLocalOf { Locale.getDefault() }
 
 @Composable
 @ReadOnlyComposable

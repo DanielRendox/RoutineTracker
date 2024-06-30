@@ -100,12 +100,9 @@ fun RoutineTrackerTheme(
     }
     val routineStatusColors =
         if (useDarkTheme) routineStatusColorsDark else routineStatusColorsLight
-    val customTextColors =
-        if (useDarkTheme) customTextColorsDark else customTextColorsLight
 
     CompositionLocalProvider(
         LocalRoutineStatusColors provides routineStatusColors,
-        LocalCustomTextColors provides customTextColors,
         LocalLocale provides getLocale()
     ) {
         MaterialTheme(

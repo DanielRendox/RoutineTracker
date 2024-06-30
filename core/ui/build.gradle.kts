@@ -32,7 +32,7 @@ dependencies {
     implementation(project(":core:model"))
 
     implementation(libs.kizitonwose.calendar.compose)
-    implementation("androidx.compose.ui:ui-util")
+    implementation(libs.androidx.ui.util)
     implementation(libs.material)
     implementation(libs.androidx.core.splashscreen)
 }

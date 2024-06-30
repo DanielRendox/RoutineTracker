@@ -30,11 +30,9 @@ class DueDateSpecificCompletionTimeLocalDataSourceImpl(
         )
     }
 
-    companion object {
-        private fun GetCompletionTime.toExternalModel(): LocalTime? {
-            return if (completionTimeHour != null && completionTimeMinute != null) {
-                LocalTime(hour = completionTimeHour, minute = completionTimeMinute)
-            } else null
-        }
+    private fun GetCompletionTime.toExternalModel(): LocalTime? {
+        return if (completionTimeHour != null && completionTimeMinute != null) {
+            LocalTime(hour = completionTimeHour, minute = completionTimeMinute)
+        } else null
     }
 }

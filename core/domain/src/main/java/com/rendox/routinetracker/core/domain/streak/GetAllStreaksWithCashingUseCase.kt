@@ -14,9 +14,9 @@ import com.rendox.routinetracker.core.logic.time.withDayOfMonth
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.model.Streak
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
-import kotlin.coroutines.CoroutineContext
 
 class GetAllStreaksWithCashingUseCase(
     private val getHabit: GetHabitUseCase,
@@ -100,14 +100,12 @@ class GetAllStreaksWithCashingUseCase(
         )
     }
 
-    companion object {
-        private fun getPeriodRange(
-            schedule: Schedule,
-            currentDate: LocalDate,
-        ): LocalDateRange? = when (schedule) {
-            is Schedule.PeriodicSchedule -> schedule.getPeriodRange(currentDate)
-            is Schedule.EveryDaySchedule -> currentDate.withDayOfMonth(1)..currentDate.atEndOfMonth
-            is Schedule.CustomDateSchedule -> throw IllegalArgumentException()
-        }
+    private fun getPeriodRange(
+        schedule: Schedule,
+        currentDate: LocalDate,
+    ): LocalDateRange? = when (schedule) {
+        is Schedule.PeriodicSchedule -> schedule.getPeriodRange(currentDate)
+        is Schedule.EveryDaySchedule -> currentDate.withDayOfMonth(1)..currentDate.atEndOfMonth
+        is Schedule.CustomDateSchedule -> throw IllegalArgumentException()
     }
 }

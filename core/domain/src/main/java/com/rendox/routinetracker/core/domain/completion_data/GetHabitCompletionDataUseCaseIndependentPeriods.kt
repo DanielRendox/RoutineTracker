@@ -74,45 +74,43 @@ class GetHabitCompletionDataUseCaseIndependentPeriods(
         }
     }
 
-    companion object {
-        private fun expandPeriodToScheduleBounds(
-            requestedDates: LocalDateRange,
-            schedule: Schedule,
-        ): LocalDateRange? {
-            val scheduleEndDate = schedule.endDate
+    private fun expandPeriodToScheduleBounds(
+        requestedDates: LocalDateRange,
+        schedule: Schedule,
+    ): LocalDateRange? {
+        val scheduleEndDate = schedule.endDate
 
-            val requestedDatesLaterThanHabitEnd =
-                scheduleEndDate != null && requestedDates.start > scheduleEndDate
-            if (requestedDatesLaterThanHabitEnd) return null
+        val requestedDatesLaterThanHabitEnd =
+            scheduleEndDate != null && requestedDates.start > scheduleEndDate
+        if (requestedDatesLaterThanHabitEnd) return null
 
-            val requestedDatesEarlierThanHabitStart =
-                requestedDates.endInclusive < schedule.startDate
-            if (requestedDatesEarlierThanHabitStart) return null
+        val requestedDatesEarlierThanHabitStart =
+            requestedDates.endInclusive < schedule.startDate
+        if (requestedDatesEarlierThanHabitStart) return null
 
-            val requestedDatesIsIncorrectRange = requestedDates.endInclusive < requestedDates.start
-            if (requestedDatesIsIncorrectRange) return null
+        val requestedDatesIsIncorrectRange = requestedDates.endInclusive < requestedDates.start
+        if (requestedDatesIsIncorrectRange) return null
 
 
-            val minDate = requestedDates.start
-            val requestedStart = when {
-                schedule.startDate > minDate -> schedule.startDate
-                else -> minDate
-            }
-            val schedulePeriodStart = when (schedule) {
-                is Schedule.PeriodicSchedule -> schedule.getPeriodRange(requestedStart)!!.start
-                else -> requestedStart
-            }
-            val maxDate = requestedDates.endInclusive
-            val requestedEnd = when {
-                scheduleEndDate != null && scheduleEndDate < maxDate ->
-                    scheduleEndDate
-                else -> maxDate
-            }
-            val schedulePeriodEnd = when (schedule) {
-                is Schedule.PeriodicSchedule -> schedule.getPeriodRange(requestedEnd)!!.endInclusive
-                else -> requestedEnd
-            }
-            return schedulePeriodStart..schedulePeriodEnd
+        val minDate = requestedDates.start
+        val requestedStart = when {
+            schedule.startDate > minDate -> schedule.startDate
+            else -> minDate
         }
+        val schedulePeriodStart = when (schedule) {
+            is Schedule.PeriodicSchedule -> schedule.getPeriodRange(requestedStart)!!.start
+            else -> requestedStart
+        }
+        val maxDate = requestedDates.endInclusive
+        val requestedEnd = when {
+            scheduleEndDate != null && scheduleEndDate < maxDate ->
+                scheduleEndDate
+            else -> maxDate
+        }
+        val schedulePeriodEnd = when (schedule) {
+            is Schedule.PeriodicSchedule -> schedule.getPeriodRange(requestedEnd)!!.endInclusive
+            else -> requestedEnd
+        }
+        return schedulePeriodStart..schedulePeriodEnd
     }
 }

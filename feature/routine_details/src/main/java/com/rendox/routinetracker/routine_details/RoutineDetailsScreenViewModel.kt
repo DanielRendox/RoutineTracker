@@ -99,16 +99,16 @@ class RoutineDetailsScreenViewModel(
     ) {
         // delete all other months because the data may be outdated
         if (forceUpdate) {
-            val start = _currentMonthFlow.value.minusMonths(NumOfMonthsToLoadAhead.toLong())
+            val start = _currentMonthFlow.value.minusMonths(NUM_OF_MONTHS_TO_LOAD_AHEAD.toLong())
                 .atStartOfMonth().toKotlinLocalDate()
-            val end = _currentMonthFlow.value.plusMonths(NumOfMonthsToLoadAhead.toLong())
+            val end = _currentMonthFlow.value.plusMonths(NUM_OF_MONTHS_TO_LOAD_AHEAD.toLong())
                 .atEndOfMonth().toKotlinLocalDate()
             _calendarDatesFlow.update { calendarDates ->
                 calendarDates.filterKeys { it in start..end }
             }
         }
         updateMonth(_currentMonthFlow.value, forceUpdate)
-        for (i in 1..NumOfMonthsToLoadAhead) {
+        for (i in 1..NUM_OF_MONTHS_TO_LOAD_AHEAD) {
             updateMonth(_currentMonthFlow.value.plusMonths(i.toLong()), forceUpdate)
             updateMonth(_currentMonthFlow.value.minusMonths(i.toLong()), forceUpdate)
         }
@@ -202,7 +202,7 @@ class RoutineDetailsScreenViewModel(
          * on the user's scroll direction). It's done for the user to see the pre-loaded data
          * when they scroll to the next month.
          */
-        const val NumOfMonthsToLoadAhead = 3
+        const val NUM_OF_MONTHS_TO_LOAD_AHEAD = 3
     }
 }
 
@@ -212,4 +212,3 @@ data class CalendarDateData(
     val numOfTimesCompleted: Float,
     val isPastDate: Boolean,
 )
-

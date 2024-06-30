@@ -365,44 +365,6 @@ private fun WeekStartDayPickerSetting(
     )
 }
 
-@Composable
-private fun SessionDurationSetting(
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier = modifier) {
-        CustomIconSetting(
-            title = stringResource(id = R.string.session_duration_setting_title),
-            icon = {
-                Icon(
-                    modifier = it,
-                    painter = painterResource(R.drawable.timelapse_24),
-                    contentDescription = null,
-                )
-            },
-        )
-    }
-}
-
-@Composable
-private fun SessionTimeSetting(
-    modifier: Modifier = Modifier
-) {
-    CustomIconSetting(
-        modifier = modifier,
-        title = stringResource(id = R.string.session_time_setting_title),
-        icon = {
-            Icon(
-                modifier = it,
-                painter = painterResource(id = R.drawable.baseline_access_time_24),
-                contentDescription = null,
-            )
-        },
-        trailingComponent = {
-            TonalDataInput(text = stringResource(R.string.pick))
-        }
-    )
-}
-
 @Preview(showSystemUi = true)
 @Composable
 fun TweakRoutinePagePreview() {

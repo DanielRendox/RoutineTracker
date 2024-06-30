@@ -141,7 +141,6 @@ class AddRoutineScreenState(
     private fun updateNavDestinations(routineType: RoutineTypeUi) {
         navDestinations = when (routineType) {
             RoutineTypeUi.YesNoHabit -> yesNoHabitDestinations
-            RoutineTypeUi.MeasurableHabit -> TODO()
         }
     }
 
@@ -155,8 +154,6 @@ class AddRoutineScreenState(
             sessionDurationMinutes = tweakRoutinePageState.sessionDuration?.toMinutes()?.toInt(),
             defaultCompletionTime = tweakRoutinePageState.sessionTime?.toKotlinLocalTime(),
         )
-
-        is RoutineTypeUi.MeasurableHabit -> TODO()
     }
 
     private fun Schedule.convertToMoreAppropriateModel(startDayOfWeek: DayOfWeek) = when(this) {

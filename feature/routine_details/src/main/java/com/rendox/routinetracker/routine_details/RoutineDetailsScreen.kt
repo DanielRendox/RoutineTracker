@@ -148,7 +148,7 @@ internal fun RoutineDetailsScreen(
     onScrolledToNewMonth: (YearMonth) -> Unit,
 ) {
     val iconDescription: String = stringResource(
-        id = com.rendox.routinetracker.core.ui.R.string.top_app_bar_navigation_icon_description
+        id = com.rendox.routinetracker.core.ui.R.string.back
     )
 
     val toolbarHeightRange = with(LocalDensity.current) {

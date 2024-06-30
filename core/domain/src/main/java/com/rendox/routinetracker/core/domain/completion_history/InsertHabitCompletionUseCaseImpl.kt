@@ -25,15 +25,15 @@ open class InsertHabitCompletionUseCaseImpl(
     ) {
         val habit = getHabit(habitId)
         if (completionRecord.date < habit.schedule.startDate) {
-            throw InsertHabitCompletionUseCase.IllegalDateEditAttemptException.NotStartedHabitDateEditAttemptException
+            throw InsertHabitCompletionUseCase.IllegalDateEditAttemptException.NotStartedHabitDateEditAttemptException()
         }
         habit.schedule.endDate?.let {  endDate ->
             if (completionRecord.date > endDate) {
-                throw InsertHabitCompletionUseCase.IllegalDateEditAttemptException.FinishedHabitDateEditAttemptException
+                throw InsertHabitCompletionUseCase.IllegalDateEditAttemptException.FinishedHabitDateEditAttemptException()
             }
         }
         if (completionRecord.date > today) {
-            throw InsertHabitCompletionUseCase.IllegalDateEditAttemptException.FutureDateEditAttemptException
+            throw InsertHabitCompletionUseCase.IllegalDateEditAttemptException.FutureDateEditAttemptException()
         }
 
         if (completionRecord.numOfTimesCompleted > 0F) {

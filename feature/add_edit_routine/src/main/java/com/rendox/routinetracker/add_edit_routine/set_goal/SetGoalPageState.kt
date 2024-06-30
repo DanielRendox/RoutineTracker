@@ -32,14 +32,6 @@ class SetGoalPageState(
         checkRoutineNameValidity()
     }
 
-    fun updateRoutineDescription(newDescription: String) {
-        if (newDescription == "") {
-            routineDescription = null
-            return
-        }
-        routineDescription = newDescription
-    }
-
     fun triggerErrorsIfAny() {
         checkRoutineNameValidity()
     }

@@ -18,17 +18,17 @@ sealed class RoutineTypeUi(
         inDevelopment = false,
     )
 
-    data object MeasurableHabit : RoutineTypeUi(
-        routineTypeId = 2,
-        titleId = R.string.measurable_habit_title,
-        descriptionId = R.string.measurable_habit_description,
-        inDevelopment = true,
-    )
+//    data object MeasurableHabit : RoutineTypeUi(
+//        routineTypeId = 2,
+//        titleId = R.string.measurable_habit_title,
+//        descriptionId = R.string.measurable_habit_description,
+//        inDevelopment = true,
+//    )
 
     companion object {
         fun getTypeById(id: Int) = when (id) {
             YesNoHabit.routineTypeId -> YesNoHabit
-            MeasurableHabit.routineTypeId -> MeasurableHabit
+//            MeasurableHabit.routineTypeId -> MeasurableHabit
             else -> throw IllegalArgumentException()
         }
     }
@@ -36,5 +36,5 @@ sealed class RoutineTypeUi(
 
 val habitTypes = listOf(
     RoutineTypeUi.YesNoHabit,
-    RoutineTypeUi.MeasurableHabit,
+//    RoutineTypeUi.MeasurableHabit,
 )

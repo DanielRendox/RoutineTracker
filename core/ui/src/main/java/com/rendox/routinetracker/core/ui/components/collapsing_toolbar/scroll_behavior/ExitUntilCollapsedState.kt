@@ -15,9 +15,9 @@ class ExitUntilCollapsedState(
         get() = (maxHeight.toFloat() - scrollValue).coerceIn(minHeight.toFloat(), maxHeight.toFloat())
 
     override var scrollValue: Int
-        get() = _scrollValue
+        get() = scrollValueLimited
         set(value) {
-            _scrollValue = value.coerceAtLeast(0)
+            scrollValueLimited = value.coerceAtLeast(0)
         }
 
     companion object {

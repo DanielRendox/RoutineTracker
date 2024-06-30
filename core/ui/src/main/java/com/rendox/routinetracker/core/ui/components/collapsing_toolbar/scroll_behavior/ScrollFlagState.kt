@@ -17,9 +17,9 @@ abstract class ScrollFlagState(
 
     protected val minHeight = heightRange.first
     protected val maxHeight = heightRange.last
-    protected val rangeDifference = heightRange.last - heightRange.first
+    private val rangeDifference = heightRange.last - heightRange.first
 
-    protected var _scrollValue by mutableIntStateOf(
+    protected var scrollValueLimited by mutableIntStateOf(
         value = scrollValue.coerceAtLeast(0),
     )
 
