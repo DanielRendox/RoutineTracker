@@ -33,6 +33,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.dp
 import com.rendox.routinetracker.core.ui.components.collapsing_toolbar.scroll_behavior.ToolbarState
 import com.rendox.routinetracker.core.ui.components.collapsing_toolbar.scroll_behavior.rememberExitUntilCollapsedToolbarState
@@ -67,17 +69,20 @@ fun CollapsingToolbarScaffold(
             Box(modifier = Modifier.padding(paddingValues)) {
                 Box(modifier = Modifier.statusBarsPadding()) {
                     Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(scrollState),
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .verticalScroll(scrollState),
                     ) {
-                        val toolbarExpandedHeight = with(LocalDensity.current) {
-                            toolbarHeightRange.last.toDp()
-                        }
+                        val toolbarExpandedHeight =
+                            with(LocalDensity.current) {
+                                toolbarHeightRange.last.toDp()
+                            }
                         Spacer(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(toolbarExpandedHeight)
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(toolbarExpandedHeight),
                         )
                         content()
                     }
@@ -90,10 +95,13 @@ fun CollapsingToolbarScaffold(
 
 @Preview
 @Composable
-fun CollapsingToolbarScaffoldPreview() {
-    val toolbarHeightRange = with(LocalDensity.current) {
-        LargeToolbarHeightCollapsed.roundToPx()..LargeToolbarHeightExpanded.roundToPx()
-    }
+fun CollapsingToolbarScaffoldPreview(
+    @PreviewParameter(LoremIpsum::class) longText: String,
+) {
+    val toolbarHeightRange =
+        with(LocalDensity.current) {
+            LargeToolbarHeightCollapsed.roundToPx()..LargeToolbarHeightExpanded.roundToPx()
+        }
     val toolbarState = rememberExitUntilCollapsedToolbarState(toolbarHeightRange)
 
     CollapsingToolbarScaffold(
@@ -108,15 +116,16 @@ fun CollapsingToolbarScaffoldPreview() {
                     IconButton(onClick = { }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null
+                            contentDescription = null,
                         )
                     }
                 },
                 actions = {
-                    val icons = listOf(
-                        Icons.Default.Create,
-                        Icons.Default.MoreVert,
-                    )
+                    val icons =
+                        listOf(
+                            Icons.Default.Create,
+                            Icons.Default.MoreVert,
+                        )
                     for (icon in icons) {
                         IconButton(onClick = { }) {
                             Icon(
@@ -125,17 +134,18 @@ fun CollapsingToolbarScaffoldPreview() {
                             )
                         }
                     }
-                }
+                },
             )
         },
     ) {
         Text(
-            modifier = Modifier.padding(
-                top = LargeToolbarBottomPadding,
-                start = 16.dp,
-                end = 16.dp
-            ),
-            text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl. Donec euismod, nisl eget aliquam aliquam, nisl nunc aliquet nunc, quis aliquam nisl nisl quis nisl.",
+            modifier =
+                Modifier.padding(
+                    top = LargeToolbarBottomPadding,
+                    start = 16.dp,
+                    end = 16.dp,
+                ),
+            text = longText,
             style = MaterialTheme.typography.bodySmall,
         )
     }

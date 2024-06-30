@@ -1,4 +1,4 @@
-<h1 align="center" style="font-size:28px; line-height:1"><b>Routine Tracker</b></h1>
+<h1 style="font-size:28px; line-height:1; text-align:center;"><b>Routine Tracker</b></h1>
 
 <div align="center">
   <img alt="Routine Tracker logo" src="images/app_logo.svg" height="150px">
