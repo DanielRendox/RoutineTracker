@@ -2,6 +2,7 @@ plugins {
     id("routinetracker.android.application")
     id("routinetracker.android.application.compose")
     id("routinetracker.android.koin")
+    id("routinetracker.lint")
 }
 
 android {
