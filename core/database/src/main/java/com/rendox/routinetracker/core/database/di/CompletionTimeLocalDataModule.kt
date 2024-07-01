@@ -1,7 +1,7 @@
 package com.rendox.routinetracker.core.database.di
 
-import com.rendox.routinetracker.core.database.completion_time.DueDateSpecificCompletionTimeLocalDataSource
-import com.rendox.routinetracker.core.database.completion_time.DueDateSpecificCompletionTimeLocalDataSourceImpl
+import com.rendox.routinetracker.core.database.completiontime.DueDateSpecificCompletionTimeLocalDataSource
+import com.rendox.routinetracker.core.database.completiontime.DueDateSpecificCompletionTimeLocalDataSourceImpl
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 

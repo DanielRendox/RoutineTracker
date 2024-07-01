@@ -18,7 +18,7 @@ import com.rendox.routinetracker.core.domain.di.domainModule
 import com.rendox.routinetracker.core.domain.di.habitDomainModule
 import com.rendox.routinetracker.core.domain.di.streakDomainModule
 import com.rendox.routinetracker.feature.agenda.di.agendaScreenModule
-import com.rendox.routinetracker.routine_details.di.routineDetailsModule
+import com.rendox.routinetracker.routinedetails.di.routineDetailsModule
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob

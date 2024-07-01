@@ -1,9 +1,9 @@
 package com.rendox.routinetracker.core.domain.agenda
 
-import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
+import com.rendox.routinetracker.core.data.completionhistory.CompletionHistoryRepository
 import com.rendox.routinetracker.core.data.habit.HabitRepository
 import com.rendox.routinetracker.core.data.vacation.VacationRepository
-import com.rendox.routinetracker.core.domain.habit_status.HabitStatusComputer
+import com.rendox.routinetracker.core.domain.habitstatus.HabitStatusComputer
 import com.rendox.routinetracker.core.domain.schedule.getPeriodRange
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.rangeTo

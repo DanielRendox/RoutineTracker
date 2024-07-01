@@ -12,7 +12,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import com.rendox.routinetracker.app.navigation.RoutineTrackerNavHost
 import com.rendox.routinetracker.core.ui.theme.RoutineTrackerTheme
-import com.rendox.routinetracker.feature.agenda.navigation.agendaNavRoute
+import com.rendox.routinetracker.feature.agenda.navigation.AGENDA_NAV_ROUTE
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
             ) {
                 RoutineTrackerNavHost(
                     modifier = Modifier.fillMaxSize(),
-                    startDestination = agendaNavRoute,
+                    startDestination = AGENDA_NAV_ROUTE,
                 )
             }
         }

@@ -4,13 +4,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import com.rendox.routinetracker.add_edit_routine.navigation.addRoutineScreen
-import com.rendox.routinetracker.add_edit_routine.navigation.navigateToAddRoutine
-import com.rendox.routinetracker.feature.agenda.navigation.agendaNavRoute
+import com.rendox.routinetracker.addeditroutine.navigation.addRoutineScreen
+import com.rendox.routinetracker.addeditroutine.navigation.navigateToAddRoutine
+import com.rendox.routinetracker.feature.agenda.navigation.AGENDA_NAV_ROUTE
 import com.rendox.routinetracker.feature.agenda.navigation.agendaScreen
 import com.rendox.routinetracker.feature.agenda.navigation.navigateToAgenda
-import com.rendox.routinetracker.routine_details.navigation.navigateToRoutineDetails
-import com.rendox.routinetracker.routine_details.navigation.routineDetailsScreen
+import com.rendox.routinetracker.routinedetails.navigation.navigateToRoutineDetails
+import com.rendox.routinetracker.routinedetails.navigation.routineDetailsScreen
 
 @Composable
 fun RoutineTrackerNavHost(
@@ -26,7 +26,7 @@ fun RoutineTrackerNavHost(
         addRoutineScreen(
             navigateBackAndRecreate = {
                 navController.navigateToAgenda {
-                    popUpTo(route = agendaNavRoute) { inclusive = true }
+                    popUpTo(route = AGENDA_NAV_ROUTE) { inclusive = true }
                 }
             },
             navigateBack = {
@@ -44,7 +44,7 @@ fun RoutineTrackerNavHost(
         routineDetailsScreen(
             popBackStack = {
                 navController.navigateToAgenda {
-                    popUpTo(route = agendaNavRoute) { inclusive = true }
+                    popUpTo(route = AGENDA_NAV_ROUTE) { inclusive = true }
                 }
             },
         )

@@ -37,7 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase.IllegalDateEditAttemptException
+import com.rendox.routinetracker.core.domain.completionhistory.InsertHabitCompletionUseCase.IllegalDateEditAttemptException
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.ui.helpers.LocalLocale
 import com.rendox.routinetracker.core.ui.helpers.ObserveUiEvent

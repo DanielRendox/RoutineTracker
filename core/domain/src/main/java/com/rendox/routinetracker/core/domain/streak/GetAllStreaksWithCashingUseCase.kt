@@ -1,6 +1,6 @@
 package com.rendox.routinetracker.core.domain.streak
 
-import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
+import com.rendox.routinetracker.core.data.completionhistory.CompletionHistoryRepository
 import com.rendox.routinetracker.core.data.streaks.StreakRepository
 import com.rendox.routinetracker.core.data.vacation.VacationRepository
 import com.rendox.routinetracker.core.domain.di.GetHabitUseCase

@@ -4,8 +4,8 @@ import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.google.common.truth.Truth.assertThat
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
-import com.rendox.routinetracker.core.database.completion_history.CompletionHistoryLocalDataSource
-import com.rendox.routinetracker.core.database.completion_history.CompletionHistoryLocalDataSourceImpl
+import com.rendox.routinetracker.core.database.completionhistory.CompletionHistoryLocalDataSource
+import com.rendox.routinetracker.core.database.completionhistory.CompletionHistoryLocalDataSourceImpl
 import com.rendox.routinetracker.core.database.di.localDataSourceModule
 import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.Habit

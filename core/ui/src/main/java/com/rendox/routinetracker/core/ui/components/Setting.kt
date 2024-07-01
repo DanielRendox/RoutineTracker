@@ -64,7 +64,8 @@ private fun SettingPreview() {
         Setting(
             modifier = Modifier.width(400.dp),
             title = "Backlog",
-            description = "If left uncompleted, the habit will continue to be displayed, even on days that are not due.",
+            description = "If left uncompleted, the habit will continue to be displayed, " +
+                "even on days that are not due.",
             isOn = true,
             onToggle = {},
         )

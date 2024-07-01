@@ -1,6 +1,6 @@
 package com.rendox.routinetracker.core.testcommon.fakes.habit
 
-import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
+import com.rendox.routinetracker.core.data.completionhistory.CompletionHistoryRepository
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.model.Habit
 import kotlinx.coroutines.flow.update

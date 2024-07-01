@@ -1,6 +1,6 @@
 package com.rendox.routinetracker.core.data
 
-import com.rendox.routinetracker.core.database.completion_history.CompletionHistoryLocalDataSource
+import com.rendox.routinetracker.core.database.completionhistory.CompletionHistoryLocalDataSource
 import com.rendox.routinetracker.core.database.habit.HabitLocalDataSource
 import com.rendox.routinetracker.core.database.vacation.VacationLocalDataSource
 
