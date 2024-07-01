@@ -32,6 +32,10 @@ This is where habit completions are stored. We store the date of the completion 
 
 This is where cached habit streaks are stored. Whenever the program computes habit streaks, it caches them in this entity for future retrievals to improve performance. A streak is nothing more than a period with a start date and an end date.
 
+## streakCashedPeriodEntity
+
+Periods may not have any streaks but we would still like to know whether a streak has been already computed or not to avoid unnecessary computations. That's why we store these periods in this table. Once the streaks for a certain period are computed, the period gets inserted in this table regardless of whether it actually has any streaks or not. 
+
 ## vacationEntity
 
 `vacationEntity` is very similar to `cachedStreakEntity` but is used for storing habit vacations. A vacation can be just a skipped date, in this case startDate and endDate will be the same or several dates on which the habit is paused and not displayed as due.
