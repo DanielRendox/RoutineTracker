@@ -41,7 +41,8 @@ fun Schedule.PeriodicSchedule.getPeriodRange(
         is Schedule.AnnualScheduleByDueDates -> annualScheduleGetPeriodDateRange(currentDate)
         is Schedule.AnnualScheduleByNumOfDueDays -> annualScheduleGetPeriodDateRange(currentDate)
         is Schedule.AlternateDaysSchedule -> alternateDaysScheduleGetPeriodRange(
-            currentDate, lastVacationEndDate
+            currentDate,
+            lastVacationEndDate,
         )
     }
 
@@ -54,9 +55,7 @@ fun Schedule.PeriodicSchedule.getPeriodRange(
     return periodRange
 }
 
-private fun Schedule.WeeklySchedule.weeklyScheduleGetPeriodDateRange(
-    currentDate: LocalDate,
-): LocalDateRange {
+private fun Schedule.WeeklySchedule.weeklyScheduleGetPeriodDateRange(currentDate: LocalDate): LocalDateRange {
     var startPeriodDate: LocalDate
     var endPeriodDate: LocalDate
 
@@ -85,9 +84,7 @@ private fun Schedule.WeeklySchedule.weeklyScheduleGetPeriodDateRange(
     return startPeriodDate..endPeriodDate
 }
 
-private fun Schedule.MonthlySchedule.monthlyScheduleGetPeriodDateRange(
-    currentDate: LocalDate,
-): LocalDateRange {
+private fun Schedule.MonthlySchedule.monthlyScheduleGetPeriodDateRange(currentDate: LocalDate): LocalDateRange {
     val startPeriodDate: LocalDate
     val endPeriodDate: LocalDate
 
@@ -107,9 +104,7 @@ private fun Schedule.MonthlySchedule.monthlyScheduleGetPeriodDateRange(
     return startPeriodDate..endPeriodDate
 }
 
-private fun Schedule.AnnualSchedule.annualScheduleGetPeriodDateRange(
-    currentDate: LocalDate,
-): LocalDateRange {
+private fun Schedule.AnnualSchedule.annualScheduleGetPeriodDateRange(currentDate: LocalDate): LocalDateRange {
     var startPeriodDate: LocalDate
     var endPeriodDate: LocalDate
 
@@ -140,10 +135,10 @@ private fun Schedule.AnnualSchedule.annualScheduleGetPeriodDateRange(
 private fun Schedule.AlternateDaysSchedule.alternateDaysScheduleGetPeriodRange(
     currentDate: LocalDate,
     lastVacationEndDate: LocalDate?,
-    ): LocalDateRange {
+): LocalDateRange {
     check(correspondingPeriod.days != 0) {
         "Corresponding period of a schedule this function operates on shouldn't have zero days " +
-                "value. For weekly, monthly, or annual schedules use different functions."
+            "value. For weekly, monthly, or annual schedules use different functions."
     }
 
     // when vacation ends, the user will expect the period to be restarted
@@ -163,5 +158,7 @@ private fun Schedule.AlternateDaysSchedule.alternateDaysScheduleGetPeriodRange(
     return startPeriodDate..endPeriodDate
 }
 
-private fun atEndOfPeriod(startPeriodDate: LocalDate, periodToAdd: DatePeriod) =
-    startPeriodDate.plus(periodToAdd).minus(DatePeriod(days = 1))
+private fun atEndOfPeriod(
+    startPeriodDate: LocalDate,
+    periodToAdd: DatePeriod,
+) = startPeriodDate.plus(periodToAdd).minus(DatePeriod(days = 1))

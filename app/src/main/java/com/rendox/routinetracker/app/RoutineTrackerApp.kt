@@ -18,7 +18,8 @@ import com.rendox.routinetracker.core.domain.di.domainModule
 import com.rendox.routinetracker.core.domain.di.habitDomainModule
 import com.rendox.routinetracker.core.domain.di.streakDomainModule
 import com.rendox.routinetracker.feature.agenda.di.agendaScreenModule
-import com.rendox.routinetracker.routine_details.di.routineDetailsModule
+import com.rendox.routinetracker.routinedetails.di.routineDetailsModule
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
@@ -26,9 +27,8 @@ import org.koin.android.ext.android.inject
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import org.koin.core.qualifier.named
-import kotlin.coroutines.CoroutineContext
 
-class RoutineTrackerApp: Application() {
+class RoutineTrackerApp : Application() {
     private val ioDispatcher by inject<CoroutineContext>(qualifier = named("ioDispatcher"))
     private val applicationScope = CoroutineScope(SupervisorJob())
     private val databasePrepopulator by inject<DatabasePrepopulator>()

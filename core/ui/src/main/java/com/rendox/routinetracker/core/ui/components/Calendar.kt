@@ -41,7 +41,6 @@ import com.kizitonwose.calendar.core.previousMonth
 import com.kizitonwose.calendar.core.yearMonth
 import com.rendox.routinetracker.core.ui.R
 import com.rendox.routinetracker.core.ui.helpers.LocalLocale
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -50,6 +49,7 @@ import java.time.ZoneOffset
 import java.time.format.TextStyle
 import java.time.temporal.WeekFields
 import java.util.Date
+import kotlinx.coroutines.launch
 
 @Composable
 fun CalendarMonthlyPaged(
@@ -101,7 +101,7 @@ fun CalendarMonthlyPaged(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
                     daysOfWeek = daysOfWeek,
                 )
-            }
+            },
         )
     }
 }
@@ -123,7 +123,7 @@ fun CalendarMonthTitle(
         CalendarNavigationIcon(
             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
             contentDescription = stringResource(
-                id = R.string.calendar_left_navigation_icon_content_description
+                id = R.string.calendar_left_navigation_icon_content_description,
             ),
             onClick = navigateToPrevious,
         )
@@ -137,7 +137,7 @@ fun CalendarMonthTitle(
             languages (e.g. in Ukrainian, it would return "жовтня", not "жовтень"). Luckily,
             this issue can be worked around by leveraging java.util.Date class, although it
             is ugly.
-            */
+             */
             val someDateInMonth = currentMonth.atDay(3)
             val randomOffset = ZoneOffset.MIN // it doesn't matter
             val date =
@@ -157,7 +157,7 @@ fun CalendarMonthTitle(
         CalendarNavigationIcon(
             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = stringResource(
-                id = R.string.calendar_right_navigation_icon_content_description
+                id = R.string.calendar_right_navigation_icon_content_description,
             ),
             onClick = navigateToNext,
         )
@@ -184,7 +184,8 @@ private fun CalendarNavigationIcon(
 
 @Composable
 private fun DaysOfWeekTitles(
-    modifier: Modifier = Modifier, daysOfWeek: List<DayOfWeek>
+    modifier: Modifier = Modifier,
+    daysOfWeek: List<DayOfWeek>,
 ) {
     Row(
         modifier = modifier,
@@ -223,7 +224,7 @@ fun ExampleCalendarDate(
         modifier = modifier
             .padding(horizontal = 8.dp, vertical = 4.dp)
             .aspectRatio(1f)
-            .clip(shape = CircleShape)
+            .clip(shape = CircleShape),
     ) {
         Text(
             modifier = Modifier.align(Alignment.Center),

@@ -33,7 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.rendox.routinetracker.core.ui.R
 
-const val TonalDataInputRoundedCornerPercent = 30
+const val TOTAL_DATA_INPUT_ROUNDED_CORNER_PERCENT = 30
 
 @Composable
 fun TonalDataInput(
@@ -46,14 +46,14 @@ fun TonalDataInput(
         modifier = modifier
             .widthIn(min = 96.dp)
             .wrapContentHeight(),
-        shape = RoundedCornerShape(TonalDataInputRoundedCornerPercent),
+        shape = RoundedCornerShape(TOTAL_DATA_INPUT_ROUNDED_CORNER_PERCENT),
         color = MaterialTheme.colorScheme.secondaryContainer,
     ) {
         Box(
             modifier = Modifier.then(
-                if (disabled) Modifier else Modifier.clickable(onClick = onClick)
+                if (disabled) Modifier else Modifier.clickable(onClick = onClick),
             ),
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
         ) {
             Text(
                 modifier = Modifier.padding(vertical = 8.dp),
@@ -76,7 +76,7 @@ fun TonalDropdownMenu(
 ) {
     Box(
         modifier = modifier
-            .clip(shape = RoundedCornerShape(TonalDataInputRoundedCornerPercent))
+            .clip(shape = RoundedCornerShape(TOTAL_DATA_INPUT_ROUNDED_CORNER_PERCENT))
             .background(MaterialTheme.colorScheme.secondaryContainer)
             .clickable(
                 onClick = onDropdownMenuClick,

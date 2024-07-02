@@ -16,7 +16,10 @@ interface VacationRepository {
         habitsToPeriods: List<Pair<List<Long>, LocalDateRange>>,
     ): Map<Long, List<Vacation>>
 
-    suspend fun insertVacation(habitId: Long, vacation: Vacation)
+    suspend fun insertVacation(
+        habitId: Long,
+        vacation: Vacation,
+    )
     suspend fun insertVacations(habitIdsToVacations: Map<Long, List<Vacation>>)
     suspend fun deleteVacationById(id: Long)
 }

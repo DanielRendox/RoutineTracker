@@ -69,10 +69,10 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:domain"))
     implementation(project(":core:logic"))
+    implementation(project(":feature:addeditroutine"))
 
-    implementation(project(":feature:add_edit_routine"))
     implementation(project(":feature:agenda"))
-    implementation(project(":feature:routine_details"))
+    implementation(project(":feature:routinedetails"))
 
     testImplementation(project(":core:testcommon"))
 

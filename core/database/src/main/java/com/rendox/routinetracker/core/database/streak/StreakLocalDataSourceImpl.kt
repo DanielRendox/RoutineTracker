@@ -5,9 +5,9 @@ import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
 import com.rendox.routinetracker.core.database.StreakCashedPeriodEntity
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.model.Streak
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
-import kotlin.coroutines.CoroutineContext
 
 class StreakLocalDataSourceImpl(
     private val db: RoutineTrackerDatabase,
@@ -15,7 +15,7 @@ class StreakLocalDataSourceImpl(
 ) : StreakLocalDataSource {
     override suspend fun insertStreaks(
         streaks: List<Pair<Long, Streak>>,
-        periods: List<Pair<Long, LocalDateRange>>
+        periods: List<Pair<Long, LocalDateRange>>,
     ) = withContext(ioDispatcher) {
         db.cashedStreakQueries.transaction {
             for (streak in streaks) {
@@ -35,10 +35,9 @@ class StreakLocalDataSourceImpl(
         }
     }
 
-    override suspend fun getAllStreaks(
-        habitId: Long
-    ): List<Streak> = withContext(ioDispatcher) {
-        db.cashedStreakQueries.getAllStreaks(habitId)
+    override suspend fun getAllStreaks(habitId: Long): List<Streak> = withContext(ioDispatcher) {
+        db.cashedStreakQueries
+            .getAllStreaks(habitId)
             .executeAsList()
             .map { it.toExternalModel() }
     }
@@ -46,30 +45,34 @@ class StreakLocalDataSourceImpl(
     override suspend fun getStreaksInPeriod(
         habitId: Long,
         minDate: LocalDate,
-        maxDate: LocalDate
+        maxDate: LocalDate,
     ): List<Streak> = withContext(ioDispatcher) {
-        db.cashedStreakQueries.getStreaksInPeriod(
-            habitId = habitId,
-            periodStart = minDate,
-            periodEnd = maxDate,
-        ).executeAsList().map { it.toExternalModel() }
+        db.cashedStreakQueries
+            .getStreaksInPeriod(
+                habitId = habitId,
+                periodStart = minDate,
+                periodEnd = maxDate,
+            ).executeAsList()
+            .map { it.toExternalModel() }
     }
 
-    override suspend fun getAllCashedPeriods(
-        habitId: Long
-    ): List<LocalDateRange> = withContext(ioDispatcher) {
-        db.cashedStreakQueries.getAllCashedPeriods(habitId)
+    override suspend fun getAllCashedPeriods(habitId: Long): List<LocalDateRange> = withContext(ioDispatcher) {
+        db.cashedStreakQueries
+            .getAllCashedPeriods(habitId)
             .executeAsList()
             .map { it.toExternalModel() }
     }
 
     override suspend fun getCashedPeriod(
-        habitId: Long, dateInPeriod: LocalDate
+        habitId: Long,
+        dateInPeriod: LocalDate,
     ): LocalDateRange? = withContext(ioDispatcher) {
-        db.cashedStreakQueries.getCashedPeriod(
-            habitId = habitId,
-            dateInPeriod = dateInPeriod,
-        ).executeAsOneOrNull()?.toExternalModel()
+        db.cashedStreakQueries
+            .getCashedPeriod(
+                habitId = habitId,
+                dateInPeriod = dateInPeriod,
+            ).executeAsOneOrNull()
+            ?.toExternalModel()
     }
 
     override suspend fun deleteStreaksInPeriod(
@@ -84,15 +87,13 @@ class StreakLocalDataSourceImpl(
         )
     }
 
-    companion object {
-        private fun CashedStreakEntity.toExternalModel() = Streak(
-            startDate = startDate,
-            endDate = endDate,
-        )
+    private fun CashedStreakEntity.toExternalModel() = Streak(
+        startDate = startDate,
+        endDate = endDate,
+    )
 
-        private fun StreakCashedPeriodEntity.toExternalModel() = LocalDateRange(
-            start = startDate,
-            endInclusive = endDate,
-        )
-    }
+    private fun StreakCashedPeriodEntity.toExternalModel() = LocalDateRange(
+        start = startDate,
+        endInclusive = endDate,
+    )
 }

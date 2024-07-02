@@ -3,8 +3,8 @@ package com.rendox.routinetracker.feature.agenda
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rendox.routinetracker.core.domain.agenda.GetAgendaUseCase
-import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase
-import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase.IllegalDateEditAttemptException
+import com.rendox.routinetracker.core.domain.completionhistory.InsertHabitCompletionUseCase
+import com.rendox.routinetracker.core.domain.completionhistory.InsertHabitCompletionUseCase.IllegalDateEditAttemptException
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.HabitStatus
 import com.rendox.routinetracker.core.model.dueOrCompletedStatuses

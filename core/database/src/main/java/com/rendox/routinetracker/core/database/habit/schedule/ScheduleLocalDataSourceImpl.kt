@@ -3,7 +3,7 @@ package com.rendox.routinetracker.core.database.habit.schedule
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
 import com.rendox.routinetracker.core.database.di.toInt
 import com.rendox.routinetracker.core.database.habit.WeekDaysMonthRelatedLocalDataSource
-import com.rendox.routinetracker.core.database.habit.due_dates.DueDateLocalDataSource
+import com.rendox.routinetracker.core.database.habit.duedates.DueDateLocalDataSource
 import com.rendox.routinetracker.core.database.model.schedule.ScheduleType
 import com.rendox.routinetracker.core.database.model.schedule.toAlternateDaySchedule
 import com.rendox.routinetracker.core.database.model.schedule.toAnnualScheduleByDueDates
@@ -96,7 +96,7 @@ internal class ScheduleLocalDataSourceImpl(
 
             ScheduleType.WeeklyScheduleByDueDaysOfWeek ->
                 scheduleEntity.toWeeklyScheduleByDueDaysOfWeek(
-                    dueDates = dueDateLocalDataSource.getDueDates(habitId)
+                    dueDates = dueDateLocalDataSource.getDueDates(habitId),
                 )
 
             ScheduleType.MonthlyScheduleByNumOfDueDays ->
@@ -113,13 +113,13 @@ internal class ScheduleLocalDataSourceImpl(
 
             ScheduleType.AnnualScheduleByDueDates ->
                 scheduleEntity.toAnnualScheduleByDueDates(
-                    dueDates = dueDateLocalDataSource.getDueDates(habitId)
+                    dueDates = dueDateLocalDataSource.getDueDates(habitId),
                 )
 
             ScheduleType.AlternateDaysSchedule -> scheduleEntity.toAlternateDaySchedule()
 
             ScheduleType.CustomDateSchedule -> scheduleEntity.toCustomDateSchedule(
-                dueDatesIndices = dueDateLocalDataSource.getDueDates(habitId)
+                dueDatesIndices = dueDateLocalDataSource.getDueDates(habitId),
             )
         }
     }
@@ -130,6 +130,7 @@ internal class ScheduleLocalDataSourceImpl(
         weekDaysMonthRelatedLocalDataSource.deleteWeekDayMonthRelatedDays(scheduleId)
     }
 
+    @Suppress("ktlint:standard:max-line-length")
     private fun insertScheduleEntity(schedule: ScheduleEntity) {
         db.scheduleEntityQueries.insertSchedule(
             id = null,

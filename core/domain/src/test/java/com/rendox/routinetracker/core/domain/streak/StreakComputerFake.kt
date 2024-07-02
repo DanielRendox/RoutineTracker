@@ -13,7 +13,7 @@ class StreakComputerFake(
         today: LocalDate,
         habit: Habit,
         completionHistory: List<Habit.CompletionRecord>,
-        vacationHistory: List<Vacation>
+        vacationHistory: List<Vacation>,
     ): List<Streak> = streaks.filter { it.endDate <= today }
 
     override fun computeStreaksInPeriod(
@@ -21,9 +21,10 @@ class StreakComputerFake(
         habit: Habit,
         completionHistory: List<Habit.CompletionRecord>,
         vacationHistory: List<Vacation>,
-        period: LocalDateRange
+        period: LocalDateRange,
     ): List<Streak> = streaks.filter { streak ->
-        streak.startDate <= period.endInclusive && streak.endDate >= period.start
-                && streak.endDate <= today
+        streak.startDate <= period.endInclusive &&
+            streak.endDate >= period.start &&
+            streak.endDate <= today
     }
 }

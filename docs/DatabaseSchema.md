@@ -16,7 +16,7 @@ Each habit must have at least one schedule, although we may later need to allow 
 
 Some types of schedules have due dates defined in this table. E.g. for the `WeeklySchedule` these are days of week, for `MonthlySchedule`, days of month, for `CustomDateSchedule` - dates. 
 
-All values are serialized to `INTEGER`s which get deserealized to respective types of values based on the type of schedule. E.g. days of week are stored as numbers where monday is first, sunday is the seventh, dates are stored as numbers as well as the number after the epoch (`1970-01-01`).
+All values are serialized to `INTEGER`s which get deserialized to respective types of values based on the type of schedule. E.g. days of week are stored as numbers where monday is first, sunday is the seventh, dates are stored as numbers as well as the number after the epoch (`1970-01-01`).
 
 There is also functionality that allows users to change the time of activities for separate dates. For example users may want to complete a habit at 5 PM on Monday, but on Wednesday they’d want to completed it on 7 PM. That’s why `dueDateEntity` also stores `completionTimeHour` and `completionTimeMinute` attributes. However, this functionality is not yet available in the release.
 

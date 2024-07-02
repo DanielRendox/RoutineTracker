@@ -64,7 +64,7 @@ internal fun Schedule.MonthlyScheduleByDueDatesIndices.toScheduleEntity() = Sche
     periodicSeparationEnabledInPeriodicSchedule = periodSeparationEnabled,
     numOfDueDaysInByNumOfDueDaysSchedule = null,
     numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule = null,
-    numOfDaysInAlternateDaysSchedule = null
+    numOfDaysInAlternateDaysSchedule = null,
 )
 
 internal fun Schedule.MonthlyScheduleByNumOfDueDays.toScheduleEntity() = ScheduleEntity(

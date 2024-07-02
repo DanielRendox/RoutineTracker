@@ -62,7 +62,7 @@ The following scheme shows the algorithm for deriving these statuses:
 
 ![Flow Chart](images/habit_status_computation_algorythm_flow_chart.png)
 
-This algorithm is designed to support different types of habits, which we plan to introduce in the future. What matters is how many times the habit is completed. It doesn’t matter how these completions are defined—whether it’s a simple yes or no, a numeric value, or a list of subtasks.
+This algorithm is designed to support different types of habits, which we plan to introduce in the future. What matters is how many times the habit is completed. It doesn't matter how these completions are defined—whether it’s a simple yes or no, a numeric value, or a list of subtasks.
 
 > [!IMPORTANT]  
 > As you can see, different dates are dependent on one another. Therefore, to compute the habit status for a certain date, we need to obtain the completion history and vacation history of the entire period.
@@ -73,7 +73,7 @@ There is also a Vacations feature that allows users to skip days and pause a hab
 
 So the data flow works as follows. When a habit is created, it gets saved to the database with all its properties. When the user marks certain days as completed, these days are added to a separate SQLite table along with the number of times completed.
 
-We have a function that computes habit statuses on a certain date. This function requires the habit and its history to be passed as a parameter. The size of this history matters. If this list is too small and doesn’t cover the entire period, the computed statuses may be incorrect.
+We have a function that computes habit statuses on a certain date. This function requires the habit and its history to be passed as a parameter. The size of this history matters. If this list is too small and doesn't cover the entire period, the computed statuses may be incorrect.
 
 We have logic for deriving these periods inside [`ScheduleGetPeriodRange.kt`](https://github.com/DanielRendox/RoutineTracker/blob/develop/core/domain/src/main/java/com/rendox/routinetracker/core/domain/completion_history/ScheduleGetPeriodRange.kt) For example, if the habit has a Weekly schedule it will return the corresponding week the validation date is in, if Monthly - month, and so on. It also accounts for possible edge cases, e.g. when the habit’s start date is not the period start date.
 
@@ -83,7 +83,7 @@ All of this is done in the domain layer of the CLEAN architecture. The call chai
 
 ## Streaks
 
-In many habit-tracking apps, streaks are formed from multiple consecutive completions. This strategy works well for everyday schedules. However, it doesn’t work as effectively for other types of schedules. In these cases, habit-tracking apps include the entire period in the streak only when all planned dates in the period are completed. For example, if we had a habit with a Mon-Wed-Thu schedule, the entire week would be included in a streak only when all three days were completed.
+In many habit-tracking apps, streaks are formed from multiple consecutive completions. This strategy works well for everyday schedules. However, it doesn't work as effectively for other types of schedules. In these cases, habit-tracking apps include the entire period in the streak only when all planned dates in the period are completed. For example, if we had a habit with a Mon-Wed-Thu schedule, the entire week would be included in a streak only when all three days were completed.
 
 While this is relatively easy to implement, there is a problem: the streak will be broken on Tuesday even though the habit is not due on that date.
 

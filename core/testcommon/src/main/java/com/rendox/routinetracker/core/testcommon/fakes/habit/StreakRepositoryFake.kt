@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.datetime.LocalDate
 
 class StreakRepositoryFake(
-    private val habitData: HabitData
+    private val habitData: HabitData,
 ) : StreakRepository {
 
     /**
@@ -24,7 +24,7 @@ class StreakRepositoryFake(
      */
     override suspend fun insertStreaks(
         streaks: List<Pair<Long, Streak>>,
-        periods: List<Pair<Long, LocalDateRange>>
+        periods: List<Pair<Long, LocalDateRange>>,
     ) {
         habitData.streaks.update {
             it.toMutableList().apply { addAll(streaks) }
@@ -40,17 +40,21 @@ class StreakRepositoryFake(
     override suspend fun getStreaksInPeriod(
         habitId: Long,
         minDate: LocalDate,
-        maxDate: LocalDate
+        maxDate: LocalDate,
     ): List<Streak> = habitData.streaks.value.filter {
         it.first == habitId &&
-                it.second.startDate <= maxDate && it.second.endDate >= minDate
+            it.second.startDate <= maxDate &&
+            it.second.endDate >= minDate
     }.map { it.second }
 
     override suspend fun getAllCashedPeriods(habitId: Long): List<LocalDateRange> =
-        habitData.streakCashedPeriods.value.map { it.second }
+        habitData.streakCashedPeriods.value.map {
+            it.second
+        }
 
     override suspend fun getCashedPeriod(
-        habitId: Long, dateInPeriod: LocalDate
+        habitId: Long,
+        dateInPeriod: LocalDate,
     ): LocalDateRange? = habitData.streakCashedPeriods.value.find {
         it.first == habitId && it.second.contains(dateInPeriod)
     }?.second
@@ -58,8 +62,8 @@ class StreakRepositoryFake(
     override suspend fun deleteStreaksInPeriod(
         habitId: Long,
         periodStartDate: LocalDate,
-        periodEndDate: LocalDate
-    ) = habitData.streakCashedPeriods.update {  streaks ->
+        periodEndDate: LocalDate,
+    ) = habitData.streakCashedPeriods.update { streaks ->
         streaks.toMutableList().apply {
             removeAll {
                 it.first == habitId && it.second.isSubsetOf(periodStartDate..periodEndDate)

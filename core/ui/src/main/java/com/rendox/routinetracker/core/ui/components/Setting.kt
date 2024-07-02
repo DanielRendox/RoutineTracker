@@ -37,7 +37,7 @@ fun Setting(
             modifier = Modifier
                 .weight(1f)
                 .padding(end = 16.dp)
-                .alpha(if (enabled) 1f else 0.5f)
+                .alpha(if (enabled) 1f else 0.5f),
         ) {
             Text(text = title)
             description?.let {
@@ -64,7 +64,8 @@ private fun SettingPreview() {
         Setting(
             modifier = Modifier.width(400.dp),
             title = "Backlog",
-            description = "If left uncompleted, the habit will continue to be displayed, even on days that are not due.",
+            description = "If left uncompleted, the habit will continue to be displayed, " +
+                "even on days that are not due.",
             isOn = true,
             onToggle = {},
         )

@@ -7,7 +7,7 @@ The majority of user intents are processed through Use Cases, but some of them d
 > [!IMPORTANT]  
 > That’s why everything is exposed to UI through the domain layer. The UI layer cannot access the data layer.
 
-At the same time, we avoid boilerplate by making use of Kotlin Functional (SAM) interfaces for those UseCases that would otherwise only call the repository and not execute any additional logic like it is done in [`HabitDomainModule.kt`](https://github.com/DanielRendox/RoutineTracker/blob/2ff5195e96f7c710f62f8cf0ac5ca081c1854aa9/core/domain/src/main/java/com/rendox/routinetracker/core/domain/di/HabitDomainModule.kt) (Koin is used for dependency injetion):
+At the same time, we avoid boilerplate by making use of Kotlin Functional (SAM) interfaces for those UseCases that would otherwise only call the repository and not execute any additional logic like it is done in [`HabitDomainModule.kt`](https://github.com/DanielRendox/RoutineTracker/blob/2ff5195e96f7c710f62f8cf0ac5ca081c1854aa9/core/domain/src/main/java/com/rendox/routinetracker/core/domain/di/HabitDomainModule.kt) (Koin is used for dependency injection):
 
 ```kotlin
 val habitDomainModule = module {

@@ -14,13 +14,13 @@ For example, after deleting a habit, ViewModel decides to throw an event that te
 
 One-off events are handled with state but state is not really suitable for this purpose it keeps the value even after the event is finished. So this requires us to manually reset the state after it’s consumed. 
 
-Othewise, some unexpected behavior may happen. Continuing the initial example, if the user tries to navigate back to the screen where the habit was deleted, it will not actually navigate because the state in that screen will immediately tell the program to navigate back.
+Otherwise, some unexpected behavior may happen. Continuing the initial example, if the user tries to navigate back to the screen where the habit was deleted, it will not actually navigate because the state in that screen will immediately tell the program to navigate back.
 
 That’s why  resetting the state is unified throughout the project with the help of extensions in [`UiEvent.kt`](https://github.com/DanielRendox/RoutineTracker/blob/main/core/ui/src/main/java/com/rendox/routinetracker/core/ui/helpers/UiEvent.kt)
 
 ## How to use
 
-So all events should be objects of `UiEvent` interface and should typcially be nullable so that when the event is fired off, it could be reset to null. This interface has a function called `onConsumed` which should be overriden when the event is fired off. You can also pass data using `val data`. 
+So all events should be objects of `UiEvent` interface and should typically be nullable so that when the event is fired off, it could be reset to null. This interface has a function called `onConsumed` which should be overridden when the event is fired off. You can also pass data using `val data`. 
 
 All events should be observed in the UI using `ObserveUiEvent` composable. This composable automatically calls `event.onConsumed()` once the action is finished.
 

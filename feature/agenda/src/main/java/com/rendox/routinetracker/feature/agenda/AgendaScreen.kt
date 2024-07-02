@@ -37,16 +37,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.rendox.routinetracker.core.domain.completion_history.InsertHabitCompletionUseCase.IllegalDateEditAttemptException
+import com.rendox.routinetracker.core.domain.completionhistory.InsertHabitCompletionUseCase.IllegalDateEditAttemptException
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.ui.helpers.LocalLocale
 import com.rendox.routinetracker.core.ui.helpers.ObserveUiEvent
 import com.rendox.routinetracker.feature.agenda.databinding.AgendaRecyclerviewBinding
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toKotlinLocalDate
 import org.koin.androidx.compose.koinViewModel
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 @Composable
 internal fun AgendaRoute(
@@ -63,15 +63,21 @@ internal fun AgendaRoute(
     val snackbarHostState = remember { SnackbarHostState() }
     val snackbarMessage = when (completionAttemptBlockedEvent?.data) {
         is IllegalDateEditAttemptException.NotStartedHabitDateEditAttemptException -> {
-            stringResource(id = com.rendox.routinetracker.core.ui.R.string.not_started_date_completion_attempt_snackbar_message)
+            stringResource(
+                id = com.rendox.routinetracker.core.ui.R.string.not_started_date_completion_attempt_snackbar_message,
+            )
         }
 
         is IllegalDateEditAttemptException.FinishedHabitDateEditAttemptException -> {
-            stringResource(id = com.rendox.routinetracker.core.ui.R.string.finished_date_completion_attempt_snackbar_message)
+            stringResource(
+                id = com.rendox.routinetracker.core.ui.R.string.finished_date_completion_attempt_snackbar_message,
+            )
         }
 
         is IllegalDateEditAttemptException.FutureDateEditAttemptException -> {
-            stringResource(id = com.rendox.routinetracker.core.ui.R.string.future_date_completion_attempt_snackbar_message)
+            stringResource(
+                id = com.rendox.routinetracker.core.ui.R.string.future_date_completion_attempt_snackbar_message,
+            )
         }
 
         null -> ""
@@ -147,12 +153,12 @@ internal fun AgendaScreen(
             )
 
             Column(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
             ) {
                 Spacer(
                     modifier = Modifier
                         .height(64.dp)
-                        .systemBarsPadding()
+                        .systemBarsPadding(),
                 )
 
                 val weekCalendarHeight = 70.dp
@@ -204,7 +210,7 @@ internal fun AgendaScreen(
                                 bottom = when (LocalConfiguration.current.orientation) {
                                     Configuration.ORIENTATION_LANDSCAPE -> 0.dp
                                     else -> smallTopAppBarHeight + weekCalendarHeight
-                                }
+                                },
                             ),
                         )
                     }
@@ -235,20 +241,20 @@ private fun AgendaTopAppBar(
         )
         IconButton(
             modifier = Modifier.padding(end = 4.dp),
-            onClick = onNotDueRoutinesVisibilityToggle
+            onClick = onNotDueRoutinesVisibilityToggle,
         ) {
             if (showAllRoutines) {
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_visibility_on_24),
                     contentDescription = stringResource(
-                        id = R.string.routine_visibility_icon_toggle_all_visible_description
+                        id = R.string.routine_visibility_icon_toggle_all_visible_description,
                     ),
                 )
             } else {
                 Icon(
                     painter = painterResource(id = R.drawable.baseline_visibility_off_24),
                     contentDescription = stringResource(
-                        id = R.string.routine_visibility_icon_toggle_some_routines_hidden_description
+                        id = R.string.routine_visibility_icon_toggle_some_routines_hidden_description,
                     ),
                 )
             }
@@ -277,9 +283,7 @@ private fun AgendaList(
 }
 
 @Composable
-fun NothingScheduled(
-    modifier: Modifier = Modifier
-) {
+fun NothingScheduled(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -340,4 +344,3 @@ private fun NothingScheduledPreview() {
         }
     }
 }
-

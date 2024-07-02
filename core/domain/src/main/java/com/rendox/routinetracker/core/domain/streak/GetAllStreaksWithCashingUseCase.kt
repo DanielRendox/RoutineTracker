@@ -1,10 +1,10 @@
 package com.rendox.routinetracker.core.domain.streak
 
-import com.rendox.routinetracker.core.data.completion_history.CompletionHistoryRepository
+import com.rendox.routinetracker.core.data.completionhistory.CompletionHistoryRepository
 import com.rendox.routinetracker.core.data.streaks.StreakRepository
 import com.rendox.routinetracker.core.data.vacation.VacationRepository
-import com.rendox.routinetracker.core.domain.schedule.getPeriodRange
 import com.rendox.routinetracker.core.domain.di.GetHabitUseCase
+import com.rendox.routinetracker.core.domain.schedule.getPeriodRange
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.atEndOfMonth
 import com.rendox.routinetracker.core.logic.time.isSubsetOf
@@ -14,9 +14,9 @@ import com.rendox.routinetracker.core.logic.time.withDayOfMonth
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.model.Streak
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
-import kotlin.coroutines.CoroutineContext
 
 class GetAllStreaksWithCashingUseCase(
     private val getHabit: GetHabitUseCase,
@@ -100,14 +100,12 @@ class GetAllStreaksWithCashingUseCase(
         )
     }
 
-    companion object {
-        private fun getPeriodRange(
-            schedule: Schedule,
-            currentDate: LocalDate,
-        ): LocalDateRange? = when (schedule) {
-            is Schedule.PeriodicSchedule -> schedule.getPeriodRange(currentDate)
-            is Schedule.EveryDaySchedule -> currentDate.withDayOfMonth(1)..currentDate.atEndOfMonth
-            is Schedule.CustomDateSchedule -> throw IllegalArgumentException()
-        }
+    private fun getPeriodRange(
+        schedule: Schedule,
+        currentDate: LocalDate,
+    ): LocalDateRange? = when (schedule) {
+        is Schedule.PeriodicSchedule -> schedule.getPeriodRange(currentDate)
+        is Schedule.EveryDaySchedule -> currentDate.withDayOfMonth(1)..currentDate.atEndOfMonth
+        is Schedule.CustomDateSchedule -> throw IllegalArgumentException()
     }
 }

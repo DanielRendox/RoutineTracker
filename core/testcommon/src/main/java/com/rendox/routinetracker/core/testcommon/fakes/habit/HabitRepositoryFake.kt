@@ -6,11 +6,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.datetime.LocalDate
 
 class HabitRepositoryFake(
-    private val habitData: HabitData
+    private val habitData: HabitData,
 ) : HabitRepository {
 
-    override suspend fun getHabitById(id: Long): Habit =
-        habitData.listOfHabits.value[(id - 1).toInt()]
+    override suspend fun getHabitById(id: Long): Habit = habitData.listOfHabits.value[(id - 1).toInt()]
 
     override suspend fun insertHabit(habit: Habit) {
         habitData.listOfHabits.update {
@@ -26,13 +25,12 @@ class HabitRepositoryFake(
 
     override suspend fun getAllHabits(): List<Habit> = habitData.listOfHabits.value
 
-    override suspend fun getAllOngoingHabits(currentDate: LocalDate): List<Habit> {
-        return habitData.listOfHabits.value.filter {
+    override suspend fun getAllOngoingHabits(currentDate: LocalDate): List<Habit> =
+        habitData.listOfHabits.value.filter {
             val endDate = it.schedule.endDate
             it.schedule.startDate <= currentDate &&
-                    (endDate == null || endDate >= currentDate)
+                (endDate == null || endDate >= currentDate)
         }
-    }
 
     override suspend fun deleteHabit(id: Long) = habitData.listOfHabits.update {
         it.toMutableList().apply { removeAt((id - 1).toInt()) }

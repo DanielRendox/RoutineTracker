@@ -15,17 +15,12 @@ class HabitRepositoryImpl(
         localDataSource.insertHabits(habits)
     }
 
-    override suspend fun getHabitById(id: Long): Habit {
-        return localDataSource.getHabitById(habitId = id)
-    }
+    override suspend fun getHabitById(id: Long): Habit = localDataSource.getHabitById(habitId = id)
 
-    override suspend fun getAllHabits(): List<Habit> {
-        return localDataSource.getAllHabits()
-    }
+    override suspend fun getAllHabits(): List<Habit> = localDataSource.getAllHabits()
 
-    override suspend fun getAllOngoingHabits(currentDate: LocalDate): List<Habit> {
-        return localDataSource.getAllOngoingHabits(currentDate)
-    }
+    override suspend fun getAllOngoingHabits(currentDate: LocalDate): List<Habit> =
+        localDataSource.getAllOngoingHabits(currentDate)
 
     override suspend fun deleteHabit(id: Long) {
         localDataSource.deleteHabitById(id)

@@ -1,18 +1,17 @@
 package com.rendox.routinetracker.core.logic.time
 
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.daysUntil
 import kotlin.random.Random
 import kotlin.random.nextInt
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.daysUntil
 
 data class LocalDateRange(
     override val start: LocalDate,
     override val endInclusive: LocalDate,
-) : Iterable<LocalDate>, ClosedRange<LocalDate> {
+) : Iterable<LocalDate>,
+    ClosedRange<LocalDate> {
 
-    override fun iterator(): Iterator<LocalDate> {
-        return LocalDateIterator(start, endInclusive)
-    }
+    override fun iterator(): Iterator<LocalDate> = LocalDateIterator(start, endInclusive)
 
     override fun toString() = "$start..$endInclusive"
 }
@@ -22,8 +21,7 @@ class LocalDateIterator(
     private val endInclusive: LocalDate,
 ) : Iterator<LocalDate> {
     private var initValue = start
-    override fun hasNext() =
-        initValue <= endInclusive
+    override fun hasNext() = initValue <= endInclusive
 
     override fun next(): LocalDate {
         val result = initValue

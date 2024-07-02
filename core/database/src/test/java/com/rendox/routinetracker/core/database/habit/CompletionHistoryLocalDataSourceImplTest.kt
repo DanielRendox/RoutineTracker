@@ -4,8 +4,8 @@ import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.google.common.truth.Truth.assertThat
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
-import com.rendox.routinetracker.core.database.completion_history.CompletionHistoryLocalDataSource
-import com.rendox.routinetracker.core.database.completion_history.CompletionHistoryLocalDataSourceImpl
+import com.rendox.routinetracker.core.database.completionhistory.CompletionHistoryLocalDataSource
+import com.rendox.routinetracker.core.database.completionhistory.CompletionHistoryLocalDataSourceImpl
 import com.rendox.routinetracker.core.database.di.localDataSourceModule
 import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.Habit
@@ -38,7 +38,7 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
         name = "Test habit",
         schedule = Schedule.EveryDaySchedule(
             startDate = LocalDate(2024, 1, 1),
-        )
+        ),
     )
     private val testCompletionHistory = listOf(
         Habit.YesNoHabit.CompletionRecord(
@@ -69,7 +69,8 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
         RoutineTrackerDatabase.Schema.create(sqlDriver)
 
         completionHistoryLocalDataSource = CompletionHistoryLocalDataSourceImpl(
-            db = get(), ioDispatcher = UnconfinedTestDispatcher()
+            db = get(),
+            ioDispatcher = UnconfinedTestDispatcher(),
         )
     }
 
@@ -81,7 +82,7 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
     @Test
     fun `assert getRecordsInPeriod returns only records within the given period`() = runTest {
         completionHistoryLocalDataSource.insertCompletions(
-            completions = mapOf(1L to testCompletionHistory)
+            completions = mapOf(1L to testCompletionHistory),
         )
         val records = completionHistoryLocalDataSource.getRecordsInPeriod(
             habit = habit,
@@ -101,7 +102,7 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
                 1L to testCompletionHistory,
                 2L to testCompletionHistory,
                 3L to testCompletionHistory,
-            )
+            ),
         )
         val habitsToPeriods = listOf(
             listOf(habit, habit.copy(id = 2)) to LocalDate(2024, 2, 1)..LocalDate(2024, 8, 1),

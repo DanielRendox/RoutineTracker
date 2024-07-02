@@ -3,8 +3,4 @@
     <issue id="GradleDependency" severity="informational" />
     <issue id="NewerVersionAvailable" severity="informational" />
     <issue id="SyntheticAccessor" severity="informational" />
-    <issue id="StopShip" severity="informational" />
-    <issue id="DuplicateStrings" severity="informational" />
-    <issue id="TypographyQuotes" severity="informational" />
-    <issue id="UnknownNullness" severity="informational" />
 </lint>

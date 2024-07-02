@@ -17,30 +17,17 @@ fun Schedule.isDue(
         lastVacationEndDate = lastVacationEndDate,
     )
 
-    is Schedule.WeeklyScheduleByDueDaysOfWeek -> weeklyScheduleByDueDaysOfWeekIsDue(
-        validationDate = validationDate
-    )
-
-    is Schedule.MonthlyScheduleByDueDatesIndices -> monthlyScheduleIsDue(
-        validationDate = validationDate
-    )
-
-    is Schedule.CustomDateSchedule -> customDateScheduleIsDue(
-        validationDate = validationDate
-    )
-
-    is Schedule.AnnualScheduleByDueDates -> annualScheduleIsDue(
-        validationDate = validationDate
-    )
+    is Schedule.WeeklyScheduleByDueDaysOfWeek -> weeklyScheduleByDueDaysOfWeekIsDue(validationDate)
+    is Schedule.MonthlyScheduleByDueDatesIndices -> monthlyScheduleIsDue(validationDate)
+    is Schedule.CustomDateSchedule -> customDateScheduleIsDue(validationDate)
+    is Schedule.AnnualScheduleByDueDates -> annualScheduleIsDue(validationDate)
 }
 
 private fun Schedule.WeeklyScheduleByDueDaysOfWeek.weeklyScheduleByDueDaysOfWeekIsDue(
     validationDate: LocalDate,
 ): Boolean = dueDaysOfWeek.contains(validationDate.dayOfWeek)
 
-private fun Schedule.MonthlyScheduleByDueDatesIndices.monthlyScheduleIsDue(
-    validationDate: LocalDate,
-): Boolean {
+private fun Schedule.MonthlyScheduleByDueDatesIndices.monthlyScheduleIsDue(validationDate: LocalDate): Boolean {
     if (includeLastDayOfMonth && validationDate.atEndOfMonth == validationDate) return true
 
     for (weekDayMonthRelated in weekDaysMonthRelated) {
@@ -50,13 +37,10 @@ private fun Schedule.MonthlyScheduleByDueDatesIndices.monthlyScheduleIsDue(
     return dueDatesIndices.contains(validationDate.dayOfMonth)
 }
 
-private fun Schedule.CustomDateSchedule.customDateScheduleIsDue(
-    validationDate: LocalDate,
-): Boolean = dueDates.contains(validationDate)
+private fun Schedule.CustomDateSchedule.customDateScheduleIsDue(validationDate: LocalDate): Boolean =
+    dueDates.contains(validationDate)
 
-private fun Schedule.AnnualScheduleByDueDates.annualScheduleIsDue(
-    validationDate: LocalDate,
-): Boolean {
+private fun Schedule.AnnualScheduleByDueDates.annualScheduleIsDue(validationDate: LocalDate): Boolean {
     for (date in dueDates) {
         if (validationDate.month == date.month && validationDate.dayOfMonth == date.dayOfMonth) return true
     }
