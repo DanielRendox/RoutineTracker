@@ -28,7 +28,7 @@ In the end, habits are tasks repeated according to a certain schedule. Routine T
   <img alt="Schedule Picker Screen" src="images/habit_schedule_editing_demo.png" width="350">
 </div>
 
-Implementing this "calendar" functionality is pretty straightforward. We use `kotilnx-datetime` (KMM alternative for `java.time`) library to figure out what day of month or week a certain date is. In the case of the Alternate Days Schedule, we count how many days have passed since the start date, and then use `%` operator to determine if the date is due or not. Check [`ScheduleIsDue.kt`](https://github.com/DanielRendox/RoutineTracker/blob/develop/core/domain/src/main/java/com/rendox/routinetracker/core/domain/completion_history/ScheduleIsDue.kt) file for more details.
+Implementing this "calendar" functionality is pretty straightforward. We use `kotilnx-datetime` (KMM alternative for `java.time`) library to figure out what day of month or week a certain date is. In the case of the Alternate Days Schedule, we count how many days have passed since the start date, and then use `%` operator to determine if the date is due or not. Check [`ScheduleIsDue.kt`](https://github.com/DanielRendox/RoutineTracker/blob/develop/core/domain/src/main/java/com/rendox/routinetracker/core/domain/schedule/ScheduleIsDue.kt) file for more details.
 
 Great! Now it shows us on what dates the habit is due. For example, here is what we’ve got for a Sun-Mon-Wen-Thu habit (only dates after the start date are displayed as due):
 
@@ -75,11 +75,11 @@ So the data flow works as follows. When a habit is created, it gets saved to the
 
 We have a function that computes habit statuses on a certain date. This function requires the habit and its history to be passed as a parameter. The size of this history matters. If this list is too small and doesn't cover the entire period, the computed statuses may be incorrect.
 
-We have logic for deriving these periods inside [`ScheduleGetPeriodRange.kt`](https://github.com/DanielRendox/RoutineTracker/blob/develop/core/domain/src/main/java/com/rendox/routinetracker/core/domain/completion_history/ScheduleGetPeriodRange.kt) For example, if the habit has a Weekly schedule it will return the corresponding week the validation date is in, if Monthly - month, and so on. It also accounts for possible edge cases, e.g. when the habit’s start date is not the period start date.
+We have logic for deriving these periods inside [`ScheduleGetPeriodRange.kt`](https://github.com/DanielRendox/RoutineTracker/blob/develop/core/domain/src/main/java/com/rendox/routinetracker/core/domain/schedule/ScheduleGetPeriodRange.kt) For example, if the habit has a Weekly schedule it will return the corresponding week the validation date is in, if Monthly - month, and so on. It also accounts for possible edge cases, e.g. when the habit’s start date is not the period start date.
 
 So when we need to compute statuses for all dates within a certain period (e.g. for a single month on the Calendar screen), we first expand this period to ensure no important data is missed. Then we get the habit, its completion history, and vacation history from the database. And finally, we compute statuses for those dates.
 
-All of this is done in the domain layer of the CLEAN architecture. The call chain starts from the [`GetHabitCompletionDataUseCase`](https://github.com/DanielRendox/RoutineTracker/blob/develop/core/domain/src/main/java/com/rendox/routinetracker/core/domain/completion_history/GetHabitCompletionDataUseCase.kt), which is then exposed to the UI layer.
+All of this is done in the domain layer of the CLEAN architecture. The call chain starts from the `GetHabitCompletionDataUseCase`, which is then exposed to the UI layer.
 
 ## Streaks
 
