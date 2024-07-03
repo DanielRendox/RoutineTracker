@@ -34,9 +34,9 @@ internal class StreakComputerImpl(
         }
 
         val streaks = mutableListOf<Streak>()
-        var failedDate: LocalDate?
 
-        for (completedDate in completionHistory.map { it.date }) {
+        var completedDate = completionHistory.first().date
+        while (completedDate <= completionHistory.last().date) {
             val habitStatus = habitStatusComputer.computeStatus(
                 validationDate = completedDate,
                 today = today,
@@ -63,7 +63,7 @@ internal class StreakComputerImpl(
                 vacationHistory = vacationHistory,
             )
 
-            failedDate = findNextFailedDate(
+            val failedDate = findNextFailedDate(
                 habit = habit,
                 currentDate = completedDate,
                 today = today,
@@ -72,44 +72,18 @@ internal class StreakComputerImpl(
                 vacationHistory = vacationHistory,
             )
 
-            val streakShouldEndAtPeriodEnd =
-                completedDatePeriod != null && !completedDatePeriod.contains(failedDate)
-            val periodEnd = completedDatePeriod?.endInclusive
-            val streakEndDate = when {
-                streakShouldEndAtPeriodEnd && periodEnd!! < lastPossibleStreakDate -> periodEnd
-                failedDate != null -> failedDate.minus(DatePeriod(days = 1))
-                lastPossibleStreakDate == today -> {
-                    val todayStatus = habitStatusComputer.computeStatus(
-                        validationDate = today,
-                        today = today,
-                        habit = habit,
-                        completionHistory = completionHistory,
-                        vacationHistory = vacationHistory,
-                    )
-                    when (todayStatus) {
-                        HabitStatus.Planned, HabitStatus.Backlog -> today.minus(DatePeriod(days = 1))
-                        else -> today
-                    }
-                }
-
-                else -> lastPossibleStreakDate
-            }
+            val streakEndDate = findStreakEndDate(
+                habit = habit,
+                failedDate = failedDate,
+                maxDate = lastPossibleStreakDate,
+                today = today,
+                completionHistory = completionHistory,
+                vacationHistory = vacationHistory,
+            )
 
             val currentStreak = Streak(startDate = streakStartDate, endDate = streakEndDate)
-            val someStreakAlreadyIncludesCurrentStreak = streaks.any { saveStreak ->
-                saveStreak.startDate <= currentStreak.startDate &&
-                    saveStreak.endDate >= currentStreak.endDate
-            }
-            if (someStreakAlreadyIncludesCurrentStreak) continue
-
-            val streakToMerge =
-                streaks.find { it.endDate.plusDays(1) == currentStreak.startDate }
-            if (streakToMerge != null) {
-                streaks.remove(streakToMerge)
-                streaks.add(currentStreak.copy(startDate = streakToMerge.startDate))
-            } else {
-                streaks.add(currentStreak)
-            }
+            streaks.add(currentStreak)
+            completedDate = completionHistory.firstOrNull { it.date > streakEndDate }?.date ?: break
         }
 
         return streaks
@@ -148,6 +122,32 @@ internal class StreakComputerImpl(
             null -> completedDatePeriod?.start ?: habit.schedule.startDate
             else -> previousFailedDate.plusDays(1)
         }
+    }
+
+    private fun findStreakEndDate(
+        habit: Habit,
+        failedDate: LocalDate?,
+        maxDate: LocalDate,
+        today: LocalDate,
+        completionHistory: List<Habit.CompletionRecord>,
+        vacationHistory: List<Vacation>,
+    ): LocalDate = when {
+        failedDate != null -> failedDate.minus(DatePeriod(days = 1))
+        maxDate == today -> {
+            val todayStatus = habitStatusComputer.computeStatus(
+                validationDate = today,
+                today = today,
+                habit = habit,
+                completionHistory = completionHistory,
+                vacationHistory = vacationHistory,
+            )
+            when (todayStatus) {
+                HabitStatus.Planned, HabitStatus.Backlog -> today.minus(DatePeriod(days = 1))
+                else -> today
+            }
+        }
+
+        else -> maxDate
     }
 
     private fun findNextFailedDate(

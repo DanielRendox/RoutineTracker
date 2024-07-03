@@ -1,6 +1,7 @@
 package com.rendox.routinetracker.core.domain.streak
 
 import com.google.common.truth.Truth.assertThat
+import com.rendox.routinetracker.core.data.RandomHabitsGenerator
 import com.rendox.routinetracker.core.domain.habitstatus.HabitStatusComputer
 import com.rendox.routinetracker.core.domain.habitstatus.HabitStatusComputerImpl
 import com.rendox.routinetracker.core.logic.time.plusDays
@@ -9,11 +10,13 @@ import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.model.Streak
 import com.rendox.routinetracker.core.model.Vacation
+import kotlin.test.assertTrue
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDate
+import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
@@ -123,24 +126,13 @@ class StreakComputerImplTest {
         )
     }
 
-    @ParameterizedTest
-    @CsvSource(
-        "false, 2024-01-05, 2024-01-10, 2024-01-31",
-        "true, 2024-01-05, 2024-01-07, 2024-01-31",
-        "true, 2024-01-05, 2024-01-07, 2024-01-10",
-    )
-    fun `streak continues in future period`(
-        periodSeparationEnabled: Boolean,
-        streakStartDateString: String,
-        streakEndDateString: String,
-        todayString: String,
-    ) {
+    @Test
+    fun `streak continues in future period`() {
         val startDate = LocalDate(2024, 1, 1)
         val completedDate = LocalDate(2024, 1, 5)
         val schedule = Schedule.WeeklyScheduleByDueDaysOfWeek(
             dueDaysOfWeek = listOf(DayOfWeek.THURSDAY, DayOfWeek.FRIDAY),
             startDate = startDate,
-            periodSeparationEnabled = periodSeparationEnabled,
         )
         val habit = Habit.YesNoHabit(
             name = "test habit",
@@ -157,12 +149,12 @@ class StreakComputerImplTest {
             habit = habit,
             completionHistory = completionHistory,
             vacationHistory = vacationHistory,
-            today = todayString.toLocalDate(),
+            today = LocalDate(2024, 1, 31),
         )
         assertThat(streaks).containsExactly(
             Streak(
-                startDate = streakStartDateString.toLocalDate(),
-                endDate = streakEndDateString.toLocalDate(),
+                startDate = LocalDate(2024, 1, 5),
+                endDate = LocalDate(2024, 1, 10),
             ),
         )
     }
@@ -428,6 +420,73 @@ class StreakComputerImplTest {
                 endDate = LocalDate(2024, 1, 5),
             ),
         )
+        val streaks = streakComputer.computeAllStreaks(
+            habit = habit,
+            completionHistory = completionHistory,
+            vacationHistory = vacationHistory,
+            today = LocalDate(2024, 1, 31),
+        )
+        assertThat(streaks).isEmpty()
+    }
+
+    @RepeatedTest(100)
+    fun `computed steak list contains no overlapping streaks`() {
+        val streaks = generateRandomStreaks()
+        for (outerStreak in streaks) {
+            for (innerStreak in streaks) {
+                if (outerStreak != innerStreak) {
+                    assertTrue(
+                        actual = outerStreak.endDate < innerStreak.startDate ||
+                            outerStreak.startDate > innerStreak.endDate,
+                        message = "$outerStreak overlaps $innerStreak",
+                    )
+                }
+            }
+        }
+    }
+
+    @RepeatedTest(100)
+    fun `computed streak list contains no adjacent streaks`() {
+        val streaks = generateRandomStreaks()
+        streaks.drop(1).forEachIndexed { index, streak ->
+            assertTrue(
+                actual = streak.startDate != streaks[index].endDate.plusDays(1),
+                message = "adjacent streaks: ${streaks[index]} and $streak",
+            )
+        }
+    }
+
+    private fun generateRandomStreaks(): List<Streak> {
+        val currentDate = LocalDate(2024, 7, 1)
+        val habit = RandomHabitsGenerator.generateRandomHabits(
+            numOfHabits = 1,
+            startDateRange = LocalDate(2023, 1, 1)..currentDate,
+
+        ).first()
+        val completionHistory = RandomHabitsGenerator.generateCompletionHistory(
+            habit = habit,
+            currentDate = currentDate,
+        )
+        val vacationHistory = RandomHabitsGenerator.generateVacationHistory(
+            habit = habit,
+            currentDate = currentDate,
+        )
+        return streakComputer.computeAllStreaks(
+            habit = habit,
+            completionHistory = completionHistory,
+            vacationHistory = vacationHistory,
+            today = currentDate,
+        )
+    }
+
+    @Test
+    fun `streaks list is empty when completion history is empty`() {
+        val habit = Habit.YesNoHabit(
+            name = "test habit",
+            schedule = Schedule.EveryDaySchedule(startDate = LocalDate(2024, 1, 1)),
+        )
+        val completionHistory = emptyList<Habit.YesNoHabit.CompletionRecord>()
+        val vacationHistory = emptyList<Vacation>()
         val streaks = streakComputer.computeAllStreaks(
             habit = habit,
             completionHistory = completionHistory,
