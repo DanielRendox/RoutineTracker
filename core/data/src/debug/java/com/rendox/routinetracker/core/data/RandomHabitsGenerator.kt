@@ -16,21 +16,23 @@ import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
 
-class RandomHabitsGenerator(
-    private val numOfHabits: Int,
-    private val currentDate: LocalDate = today,
-    private val startDateRange: LocalDateRange = currentDate.minusDays(365)..currentDate,
-) {
+object RandomHabitsGenerator {
 
-    fun generateRandomHabits(): List<Habit> = (1..numOfHabits).map { habitNum ->
-        val schedule = generateRandomSchedule()
+    fun generateRandomHabits(
+        numOfHabits: Int,
+        startDateRange: LocalDateRange = today.minusDays(365)..today,
+    ): List<Habit> = (1..numOfHabits).map { habitNum ->
+        val schedule = generateRandomSchedule(startDateRange)
         Habit.YesNoHabit(
             name = "YesNoHabit $habitNum, ${schedule::class.simpleName}",
             schedule = schedule,
         )
     }
 
-    fun generateCompletionHistory(habit: Habit): List<Habit.CompletionRecord> {
+    fun generateCompletionHistory(
+        habit: Habit,
+        currentDate: LocalDate = today,
+    ): List<Habit.CompletionRecord> {
         val schedule = habit.schedule
         val entireHistory = (schedule.startDate..currentDate).shuffled()
         val completionRate = when (schedule) {
@@ -55,6 +57,7 @@ class RandomHabitsGenerator(
 
     fun generateVacationHistory(
         habit: Habit,
+        currentDate: LocalDate = today,
         frequencyDays: IntRange = 20..40,
         durationDays: IntRange = 0..15,
     ): List<Vacation> = buildList {
@@ -78,7 +81,7 @@ class RandomHabitsGenerator(
         }
     }
 
-    private fun generateRandomSchedule(): Schedule {
+    private fun generateRandomSchedule(startDateRange: LocalDateRange): Schedule {
         val scheduleTypeIndex = Random.nextInt(6)
         val startDate = startDateRange.random()
         if (scheduleTypeIndex == 0) return Schedule.EveryDaySchedule(startDate = startDate)

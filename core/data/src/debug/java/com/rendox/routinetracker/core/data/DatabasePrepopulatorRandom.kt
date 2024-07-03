@@ -5,7 +5,6 @@ import com.rendox.routinetracker.core.database.habit.HabitLocalDataSource
 import com.rendox.routinetracker.core.database.vacation.VacationLocalDataSource
 
 class DatabasePrepopulatorRandom(
-    private val habitsGenerator: RandomHabitsGenerator,
     private val habitLocalDataSource: HabitLocalDataSource,
     private val completionHistoryLocalDataSource: CompletionHistoryLocalDataSource,
     private val vacationLocalDataSource: VacationLocalDataSource,
@@ -14,18 +13,18 @@ class DatabasePrepopulatorRandom(
         val dbIsNotEmpty = !habitLocalDataSource.checkIfIsEmpty()
         if (dbIsNotEmpty) return
 
-        val habits = habitsGenerator.generateRandomHabits()
+        val habits = RandomHabitsGenerator.generateRandomHabits(numOfHabits = 20)
         habitLocalDataSource.insertHabits(habits)
 
         val insertedHabits = habitLocalDataSource.getAllHabits()
 
         val completionHistory = insertedHabits
-            .associateWith { habit -> habitsGenerator.generateCompletionHistory(habit) }
+            .associateWith { habit -> RandomHabitsGenerator.generateCompletionHistory(habit) }
             .mapKeys { it.key.id!! }
         completionHistoryLocalDataSource.insertCompletions(completionHistory)
 
         val vacationHistory = insertedHabits
-            .associateWith { habit -> habitsGenerator.generateVacationHistory(habit) }
+            .associateWith { habit -> RandomHabitsGenerator.generateVacationHistory(habit) }
             .mapKeys { it.key.id!! }
         vacationLocalDataSource.insertVacations(vacationHistory)
     }
