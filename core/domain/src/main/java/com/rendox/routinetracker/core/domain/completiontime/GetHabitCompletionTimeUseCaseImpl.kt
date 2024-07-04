@@ -4,7 +4,7 @@ import com.rendox.routinetracker.core.data.completiontime.CompletionTimeReposito
 import com.rendox.routinetracker.core.data.completiontime.DueDateSpecificCompletionTimeRepository
 import com.rendox.routinetracker.core.database.di.toInt
 import com.rendox.routinetracker.core.domain.di.GetHabitUseCase
-import com.rendox.routinetracker.core.logic.time.AnnualDate
+import com.rendox.routinetracker.core.model.AnnualDate
 import com.rendox.routinetracker.core.model.Schedule
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime

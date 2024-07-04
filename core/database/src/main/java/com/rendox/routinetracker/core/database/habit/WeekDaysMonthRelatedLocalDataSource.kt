@@ -1,6 +1,6 @@
 package com.rendox.routinetracker.core.database.habit
 
-import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
+import com.rendox.routinetracker.core.model.WeekDayMonthRelated
 
 interface WeekDaysMonthRelatedLocalDataSource {
     fun insertWeekDaysMonthRelated(

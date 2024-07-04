@@ -4,8 +4,8 @@ import com.rendox.routinetracker.core.database.di.toAnnualDate
 import com.rendox.routinetracker.core.database.di.toDayOfWeek
 import com.rendox.routinetracker.core.database.di.toLocalDate
 import com.rendox.routinetracker.core.database.schedule.ScheduleEntity
-import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
 import com.rendox.routinetracker.core.model.Schedule
+import com.rendox.routinetracker.core.model.WeekDayMonthRelated
 
 internal fun ScheduleEntity.toEveryDaySchedule() = Schedule.EveryDaySchedule(
     startDate = startDate,

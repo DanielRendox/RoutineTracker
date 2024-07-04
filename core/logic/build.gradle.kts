@@ -5,5 +5,6 @@ plugins {
 
 dependencies {
     implementation(libs.jetbrains.kotlinx.datetime)
+    implementation(project(":core:model"))
 }
 

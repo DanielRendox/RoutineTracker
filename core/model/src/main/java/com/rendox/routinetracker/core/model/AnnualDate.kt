@@ -1,4 +1,4 @@
-package com.rendox.routinetracker.core.logic.time
+package com.rendox.routinetracker.core.model
 
 import kotlinx.datetime.Month
 
