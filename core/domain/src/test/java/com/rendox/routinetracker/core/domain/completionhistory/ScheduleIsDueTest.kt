@@ -2,13 +2,13 @@ package com.rendox.routinetracker.core.domain.completionhistory
 
 import com.google.common.truth.Truth.assertThat
 import com.rendox.routinetracker.core.domain.schedule.isDue
-import com.rendox.routinetracker.core.logic.time.AnnualDate
-import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
-import com.rendox.routinetracker.core.logic.time.WeekDayNumberMonthRelated
 import com.rendox.routinetracker.core.logic.time.atEndOfMonth
 import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo
+import com.rendox.routinetracker.core.model.AnnualDate
 import com.rendox.routinetracker.core.model.Schedule
+import com.rendox.routinetracker.core.model.WeekDayMonthRelated
+import com.rendox.routinetracker.core.model.WeekDayNumberMonthRelated
 import kotlin.random.Random
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DateTimeUnit

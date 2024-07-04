@@ -3,7 +3,7 @@ package com.rendox.routinetracker.core.database.habit
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
 import com.rendox.routinetracker.core.database.di.toDayOfWeek
 import com.rendox.routinetracker.core.database.di.toInt
-import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
+import com.rendox.routinetracker.core.model.WeekDayMonthRelated
 
 internal class WeekDaysMonthRelatedLocalDataSourceImpl(
     private val db: RoutineTrackerDatabase,

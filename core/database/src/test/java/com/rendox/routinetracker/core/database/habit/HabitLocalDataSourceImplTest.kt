@@ -6,11 +6,11 @@ import com.google.common.truth.Truth.assertThat
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
 import com.rendox.routinetracker.core.database.di.habitLocalDataModule
 import com.rendox.routinetracker.core.database.di.localDataSourceModule
-import com.rendox.routinetracker.core.logic.time.AnnualDate
-import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
-import com.rendox.routinetracker.core.logic.time.WeekDayNumberMonthRelated
+import com.rendox.routinetracker.core.model.AnnualDate
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Schedule
+import com.rendox.routinetracker.core.model.WeekDayMonthRelated
+import com.rendox.routinetracker.core.model.WeekDayNumberMonthRelated
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest

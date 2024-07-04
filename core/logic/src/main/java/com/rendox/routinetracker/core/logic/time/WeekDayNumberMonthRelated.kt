@@ -1,24 +1,11 @@
 package com.rendox.routinetracker.core.logic.time
 
+import com.rendox.routinetracker.core.model.WeekDayMonthRelated
+import com.rendox.routinetracker.core.model.WeekDayNumberMonthRelated
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
-
-data class WeekDayMonthRelated(
-    val dayOfWeek: DayOfWeek,
-    val weekDayNumberMonthRelated: WeekDayNumberMonthRelated,
-)
-
-enum class WeekDayNumberMonthRelated {
-    First,
-    Second,
-    Third,
-    Forth,
-    Fifth,
-    Last,
-}
 
 /**
  * Never returns WeekDayMonthRelated.Last

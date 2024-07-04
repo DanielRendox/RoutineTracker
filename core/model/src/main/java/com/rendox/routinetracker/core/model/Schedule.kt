@@ -1,7 +1,5 @@
 package com.rendox.routinetracker.core.model
 
-import com.rendox.routinetracker.core.logic.time.AnnualDate
-import com.rendox.routinetracker.core.logic.time.WeekDayMonthRelated
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek

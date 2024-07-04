@@ -16,9 +16,9 @@ import com.rendox.routinetracker.core.database.habit.HabitEntity
 import com.rendox.routinetracker.core.database.schedule.DueDateEntity
 import com.rendox.routinetracker.core.database.schedule.ScheduleEntity
 import com.rendox.routinetracker.core.database.schedule.WeekDayMonthRelatedEntity
-import com.rendox.routinetracker.core.logic.time.AnnualDate
 import com.rendox.routinetracker.core.logic.time.epochDate
 import com.rendox.routinetracker.core.logic.time.plusDays
+import com.rendox.routinetracker.core.model.AnnualDate
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.datetime.DayOfWeek
