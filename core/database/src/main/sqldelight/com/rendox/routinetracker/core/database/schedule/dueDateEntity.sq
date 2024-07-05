@@ -6,7 +6,7 @@ CREATE TABLE dueDateEntity (
     completionTimeHour INTEGER AS Int,
     completionTimeMinute INTEGER AS Int,
     PRIMARY KEY (scheduleId, dueDateNumber),
-    FOREIGN KEY (scheduleId) REFERENCES scheduleEntity(id)
+    FOREIGN KEY (scheduleId) REFERENCES scheduleEntity(id) ON DELETE CASCADE
 );
 
 getDueDates:

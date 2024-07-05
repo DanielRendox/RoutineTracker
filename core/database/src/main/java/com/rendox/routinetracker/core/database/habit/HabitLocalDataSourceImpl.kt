@@ -89,8 +89,7 @@ class HabitLocalDataSourceImpl(
         db.habitEntityQueries.transaction {
             db.habitEntityQueries.deleteHabitById(habitId)
             scheduleLocalDataSource.deleteSchedule(habitId)
-            db.cashedStreakQueries.deleteAllStreaksForHabit(habitId)
-            db.cashedStreakQueries.deleteAllCashedPeriodsForHabit(habitId)
+            db.cachedStreakEntityQueries.deleteAllStreaksForHabit(habitId)
             db.completionHistoryEntityQueries.deleteAllCompletionsForHabit(habitId)
             db.specificDateCustomCompletionTimeQueries.deleteAllCompletionTimesForHabit(habitId)
             db.vacationEntityQueries.deleteAllVacationsForHabit(habitId)

@@ -26,8 +26,4 @@ class VacationRepositoryImpl(
 
     override suspend fun insertVacations(habitIdsToVacations: Map<Long, List<Vacation>>) =
         localDataSource.insertVacations(habitIdsToVacations)
-
-    override suspend fun deleteVacationById(id: Long) {
-        localDataSource.deleteVacationById(id)
-    }
 }

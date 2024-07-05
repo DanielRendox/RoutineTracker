@@ -7,7 +7,7 @@ CREATE TABLE specificDateCustomCompletionTime (
     completionTimeHour INTEGER AS Int NOT NULL,
     completionTimeMinute INTEGER AS Int NOT NULL,
     PRIMARY KEY (routineId, date),
-    FOREIGN KEY (routineId) REFERENCES habitEntity(id)
+    FOREIGN KEY (routineId) REFERENCES habitEntity(id) ON DELETE CASCADE
 );
 
 getCompletionTime:

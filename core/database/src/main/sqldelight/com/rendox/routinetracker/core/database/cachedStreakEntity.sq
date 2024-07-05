@@ -1,0 +1,34 @@
+import kotlinx.datetime.LocalDate;
+
+CREATE TABLE cachedStreakEntity (
+    habitId INTEGER NOT NULL,
+    startDate INTEGER AS LocalDate NOT NULL,
+    endDate INTEGER AS LocalDate NOT NULL,
+    PRIMARY KEY (habitId, startDate, endDate),
+    FOREIGN KEY (habitId) REFERENCES habitEntity(id) ON DELETE CASCADE
+);
+
+insertStreak:
+INSERT OR IGNORE
+INTO cachedStreakEntity
+VALUES (?, ?, ?);
+
+getAllStreaks:
+SELECT *
+FROM cachedStreakEntity
+WHERE habitId = ?;
+
+getStreaksInPeriod:
+SELECT *
+FROM cachedStreakEntity
+WHERE habitId = :habitId
+    AND startDate <= :periodEnd AND endDate >= :periodStart;
+
+deleteStreaksInPeriod:
+DELETE FROM cachedStreakEntity
+WHERE habitId = :habitId
+    AND :periodStart <= startDate AND endDate <= :periodEnd;
+
+deleteAllStreaksForHabit:
+DELETE FROM cachedStreakEntity
+WHERE habitId = :habitId;

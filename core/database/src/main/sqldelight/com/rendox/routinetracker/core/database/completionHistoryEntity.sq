@@ -5,7 +5,8 @@ CREATE TABLE completionHistoryEntity (
     habitId INTEGER NOT NULL,
     date INTEGER AS LocalDate NOT NULL,
     numOfTimesCompleted REAL AS Float NOT NULL,
-    PRIMARY KEY (habitId, date)
+    PRIMARY KEY (habitId, date),
+    FOREIGN KEY (habitId) REFERENCES habitEntity(id) ON DELETE CASCADE
 );
 
 insertCompletion:

@@ -6,11 +6,10 @@ import app.cash.sqldelight.adapter.primitive.FloatColumnAdapter
 import app.cash.sqldelight.adapter.primitive.IntColumnAdapter
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
-import com.rendox.routinetracker.core.database.CashedStreakEntity
+import com.rendox.routinetracker.core.database.CachedStreakEntity
 import com.rendox.routinetracker.core.database.CompletionHistoryEntity
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
 import com.rendox.routinetracker.core.database.SpecificDateCustomCompletionTime
-import com.rendox.routinetracker.core.database.StreakCashedPeriodEntity
 import com.rendox.routinetracker.core.database.VacationEntity
 import com.rendox.routinetracker.core.database.habit.HabitEntity
 import com.rendox.routinetracker.core.database.schedule.DueDateEntity
@@ -82,11 +81,7 @@ val localDataSourceModule = module {
                 startDateAdapter = localDateAdapter,
                 endDateAdapter = localDateAdapter,
             ),
-            cashedStreakEntityAdapter = CashedStreakEntity.Adapter(
-                startDateAdapter = localDateAdapter,
-                endDateAdapter = localDateAdapter,
-            ),
-            streakCashedPeriodEntityAdapter = StreakCashedPeriodEntity.Adapter(
+            cachedStreakEntityAdapter = CachedStreakEntity.Adapter(
                 startDateAdapter = localDateAdapter,
                 endDateAdapter = localDateAdapter,
             ),

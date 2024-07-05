@@ -6,7 +6,7 @@ CREATE TABLE weekDayMonthRelatedEntity (
     scheduleId INTEGER NOT NULL,
     weekDayIndex INTEGER AS Int NOT NULL,
     weekDayNumberMonthRelated TEXT AS WeekDayNumberMonthRelated NOT NULL,
-    FOREIGN KEY(scheduleId) REFERENCES scheduleEntity(id)
+    FOREIGN KEY(scheduleId) REFERENCES scheduleEntity(id) ON DELETE CASCADE
 );
 
 getWeekDayMonthRelatedDays:

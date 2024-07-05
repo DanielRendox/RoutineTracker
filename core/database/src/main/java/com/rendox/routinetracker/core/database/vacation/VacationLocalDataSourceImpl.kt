@@ -63,7 +63,6 @@ class VacationLocalDataSourceImpl(
     ) = withContext(ioDispatcher) {
         db.vacationEntityQueries.insertVacation(
             habitId = habitId,
-            id = vacation.id,
             startDate = vacation.startDate,
             endDate = vacation.endDate,
         )
@@ -75,16 +74,11 @@ class VacationLocalDataSourceImpl(
                 for (vacation in vacations) {
                     db.vacationEntityQueries.insertVacation(
                         habitId = habitId,
-                        id = vacation.id,
                         startDate = vacation.startDate,
                         endDate = vacation.endDate,
                     )
                 }
             }
         }
-    }
-
-    override suspend fun deleteVacationById(id: Long) = withContext(ioDispatcher) {
-        db.vacationEntityQueries.deleteVacationById(id)
     }
 }

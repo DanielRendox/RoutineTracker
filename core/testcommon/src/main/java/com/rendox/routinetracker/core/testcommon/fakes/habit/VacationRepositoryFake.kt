@@ -43,12 +43,6 @@ class VacationRepositoryFake(
         }
     }
 
-    override suspend fun deleteVacationById(id: Long) {
-        habitData.vacationHistory.update {
-            it.toMutableList().apply { removeAt((id - 1).toInt()) }
-        }
-    }
-
     private fun getAllVacations(): Map<Long, List<Vacation>> = habitData.vacationHistory.value.groupBy(
         keySelector = { it.first },
         valueTransform = { it.second },

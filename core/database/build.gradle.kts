@@ -10,6 +10,7 @@ sqldelight {
     databases {
         create("RoutineTrackerDatabase") {
             packageName.set("com.rendox.routinetracker.core.database")
+            schemaOutputDirectory.set(file("src/main/sqldelight/databases"))
         }
     }
 }
