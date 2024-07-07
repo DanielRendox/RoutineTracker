@@ -54,7 +54,9 @@ The motivation for this project is simple. I couldn't find any planner or habit 
 
 ## Get the app
 
-You can install the app from the [GitHub releases](https://github.com/DanielRendox/RoutineTracker/releases) page or build it yourself by [cloning the project](https://docs.github.com/articles/cloning-a-repository) and launching it in the latest version of [Android Studio](https://developer.android.com/studio).
+You can install the app from the [GitHub releases](https://github.com/DanielRendox/RoutineTracker/releases) page or build it yourself by [cloning the project](https://docs.github.com/articles/cloning-a-repository) and launching it in the [Android Studio](https://developer.android.com/studio).
+
+Please note that the SQLDelight plugin v2.0.2 does not work well with the new Android Studio Koala. Since the project uses SQLDelight, this results in an internal error that disables syntax highlighting for project files. If you have it installed, you might want to disable it for smoother browsing. Alternatively, you can download an older version of Android Studio from the [download archives](https://developer.android.com/studio/archive).
 
 ## What do you think?
 
