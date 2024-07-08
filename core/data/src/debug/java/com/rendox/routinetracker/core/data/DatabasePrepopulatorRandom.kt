@@ -3,6 +3,7 @@ package com.rendox.routinetracker.core.data
 import com.rendox.routinetracker.core.database.completionhistory.CompletionHistoryLocalDataSource
 import com.rendox.routinetracker.core.database.habit.HabitLocalDataSource
 import com.rendox.routinetracker.core.database.vacation.VacationLocalDataSource
+import com.rendox.routinetracker.core.logic.RandomHabitsGenerator
 
 class DatabasePrepopulatorRandom(
     private val habitLocalDataSource: HabitLocalDataSource,

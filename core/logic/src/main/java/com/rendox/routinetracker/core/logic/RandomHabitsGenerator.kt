@@ -1,4 +1,4 @@
-package com.rendox.routinetracker.core.data
+package com.rendox.routinetracker.core.logic
 
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.minusDays
