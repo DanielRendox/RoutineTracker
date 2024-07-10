@@ -1,5 +1,6 @@
 package com.rendox.routinetracker.core.database.di
 
+import androidx.sqlite.db.SupportSQLiteDatabase
 import app.cash.sqldelight.ColumnAdapter
 import app.cash.sqldelight.EnumColumnAdapter
 import app.cash.sqldelight.adapter.primitive.FloatColumnAdapter
@@ -37,6 +38,11 @@ val localDataSourceModule = module {
             schema = RoutineTrackerDatabase.Schema,
             context = get(),
             name = "routinetracker.db",
+            callback = object : AndroidSqliteDriver.Callback(RoutineTrackerDatabase.Schema) {
+                override fun onOpen(db: SupportSQLiteDatabase) {
+                    db.setForeignKeyConstraintsEnabled(true)
+                }
+            },
         )
     }
 
