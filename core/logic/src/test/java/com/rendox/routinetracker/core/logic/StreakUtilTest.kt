@@ -1,4 +1,4 @@
-package com.rendox.routinetracker.core.domain.streak
+package com.rendox.routinetracker.core.logic
 
 import com.google.common.truth.Truth.assertThat
 import com.rendox.routinetracker.core.model.Streak
@@ -158,6 +158,34 @@ class StreakUtilTest {
             Streak(
                 startDate = LocalDate(2022, 1, 1),
                 endDate = LocalDate(2022, 1, 2),
+            ),
+        )
+    }
+
+    @Test
+    fun `joins adjacent streaks handles unsorted streaks`() {
+        val streaks = listOf(
+            Streak(
+                startDate = LocalDate(2022, 1, 11),
+                endDate = LocalDate(2022, 1, 20),
+            ),
+            Streak(
+                startDate = LocalDate(2022, 1, 1),
+                endDate = LocalDate(2022, 1, 10),
+            ),
+            Streak(
+                startDate = LocalDate(2022, 1, 25),
+                endDate = LocalDate(2022, 1, 30),
+            ),
+        )
+        assertThat(streaks.joinAdjacentStreaks()).containsExactly(
+            Streak(
+                startDate = LocalDate(2022, 1, 1),
+                endDate = LocalDate(2022, 1, 20),
+            ),
+            Streak(
+                startDate = LocalDate(2022, 1, 25),
+                endDate = LocalDate(2022, 1, 30),
             ),
         )
     }

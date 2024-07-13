@@ -10,10 +10,10 @@ import com.rendox.routinetracker.core.domain.completionhistory.InsertHabitComple
 import com.rendox.routinetracker.core.domain.di.DeleteHabitUseCase
 import com.rendox.routinetracker.core.domain.di.GetHabitUseCase
 import com.rendox.routinetracker.core.domain.streak.GetAllStreaksUseCase
-import com.rendox.routinetracker.core.domain.streak.contains
-import com.rendox.routinetracker.core.domain.streak.getCurrentStreak
-import com.rendox.routinetracker.core.domain.streak.getDurationInDays
-import com.rendox.routinetracker.core.domain.streak.getLongestStreak
+import com.rendox.routinetracker.core.logic.contains
+import com.rendox.routinetracker.core.logic.getCurrentStreak
+import com.rendox.routinetracker.core.logic.getDurationInDays
+import com.rendox.routinetracker.core.logic.getLongestStreak
 import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.HabitStatus

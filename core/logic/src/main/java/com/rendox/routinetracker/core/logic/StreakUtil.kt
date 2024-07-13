@@ -1,4 +1,4 @@
-package com.rendox.routinetracker.core.domain.streak
+package com.rendox.routinetracker.core.logic
 
 import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo
