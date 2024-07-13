@@ -4,7 +4,7 @@ import com.rendox.routinetracker.core.data.completionhistory.CompletionHistoryRe
 import com.rendox.routinetracker.core.data.streaks.StreakRepository
 import com.rendox.routinetracker.core.data.vacation.VacationRepository
 import com.rendox.routinetracker.core.domain.di.GetHabitUseCase
-import com.rendox.routinetracker.core.domain.streak.StreakComputer
+import com.rendox.routinetracker.core.domain.streak.computer.StreakComputer
 import com.rendox.routinetracker.core.model.Habit
 import kotlinx.datetime.LocalDate
 

@@ -5,6 +5,7 @@ import com.rendox.routinetracker.core.data.streaks.StreakRepository
 import com.rendox.routinetracker.core.data.vacation.VacationRepository
 import com.rendox.routinetracker.core.domain.di.GetHabitUseCase
 import com.rendox.routinetracker.core.domain.schedule.getPeriodRange
+import com.rendox.routinetracker.core.domain.streak.computer.StreakComputer
 import com.rendox.routinetracker.core.logic.joinAdjacentStreaks
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.atEndOfMonth

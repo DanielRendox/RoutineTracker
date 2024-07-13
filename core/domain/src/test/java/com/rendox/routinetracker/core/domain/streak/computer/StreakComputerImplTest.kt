@@ -1,4 +1,4 @@
-package com.rendox.routinetracker.core.domain.streak
+package com.rendox.routinetracker.core.domain.streak.computer
 
 import com.google.common.truth.Truth.assertThat
 import com.rendox.routinetracker.core.domain.habitstatus.HabitStatusComputer

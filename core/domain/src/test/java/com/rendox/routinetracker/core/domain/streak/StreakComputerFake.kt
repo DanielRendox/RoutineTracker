@@ -1,5 +1,6 @@
 package com.rendox.routinetracker.core.domain.streak
 
+import com.rendox.routinetracker.core.domain.streak.computer.StreakComputer
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Streak
