@@ -19,7 +19,7 @@ import kotlinx.datetime.minus
 internal class StreakComputerImpl(
     private val habitStatusComputer: HabitStatusComputer,
 ) : StreakComputer {
-    override fun computeAllStreaks(
+    override fun computeStreaks(
         today: LocalDate,
         habit: Habit,
         completionHistory: List<Habit.CompletionRecord>,
@@ -55,19 +55,6 @@ internal class StreakComputerImpl(
         }
         return streaks
     }
-
-    override fun computeStreaksInPeriod(
-        today: LocalDate,
-        habit: Habit,
-        completionHistory: List<Habit.CompletionRecord>,
-        vacationHistory: List<Vacation>,
-        period: LocalDateRange,
-    ): List<Streak> = computeAllStreaks(
-        today = today,
-        habit = habit,
-        completionHistory = completionHistory.filter { it.date in period },
-        vacationHistory = vacationHistory.filter { it.startDate in period },
-    )
 
     private fun computeStreak(
         today: LocalDate,

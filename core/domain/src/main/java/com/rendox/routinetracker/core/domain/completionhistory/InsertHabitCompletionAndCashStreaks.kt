@@ -62,8 +62,7 @@ class InsertHabitCompletionAndCashStreaks(
             minDate = cashedPeriod.start,
             maxDate = cashedPeriod.endInclusive,
         )
-        val streaks = streakComputer.computeStreaksInPeriod(
-            period = cashedPeriod,
+        val streaks = streakComputer.computeStreaks(
             habit = habit,
             completionHistory = completionHistory,
             vacationHistory = vacationHistory,

@@ -44,7 +44,7 @@ class StreakComputerImplTest {
         }
         val vacationHistory = emptyList<Vacation>()
 
-        val streaks = streakComputer.computeAllStreaks(
+        val streaks = streakComputer.computeStreaks(
             habit = habit,
             completionHistory = completionHistory,
             vacationHistory = vacationHistory,
@@ -75,7 +75,7 @@ class StreakComputerImplTest {
         )
         val vacationHistory = emptyList<Vacation>()
 
-        val streaks = streakComputer.computeAllStreaks(
+        val streaks = streakComputer.computeStreaks(
             habit = habit,
             completionHistory = completionHistory,
             vacationHistory = vacationHistory,
@@ -111,7 +111,7 @@ class StreakComputerImplTest {
             ),
         )
         val vacationHistory = emptyList<Vacation>()
-        val streaks = streakComputer.computeAllStreaks(
+        val streaks = streakComputer.computeStreaks(
             habit = habit,
             completionHistory = completionHistory,
             vacationHistory = vacationHistory,
@@ -145,7 +145,7 @@ class StreakComputerImplTest {
             ),
         )
         val vacationHistory = emptyList<Vacation>()
-        val streaks = streakComputer.computeAllStreaks(
+        val streaks = streakComputer.computeStreaks(
             habit = habit,
             completionHistory = completionHistory,
             vacationHistory = vacationHistory,
@@ -179,7 +179,7 @@ class StreakComputerImplTest {
             ),
         )
         val vacationHistory = emptyList<Vacation>()
-        val streaks = streakComputer.computeAllStreaks(
+        val streaks = streakComputer.computeStreaks(
             habit = habit,
             completionHistory = completionHistory,
             vacationHistory = vacationHistory,
@@ -213,7 +213,7 @@ class StreakComputerImplTest {
             ),
         )
         val vacationHistory = emptyList<Vacation>()
-        val streaks = streakComputer.computeAllStreaks(
+        val streaks = streakComputer.computeStreaks(
             habit = habit,
             completionHistory = completionHistory,
             vacationHistory = vacationHistory,
@@ -243,7 +243,7 @@ class StreakComputerImplTest {
             ),
         )
         val vacationHistory = emptyList<Vacation>()
-        val streaks = streakComputer.computeAllStreaks(
+        val streaks = streakComputer.computeStreaks(
             habit = habit,
             completionHistory = completionHistory,
             vacationHistory = vacationHistory,
@@ -273,7 +273,7 @@ class StreakComputerImplTest {
             ),
         )
         val vacationHistory = emptyList<Vacation>()
-        val streaks = streakComputer.computeAllStreaks(
+        val streaks = streakComputer.computeStreaks(
             habit = habit,
             completionHistory = completionHistory,
             vacationHistory = vacationHistory,
@@ -351,7 +351,7 @@ class StreakComputerImplTest {
             it.startDate >= firstStreakStartDate && it.endDate <= lastStreakEndDate
         }
         val vacationHistory = emptyList<Vacation>()
-        val streaks = streakComputer.computeAllStreaks(
+        val streaks = streakComputer.computeStreaks(
             habit = habit,
             completionHistory = completionHistory.filter {
                 val start = LocalDate(2024, 1, 5)
@@ -388,7 +388,7 @@ class StreakComputerImplTest {
                 endDate = LocalDate(2024, 1, 5),
             ),
         )
-        val streaks = streakComputer.computeAllStreaks(
+        val streaks = streakComputer.computeStreaks(
             habit = habit,
             completionHistory = completionHistory,
             vacationHistory = vacationHistory,
@@ -420,7 +420,7 @@ class StreakComputerImplTest {
                 endDate = LocalDate(2024, 1, 5),
             ),
         )
-        val streaks = streakComputer.computeAllStreaks(
+        val streaks = streakComputer.computeStreaks(
             habit = habit,
             completionHistory = completionHistory,
             vacationHistory = vacationHistory,
@@ -469,7 +469,7 @@ class StreakComputerImplTest {
                 completed = true,
             ),
         )
-        val streaks = streakComputer.computeAllStreaks(
+        val streaks = streakComputer.computeStreaks(
             habit = habit,
             completionHistory = completionHistory,
             vacationHistory = emptyList(),
@@ -504,7 +504,7 @@ class StreakComputerImplTest {
             habit = habit,
             currentDate = currentDate,
         )
-        return streakComputer.computeAllStreaks(
+        return streakComputer.computeStreaks(
             habit = habit,
             completionHistory = completionHistory,
             vacationHistory = vacationHistory,
@@ -520,7 +520,7 @@ class StreakComputerImplTest {
         )
         val completionHistory = emptyList<Habit.YesNoHabit.CompletionRecord>()
         val vacationHistory = emptyList<Vacation>()
-        val streaks = streakComputer.computeAllStreaks(
+        val streaks = streakComputer.computeStreaks(
             habit = habit,
             completionHistory = completionHistory,
             vacationHistory = vacationHistory,

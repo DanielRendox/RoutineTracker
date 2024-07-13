@@ -13,6 +13,7 @@ import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.model.Streak
+import com.rendox.routinetracker.core.model.Vacation
 import com.rendox.routinetracker.core.testcommon.fakes.habit.CompletionHistoryRepositoryFake
 import com.rendox.routinetracker.core.testcommon.fakes.habit.HabitData
 import com.rendox.routinetracker.core.testcommon.fakes.habit.HabitRepositoryFake
@@ -66,7 +67,14 @@ class GetAllStreaksWithCashingUseCaseTest : KoinTest {
             CompletionHistoryRepositoryFake(habitData = get())
         }
         single<StreakComputer> {
-            StreakComputerFake(streaks = fakeStreaks)
+            object : StreakComputer {
+                override fun computeStreaks(
+                    today: LocalDate,
+                    habit: Habit,
+                    completionHistory: List<Habit.CompletionRecord>,
+                    vacationHistory: List<Vacation>,
+                ): List<Streak> = fakeStreaks.filter { it.endDate <= today }
+            }
         }
     }
 

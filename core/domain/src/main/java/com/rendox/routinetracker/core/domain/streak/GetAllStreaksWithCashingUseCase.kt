@@ -93,12 +93,11 @@ class GetAllStreaksWithCashingUseCase(
             minDate = period.start,
             maxDate = period.endInclusive,
         )
-        return streakComputer.computeStreaksInPeriod(
+        return streakComputer.computeStreaks(
             today = today,
             habit = habit,
             completionHistory = completionHistory,
             vacationHistory = vacationHistory,
-            period = period,
         )
     }
 
