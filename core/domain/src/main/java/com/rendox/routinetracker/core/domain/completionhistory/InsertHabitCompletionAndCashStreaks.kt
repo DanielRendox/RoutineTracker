@@ -52,16 +52,8 @@ class InsertHabitCompletionAndCashStreaks(
             dateInPeriod = completedDate,
         ) ?: return
 
-        val completionHistory = completionHistoryRepository.getRecordsInPeriod(
-            habit = habit,
-            minDate = cashedPeriod.start,
-            maxDate = cashedPeriod.endInclusive,
-        )
-        val vacationHistory = vacationRepository.getVacationsInPeriod(
-            habitId = habit.id!!,
-            minDate = cashedPeriod.start,
-            maxDate = cashedPeriod.endInclusive,
-        )
+        val completionHistory = completionHistoryRepository.getRecordsInPeriod(habit, cashedPeriod)
+        val vacationHistory = vacationRepository.getVacationsInPeriod(habit.id!!, cashedPeriod)
         val streaks = streakComputer.computeStreaks(
             habit = habit,
             completionHistory = completionHistory,
@@ -69,11 +61,7 @@ class InsertHabitCompletionAndCashStreaks(
             today = today,
         )
 
-        streakRepository.deleteStreaksInPeriod(
-            habitId = habit.id!!,
-            periodStartDate = cashedPeriod.start,
-            periodEndDate = cashedPeriod.endInclusive,
-        )
+        streakRepository.deleteStreaksInPeriod(habit.id!!, cashedPeriod)
         streakRepository.insertStreaks(
             streaks = streaks.map { habit.id!! to it },
             periods = listOf(habit.id!! to cashedPeriod),

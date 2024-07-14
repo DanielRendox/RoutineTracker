@@ -16,13 +16,12 @@ class CompletionHistoryLocalDataSourceImpl(
 
     override suspend fun getRecordsInPeriod(
         habit: Habit,
-        minDate: LocalDate?,
-        maxDate: LocalDate?,
+        period: LocalDateRange,
     ): List<Habit.CompletionRecord> = withContext(ioDispatcher) {
         db.completionHistoryEntityQueries.getRecordsInPeriod(
-            habit.id!!,
-            minDate,
-            maxDate,
+            habitId = habit.id!!,
+            minDate = period.start,
+            maxDate = period.endInclusive,
         ).executeAsList().map { it.toExternalModel(habit) }
     }
 
@@ -98,9 +97,7 @@ class CompletionHistoryLocalDataSourceImpl(
     override suspend fun deleteCompletionByDate(
         habitId: Long,
         date: LocalDate,
-    ) {
-        withContext(ioDispatcher) {
-            db.completionHistoryEntityQueries.deleteCompletionByDate(habitId, date)
-        }
+    ) = withContext(ioDispatcher) {
+        db.completionHistoryEntityQueries.deleteCompletionByDate(habitId, date)
     }
 }

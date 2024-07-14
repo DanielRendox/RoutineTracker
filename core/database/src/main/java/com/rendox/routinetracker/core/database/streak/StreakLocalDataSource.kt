@@ -14,8 +14,7 @@ interface StreakLocalDataSource {
 
     suspend fun getStreaksInPeriod(
         habitId: Long,
-        minDate: LocalDate,
-        maxDate: LocalDate,
+        period: LocalDateRange,
     ): List<Streak>
 
     suspend fun getAllCashedPeriods(habitId: Long): List<LocalDateRange>
@@ -27,7 +26,6 @@ interface StreakLocalDataSource {
 
     suspend fun deleteStreaksInPeriod(
         habitId: Long,
-        periodStartDate: LocalDate,
-        periodEndDate: LocalDate,
+        period: LocalDateRange,
     )
 }

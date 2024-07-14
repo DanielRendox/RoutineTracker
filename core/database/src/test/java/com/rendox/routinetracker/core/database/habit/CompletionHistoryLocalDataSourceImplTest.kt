@@ -84,11 +84,9 @@ class CompletionHistoryLocalDataSourceImplTest : KoinTest {
         completionHistoryLocalDataSource.insertCompletions(
             completions = mapOf(1L to testCompletionHistory),
         )
-        val records = completionHistoryLocalDataSource.getRecordsInPeriod(
-            habit = habit,
-            minDate = LocalDate(2024, 2, 1),
-            maxDate = LocalDate(2024, 8, 1),
-        )
+        val minDate = LocalDate(2024, 2, 1)
+        val maxDate = LocalDate(2024, 8, 1)
+        val records = completionHistoryLocalDataSource.getRecordsInPeriod(habit, minDate..maxDate)
         assertThat(records).containsExactly(
             testCompletionHistory[1],
             testCompletionHistory[2],

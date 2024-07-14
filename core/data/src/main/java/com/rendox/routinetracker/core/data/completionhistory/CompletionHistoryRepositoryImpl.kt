@@ -11,13 +11,8 @@ class CompletionHistoryRepositoryImpl(
 
     override suspend fun getRecordsInPeriod(
         habit: Habit,
-        minDate: LocalDate?,
-        maxDate: LocalDate?,
-    ): List<Habit.CompletionRecord> = localDataSource.getRecordsInPeriod(
-        habit,
-        minDate,
-        maxDate,
-    )
+        period: LocalDateRange,
+    ): List<Habit.CompletionRecord> = localDataSource.getRecordsInPeriod(habit, period)
 
     override suspend fun getMultiHabitRecords(
         habitsToPeriods: List<Pair<List<Habit>, LocalDateRange>>,
@@ -26,18 +21,13 @@ class CompletionHistoryRepositoryImpl(
     override suspend fun insertCompletion(
         habitId: Long,
         completionRecord: Habit.CompletionRecord,
-    ) {
-        localDataSource.insertCompletion(habitId, completionRecord)
-    }
+    ) = localDataSource.insertCompletion(habitId, completionRecord)
 
-    override suspend fun insertCompletions(completions: Map<Long, List<Habit.CompletionRecord>>) {
+    override suspend fun insertCompletions(completions: Map<Long, List<Habit.CompletionRecord>>) =
         localDataSource.insertCompletions(completions)
-    }
 
     override suspend fun deleteCompletionByDate(
         habitId: Long,
         date: LocalDate,
-    ) {
-        localDataSource.deleteCompletionByDate(habitId, date)
-    }
+    ) = localDataSource.deleteCompletionByDate(habitId, date)
 }

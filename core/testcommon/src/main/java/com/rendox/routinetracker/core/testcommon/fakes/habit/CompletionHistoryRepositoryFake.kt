@@ -12,12 +12,9 @@ class CompletionHistoryRepositoryFake(
 
     override suspend fun getRecordsInPeriod(
         habit: Habit,
-        minDate: LocalDate?,
-        maxDate: LocalDate?,
+        period: LocalDateRange,
     ): List<Habit.CompletionRecord> = habitData.completionHistory.value.filter {
-        it.first == habit.id!! &&
-            (minDate == null || minDate <= it.second.date) &&
-            (maxDate == null || it.second.date <= maxDate)
+        it.first == habit.id!! && it.second.date in period
     }.map { it.second }.sortedBy { it.date }
 
     override suspend fun getMultiHabitRecords(
@@ -27,22 +24,20 @@ class CompletionHistoryRepositoryFake(
     override suspend fun insertCompletion(
         habitId: Long,
         completionRecord: Habit.CompletionRecord,
-    ) {
-        habitData.completionHistory.update {
-            it.toMutableList().apply { add(habitId to completionRecord) }
-        }
+    ) = habitData.completionHistory.update {
+        it.toMutableList().apply { add(habitId to completionRecord) }
     }
 
     override suspend fun insertCompletions(completions: Map<Long, List<Habit.CompletionRecord>>) {
-        val updatedCompletionHistory = habitData.completionHistory.value.toMutableList()
-
-        for ((habitId, completionRecords) in completions) {
-            for (completionRecord in completionRecords) {
-                updatedCompletionHistory.add(habitId to completionRecord)
+        habitData.completionHistory.update {
+            it.toMutableList().apply {
+                for ((habitId, completionRecords) in completions) {
+                    for (completionRecord in completionRecords) {
+                        add(habitId to completionRecord)
+                    }
+                }
             }
         }
-
-        habitData.completionHistory.update { updatedCompletionHistory }
     }
 
     override suspend fun deleteCompletionByDate(

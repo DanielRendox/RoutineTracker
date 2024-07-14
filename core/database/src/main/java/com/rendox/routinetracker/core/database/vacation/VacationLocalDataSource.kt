@@ -2,14 +2,12 @@ package com.rendox.routinetracker.core.database.vacation
 
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.model.Vacation
-import kotlinx.datetime.LocalDate
 
 interface VacationLocalDataSource {
 
     suspend fun getVacationsInPeriod(
         habitId: Long,
-        minDate: LocalDate,
-        maxDate: LocalDate,
+        period: LocalDateRange,
     ): List<Vacation>
 
     suspend fun getMultiHabitVacations(

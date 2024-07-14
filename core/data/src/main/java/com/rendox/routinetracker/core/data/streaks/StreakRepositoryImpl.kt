@@ -17,13 +17,8 @@ class StreakRepositoryImpl(
 
     override suspend fun getStreaksInPeriod(
         habitId: Long,
-        minDate: LocalDate,
-        maxDate: LocalDate,
-    ): List<Streak> = localDataSource.getStreaksInPeriod(
-        habitId,
-        minDate,
-        maxDate,
-    )
+        period: LocalDateRange,
+    ): List<Streak> = localDataSource.getStreaksInPeriod(habitId, period)
 
     override suspend fun getAllCashedPeriods(habitId: Long): List<LocalDateRange> =
         localDataSource.getAllCashedPeriods(habitId)
@@ -35,11 +30,6 @@ class StreakRepositoryImpl(
 
     override suspend fun deleteStreaksInPeriod(
         habitId: Long,
-        periodStartDate: LocalDate,
-        periodEndDate: LocalDate,
-    ) = localDataSource.deleteStreaksInPeriod(
-        habitId,
-        periodStartDate,
-        periodEndDate,
-    )
+        period: LocalDateRange,
+    ) = localDataSource.deleteStreaksInPeriod(habitId, period)
 }

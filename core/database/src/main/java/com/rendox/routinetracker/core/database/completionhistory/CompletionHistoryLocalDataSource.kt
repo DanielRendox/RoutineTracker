@@ -8,8 +8,7 @@ interface CompletionHistoryLocalDataSource {
 
     suspend fun getRecordsInPeriod(
         habit: Habit,
-        minDate: LocalDate?,
-        maxDate: LocalDate?,
+        period: LocalDateRange,
     ): List<Habit.CompletionRecord>
 
     suspend fun getMultiHabitRecords(

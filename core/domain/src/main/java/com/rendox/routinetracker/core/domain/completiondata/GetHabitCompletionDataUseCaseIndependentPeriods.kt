@@ -42,21 +42,13 @@ class GetHabitCompletionDataUseCaseIndependentPeriods(
         )
 
         val completionHistory = if (period != null) {
-            completionHistoryRepository.getRecordsInPeriod(
-                habit = habit,
-                minDate = period.start,
-                maxDate = period.endInclusive,
-            )
+            completionHistoryRepository.getRecordsInPeriod(habit, period)
         } else {
             emptyList()
         }
 
         val vacationHistory = if (period != null) {
-            vacationRepository.getVacationsInPeriod(
-                habitId = habitId,
-                minDate = period.start,
-                maxDate = period.endInclusive,
-            )
+            vacationRepository.getVacationsInPeriod(habitId, period)
         } else {
             emptyList()
         }

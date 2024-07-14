@@ -6,14 +6,9 @@ import kotlinx.datetime.LocalDate
 
 interface CompletionHistoryRepository {
 
-    /**
-     * get all records for the given habit in the ascending order, if [minDate] or [maxDate] are
-     * specified, returns only the records in the given range.
-     */
     suspend fun getRecordsInPeriod(
         habit: Habit,
-        minDate: LocalDate? = null,
-        maxDate: LocalDate? = null,
+        period: LocalDateRange,
     ): List<Habit.CompletionRecord>
 
     suspend fun getMultiHabitRecords(

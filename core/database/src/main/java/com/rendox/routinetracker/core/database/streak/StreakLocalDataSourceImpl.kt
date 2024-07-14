@@ -44,14 +44,13 @@ class StreakLocalDataSourceImpl(
 
     override suspend fun getStreaksInPeriod(
         habitId: Long,
-        minDate: LocalDate,
-        maxDate: LocalDate,
+        period: LocalDateRange,
     ): List<Streak> = withContext(ioDispatcher) {
         db.cashedStreakQueries
             .getStreaksInPeriod(
                 habitId = habitId,
-                periodStart = minDate,
-                periodEnd = maxDate,
+                periodStart = period.start,
+                periodEnd = period.endInclusive,
             ).executeAsList()
             .map { it.toExternalModel() }
     }
@@ -77,13 +76,12 @@ class StreakLocalDataSourceImpl(
 
     override suspend fun deleteStreaksInPeriod(
         habitId: Long,
-        periodStartDate: LocalDate,
-        periodEndDate: LocalDate,
+        period: LocalDateRange,
     ) = withContext(ioDispatcher) {
         db.cashedStreakQueries.deleteStreaksInPeriod(
             habitId = habitId,
-            periodStart = periodStartDate,
-            periodEnd = periodEndDate,
+            periodStart = period.start,
+            periodEnd = period.endInclusive,
         )
     }
 

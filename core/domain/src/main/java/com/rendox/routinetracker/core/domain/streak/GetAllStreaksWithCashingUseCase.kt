@@ -83,16 +83,8 @@ class GetAllStreaksWithCashingUseCase(
         period: LocalDateRange,
         today: LocalDate,
     ): List<Streak> {
-        val completionHistory = completionHistoryRepository.getRecordsInPeriod(
-            habit = habit,
-            minDate = period.start,
-            maxDate = period.endInclusive,
-        )
-        val vacationHistory = vacationHistoryRepository.getVacationsInPeriod(
-            habitId = habit.id!!,
-            minDate = period.start,
-            maxDate = period.endInclusive,
-        )
+        val completionHistory = completionHistoryRepository.getRecordsInPeriod(habit, period)
+        val vacationHistory = vacationHistoryRepository.getVacationsInPeriod(habit.id!!, period)
         return streakComputer.computeStreaks(
             today = today,
             habit = habit,
