@@ -94,7 +94,7 @@ class GetHabitCompletionDataUseCaseIndependentPeriods(
                 else -> minDate
             }
             val schedulePeriodStart = when (schedule) {
-                is Schedule.PeriodicSchedule -> schedule.getPeriodRange(requestedStart)!!.start
+                is Schedule.PeriodicSchedule -> schedule.getPeriodRange(requestedStart).start
                 else -> requestedStart
             }
             val maxDate = requestedDates.endInclusive
@@ -103,7 +103,7 @@ class GetHabitCompletionDataUseCaseIndependentPeriods(
                 else -> maxDate
             }
             val schedulePeriodEnd = when (schedule) {
-                is Schedule.PeriodicSchedule -> schedule.getPeriodRange(requestedEnd)!!.endInclusive
+                is Schedule.PeriodicSchedule -> schedule.getPeriodRange(requestedEnd).endInclusive
                 else -> requestedEnd
             }
             return schedulePeriodStart..schedulePeriodEnd

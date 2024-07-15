@@ -79,7 +79,7 @@ class GetAgendaUseCaseImpl(
             }.map { (_, habits) ->
                 val periods = habits.map { habit ->
                     when (val schedule = habit.schedule) {
-                        is Schedule.PeriodicSchedule -> schedule.getPeriodRange(validationDate)!!
+                        is Schedule.PeriodicSchedule -> schedule.getPeriodRange(validationDate)
                         is Schedule.NonPeriodicSchedule -> validationDate..validationDate
                     }
                 }

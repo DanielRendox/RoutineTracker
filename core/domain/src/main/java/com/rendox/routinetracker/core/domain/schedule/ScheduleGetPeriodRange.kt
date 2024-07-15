@@ -22,16 +22,10 @@ import kotlinx.datetime.yearsUntil
 fun Schedule.PeriodicSchedule.getPeriodRange(
     currentDate: LocalDate,
     lastVacationEndDate: LocalDate? = null,
-): LocalDateRange? {
-    if (currentDate < startDate) {
-        return null
-    }
-
-    endDate?.let {
-        if (currentDate > it) {
-            return null
-        }
-    }
+): LocalDateRange {
+    require(currentDate >= startDate)
+    val scheduleEndDate = endDate
+    require(scheduleEndDate == null || currentDate <= scheduleEndDate)
 
     val periodRange = when (this) {
         is Schedule.WeeklyScheduleByDueDaysOfWeek -> weeklyScheduleGetPeriodDateRange(currentDate)

@@ -9,18 +9,24 @@ import kotlinx.datetime.daysUntil
 fun Schedule.isDue(
     validationDate: LocalDate,
     lastVacationEndDate: LocalDate? = null,
-): Boolean = when (this) {
-    is Schedule.EveryDaySchedule -> true
+): Boolean {
+    if (validationDate < startDate) return false
+    val scheduleEndDate = endDate
+    if (scheduleEndDate != null && validationDate > scheduleEndDate) return false
 
-    is Schedule.ByNumOfDueDays -> scheduleByNumOfDueDaysIsDue(
-        validationDate = validationDate,
-        lastVacationEndDate = lastVacationEndDate,
-    )
+    return when (this) {
+        is Schedule.EveryDaySchedule -> true
 
-    is Schedule.WeeklyScheduleByDueDaysOfWeek -> weeklyScheduleByDueDaysOfWeekIsDue(validationDate)
-    is Schedule.MonthlyScheduleByDueDatesIndices -> monthlyScheduleIsDue(validationDate)
-    is Schedule.CustomDateSchedule -> customDateScheduleIsDue(validationDate)
-    is Schedule.AnnualScheduleByDueDates -> annualScheduleIsDue(validationDate)
+        is Schedule.ByNumOfDueDays -> scheduleByNumOfDueDaysIsDue(
+            validationDate = validationDate,
+            lastVacationEndDate = lastVacationEndDate,
+        )
+
+        is Schedule.WeeklyScheduleByDueDaysOfWeek -> weeklyScheduleByDueDaysOfWeekIsDue(validationDate)
+        is Schedule.MonthlyScheduleByDueDatesIndices -> monthlyScheduleIsDue(validationDate)
+        is Schedule.CustomDateSchedule -> customDateScheduleIsDue(validationDate)
+        is Schedule.AnnualScheduleByDueDates -> annualScheduleIsDue(validationDate)
+    }
 }
 
 private fun Schedule.WeeklyScheduleByDueDaysOfWeek.weeklyScheduleByDueDaysOfWeekIsDue(
@@ -54,7 +60,7 @@ private fun Schedule.ByNumOfDueDays.scheduleByNumOfDueDaysIsDue(
     val validationDatePeriod = (this as Schedule.PeriodicSchedule).getPeriodRange(
         currentDate = validationDate,
         lastVacationEndDate = lastVacationEndDate,
-    ) ?: return false
+    )
     val validationDateNumber = validationDatePeriod.start.daysUntil(validationDate) + 1
     val scheduleStartDate = (this as Schedule).startDate
     val numOfDueDays = getNumOfDueDays(scheduleStartDate, validationDate)
@@ -84,13 +90,8 @@ private fun Schedule.ByNumOfDueDays.getNumOfDueDays(
     val defaultNumOfDueDays = getDefaultNumOfDueDays()
     val numOfDueDaysInFirstPeriod = getNumOfDueDaysInFirstPeriod()
 
-    if (firstPeriod == null || validationDate !in firstPeriod) {
-        return defaultNumOfDueDays
-    }
-
-    if (numOfDueDaysInFirstPeriod != null) {
-        return numOfDueDaysInFirstPeriod
-    }
+    if (validationDate !in firstPeriod) return defaultNumOfDueDays
+    if (numOfDueDaysInFirstPeriod != null) return numOfDueDaysInFirstPeriod
 
     val numOfDaysInFirstPeriod = firstPeriod.count()
     return if (numOfDaysInFirstPeriod < defaultNumOfDueDays) {
