@@ -16,7 +16,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
 
-class GetHabitCompletionDataUseCaseIndependentPeriods(
+class GetHabitCompletionDataUseCaseImpl(
     private val getHabit: GetHabitUseCase,
     private val vacationRepository: VacationRepository,
     private val completionHistoryRepository: CompletionHistoryRepository,
