@@ -27,31 +27,32 @@ internal class StreakComputerImpl(
     ): List<Streak> {
         if (completionHistory.isEmpty()) return emptyList()
         val streaks = mutableListOf<Streak>()
+        val sortedCompletionHistory = completionHistory.sortedBy { it.date }
 
         val lastPossibleStreakDate = deriveLastPossibleStreakDate(
             habit = habit,
             today = today,
         )
 
-        var completedDate = completionHistory.first().date
-        while (completedDate <= completionHistory.last().date) {
+        var completedDate = sortedCompletionHistory.first().date
+        while (completedDate <= sortedCompletionHistory.last().date) {
             val streak = computeStreak(
                 today = today,
                 habit = habit,
                 completedDate = completedDate,
-                completionHistory = completionHistory,
+                completionHistory = sortedCompletionHistory,
                 vacationHistory = vacationHistory,
                 lastPossibleStreakDate = lastPossibleStreakDate,
             )
             if (streak == null) {
                 completedDate =
-                    completionHistory.firstOrNull { it.date > completedDate }?.date ?: break
+                    sortedCompletionHistory.firstOrNull { it.date > completedDate }?.date ?: break
                 continue
             }
 
             streaks.add(streak)
             completedDate =
-                completionHistory.firstOrNull { it.date > streak.endDate }?.date ?: break
+                sortedCompletionHistory.firstOrNull { it.date > streak.endDate }?.date ?: break
         }
         return streaks
     }

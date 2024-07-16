@@ -528,4 +528,44 @@ class StreakComputerImplTest {
         )
         assertThat(streaks).isEmpty()
     }
+
+    @Test
+    fun `handles unsorted completion history`() {
+        val habit = Habit.YesNoHabit(
+            id = 1L,
+            name = "Test Habit",
+            schedule = Schedule.WeeklyScheduleByNumOfDueDays(
+                startDate = LocalDate(2024, 1, 1),
+                startDayOfWeek = DayOfWeek.MONDAY,
+                numOfDueDays = 2,
+            ),
+        )
+        val completionHistory = listOf(
+            Habit.YesNoHabit.CompletionRecord(
+                date = LocalDate(2024, 7, 1),
+                completed = true,
+            ),
+            Habit.YesNoHabit.CompletionRecord(
+                date = LocalDate(2024, 6, 1),
+                completed = true,
+            ),
+        )
+        val actualStreaks = streakComputer.computeStreaks(
+            habit = habit,
+            completionHistory = completionHistory,
+            vacationHistory = emptyList(),
+            today = LocalDate(2024, 8, 1),
+        )
+        val expectedStreaks = listOf(
+            Streak(
+                startDate = LocalDate(2024, 5, 28),
+                endDate = LocalDate(2024, 6, 2),
+            ),
+            Streak(
+                startDate = LocalDate(2024, 7, 1),
+                endDate = LocalDate(2024, 7, 1),
+            ),
+        )
+        assertThat(actualStreaks).containsExactlyElementsIn(expectedStreaks)
+    }
 }
