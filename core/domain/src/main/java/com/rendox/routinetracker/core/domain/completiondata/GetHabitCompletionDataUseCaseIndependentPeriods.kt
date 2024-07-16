@@ -4,11 +4,14 @@ import com.rendox.routinetracker.core.data.completionhistory.CompletionHistoryRe
 import com.rendox.routinetracker.core.data.vacation.VacationRepository
 import com.rendox.routinetracker.core.domain.di.GetHabitUseCase
 import com.rendox.routinetracker.core.domain.habitstatus.HabitStatusComputer
+import com.rendox.routinetracker.core.domain.schedule.expandPeriodToScheduleBounds
 import com.rendox.routinetracker.core.domain.schedule.getPeriodRange
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.rangeTo
+import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.HabitCompletionData
 import com.rendox.routinetracker.core.model.Schedule
+import com.rendox.routinetracker.core.model.Vacation
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
@@ -36,21 +39,26 @@ class GetHabitCompletionDataUseCaseIndependentPeriods(
         today: LocalDate,
     ): Map<LocalDate, HabitCompletionData> = withContext(defaultDispatcher) {
         val habit = getHabit(habitId)
-        val period = expandPeriodToScheduleBounds(
-            requestedDates = validationDates,
-            schedule = habit.schedule,
-        )
+        val periodNotInScheduleBounds =
+            validationDates.start < habit.schedule.startDate ||
+                habit.schedule.endDate?.let { it < validationDates.endInclusive } == true
 
-        val completionHistory = if (period != null) {
-            completionHistoryRepository.getRecordsInPeriod(habit, period)
+        val completionHistory: List<Habit.CompletionRecord>
+        val vacationHistory: List<Vacation>
+        if (periodNotInScheduleBounds) {
+            completionHistory = emptyList()
+            vacationHistory = emptyList()
         } else {
-            emptyList()
-        }
+            val period = when (val schedule = habit.schedule) {
+                is Schedule.PeriodicSchedule -> validationDates.expandPeriodToScheduleBounds(
+                    schedule = schedule,
+                    getPeriodRange = { date -> schedule.getPeriodRange(date) },
+                )
 
-        val vacationHistory = if (period != null) {
-            vacationRepository.getVacationsInPeriod(habitId, period)
-        } else {
-            emptyList()
+                is Schedule.NonPeriodicSchedule -> validationDates
+            }
+            completionHistory = completionHistoryRepository.getRecordsInPeriod(habit, period)
+            vacationHistory = vacationRepository.getVacationsInPeriod(habitId, period)
         }
 
         validationDates.associateWith { date ->
@@ -67,46 +75,6 @@ class GetHabitCompletionDataUseCaseIndependentPeriods(
                 habitStatus = habitStatus,
                 numOfTimesCompleted = numOfTimesCompleted,
             )
-        }
-    }
-
-    companion object {
-        private fun expandPeriodToScheduleBounds(
-            requestedDates: LocalDateRange,
-            schedule: Schedule,
-        ): LocalDateRange? {
-            val scheduleEndDate = schedule.endDate
-
-            val requestedDatesLaterThanHabitEnd =
-                scheduleEndDate != null && requestedDates.start > scheduleEndDate
-            if (requestedDatesLaterThanHabitEnd) return null
-
-            val requestedDatesEarlierThanHabitStart =
-                requestedDates.endInclusive < schedule.startDate
-            if (requestedDatesEarlierThanHabitStart) return null
-
-            val requestedDatesIsIncorrectRange = requestedDates.endInclusive < requestedDates.start
-            if (requestedDatesIsIncorrectRange) return null
-
-            val minDate = requestedDates.start
-            val requestedStart = when {
-                schedule.startDate > minDate -> schedule.startDate
-                else -> minDate
-            }
-            val schedulePeriodStart = when (schedule) {
-                is Schedule.PeriodicSchedule -> schedule.getPeriodRange(requestedStart).start
-                else -> requestedStart
-            }
-            val maxDate = requestedDates.endInclusive
-            val requestedEnd = when {
-                scheduleEndDate != null && scheduleEndDate < maxDate -> scheduleEndDate
-                else -> maxDate
-            }
-            val schedulePeriodEnd = when (schedule) {
-                is Schedule.PeriodicSchedule -> schedule.getPeriodRange(requestedEnd).endInclusive
-                else -> requestedEnd
-            }
-            return schedulePeriodStart..schedulePeriodEnd
         }
     }
 }
