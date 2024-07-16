@@ -5,6 +5,7 @@ import com.rendox.routinetracker.core.database.model.toExternalModel
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.epochDate
 import com.rendox.routinetracker.core.model.Habit
+import com.rendox.routinetracker.core.model.Streak
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
@@ -66,16 +67,47 @@ class CompletionHistoryLocalDataSourceImpl(
             )
     }
 
+    override suspend fun getRecordsWithoutStreaks(habit: Habit): List<Habit.CompletionRecord> =
+        withContext(ioDispatcher) {
+            db.completionHistoryEntityQueries.getRecordsWithoutStreaks(habit.id!!).executeAsList()
+                .map { it.toExternalModel(habit) }
+        }
+
     override suspend fun insertCompletion(
         habitId: Long,
         completionRecord: Habit.CompletionRecord,
-    ) {
-        withContext(ioDispatcher) {
+    ) = withContext(ioDispatcher) {
+        db.completionHistoryEntityQueries.insertCompletion(
+            habitId = habitId,
+            date = completionRecord.date,
+            numOfTimesCompleted = completionRecord.numOfTimesCompleted,
+        )
+    }
+
+    override suspend fun insertCompletionAndCacheStreaks(
+        habitId: Long,
+        completionRecord: Habit.CompletionRecord,
+        period: LocalDateRange,
+        streaks: List<Streak>,
+    ) = withContext(ioDispatcher) {
+        db.completionHistoryEntityQueries.transaction {
             db.completionHistoryEntityQueries.insertCompletion(
-                habitId = habitId,
-                date = completionRecord.date,
-                numOfTimesCompleted = completionRecord.numOfTimesCompleted,
+                habitId,
+                completionRecord.date,
+                completionRecord.numOfTimesCompleted,
             )
+            db.cashedStreakQueries.deleteStreaksInPeriod(
+                habitId,
+                period.start,
+                period.endInclusive,
+            )
+            for (streak in streaks) {
+                db.cashedStreakQueries.insertStreak(
+                    habitId,
+                    streak.startDate,
+                    streak.endDate,
+                )
+            }
         }
     }
 

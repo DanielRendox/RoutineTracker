@@ -17,10 +17,8 @@ val completionHistoryDomainModule = module {
     single<InsertHabitCompletionUseCase> {
         InsertHabitCompletionAndCashStreaks(
             completionHistoryRepository = get(),
-            vacationRepository = get(),
             getHabit = get(),
-            streakComputer = get(),
-            streakRepository = get(),
+            streakManager = get(),
         )
     }
 

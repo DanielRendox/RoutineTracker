@@ -2,7 +2,6 @@ package com.rendox.routinetracker.core.testcommon.fakes.habit
 
 import com.rendox.routinetracker.core.data.streaks.StreakRepository
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
-import com.rendox.routinetracker.core.logic.time.isSubsetOf
 import com.rendox.routinetracker.core.model.Streak
 import kotlinx.coroutines.flow.update
 import kotlinx.datetime.LocalDate
@@ -48,10 +47,10 @@ class StreakRepositoryFake(
     override suspend fun deleteStreaksInPeriod(
         habitId: Long,
         period: LocalDateRange,
-    ) = habitData.streakCashedPeriods.update { streaks ->
+    ) = habitData.streaks.update { streaks ->
         streaks.toMutableList().apply {
             removeAll {
-                it.first == habitId && it.second.isSubsetOf(period)
+                it.first == habitId && period.start <= it.second.startDate && it.second.endDate <= period.endInclusive
             }
         }
     }

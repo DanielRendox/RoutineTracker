@@ -1,8 +1,10 @@
 package com.rendox.routinetracker.core.testcommon.fakes.habit
 
 import com.rendox.routinetracker.core.data.completionhistory.CompletionHistoryRepository
+import com.rendox.routinetracker.core.logic.contains
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.model.Habit
+import com.rendox.routinetracker.core.model.Streak
 import kotlinx.coroutines.flow.update
 import kotlinx.datetime.LocalDate
 
@@ -36,6 +38,33 @@ class CompletionHistoryRepositoryFake(
                         add(habitId to completionRecord)
                     }
                 }
+            }
+        }
+    }
+
+    override suspend fun getRecordsWithoutStreaks(habit: Habit): List<Habit.CompletionRecord> =
+        habitData.completionHistory.value.filter { (id, completion) ->
+            id == habit.id!! &&
+                !habitData.streaks.value.any { streak ->
+                    streak.first == habit.id!! && streak.second.contains(completion.date)
+                }
+        }.map { it.second }
+
+    override suspend fun insertCompletionAndCacheStreaks(
+        habitId: Long,
+        completionRecord: Habit.CompletionRecord,
+        period: LocalDateRange,
+        streaks: List<Streak>,
+    ) {
+        insertCompletion(habitId, completionRecord)
+        habitData.streaks.update { cachedStreaks ->
+            cachedStreaks.toMutableList().apply {
+                removeAll {
+                    it.first == habitId &&
+                        period.start <= it.second.startDate &&
+                        it.second.endDate <= period.endInclusive
+                }
+                addAll(streaks.map { habitId to it })
             }
         }
     }

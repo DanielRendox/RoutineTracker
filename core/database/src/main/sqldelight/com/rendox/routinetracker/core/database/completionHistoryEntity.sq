@@ -30,6 +30,12 @@ WHERE (habitId IN :habitIds1 AND (:minDate1 <= date) AND (date <= :maxDate1)) OR
     (habitId IN :habitIds5 AND (:minDate5 <= date) AND (date <= :maxDate5))
 ORDER BY habitId ASC, date ASC;
 
+getRecordsWithoutStreaks:
+SELECT ch.* FROM completionHistoryEntity ch
+LEFT JOIN cashedStreakEntity cs
+ON ch.habitId = cs.habitId AND ch.date BETWEEN cs.startDate AND cs.endDate
+WHERE ch.habitId = :habitId AND cs.habitId IS NULL;
+
 deleteCompletionByDate:
 DELETE FROM completionHistoryEntity
 WHERE habitId = ? AND date = ?;
