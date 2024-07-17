@@ -26,6 +26,8 @@ import kotlinx.datetime.LocalDate
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -128,6 +130,31 @@ class InsertHabitCompletionAndCashStreaksTest : KoinTest {
         assertThat(streakRepository.getAllStreaks(habitId)).isEmpty()
     }
 
+    @ParameterizedTest
+    @ValueSource(booleans = [true, false])
+    fun `caches all streaks accept ones in current period`(completed: Boolean) = runTest {
+        val firstCompletion = Habit.YesNoHabit.CompletionRecord(
+            date = LocalDate(2024, 7, 1),
+            completed = completed,
+        )
+        val secondCompletion = Habit.YesNoHabit.CompletionRecord(
+            date = LocalDate(2024, 7, 8),
+            completed = true,
+        )
+        insertHabitCompletionAndCashStreaks(
+            habitId = habitId,
+            completionRecord = firstCompletion,
+            today = secondCompletion.date,
+        )
+        insertHabitCompletionAndCashStreaks(
+            habitId = habitId,
+            completionRecord = secondCompletion,
+            today = secondCompletion.date,
+        )
+        val firstStreak = computeStreaks(completions = listOf(firstCompletion), today = secondCompletion.date)
+        assertThat(streakRepository.getAllStreaks(habitId)).containsExactlyElementsIn(firstStreak)
+    }
+
     @Test
     fun `caches last not cached streak`() = runTest {
         val firstCompletion = Habit.YesNoHabit.CompletionRecord(
@@ -152,7 +179,7 @@ class InsertHabitCompletionAndCashStreaksTest : KoinTest {
             today = secondCompletion.date,
         )
         val expected = computeStreaks(
-            completions = listOf(firstCompletion, secondCompletion),
+            completions = listOf(firstCompletion),
             today = secondCompletion.date,
         )
         val actual = streakRepository.getAllStreaks(habitId)

@@ -77,11 +77,18 @@ class CompletionHistoryLocalDataSourceImpl(
         habitId: Long,
         completionRecord: Habit.CompletionRecord,
     ) = withContext(ioDispatcher) {
-        db.completionHistoryEntityQueries.insertCompletion(
-            habitId = habitId,
-            date = completionRecord.date,
-            numOfTimesCompleted = completionRecord.numOfTimesCompleted,
-        )
+        if (completionRecord.numOfTimesCompleted > 0F) {
+            db.completionHistoryEntityQueries.insertCompletion(
+                habitId = habitId,
+                date = completionRecord.date,
+                numOfTimesCompleted = completionRecord.numOfTimesCompleted,
+            )
+        } else {
+            db.completionHistoryEntityQueries.deleteCompletionByDate(
+                habitId,
+                completionRecord.date,
+            )
+        }
     }
 
     override suspend fun insertCompletionAndCacheStreaks(
@@ -91,11 +98,18 @@ class CompletionHistoryLocalDataSourceImpl(
         streaks: List<Streak>,
     ) = withContext(ioDispatcher) {
         db.completionHistoryEntityQueries.transaction {
-            db.completionHistoryEntityQueries.insertCompletion(
-                habitId,
-                completionRecord.date,
-                completionRecord.numOfTimesCompleted,
-            )
+            if (completionRecord.numOfTimesCompleted > 0F) {
+                db.completionHistoryEntityQueries.insertCompletion(
+                    habitId = habitId,
+                    date = completionRecord.date,
+                    numOfTimesCompleted = completionRecord.numOfTimesCompleted,
+                )
+            } else {
+                db.completionHistoryEntityQueries.deleteCompletionByDate(
+                    habitId,
+                    completionRecord.date,
+                )
+            }
             db.cashedStreakQueries.deleteStreaksInPeriod(
                 habitId,
                 period.start,

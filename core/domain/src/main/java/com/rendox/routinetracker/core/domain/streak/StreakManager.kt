@@ -62,9 +62,11 @@ class StreakManager(
         val completionHistory = completionHistoryRepository.getRecordsInPeriod(habit, period)
             .toMutableList()
             .apply {
-                val index = indexOfFirst { it.date == completion?.date }
-                if (index != -1) removeAt(index)
-                if (completion != null) add(completion)
+                if (completion?.date in period) {
+                    val index = indexOfFirst { it.date == completion?.date }
+                    if (index != -1) removeAt(index)
+                    if (completion != null) add(completion)
+                }
             }
         val vacationHistory = vacationHistoryRepository.getVacationsInPeriod(habit.id!!, period)
         return streakComputer.computeStreaks(
