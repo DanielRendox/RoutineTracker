@@ -27,7 +27,9 @@ internal class StreakComputerImpl(
     ): List<Streak> {
         if (completionHistory.isEmpty()) return emptyList()
         val streaks = mutableListOf<Streak>()
-        val sortedCompletionHistory = completionHistory.sortedBy { it.date }
+        val sortedCompletionHistory = completionHistory
+            .filter { it.date <= today }
+            .sortedBy { it.date }
 
         val lastPossibleStreakDate = deriveLastPossibleStreakDate(
             habit = habit,

@@ -78,7 +78,6 @@ class InsertHabitCompletionAndCashStreaksTest : KoinTest {
                 streakDomainModule,
                 completionHistoryDomainModule,
                 habitDomainModule,
-                streakDomainModule,
                 testModule,
             )
         }

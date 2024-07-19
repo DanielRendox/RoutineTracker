@@ -64,8 +64,7 @@ class GetAllStreaksWithCashingUseCase(
         val actuallyNeedToInsertComputedStreaks = computedPeriods.isNotEmpty()
         if (actuallyNeedToInsertComputedStreaks) {
             streakRepository.insertStreaks(
-                streaks = distinctComputedStreaks.map { habitId to it },
-                periods = computedPeriods.map { habitId to it },
+                streaks = mapOf(habitId to distinctComputedStreaks),
             )
         }
 

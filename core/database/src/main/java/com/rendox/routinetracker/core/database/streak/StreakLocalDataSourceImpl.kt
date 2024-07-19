@@ -12,23 +12,36 @@ class StreakLocalDataSourceImpl(
     private val db: RoutineTrackerDatabase,
     private val ioDispatcher: CoroutineContext,
 ) : StreakLocalDataSource {
-    override suspend fun insertStreaks(
-        streaks: List<Pair<Long, Streak>>,
-        periods: List<Pair<Long, LocalDateRange>>,
-    ) = withContext(ioDispatcher) {
+    override suspend fun insertStreaks(streaks: Map<Long, List<Streak>>) = withContext(ioDispatcher) {
         db.cashedStreakQueries.transaction {
+            for ((habitId, streakList) in streaks) {
+                for (streak in streakList) {
+                    db.cashedStreakQueries.insertStreak(
+                        habitId = habitId,
+                        startDate = streak.startDate,
+                        endDate = streak.endDate,
+                    )
+                }
+            }
+        }
+    }
+
+    override suspend fun upsertStreaks(
+        habitId: Long,
+        period: LocalDateRange,
+        streaks: List<Streak>,
+    ) {
+        db.cashedStreakQueries.transaction {
+            db.cashedStreakQueries.deleteStreaksInPeriod(
+                habitId = habitId,
+                periodStart = period.start,
+                periodEnd = period.endInclusive,
+            )
             for (streak in streaks) {
                 db.cashedStreakQueries.insertStreak(
-                    habitId = streak.first,
-                    startDate = streak.second.startDate,
-                    endDate = streak.second.endDate,
-                )
-            }
-            for (period in periods) {
-                db.cashedStreakQueries.insertPeriod(
-                    habitId = period.first,
-                    startDate = period.second.start,
-                    endDate = period.second.endInclusive,
+                    habitId = habitId,
+                    startDate = streak.startDate,
+                    endDate = streak.endDate,
                 )
             }
         }
@@ -73,14 +86,11 @@ class StreakLocalDataSourceImpl(
             ?.toExternalModel()
     }
 
-    override suspend fun deleteStreaksInPeriod(
-        habitId: Long,
-        period: LocalDateRange,
-    ) = withContext(ioDispatcher) {
-        db.cashedStreakQueries.deleteStreaksInPeriod(
-            habitId = habitId,
-            periodStart = period.start,
-            periodEnd = period.endInclusive,
-        )
+    override suspend fun getLastStreak(habitId: Long): Streak? = withContext(ioDispatcher) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getLongestStreaks(habitId: Long): List<Streak> {
+        TODO("Not yet implemented")
     }
 }

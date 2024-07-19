@@ -9,7 +9,6 @@ import com.rendox.routinetracker.core.domain.di.completionHistoryDomainModule
 import com.rendox.routinetracker.core.domain.di.habitDomainModule
 import com.rendox.routinetracker.core.domain.di.streakDomainModule
 import com.rendox.routinetracker.core.domain.streak.computer.StreakComputer
-import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.model.Streak
@@ -120,13 +119,7 @@ class GetAllStreaksWithCashingUseCaseTest : KoinTest {
     @Test
     fun `does not compute streaks for past periods if they are cashed`() = runTest {
         streakRepository.insertStreaks(
-            streaks = cashedStreaks.map { habitId to it },
-            periods = listOf(
-                LocalDateRange(
-                    start = LocalDate(2023, 11, 1),
-                    endInclusive = LocalDate(2023, 11, 30),
-                ),
-            ).map { habitId to it },
+            streaks = mapOf(habitId to cashedStreaks),
         )
         val streaks = getAllStreaksUseCase(
             habitId = habitId,

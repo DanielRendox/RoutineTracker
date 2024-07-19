@@ -2,6 +2,7 @@ package com.rendox.routinetracker.core.testcommon.fakes.habit
 
 import com.rendox.routinetracker.core.data.completionhistory.CompletionHistoryRepository
 import com.rendox.routinetracker.core.logic.contains
+import com.rendox.routinetracker.core.logic.isSubsetOf
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Streak
@@ -60,9 +61,7 @@ class CompletionHistoryRepositoryFake(
         habitData.streaks.update { cachedStreaks ->
             cachedStreaks.toMutableList().apply {
                 removeAll {
-                    it.first == habitId &&
-                        period.start <= it.second.startDate &&
-                        it.second.endDate <= period.endInclusive
+                    it.first == habitId && it.second.isSubsetOf(period)
                 }
                 addAll(streaks.map { habitId to it })
             }

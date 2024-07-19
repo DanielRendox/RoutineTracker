@@ -1,10 +1,13 @@
 package com.rendox.routinetracker.core.domain.streak
 
 import com.rendox.routinetracker.core.data.completionhistory.CompletionHistoryRepository
+import com.rendox.routinetracker.core.data.streaks.StreakRepository
 import com.rendox.routinetracker.core.data.vacation.VacationRepository
 import com.rendox.routinetracker.core.domain.schedule.expandPeriodToScheduleBounds
 import com.rendox.routinetracker.core.domain.schedule.getPeriodRange
 import com.rendox.routinetracker.core.domain.streak.computer.StreakComputer
+import com.rendox.routinetracker.core.logic.getDurationInDays
+import com.rendox.routinetracker.core.logic.joinAdjacentStreaks
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.atEndOfMonth
 import com.rendox.routinetracker.core.logic.time.rangeTo
@@ -16,8 +19,9 @@ import kotlinx.datetime.LocalDate
 
 class StreakManager(
     private val completionHistoryRepository: CompletionHistoryRepository,
-    private val vacationHistoryRepository: VacationRepository,
+    private val vacationRepository: VacationRepository,
     private val streakComputer: StreakComputer,
+    private val streakRepository: StreakRepository,
 ) {
 
     suspend fun formStreaksAfterCompletion(
@@ -29,7 +33,44 @@ class StreakManager(
     suspend fun formLastNotSavedStreaks(
         habit: Habit,
         today: LocalDate,
-    ): Pair<LocalDateRange, List<Streak>> = formStreaks(habit, today, null)!!
+    ): Pair<LocalDateRange, List<Streak>>? = formStreaks(habit, today, null)
+
+    suspend fun getCurrentStreak(
+        habit: Habit,
+        today: LocalDate,
+    ): Streak? {
+        val currentPeriod = getPeriodRange(habit.schedule, today)
+        val currentPeriodStreaks = computeStreaks(
+            habit = habit,
+            period = currentPeriod,
+            today = today,
+            completion = null,
+        )
+        val lastCachedStreak: Streak? = streakRepository.getLastStreak(habit.id!!)
+        return currentPeriodStreaks
+            .toMutableList()
+            .apply { if (lastCachedStreak != null) add(lastCachedStreak) }
+            .joinAdjacentStreaks()
+            .maxByOrNull { it.startDate }
+            ?.takeIf { it.endDate in currentPeriod }
+    }
+
+    suspend fun getLongestStreak(
+        habit: Habit,
+        today: LocalDate,
+    ): Streak? {
+        val currentPeriod = getPeriodRange(habit.schedule, today)
+        val notCachedStreaks = computeStreaks(
+            habit = habit,
+            period = currentPeriod,
+            today = today,
+            completion = null,
+        )
+        val cachedStreaks = streakRepository.getLongestStreaks(habit.id!!)
+        return (cachedStreaks + notCachedStreaks)
+            .joinAdjacentStreaks()
+            .maxByOrNull { it.getDurationInDays() }
+    }
 
     private suspend fun formStreaks(
         habit: Habit,
@@ -68,7 +109,7 @@ class StreakManager(
                     if (completion != null) add(completion)
                 }
             }
-        val vacationHistory = vacationHistoryRepository.getVacationsInPeriod(habit.id!!, period)
+        val vacationHistory = vacationRepository.getVacationsInPeriod(habit.id!!, period)
         return streakComputer.computeStreaks(
             today = today,
             habit = habit,
