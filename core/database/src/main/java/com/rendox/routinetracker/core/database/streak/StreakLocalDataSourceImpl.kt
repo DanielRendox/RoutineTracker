@@ -1,8 +1,7 @@
 package com.rendox.routinetracker.core.database.streak
 
-import com.rendox.routinetracker.core.database.CashedStreakEntity
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
-import com.rendox.routinetracker.core.database.StreakCashedPeriodEntity
+import com.rendox.routinetracker.core.database.model.toExternalModel
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.model.Streak
 import kotlin.coroutines.CoroutineContext
@@ -84,14 +83,4 @@ class StreakLocalDataSourceImpl(
             periodEnd = period.endInclusive,
         )
     }
-
-    private fun CashedStreakEntity.toExternalModel() = Streak(
-        startDate = startDate,
-        endDate = endDate,
-    )
-
-    private fun StreakCashedPeriodEntity.toExternalModel() = LocalDateRange(
-        start = startDate,
-        endInclusive = endDate,
-    )
 }
