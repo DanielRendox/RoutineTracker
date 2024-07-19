@@ -100,8 +100,10 @@ class GetCurrentStreakUseCaseTest : KoinTest {
         completionHistoryRepository = get()
         streakRepository = get()
         getCurrentStreak = GetCurrentStreakUseCase(
-            streakManager = get(),
             streakRepository = streakRepository,
+            completionHistoryRepository = completionHistoryRepository,
+            vacationRepository = get(),
+            streakComputer = streakComputer,
         )
     }
 

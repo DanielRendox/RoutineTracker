@@ -39,7 +39,7 @@ class InsertHabitCompletionAndCashStreaks(
             throw IllegalDateEditAttemptException.FutureDateEditAttemptException()
         }
 
-        val periodToStreaks = streakManager.formStreaksAfterCompletion(
+        val periodToStreaks = streakManager.formStreaks(
             habit = habit,
             today = today,
             completion = completionRecord,

@@ -131,7 +131,7 @@ class InsertHabitCompletionAndCashStreaksTest : KoinTest {
 
     @ParameterizedTest
     @ValueSource(booleans = [true, false])
-    fun `caches all streaks accept ones in current period`(completed: Boolean) = runTest {
+    fun `caches all streaks except ones in current period`(completed: Boolean) = runTest {
         val firstCompletion = Habit.YesNoHabit.CompletionRecord(
             date = LocalDate(2024, 7, 1),
             completed = completed,

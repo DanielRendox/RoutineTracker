@@ -1,13 +1,10 @@
 package com.rendox.routinetracker.core.domain.streak
 
 import com.rendox.routinetracker.core.data.completionhistory.CompletionHistoryRepository
-import com.rendox.routinetracker.core.data.streaks.StreakRepository
 import com.rendox.routinetracker.core.data.vacation.VacationRepository
 import com.rendox.routinetracker.core.domain.schedule.expandPeriodToScheduleBounds
 import com.rendox.routinetracker.core.domain.schedule.getPeriodRange
 import com.rendox.routinetracker.core.domain.streak.computer.StreakComputer
-import com.rendox.routinetracker.core.logic.getDurationInDays
-import com.rendox.routinetracker.core.logic.joinAdjacentStreaks
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.atEndOfMonth
 import com.rendox.routinetracker.core.logic.time.rangeTo
@@ -17,65 +14,15 @@ import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.model.Streak
 import kotlinx.datetime.LocalDate
 
-class StreakManager(
-    private val completionHistoryRepository: CompletionHistoryRepository,
-    private val vacationRepository: VacationRepository,
-    private val streakComputer: StreakComputer,
-    private val streakRepository: StreakRepository,
+open class StreakManager(
+    protected val completionHistoryRepository: CompletionHistoryRepository,
+    protected val vacationRepository: VacationRepository,
+    protected val streakComputer: StreakComputer,
 ) {
-
-    suspend fun formStreaksAfterCompletion(
-        habit: Habit,
-        completion: Habit.CompletionRecord,
-        today: LocalDate,
-    ): Pair<LocalDateRange, List<Streak>>? = formStreaks(habit, today, completion)
-
-    suspend fun formLastNotSavedStreaks(
+    suspend fun formStreaks(
         habit: Habit,
         today: LocalDate,
-    ): Pair<LocalDateRange, List<Streak>>? = formStreaks(habit, today, null)
-
-    suspend fun getCurrentStreak(
-        habit: Habit,
-        today: LocalDate,
-    ): Streak? {
-        val currentPeriod = getPeriodRange(habit.schedule, today)
-        val currentPeriodStreaks = computeStreaks(
-            habit = habit,
-            period = currentPeriod,
-            today = today,
-            completion = null,
-        )
-        val lastCachedStreak: Streak? = streakRepository.getLastStreak(habit.id!!)
-        return currentPeriodStreaks
-            .toMutableList()
-            .apply { if (lastCachedStreak != null) add(lastCachedStreak) }
-            .joinAdjacentStreaks()
-            .maxByOrNull { it.startDate }
-            ?.takeIf { it.endDate in currentPeriod }
-    }
-
-    suspend fun getLongestStreak(
-        habit: Habit,
-        today: LocalDate,
-    ): Streak? {
-        val currentPeriod = getPeriodRange(habit.schedule, today)
-        val notCachedStreaks = computeStreaks(
-            habit = habit,
-            period = currentPeriod,
-            today = today,
-            completion = null,
-        )
-        val cachedStreaks = streakRepository.getLongestStreaks(habit.id!!)
-        return (cachedStreaks + notCachedStreaks)
-            .joinAdjacentStreaks()
-            .maxByOrNull { it.getDurationInDays() }
-    }
-
-    private suspend fun formStreaks(
-        habit: Habit,
-        today: LocalDate,
-        completion: Habit.CompletionRecord?,
+        completion: Habit.CompletionRecord? = null,
     ): Pair<LocalDateRange, List<Streak>>? {
         val currentPeriod = getPeriodRange(habit.schedule, today)
         val completionsWithoutStreaks = completionHistoryRepository
@@ -94,11 +41,11 @@ class StreakManager(
         return expandedPeriod to computeStreaks(habit, expandedPeriod, today, completion)
     }
 
-    private suspend fun computeStreaks(
+    protected suspend fun computeStreaks(
         habit: Habit,
         period: LocalDateRange,
         today: LocalDate,
-        completion: Habit.CompletionRecord?,
+        completion: Habit.CompletionRecord? = null,
     ): List<Streak> {
         val completionHistory = completionHistoryRepository.getRecordsInPeriod(habit, period)
             .toMutableList()
@@ -118,14 +65,12 @@ class StreakManager(
         )
     }
 
-    companion object {
-        private fun getPeriodRange(
-            schedule: Schedule,
-            currentDate: LocalDate,
-        ): LocalDateRange = when (schedule) {
-            is Schedule.PeriodicSchedule -> schedule.getPeriodRange(currentDate)
-            is Schedule.EveryDaySchedule -> currentDate.withDayOfMonth(1)..currentDate.atEndOfMonth
-            is Schedule.CustomDateSchedule -> throw IllegalArgumentException()
-        }
+    protected fun getPeriodRange(
+        schedule: Schedule,
+        currentDate: LocalDate,
+    ): LocalDateRange = when (schedule) {
+        is Schedule.PeriodicSchedule -> schedule.getPeriodRange(currentDate)
+        is Schedule.EveryDaySchedule -> currentDate.withDayOfMonth(1)..currentDate.atEndOfMonth
+        is Schedule.CustomDateSchedule -> throw IllegalArgumentException()
     }
 }

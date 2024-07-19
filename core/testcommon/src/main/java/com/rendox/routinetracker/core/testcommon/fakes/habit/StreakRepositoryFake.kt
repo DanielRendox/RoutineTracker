@@ -40,11 +40,13 @@ class StreakRepositoryFake(
     override suspend fun getStreaksInPeriod(
         habitId: Long,
         period: LocalDateRange,
-    ): List<Streak> = habitData.streaks.value.filter {
-        it.first == habitId &&
-            it.second.startDate <= period.endInclusive &&
-            it.second.endDate >= period.start
-    }.map { it.second }
+    ): List<Streak> = habitData.streaks.value
+        .filter { it.first == habitId }
+        .map { it.second }
+        .joinAdjacentStreaks()
+        .filter { streak ->
+            streak.startDate <= period.endInclusive && streak.endDate >= period.start
+        }
 
     override suspend fun getAllCashedPeriods(habitId: Long): List<LocalDateRange> =
         habitData.streakCashedPeriods.value.map { it.second }

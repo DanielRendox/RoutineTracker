@@ -18,7 +18,6 @@ val streakDomainModule = module {
             completionHistoryRepository = get(),
             vacationRepository = get(),
             streakComputer = get(),
-            streakRepository = get(),
         )
     }
 

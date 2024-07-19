@@ -92,8 +92,10 @@ class GetLongestStreakUseCaseTest : KoinTest {
         streakRepository = get()
 
         getLongestStreak = GetLongestStreakUseCase(
-            streakManager = get(),
             streakRepository = streakRepository,
+            completionHistoryRepository = completionHistoryRepository,
+            vacationRepository = get(),
+            streakComputer = streakComputer,
         )
     }
 
