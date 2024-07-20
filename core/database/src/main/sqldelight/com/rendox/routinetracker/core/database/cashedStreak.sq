@@ -24,6 +24,46 @@ FROM cashedStreakEntity
 WHERE habitId = :habitId
     AND startDate <= :periodEnd AND endDate >= :periodStart;
 
+getLastStreak:
+WITH RECURSIVE CombinedStreaks AS (
+     SELECT habitId, startDate, endDate
+     FROM cashedStreakEntity
+     WHERE habitId = :habitId
+
+     UNION ALL
+
+     SELECT CombinedStreaks.habitId, CombinedStreaks.startDate, cashedStreakEntity.endDate
+     FROM CombinedStreaks
+     JOIN cashedStreakEntity
+     ON CombinedStreaks.habitId = cashedStreakEntity.habitId
+     AND CombinedStreaks.endDate + 1 = cashedStreakEntity.startDate
+)
+SELECT habitId, startDate, endDate
+FROM CombinedStreaks
+WHERE endDate = ( SELECT MAX(endDate) FROM CombinedStreaks )
+ORDER BY startDate
+LIMIT 1;
+
+getLongestStreak:
+WITH RECURSIVE CombinedStreaks AS (
+    SELECT habitId, startDate, endDate
+    FROM cashedStreakEntity
+    WHERE habitId = :habitId
+
+    UNION ALL
+
+    SELECT CombinedStreaks.habitId, CombinedStreaks.startDate, cashedStreakEntity.endDate
+    FROM CombinedStreaks
+    JOIN cashedStreakEntity
+    ON CombinedStreaks.habitId = cashedStreakEntity.habitId
+    AND CombinedStreaks.endDate + 1 = cashedStreakEntity.startDate
+)
+SELECT * FROM CombinedStreaks
+WHERE endDate - startDate = (
+    SELECT MAX(endDate - startDate) FROM CombinedStreaks
+)
+ORDER BY startDate;
+
 deleteStreaksInPeriod:
 DELETE FROM cashedStreakEntity
 WHERE habitId = :habitId

@@ -87,10 +87,10 @@ class StreakLocalDataSourceImpl(
     }
 
     override suspend fun getLastStreak(habitId: Long): Streak? = withContext(ioDispatcher) {
-        TODO("Not yet implemented")
+        db.cashedStreakQueries.getLastStreak(habitId).executeAsOneOrNull()?.toExternalModel()
     }
 
-    override suspend fun getLongestStreaks(habitId: Long): List<Streak> {
-        TODO("Not yet implemented")
+    override suspend fun getLongestStreaks(habitId: Long): List<Streak> = withContext(ioDispatcher) {
+        db.cashedStreakQueries.getLongestStreak(habitId).executeAsList().map { it.toExternalModel() }
     }
 }
