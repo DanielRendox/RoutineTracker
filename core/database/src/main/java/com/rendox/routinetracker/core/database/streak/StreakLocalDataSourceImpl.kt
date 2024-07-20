@@ -6,7 +6,6 @@ import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.model.Streak
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.LocalDate
 
 class StreakLocalDataSourceImpl(
     private val db: RoutineTrackerDatabase,
@@ -45,38 +44,6 @@ class StreakLocalDataSourceImpl(
                 )
             }
         }
-    }
-
-    override suspend fun getStreaksInPeriod(
-        habitId: Long,
-        period: LocalDateRange,
-    ): List<Streak> = withContext(ioDispatcher) {
-        db.cashedStreakQueries
-            .getStreaksInPeriod(
-                habitId = habitId,
-                periodStart = period.start,
-                periodEnd = period.endInclusive,
-            ).executeAsList()
-            .map { it.toExternalModel() }
-    }
-
-    override suspend fun getAllCashedPeriods(habitId: Long): List<LocalDateRange> = withContext(ioDispatcher) {
-        db.cashedStreakQueries
-            .getAllCashedPeriods(habitId)
-            .executeAsList()
-            .map { it.toExternalModel() }
-    }
-
-    override suspend fun getCashedPeriod(
-        habitId: Long,
-        dateInPeriod: LocalDate,
-    ): LocalDateRange? = withContext(ioDispatcher) {
-        db.cashedStreakQueries
-            .getCashedPeriod(
-                habitId = habitId,
-                dateInPeriod = dateInPeriod,
-            ).executeAsOneOrNull()
-            ?.toExternalModel()
     }
 
     override suspend fun getLastStreak(habitId: Long): Streak? = withContext(ioDispatcher) {

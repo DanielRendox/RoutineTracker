@@ -3,7 +3,6 @@ package com.rendox.routinetracker.core.domain.streak.stats
 import com.google.common.truth.Truth.assertThat
 import com.rendox.routinetracker.core.data.completionhistory.CompletionHistoryRepository
 import com.rendox.routinetracker.core.data.habit.HabitRepository
-import com.rendox.routinetracker.core.data.streaks.StreakRepository
 import com.rendox.routinetracker.core.data.vacation.VacationRepository
 import com.rendox.routinetracker.core.domain.di.completionHistoryDomainModule
 import com.rendox.routinetracker.core.domain.di.habitDomainModule
@@ -41,7 +40,7 @@ import org.koin.test.get
 class GetCurrentStreakUseCaseTest : KoinTest {
 
     private lateinit var getCurrentStreak: GetCurrentStreakUseCase
-    private lateinit var streakRepository: StreakRepository
+    private lateinit var streakRepository: StreakRepositoryFake
     private lateinit var streakComputer: StreakComputer
     private lateinit var completionHistoryRepository: CompletionHistoryRepository
 
@@ -76,7 +75,7 @@ class GetCurrentStreakUseCaseTest : KoinTest {
         single<HabitRepository> {
             HabitRepositoryFake(habitData = get())
         }
-        single<StreakRepository> {
+        single<StreakRepositoryFake> {
             StreakRepositoryFake(habitData = get())
         }
         single<VacationRepository> {

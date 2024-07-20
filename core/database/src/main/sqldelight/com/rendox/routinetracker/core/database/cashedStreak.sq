@@ -13,17 +13,6 @@ INSERT OR IGNORE
 INTO cashedStreakEntity
 VALUES (?, ?, ?);
 
-getAllStreaks:
-SELECT *
-FROM cashedStreakEntity
-WHERE habitId = ?;
-
-getStreaksInPeriod:
-SELECT *
-FROM cashedStreakEntity
-WHERE habitId = :habitId
-    AND startDate <= :periodEnd AND endDate >= :periodStart;
-
 getLastStreak:
 WITH RECURSIVE CombinedStreaks AS (
      SELECT habitId, startDate, endDate
@@ -80,22 +69,6 @@ CREATE TABLE streakCashedPeriodEntity (
     PRIMARY KEY (habitId, startDate, endDate),
     FOREIGN KEY (habitId) REFERENCES habitEntity(id)
 );
-
-insertPeriod:
-INSERT OR IGNORE
-INTO streakCashedPeriodEntity
-VALUES (?, ?, ?);
-
-getAllCashedPeriods:
-SELECT *
-FROM streakCashedPeriodEntity
-WHERE habitId = ?;
-
-getCashedPeriod:
-SELECT *
-FROM streakCashedPeriodEntity
-WHERE habitId = :habitId
-    AND startDate <= :dateInPeriod AND :dateInPeriod <= endDate;
 
 deleteAllCashedPeriodsForHabit:
 DELETE FROM streakCashedPeriodEntity
