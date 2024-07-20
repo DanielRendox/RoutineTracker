@@ -1,14 +1,11 @@
 package com.rendox.routinetracker.core.domain.di
 
-import com.rendox.routinetracker.core.domain.streak.GetAllStreaksUseCase
-import com.rendox.routinetracker.core.domain.streak.GetAllStreaksWithCashingUseCase
 import com.rendox.routinetracker.core.domain.streak.GetStreaksInPeriodUseCase
 import com.rendox.routinetracker.core.domain.streak.StreakManager
 import com.rendox.routinetracker.core.domain.streak.computer.StreakComputer
 import com.rendox.routinetracker.core.domain.streak.computer.StreakComputerImpl
 import com.rendox.routinetracker.core.domain.streak.stats.GetCurrentStreakUseCase
 import com.rendox.routinetracker.core.domain.streak.stats.GetLongestStreakUseCase
-import org.koin.core.qualifier.named
 import org.koin.dsl.module
 
 val streakDomainModule = module {
@@ -47,17 +44,6 @@ val streakDomainModule = module {
             completionHistoryRepository = get(),
             vacationRepository = get(),
             streakComputer = get(),
-        )
-    }
-
-    single<GetAllStreaksUseCase> {
-        GetAllStreaksWithCashingUseCase(
-            getHabit = get(),
-            completionHistoryRepository = get(),
-            vacationHistoryRepository = get(),
-            defaultDispatcher = get(qualifier = named("defaultDispatcher")),
-            streakComputer = get(),
-            streakRepository = get(),
         )
     }
 }
