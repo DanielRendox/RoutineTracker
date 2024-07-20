@@ -19,14 +19,14 @@ class DatabasePrepopulatorRandom(
 
         val insertedHabits = habitLocalDataSource.getAllHabits()
 
-        val completionHistory = insertedHabits
-            .associateWith { habit -> RandomHabitsGenerator.generateCompletionHistory(habit) }
-            .mapKeys { it.key.id!! }
-        completionHistoryLocalDataSource.insertCompletions(completionHistory)
-
-        val vacationHistory = insertedHabits
-            .associateWith { habit -> RandomHabitsGenerator.generateVacationHistory(habit) }
-            .mapKeys { it.key.id!! }
-        vacationLocalDataSource.insertVacations(vacationHistory)
+//        val completionHistory = insertedHabits
+//            .associateWith { habit -> RandomHabitsGenerator.generateCompletionHistory(habit) }
+//            .mapKeys { it.key.id!! }
+//        completionHistoryLocalDataSource.insertCompletions(completionHistory)
+//
+//        val vacationHistory = insertedHabits
+//            .associateWith { habit -> RandomHabitsGenerator.generateVacationHistory(habit) }
+//            .mapKeys { it.key.id!! }
+//        vacationLocalDataSource.insertVacations(vacationHistory)
     }
 }
