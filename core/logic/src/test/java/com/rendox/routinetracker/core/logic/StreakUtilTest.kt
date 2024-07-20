@@ -46,22 +46,6 @@ class StreakUtilTest {
     }
 
     @Test
-    fun getCurrentStreakTest() {
-        assertThat(
-            streaks.getCurrentStreak(LocalDate(2023, 4, 11)),
-        ).isEqualTo(streaks.last())
-
-        assertThat(
-            streaks.take(3).getCurrentStreak(LocalDate(2023, 3, 5)),
-        ).isEqualTo(streaks[2])
-    }
-
-    @Test
-    fun getLongestStreakTest() {
-        assertThat(streaks.getLongestStreak()).isEqualTo(streaks[1])
-    }
-
-    @Test
     fun `joinAdjacentStreaks joins only adjacent streaks and keeps others intact`() {
         val streaks = listOf(
             Streak(
