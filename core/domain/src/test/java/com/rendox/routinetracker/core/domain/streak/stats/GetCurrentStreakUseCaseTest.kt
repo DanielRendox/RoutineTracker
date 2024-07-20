@@ -25,11 +25,13 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.toLocalDate
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.ValueSource
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.dsl.module
@@ -143,28 +145,25 @@ class GetCurrentStreakUseCaseTest : KoinTest {
         assertThat(getCurrentStreak(habit, today)).isEqualTo(expected)
     }
 
-    @Test
-    fun `returns null when there are no streaks in current period`() = runTest {
-        assertThat(getCurrentStreak(habit, today)).isNull()
+    @ParameterizedTest
+    @ValueSource(strings = ["2024-08-01", "2024-08-02"])
+    fun `returns streak if it is still lasting`(streakEndDate: String) = runTest {
+        val streak = Streak(
+            startDate = LocalDate(2024, 7, 20),
+            endDate = streakEndDate.toLocalDate(),
+        )
+        streakRepository.insertStreaks(mapOf(habitId to listOf(streak)))
+        assertThat(getCurrentStreak(habit, today)).isEqualTo(streak)
     }
 
     @Test
-    fun `does not return streaks from different period`() = runTest {
-        val streak = Streak(
+    fun `returns null when the streak is not lasting`() = runTest {
+        val today = LocalDate(2024, 7, 7)
+        val notCurrentStreak = Streak(
             startDate = LocalDate(2024, 7, 1),
             endDate = LocalDate(2024, 7, 2),
         )
-        streakRepository.insertStreaks(mapOf(habitId to listOf(streak)))
-        assertThat(getCurrentStreak(habit, today)).isNull()
-    }
-
-    @Test
-    fun `returns null if there is no current streak`() = runTest {
-        val streak = Streak(
-            startDate = LocalDate(2024, 7, 21),
-            endDate = LocalDate(2024, 7, 27),
-        )
-        streakRepository.insertStreaks(mapOf(habitId to listOf(streak)))
+        streakRepository.insertStreaks(mapOf(habitId to listOf(notCurrentStreak)))
         assertThat(getCurrentStreak(habit, today)).isNull()
     }
 

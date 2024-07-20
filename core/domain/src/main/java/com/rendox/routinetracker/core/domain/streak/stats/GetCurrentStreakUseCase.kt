@@ -6,6 +6,7 @@ import com.rendox.routinetracker.core.data.vacation.VacationRepository
 import com.rendox.routinetracker.core.domain.streak.StreakManager
 import com.rendox.routinetracker.core.domain.streak.computer.StreakComputer
 import com.rendox.routinetracker.core.logic.joinAdjacentStreaks
+import com.rendox.routinetracker.core.logic.time.minusDays
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Streak
 import kotlinx.datetime.LocalDate
@@ -41,6 +42,6 @@ class GetCurrentStreakUseCase(
             .apply { if (lastCachedStreak != null) add(lastCachedStreak) }
             .joinAdjacentStreaks()
             .maxByOrNull { it.startDate }
-            ?.takeIf { it.endDate in currentPeriod }
+            ?.takeIf { it.endDate >= today.minusDays(1) }
     }
 }
