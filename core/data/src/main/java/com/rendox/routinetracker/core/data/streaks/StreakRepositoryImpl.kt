@@ -8,6 +8,8 @@ class StreakRepositoryImpl(
     private val localDataSource: StreakLocalDataSource,
 ) : StreakRepository {
 
+    override suspend fun insertStreaks(streaks: Map<Long, List<Streak>>) = localDataSource.insertStreaks(streaks)
+
     override suspend fun upsertStreaks(
         habitId: Long,
         period: LocalDateRange,

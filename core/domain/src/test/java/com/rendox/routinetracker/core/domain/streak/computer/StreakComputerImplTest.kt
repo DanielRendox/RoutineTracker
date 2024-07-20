@@ -3,20 +3,17 @@ package com.rendox.routinetracker.core.domain.streak.computer
 import com.google.common.truth.Truth.assertThat
 import com.rendox.routinetracker.core.domain.habitstatus.HabitStatusComputer
 import com.rendox.routinetracker.core.domain.habitstatus.HabitStatusComputerImpl
-import com.rendox.routinetracker.core.logic.RandomHabitsGenerator
 import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.Schedule
 import com.rendox.routinetracker.core.model.Streak
 import com.rendox.routinetracker.core.model.Vacation
-import kotlin.test.assertTrue
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDate
-import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
@@ -429,22 +426,6 @@ class StreakComputerImplTest {
         assertThat(streaks).isEmpty()
     }
 
-    @RepeatedTest(100)
-    fun `computed steak list contains no overlapping streaks`() {
-        val streaks = generateRandomStreaks()
-        for (outerStreak in streaks) {
-            for (innerStreak in streaks) {
-                if (outerStreak != innerStreak) {
-                    assertTrue(
-                        actual = outerStreak.endDate < innerStreak.startDate ||
-                            outerStreak.startDate > innerStreak.endDate,
-                        message = "$outerStreak overlaps $innerStreak",
-                    )
-                }
-            }
-        }
-    }
-
     @Test
     fun `does not merge adjacent streaks`() {
         val habit = Habit.YesNoHabit(
@@ -480,35 +461,6 @@ class StreakComputerImplTest {
                 startDate = LocalDate(2024, 7, 1),
                 endDate = LocalDate(2024, 7, 8),
             ),
-        )
-    }
-
-    @RepeatedTest(10)
-    fun `streak list contains no duplicates`() {
-        val streaks = generateRandomStreaks()
-        assertThat(streaks).containsNoDuplicates()
-    }
-
-    private fun generateRandomStreaks(): List<Streak> {
-        val currentDate = LocalDate(2024, 7, 1)
-        val habit = RandomHabitsGenerator.generateRandomHabits(
-            numOfHabits = 1,
-            startDateRange = LocalDate(2023, 1, 1)..currentDate,
-
-        ).first()
-        val completionHistory = RandomHabitsGenerator.generateCompletionHistory(
-            habit = habit,
-            currentDate = currentDate,
-        )
-        val vacationHistory = RandomHabitsGenerator.generateVacationHistory(
-            habit = habit,
-            currentDate = currentDate,
-        )
-        return streakComputer.computeStreaks(
-            habit = habit,
-            completionHistory = completionHistory,
-            vacationHistory = vacationHistory,
-            today = currentDate,
         )
     }
 

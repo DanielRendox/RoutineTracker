@@ -12,7 +12,7 @@ class StreakRepositoryFake(
     private val habitData: HabitData,
 ) : StreakRepository {
 
-    fun insertStreaks(streaks: Map<Long, List<Streak>>) = habitData.streaks.update {
+    override suspend fun insertStreaks(streaks: Map<Long, List<Streak>>) = habitData.streaks.update {
         it.toMutableList().apply {
             for ((habitId, streakList) in streaks) {
                 addAll(streakList.map { streak -> habitId to streak })

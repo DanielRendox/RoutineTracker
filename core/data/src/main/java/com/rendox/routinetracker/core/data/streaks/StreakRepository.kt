@@ -5,6 +5,8 @@ import com.rendox.routinetracker.core.model.Streak
 
 interface StreakRepository {
 
+    suspend fun insertStreaks(streaks: Map<Long, List<Streak>>)
+
     suspend fun upsertStreaks(
         habitId: Long,
         period: LocalDateRange,

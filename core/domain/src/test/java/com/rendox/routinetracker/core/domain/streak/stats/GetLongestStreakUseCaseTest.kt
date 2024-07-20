@@ -3,6 +3,7 @@ package com.rendox.routinetracker.core.domain.streak.stats
 import com.google.common.truth.Truth.assertThat
 import com.rendox.routinetracker.core.data.completionhistory.CompletionHistoryRepository
 import com.rendox.routinetracker.core.data.habit.HabitRepository
+import com.rendox.routinetracker.core.data.streaks.StreakRepository
 import com.rendox.routinetracker.core.data.vacation.VacationRepository
 import com.rendox.routinetracker.core.domain.di.completionHistoryDomainModule
 import com.rendox.routinetracker.core.domain.di.habitDomainModule
@@ -40,7 +41,7 @@ import org.koin.test.get
 class GetLongestStreakUseCaseTest : KoinTest {
 
     private lateinit var getLongestStreak: GetLongestStreakUseCase
-    private lateinit var streakRepository: StreakRepositoryFake
+    private lateinit var streakRepository: StreakRepository
     private lateinit var streakComputer: StreakComputer
     private lateinit var completionHistoryRepository: CompletionHistoryRepository
 
@@ -64,7 +65,7 @@ class GetLongestStreakUseCaseTest : KoinTest {
         single<HabitRepository> {
             HabitRepositoryFake(habitData = get())
         }
-        single<StreakRepositoryFake> {
+        single<StreakRepository> {
             StreakRepositoryFake(habitData = get())
         }
         single<VacationRepository> {

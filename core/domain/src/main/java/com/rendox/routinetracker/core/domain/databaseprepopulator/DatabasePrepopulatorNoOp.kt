@@ -1,4 +1,4 @@
-package com.rendox.routinetracker.core.data
+package com.rendox.routinetracker.core.domain.databaseprepopulator
 
 class DatabasePrepopulatorNoOp : DatabasePrepopulator {
     override suspend fun prepopulateDatabase() {
