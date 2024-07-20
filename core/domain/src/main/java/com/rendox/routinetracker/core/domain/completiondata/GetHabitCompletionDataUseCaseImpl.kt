@@ -39,27 +39,20 @@ class GetHabitCompletionDataUseCaseImpl(
         today: LocalDate,
     ): Map<LocalDate, HabitCompletionData> = withContext(defaultDispatcher) {
         val habit = getHabit(habitId)
-        val periodNotInScheduleBounds =
-            validationDates.start < habit.schedule.startDate ||
-                habit.schedule.endDate?.let { it < validationDates.endInclusive } == true
 
         val completionHistory: List<Habit.CompletionRecord>
         val vacationHistory: List<Vacation>
-        if (periodNotInScheduleBounds) {
-            completionHistory = emptyList()
-            vacationHistory = emptyList()
-        } else {
-            val period = when (val schedule = habit.schedule) {
-                is Schedule.PeriodicSchedule -> validationDates.expandPeriodToScheduleBounds(
-                    schedule = schedule,
-                    getPeriodRange = { date -> schedule.getPeriodRange(date) },
-                )
+        val period = when (val schedule = habit.schedule) {
+            is Schedule.PeriodicSchedule -> validationDates.expandPeriodToScheduleBounds(
+                schedule = schedule,
+                getPeriodRange = { date -> schedule.getPeriodRange(date) },
+            )
 
-                is Schedule.NonPeriodicSchedule -> validationDates
-            }
-            completionHistory = completionHistoryRepository.getRecordsInPeriod(habit, period)
-            vacationHistory = vacationRepository.getVacationsInPeriod(habitId, period)
+            is Schedule.NonPeriodicSchedule -> validationDates
         }
+
+        completionHistory = completionHistoryRepository.getRecordsInPeriod(habit, period)
+        vacationHistory = vacationRepository.getVacationsInPeriod(habitId, period)
 
         validationDates.associateWith { date ->
             val habitStatus = habitStatusComputer.computeStatus(
