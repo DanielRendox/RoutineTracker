@@ -16,8 +16,6 @@ class StreakRepositoryImpl(
         streaks: List<Streak>,
     ) = localDataSource.upsertStreaks(habitId, period, streaks)
 
-    override suspend fun getAllStreaks(habitId: Long): List<Streak> = localDataSource.getAllStreaks(habitId)
-
     override suspend fun getStreaksInPeriod(
         habitId: Long,
         period: LocalDateRange,

@@ -34,7 +34,7 @@ class StreakRepositoryFake(
         }
     }
 
-    override suspend fun getAllStreaks(habitId: Long): List<Streak> =
+    fun getAllStreaks(habitId: Long): List<Streak> =
         habitData.streaks.value.filter { it.first == habitId }.map { it.second }
 
     override suspend fun getStreaksInPeriod(

@@ -47,13 +47,6 @@ class StreakLocalDataSourceImpl(
         }
     }
 
-    override suspend fun getAllStreaks(habitId: Long): List<Streak> = withContext(ioDispatcher) {
-        db.cashedStreakQueries
-            .getAllStreaks(habitId)
-            .executeAsList()
-            .map { it.toExternalModel() }
-    }
-
     override suspend fun getStreaksInPeriod(
         habitId: Long,
         period: LocalDateRange,

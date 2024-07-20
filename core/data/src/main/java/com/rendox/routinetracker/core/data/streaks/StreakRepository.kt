@@ -14,8 +14,6 @@ interface StreakRepository {
         streaks: List<Streak>,
     )
 
-    suspend fun getAllStreaks(habitId: Long): List<Streak>
-
     suspend fun getStreaksInPeriod(
         habitId: Long,
         period: LocalDateRange,
