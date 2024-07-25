@@ -7,7 +7,6 @@ import com.rendox.routinetracker.core.logic.time.epochDate
 import com.rendox.routinetracker.core.model.Vacation
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.LocalDate
 
 class VacationLocalDataSourceImpl(
     private val db: RoutineTrackerDatabase,
@@ -16,13 +15,12 @@ class VacationLocalDataSourceImpl(
 
     override suspend fun getVacationsInPeriod(
         habitId: Long,
-        minDate: LocalDate,
-        maxDate: LocalDate,
+        period: LocalDateRange,
     ): List<Vacation> = withContext(ioDispatcher) {
         db.vacationEntityQueries.getVacationsInPeriod(
             habitId = habitId,
-            minDate = minDate,
-            maxDate = maxDate,
+            minDate = period.start,
+            maxDate = period.endInclusive,
         ).executeAsList().map { it.toExternalModel() }
     }
 

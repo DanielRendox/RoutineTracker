@@ -3,7 +3,6 @@ package com.rendox.routinetracker.core.data.vacation
 import com.rendox.routinetracker.core.database.vacation.VacationLocalDataSource
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.model.Vacation
-import kotlinx.datetime.LocalDate
 
 class VacationRepositoryImpl(
     private val localDataSource: VacationLocalDataSource,
@@ -11,9 +10,8 @@ class VacationRepositoryImpl(
 
     override suspend fun getVacationsInPeriod(
         habitId: Long,
-        minDate: LocalDate,
-        maxDate: LocalDate,
-    ): List<Vacation> = localDataSource.getVacationsInPeriod(habitId, minDate, maxDate)
+        period: LocalDateRange,
+    ): List<Vacation> = localDataSource.getVacationsInPeriod(habitId, period)
 
     override suspend fun getMultiHabitVacations(
         habitsToPeriods: List<Pair<List<Long>, LocalDateRange>>,

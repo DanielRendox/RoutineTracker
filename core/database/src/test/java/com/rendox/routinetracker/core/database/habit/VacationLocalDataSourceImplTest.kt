@@ -96,8 +96,7 @@ class VacationLocalDataSourceImplTest : KoinTest {
         )
         val resultingVacations = vacationLocalDataSource.getVacationsInPeriod(
             habitId = habitId,
-            minDate = minDate.toLocalDate(),
-            maxDate = maxDate.toLocalDate(),
+            period = minDate.toLocalDate()..maxDate.toLocalDate(),
         )
         if (shouldContain) {
             assertThat(resultingVacations).containsExactly(vacation)

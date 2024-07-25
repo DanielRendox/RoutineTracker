@@ -1,10 +1,11 @@
 package com.rendox.routinetracker.core.domain.di
 
-import com.rendox.routinetracker.core.domain.streak.GetAllStreaksUseCase
-import com.rendox.routinetracker.core.domain.streak.GetAllStreaksWithCashingUseCase
-import com.rendox.routinetracker.core.domain.streak.StreakComputer
-import com.rendox.routinetracker.core.domain.streak.StreakComputerImpl
-import org.koin.core.qualifier.named
+import com.rendox.routinetracker.core.domain.streak.GetStreaksInPeriodUseCase
+import com.rendox.routinetracker.core.domain.streak.StreakManager
+import com.rendox.routinetracker.core.domain.streak.computer.StreakComputer
+import com.rendox.routinetracker.core.domain.streak.computer.StreakComputerImpl
+import com.rendox.routinetracker.core.domain.streak.stats.GetCurrentStreakUseCase
+import com.rendox.routinetracker.core.domain.streak.stats.GetLongestStreakUseCase
 import org.koin.dsl.module
 
 val streakDomainModule = module {
@@ -12,14 +13,37 @@ val streakDomainModule = module {
         StreakComputerImpl(habitStatusComputer = get())
     }
 
-    single<GetAllStreaksUseCase> {
-        GetAllStreaksWithCashingUseCase(
-            getHabit = get(),
+    single<StreakManager> {
+        StreakManager(
             completionHistoryRepository = get(),
-            vacationHistoryRepository = get(),
-            defaultDispatcher = get(qualifier = named("defaultDispatcher")),
+            vacationRepository = get(),
             streakComputer = get(),
+        )
+    }
+
+    single<GetCurrentStreakUseCase> {
+        GetCurrentStreakUseCase(
             streakRepository = get(),
+            completionHistoryRepository = get(),
+            vacationRepository = get(),
+            streakComputer = get(),
+        )
+    }
+
+    single<GetLongestStreakUseCase> {
+        GetLongestStreakUseCase(
+            streakRepository = get(),
+            completionHistoryRepository = get(),
+            vacationRepository = get(),
+            streakComputer = get(),
+        )
+    }
+
+    single<GetStreaksInPeriodUseCase> {
+        GetStreaksInPeriodUseCase(
+            completionHistoryRepository = get(),
+            vacationRepository = get(),
+            streakComputer = get(),
         )
     }
 }

@@ -3,7 +3,7 @@ package com.rendox.routinetracker.core.domain.di
 import com.rendox.routinetracker.core.domain.agenda.GetAgendaUseCase
 import com.rendox.routinetracker.core.domain.agenda.GetAgendaUseCaseImpl
 import com.rendox.routinetracker.core.domain.completiondata.GetHabitCompletionDataUseCase
-import com.rendox.routinetracker.core.domain.completiondata.GetHabitCompletionDataUseCaseIndependentPeriods
+import com.rendox.routinetracker.core.domain.completiondata.GetHabitCompletionDataUseCaseImpl
 import com.rendox.routinetracker.core.domain.completionhistory.InsertHabitCompletionAndCashStreaks
 import com.rendox.routinetracker.core.domain.completionhistory.InsertHabitCompletionUseCase
 import com.rendox.routinetracker.core.domain.habitstatus.HabitStatusComputer
@@ -17,15 +17,13 @@ val completionHistoryDomainModule = module {
     single<InsertHabitCompletionUseCase> {
         InsertHabitCompletionAndCashStreaks(
             completionHistoryRepository = get(),
-            vacationRepository = get(),
             getHabit = get(),
-            streakComputer = get(),
-            streakRepository = get(),
+            streakManager = get(),
         )
     }
 
     single<GetHabitCompletionDataUseCase> {
-        GetHabitCompletionDataUseCaseIndependentPeriods(
+        GetHabitCompletionDataUseCaseImpl(
             getHabit = get(),
             vacationRepository = get(),
             completionHistoryRepository = get(),

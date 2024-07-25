@@ -279,11 +279,15 @@ internal class HabitStatusComputerImpl : HabitStatusComputer {
             }
         }
 
+        if (actualDate < habit.schedule.startDate) return 0.0
+        val habitEndDate = habit.schedule.endDate
+        if (habitEndDate != null && actualDate > habitEndDate) return 0.0
+
         val schedule = habit.schedule
         val period =
             if (schedule is Schedule.PeriodicSchedule && schedule.periodSeparationEnabled) {
                 val lastPeriod = schedule.getPeriodRange(currentDate = actualDate)
-                if (lastPeriod == null || currentDate !in lastPeriod) return 0.0
+                if (currentDate !in lastPeriod) return 0.0
                 lastPeriod.start..actualDate
             } else {
                 schedule.startDate..actualDate

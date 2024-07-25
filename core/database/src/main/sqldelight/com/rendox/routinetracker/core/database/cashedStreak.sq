@@ -13,16 +13,45 @@ INSERT OR IGNORE
 INTO cashedStreakEntity
 VALUES (?, ?, ?);
 
-getAllStreaks:
-SELECT *
-FROM cashedStreakEntity
-WHERE habitId = ?;
+getLastStreak:
+WITH RECURSIVE CombinedStreaks AS (
+     SELECT habitId, startDate, endDate
+     FROM cashedStreakEntity
+     WHERE habitId = :habitId
 
-getStreaksInPeriod:
-SELECT *
-FROM cashedStreakEntity
-WHERE habitId = :habitId
-    AND startDate <= :periodEnd AND endDate >= :periodStart;
+     UNION ALL
+
+     SELECT CombinedStreaks.habitId, CombinedStreaks.startDate, cashedStreakEntity.endDate
+     FROM CombinedStreaks
+     JOIN cashedStreakEntity
+     ON CombinedStreaks.habitId = cashedStreakEntity.habitId
+     AND CombinedStreaks.endDate + 1 = cashedStreakEntity.startDate
+)
+SELECT habitId, startDate, endDate
+FROM CombinedStreaks
+WHERE endDate = ( SELECT MAX(endDate) FROM CombinedStreaks )
+ORDER BY startDate
+LIMIT 1;
+
+getLongestStreak:
+WITH RECURSIVE CombinedStreaks AS (
+    SELECT habitId, startDate, endDate
+    FROM cashedStreakEntity
+    WHERE habitId = :habitId
+
+    UNION ALL
+
+    SELECT CombinedStreaks.habitId, CombinedStreaks.startDate, cashedStreakEntity.endDate
+    FROM CombinedStreaks
+    JOIN cashedStreakEntity
+    ON CombinedStreaks.habitId = cashedStreakEntity.habitId
+    AND CombinedStreaks.endDate + 1 = cashedStreakEntity.startDate
+)
+SELECT * FROM CombinedStreaks
+WHERE endDate - startDate = (
+    SELECT MAX(endDate - startDate) FROM CombinedStreaks
+)
+ORDER BY startDate;
 
 deleteStreaksInPeriod:
 DELETE FROM cashedStreakEntity
@@ -40,22 +69,6 @@ CREATE TABLE streakCashedPeriodEntity (
     PRIMARY KEY (habitId, startDate, endDate),
     FOREIGN KEY (habitId) REFERENCES habitEntity(id)
 );
-
-insertPeriod:
-INSERT OR IGNORE
-INTO streakCashedPeriodEntity
-VALUES (?, ?, ?);
-
-getAllCashedPeriods:
-SELECT *
-FROM streakCashedPeriodEntity
-WHERE habitId = ?;
-
-getCashedPeriod:
-SELECT *
-FROM streakCashedPeriodEntity
-WHERE habitId = :habitId
-    AND startDate <= :dateInPeriod AND :dateInPeriod <= endDate;
 
 deleteAllCashedPeriodsForHabit:
 DELETE FROM streakCashedPeriodEntity

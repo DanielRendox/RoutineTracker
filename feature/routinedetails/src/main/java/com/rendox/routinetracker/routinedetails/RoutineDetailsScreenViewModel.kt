@@ -9,23 +9,20 @@ import com.rendox.routinetracker.core.domain.completionhistory.InsertHabitComple
 import com.rendox.routinetracker.core.domain.completionhistory.InsertHabitCompletionUseCase.IllegalDateEditAttemptException
 import com.rendox.routinetracker.core.domain.di.DeleteHabitUseCase
 import com.rendox.routinetracker.core.domain.di.GetHabitUseCase
-import com.rendox.routinetracker.core.domain.streak.GetAllStreaksUseCase
-import com.rendox.routinetracker.core.domain.streak.contains
-import com.rendox.routinetracker.core.domain.streak.getCurrentStreak
-import com.rendox.routinetracker.core.domain.streak.getDurationInDays
-import com.rendox.routinetracker.core.domain.streak.getLongestStreak
+import com.rendox.routinetracker.core.domain.streak.GetStreaksInPeriodUseCase
+import com.rendox.routinetracker.core.domain.streak.stats.GetCurrentStreakUseCase
+import com.rendox.routinetracker.core.domain.streak.stats.GetLongestStreakUseCase
+import com.rendox.routinetracker.core.logic.contains
+import com.rendox.routinetracker.core.logic.getDurationInDays
 import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.model.Habit
 import com.rendox.routinetracker.core.model.HabitStatus
-import com.rendox.routinetracker.core.model.Streak
 import com.rendox.routinetracker.core.ui.helpers.UiEvent
 import java.time.YearMonth
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -41,8 +38,10 @@ class RoutineDetailsScreenViewModel(
     private val getHabit: GetHabitUseCase,
     private val getHabitCompletionData: GetHabitCompletionDataUseCase,
     private val insertHabitCompletion: InsertHabitCompletionUseCase,
-    private val getAllStreaksUseCase: GetAllStreaksUseCase,
     private val deleteHabit: DeleteHabitUseCase,
+    private val getCurrentStreak: GetCurrentStreakUseCase,
+    private val getLongestStreak: GetLongestStreakUseCase,
+    private val getStreaksInPeriod: GetStreaksInPeriodUseCase,
 ) : ViewModel() {
     private val _habitFlow: MutableStateFlow<Habit?> = MutableStateFlow(null)
     val habitFlow: StateFlow<Habit?> = _habitFlow.asStateFlow()
@@ -52,27 +51,15 @@ class RoutineDetailsScreenViewModel(
     private val _calendarDatesFlow = MutableStateFlow(emptyMap<LocalDate, CalendarDateData>())
     val calendarDatesFlow = _calendarDatesFlow.asStateFlow()
 
-    private val streaksFlow = MutableStateFlow(emptyList<Streak>())
-
     private val initialMonth = YearMonth.from(todayFlow.value.toJavaLocalDate())
     private val _currentMonthFlow: MutableStateFlow<YearMonth> = MutableStateFlow(initialMonth)
     val currentMonthFlow: StateFlow<YearMonth> = _currentMonthFlow.asStateFlow()
 
-    val currentStreakDurationInDays: StateFlow<Int> = streaksFlow.map { streaks ->
-        streaks.getCurrentStreak(today)?.getDurationInDays() ?: 0
-    }.stateIn(
-        scope = viewModelScope,
-        initialValue = 0,
-        started = SharingStarted.WhileSubscribed(5_000),
-    )
+    private val _currentStreakDurationInDays = MutableStateFlow(0)
+    val currentStreakDurationInDays = _currentStreakDurationInDays.asStateFlow()
 
-    val longestStreakDurationInDays: StateFlow<Int> = streaksFlow.map { streaks ->
-        streaks.getLongestStreak()?.getDurationInDays() ?: 0
-    }.stateIn(
-        scope = viewModelScope,
-        initialValue = 0,
-        started = SharingStarted.WhileSubscribed(5_000),
-    )
+    private val _longestStreakDurationInDays = MutableStateFlow(0)
+    val longestStreakDurationInDays = _longestStreakDurationInDays.asStateFlow()
 
     private val _completionAttemptBlockedEvent: MutableStateFlow<UiEvent<IllegalDateEditAttemptException>?> =
         MutableStateFlow(null)
@@ -83,18 +70,17 @@ class RoutineDetailsScreenViewModel(
 
     init {
         viewModelScope.launch {
-            _habitFlow.update { getHabit(routineId) }
-            streaksFlow.update {
-                getAllStreaksUseCase(
-                    habitId = routineId,
-                    today = todayFlow.value,
-                )
-            }
-            updateMonthsWithMargin()
+            val habit = getHabit(routineId)
+            _habitFlow.update { habit }
+            updateStreaks(habit)
+            updateMonthsWithMargin(habit)
         }
     }
 
-    private suspend fun updateMonthsWithMargin(forceUpdate: Boolean = false) {
+    private suspend fun updateMonthsWithMargin(
+        habit: Habit,
+        forceUpdate: Boolean = false,
+    ) {
         // delete all other months because the data may be outdated
         if (forceUpdate) {
             val start = _currentMonthFlow.value.minusMonths(NUM_OF_MONTHS_TO_LOAD_AHEAD.toLong())
@@ -105,10 +91,10 @@ class RoutineDetailsScreenViewModel(
                 calendarDates.filterKeys { it in start..end }
             }
         }
-        updateMonth(_currentMonthFlow.value, forceUpdate)
+        updateMonth(habit, _currentMonthFlow.value, forceUpdate)
         for (i in 1..NUM_OF_MONTHS_TO_LOAD_AHEAD) {
-            updateMonth(_currentMonthFlow.value.plusMonths(i.toLong()), forceUpdate)
-            updateMonth(_currentMonthFlow.value.minusMonths(i.toLong()), forceUpdate)
+            updateMonth(habit, _currentMonthFlow.value.plusMonths(i.toLong()), forceUpdate)
+            updateMonth(habit, _currentMonthFlow.value.minusMonths(i.toLong()), forceUpdate)
         }
     }
 
@@ -116,6 +102,7 @@ class RoutineDetailsScreenViewModel(
      * @param forceUpdate update the data even if it's already loaded
      */
     private suspend fun updateMonth(
+        habit: Habit,
         monthToUpdate: YearMonth,
         forceUpdate: Boolean = false,
     ) {
@@ -133,10 +120,15 @@ class RoutineDetailsScreenViewModel(
             validationDates = monthStart..monthEnd,
             today = todayFlow.value,
         )
+        val streaks = getStreaksInPeriod(
+            habit = habit,
+            period = monthStart..monthEnd,
+            today = todayFlow.value,
+        )
         val calendarDateData = datesCompletionData.mapValues { (date, completionData) ->
             CalendarDateData(
                 status = completionData.habitStatus,
-                includedInStreak = streaksFlow.value.any { it.contains(date) },
+                includedInStreak = streaks.any { it.contains(date) },
                 numOfTimesCompleted = completionData.numOfTimesCompleted,
                 isPastDate = date <= todayFlow.value,
             )
@@ -150,7 +142,7 @@ class RoutineDetailsScreenViewModel(
         _currentMonthFlow.update { newMonth }
         if (newMonth != initialMonth) {
             viewModelScope.launch {
-                updateMonthsWithMargin()
+                updateMonthsWithMargin(_habitFlow.value!!)
             }
         }
     }
@@ -173,13 +165,10 @@ class RoutineDetailsScreenViewModel(
             }
         }
 
-        streaksFlow.update {
-            getAllStreaksUseCase(
-                habitId = routineId,
-                today = todayFlow.value,
-            )
+        coroutineScope {
+            launch { updateStreaks(_habitFlow.value!!) }
+            launch { updateMonthsWithMargin(habit = _habitFlow.value!!, forceUpdate = true) }
         }
-        updateMonthsWithMargin(forceUpdate = true)
     }
 
     fun onDeleteHabit() = viewModelScope.launch {
@@ -193,6 +182,15 @@ class RoutineDetailsScreenViewModel(
                     _navigateBackEvent.update { null }
                 }
             }
+        }
+    }
+
+    private suspend fun updateStreaks(habit: Habit) {
+        _currentStreakDurationInDays.update {
+            getCurrentStreak(habit, todayFlow.value)?.getDurationInDays() ?: 0
+        }
+        _longestStreakDurationInDays.update {
+            getLongestStreak(habit, todayFlow.value)?.getDurationInDays() ?: 0
         }
     }
 

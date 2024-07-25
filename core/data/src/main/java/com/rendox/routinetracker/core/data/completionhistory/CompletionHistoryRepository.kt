@@ -2,23 +2,21 @@ package com.rendox.routinetracker.core.data.completionhistory
 
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.model.Habit
+import com.rendox.routinetracker.core.model.Streak
 import kotlinx.datetime.LocalDate
 
 interface CompletionHistoryRepository {
 
-    /**
-     * get all records for the given habit in the ascending order, if [minDate] or [maxDate] are
-     * specified, returns only the records in the given range.
-     */
     suspend fun getRecordsInPeriod(
         habit: Habit,
-        minDate: LocalDate? = null,
-        maxDate: LocalDate? = null,
+        period: LocalDateRange,
     ): List<Habit.CompletionRecord>
 
     suspend fun getMultiHabitRecords(
         habitsToPeriods: List<Pair<List<Habit>, LocalDateRange>>,
     ): Map<Long, List<Habit.CompletionRecord>>
+
+    suspend fun getRecordsWithoutStreaks(habit: Habit): List<Habit.CompletionRecord>
 
     suspend fun insertCompletion(
         habitId: Long,
@@ -26,6 +24,13 @@ interface CompletionHistoryRepository {
     )
 
     suspend fun insertCompletions(completions: Map<Long, List<Habit.CompletionRecord>>)
+
+    suspend fun insertCompletionAndCacheStreaks(
+        habitId: Long,
+        completionRecord: Habit.CompletionRecord,
+        period: LocalDateRange,
+        streaks: List<Streak>,
+    )
 
     suspend fun deleteCompletionByDate(
         habitId: Long,

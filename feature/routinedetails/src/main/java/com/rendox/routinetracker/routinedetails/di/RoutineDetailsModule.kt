@@ -9,10 +9,12 @@ val routineDetailsModule = module {
         RoutineDetailsScreenViewModel(
             routineId = parameters.get(),
             getHabit = get(),
-            getAllStreaksUseCase = get(),
-            insertHabitCompletion = get(),
             getHabitCompletionData = get(),
+            insertHabitCompletion = get(),
             deleteHabit = get(),
+            getCurrentStreak = get(),
+            getLongestStreak = get(),
+            getStreaksInPeriod = get(),
         )
     }
 }
