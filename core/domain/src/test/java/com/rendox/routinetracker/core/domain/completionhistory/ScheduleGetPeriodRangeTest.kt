@@ -14,7 +14,11 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Month
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDate
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
+import org.junit.jupiter.params.provider.ValueSource
 
 class ScheduleGetPeriodRangeTest {
 
@@ -205,6 +209,64 @@ class ScheduleGetPeriodRangeTest {
 
         val secondPeriod = secondPeriodStartDate..secondPeriodEndDate
         assertEachDateOfRangeIsInExpectedRange(schedule, secondPeriod)
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "2024-01-30, 2024-01-30, 2024-01-30, 2024-02-28",
+        "2024-01-30, 2024-03-01, 2024-02-29, 2024-03-29",
+        "2024-01-30, 2024-02-01, 2024-01-30, 2024-02-28",
+        "2024-01-30, 2024-02-29, 2024-02-29, 2024-03-29",
+        "2023-01-30, 2023-02-28, 2023-02-28, 2023-03-29",
+        "2024-01-31, 2024-02-01, 2024-01-31, 2024-02-28",
+        "2024-01-31, 2024-02-29, 2024-02-29, 2024-03-30",
+        "2024-01-31, 2024-04-30, 2024-04-30, 2024-05-30",
+        "2024-01-31, 2024-03-01, 2024-02-29, 2024-03-30",
+        "2024-01-31, 2024-04-01, 2024-03-31, 2024-04-29",
+        "2024-01-29, 2024-02-29, 2024-02-29, 2024-03-28",
+        "2023-01-29, 2023-02-28, 2023-02-28, 2023-03-28",
+        "2023-01-29, 2023-03-01, 2023-02-28, 2023-03-28",
+    )
+    fun `monthly schedule range is correct for inconsistent dates`(
+        startDate: String,
+        currentDate: String,
+        periodStart: String,
+        periodEnd: String,
+    ) {
+        val schedule = Schedule.MonthlyScheduleByNumOfDueDays(
+            startDate = startDate.toLocalDate(),
+            numOfDueDays = 2,
+        )
+        val periodRange = schedule.getPeriodRange(currentDate.toLocalDate())
+        val expectedPeriod = periodStart.toLocalDate()..periodEnd.toLocalDate()
+        assertThat(periodRange).isEqualTo(expectedPeriod)
+    }
+
+    @Test
+    fun periodRangeIsCorrectForWholeYear() {
+        val schedule = Schedule.MonthlyScheduleByNumOfDueDays(
+            startDate = LocalDate(2024, 1, 30),
+            numOfDueDays = 2,
+        )
+        val periods = mutableListOf<LocalDateRange>()
+        for (date in schedule.startDate..schedule.startDate.plus(DatePeriod(years = 1))) {
+            periods.add(schedule.getPeriodRange(date))
+        }
+        println("periods = ${periods.distinct()}")
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["2023-09-30", "2023-10-01"])
+    fun `monthly schedule range is correct for end of month dates`(currentDate: String) {
+        val schedule = Schedule.MonthlyScheduleByNumOfDueDays(
+            startDate = LocalDate(2023, 7, 31),
+            numOfDueDays = 2,
+        )
+        val expectedRange = LocalDateRange(
+            start = LocalDate(2023, 9, 30),
+            endInclusive = LocalDate(2023, 10, 29),
+        )
+        assertThat(schedule.getPeriodRange(currentDate.toLocalDate())).isEqualTo(expectedRange)
     }
 
     private fun assertEachDateOfRangeIsInExpectedRange(

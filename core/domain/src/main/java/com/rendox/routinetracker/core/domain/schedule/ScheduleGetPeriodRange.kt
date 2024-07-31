@@ -3,6 +3,7 @@ package com.rendox.routinetracker.core.domain.schedule
 import com.rendox.routinetracker.core.logic.time.LocalDateRange
 import com.rendox.routinetracker.core.logic.time.atEndOfMonth
 import com.rendox.routinetracker.core.logic.time.atEndOfYear
+import com.rendox.routinetracker.core.logic.time.minusDays
 import com.rendox.routinetracker.core.logic.time.plusDays
 import com.rendox.routinetracker.core.logic.time.rangeTo
 import com.rendox.routinetracker.core.logic.time.withDayOfMonth
@@ -79,13 +80,18 @@ private fun Schedule.WeeklySchedule.weeklyScheduleGetPeriodDateRange(currentDate
 }
 
 private fun Schedule.MonthlySchedule.monthlyScheduleGetPeriodDateRange(currentDate: LocalDate): LocalDateRange {
-    val startPeriodDate: LocalDate
-    val endPeriodDate: LocalDate
+    var startPeriodDate: LocalDate
+    var endPeriodDate: LocalDate
 
     if (startFromHabitStart) {
         val numberOfPeriodsAlreadyPassed = startDate.monthsUntil(currentDate)
         startPeriodDate = startDate.plus(DatePeriod(months = numberOfPeriodsAlreadyPassed))
-        endPeriodDate = atEndOfPeriod(startPeriodDate, correspondingPeriod)
+        endPeriodDate = startDate.plus(DatePeriod(months = numberOfPeriodsAlreadyPassed + 1)).minusDays(1)
+
+        if (currentDate !in startPeriodDate..endPeriodDate) {
+            startPeriodDate = startDate.plus(DatePeriod(months = numberOfPeriodsAlreadyPassed + 1))
+            endPeriodDate = startDate.plus(DatePeriod(months = numberOfPeriodsAlreadyPassed + 2)).minusDays(1)
+        }
     } else {
         val stillFirstMonth = currentDate <= startDate.atEndOfMonth
         startPeriodDate = if (stillFirstMonth) {
