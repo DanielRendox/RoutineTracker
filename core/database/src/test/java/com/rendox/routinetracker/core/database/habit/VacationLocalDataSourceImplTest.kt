@@ -82,7 +82,6 @@ class VacationLocalDataSourceImplTest : KoinTest {
         vacationCompleted: Boolean,
     ) = runTest {
         val vacation = Vacation(
-            id = 1L,
             startDate = LocalDate(2024, 6, 8),
             endDate = if (vacationCompleted) {
                 LocalDate(2024, 7, 1)
@@ -110,19 +109,16 @@ class VacationLocalDataSourceImplTest : KoinTest {
         val habitIdsToVacations = mapOf(
             1L to listOf(
                 Vacation(
-                    id = 1L,
                     startDate = LocalDate(2024, 6, 8),
                     endDate = LocalDate(2024, 7, 1),
                 ),
                 Vacation(
-                    id = 2L,
                     startDate = LocalDate(2024, 8, 1),
                     endDate = LocalDate(2024, 8, 2),
                 ),
             ),
             2L to listOf(
                 Vacation(
-                    id = 3L,
                     startDate = LocalDate(2024, 10, 1),
                     endDate = null,
                 ),
@@ -130,7 +126,6 @@ class VacationLocalDataSourceImplTest : KoinTest {
             3L to emptyList(),
             4L to listOf(
                 Vacation(
-                    id = 4L,
                     startDate = LocalDate(2024, 6, 3),
                     endDate = LocalDate(2024, 7, 2),
                 ),

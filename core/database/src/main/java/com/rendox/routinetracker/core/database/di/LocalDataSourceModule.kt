@@ -1,12 +1,13 @@
 package com.rendox.routinetracker.core.database.di
 
+import androidx.sqlite.db.SupportSQLiteDatabase
 import app.cash.sqldelight.ColumnAdapter
 import app.cash.sqldelight.EnumColumnAdapter
 import app.cash.sqldelight.adapter.primitive.FloatColumnAdapter
 import app.cash.sqldelight.adapter.primitive.IntColumnAdapter
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
-import com.rendox.routinetracker.core.database.CashedStreakEntity
+import com.rendox.routinetracker.core.database.CachedStreakEntity
 import com.rendox.routinetracker.core.database.CompletionHistoryEntity
 import com.rendox.routinetracker.core.database.RoutineTrackerDatabase
 import com.rendox.routinetracker.core.database.SpecificDateCustomCompletionTime
@@ -37,6 +38,11 @@ val localDataSourceModule = module {
             schema = RoutineTrackerDatabase.Schema,
             context = get(),
             name = "routinetracker.db",
+            callback = object : AndroidSqliteDriver.Callback(RoutineTrackerDatabase.Schema) {
+                override fun onOpen(db: SupportSQLiteDatabase) {
+                    db.setForeignKeyConstraintsEnabled(true)
+                }
+            },
         )
     }
 
@@ -81,7 +87,7 @@ val localDataSourceModule = module {
                 startDateAdapter = localDateAdapter,
                 endDateAdapter = localDateAdapter,
             ),
-            cashedStreakEntityAdapter = CashedStreakEntity.Adapter(
+            cachedStreakEntityAdapter = CachedStreakEntity.Adapter(
                 startDateAdapter = localDateAdapter,
                 endDateAdapter = localDateAdapter,
             ),

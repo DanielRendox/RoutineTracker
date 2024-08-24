@@ -30,6 +30,7 @@ import org.koin.test.get
 class HabitLocalDataSourceImplTest : KoinTest {
 
     private lateinit var sqlDriver: SqlDriver
+    private lateinit var db: RoutineTrackerDatabase
     private lateinit var habitLocalDataSource: HabitLocalDataSource
 
     private val testModule = module {
@@ -52,8 +53,9 @@ class HabitLocalDataSourceImplTest : KoinTest {
         sqlDriver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         RoutineTrackerDatabase.Schema.create(sqlDriver)
 
+        db = get()
         habitLocalDataSource = HabitLocalDataSourceImpl(
-            db = get(),
+            db = db,
             ioDispatcher = UnconfinedTestDispatcher(),
             scheduleLocalDataSource = get(),
         )
@@ -228,5 +230,90 @@ class HabitLocalDataSourceImplTest : KoinTest {
         habitLocalDataSource.insertHabit(habit)
         val resultingRoutine = habitLocalDataSource.getHabitById(habit.id!!)
         assertThat(resultingRoutine).isEqualTo(habit)
+    }
+
+    @Test
+    fun `deleting habit removes habit, its schedule, and due dates`() = runTest {
+        val habitId = 1L
+        val habit = Habit.YesNoHabit(
+            id = habitId,
+            name = "Test Habit",
+            schedule = Schedule.MonthlyScheduleByDueDatesIndices(
+                startDate = LocalDate(2024, 1, 1),
+                dueDatesIndices = listOf(1, 2, 3),
+                weekDaysMonthRelated = listOf(
+                    WeekDayMonthRelated(DayOfWeek.MONDAY, WeekDayNumberMonthRelated.First),
+                    WeekDayMonthRelated(DayOfWeek.TUESDAY, WeekDayNumberMonthRelated.Second),
+                ),
+            ),
+        )
+        habitLocalDataSource.insertHabit(habit)
+        val completionTimeDate = LocalDate(2024, 1, 1)
+        db.specificDateCustomCompletionTimeQueries.insertCompletiontime(
+            routineId = habitId,
+            date = completionTimeDate,
+            completionTimeHour = 12,
+            completionTimeMinute = 30,
+        )
+        db.vacationEntityQueries.insertVacation(
+            habitId = habitId,
+            startDate = LocalDate(2024, 1, 4),
+            endDate = LocalDate(2024, 1, 4),
+        )
+
+        habitLocalDataSource.deleteHabitById(habitId)
+
+        assertThat(db.habitEntityQueries.getHabitById(habitId).executeAsOneOrNull()).isNull()
+        assertThat(db.scheduleEntityQueries.getScheduleById(habitId).executeAsOneOrNull()).isNull()
+        assertThat(db.dueDateEntityQueries.getDueDates(habitId).executeAsList()).isEmpty()
+        assertThat(db.weekDayMonthRelatedEntityQueries.getWeekDayMonthRelatedDays(habitId).executeAsList()).isEmpty()
+    }
+
+    @Test
+    fun `deleting habit removes all its completions`() = runTest {
+        val habitId = 1L
+        val habit = Habit.YesNoHabit(
+            id = habitId,
+            name = "Test Habit",
+            schedule = Schedule.EveryDaySchedule(
+                startDate = LocalDate(2024, 1, 1),
+            ),
+        )
+        habitLocalDataSource.insertHabit(habit)
+        db.cachedStreakEntityQueries.insertStreak(
+            habitId = habitId,
+            startDate = LocalDate(2024, 1, 1),
+            endDate = LocalDate(2024, 1, 3),
+        )
+        habitLocalDataSource.deleteHabitById(habitId)
+        assertThat(db.cachedStreakEntityQueries.getAllStreaks(habitId).executeAsList()).isEmpty()
+    }
+
+    @Test
+    fun `deleting habit removes all its streaks`() = runTest {
+        val habitId = 1L
+        val habit = Habit.YesNoHabit(
+            id = habitId,
+            name = "Test Habit",
+            schedule = Schedule.EveryDaySchedule(
+                startDate = LocalDate(2024, 1, 1),
+            ),
+        )
+        habitLocalDataSource.insertHabit(habit)
+        assertThat(db.cachedStreakEntityQueries.getAllCashedPeriods(habitId).executeAsList()).isEmpty()
+    }
+
+    @Test
+    fun `deleting habit removes all vacations`() = runTest {
+        val habitId = 1L
+        val habit = Habit.YesNoHabit(
+            id = habitId,
+            name = "Test Habit",
+            schedule = Schedule.EveryDaySchedule(
+                startDate = LocalDate(2024, 1, 1),
+            ),
+        )
+        habitLocalDataSource.insertHabit(habit)
+        assertThat(db.vacationEntityQueries.getAllVacations(habitId).executeAsList()).isEmpty()
     }
 }
