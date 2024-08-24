@@ -5,8 +5,12 @@ CREATE TABLE vacationEntity (
     startDate INTEGER AS LocalDate NOT NULL,
     endDate INTEGER AS LocalDate,
     PRIMARY KEY (habitId, startDate, endDate),
-    FOREIGN KEY (habitId) REFERENCES habitEntity(id)
+    FOREIGN KEY (habitId) REFERENCES habitEntity(id) ON DELETE CASCADE
 );
+
+getAllVacations:
+SELECT * FROM vacationEntity
+WHERE habitId = ?;
 
 getVacationsInPeriod:
 SELECT * FROM vacationEntity

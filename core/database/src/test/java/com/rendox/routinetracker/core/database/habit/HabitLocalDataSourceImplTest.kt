@@ -52,6 +52,7 @@ class HabitLocalDataSourceImplTest : KoinTest {
 
         sqlDriver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
         RoutineTrackerDatabase.Schema.create(sqlDriver)
+        sqlDriver.execute(null, "PRAGMA foreign_keys = ON;", 0)
 
         db = get()
         habitLocalDataSource = HabitLocalDataSourceImpl(
@@ -300,7 +301,7 @@ class HabitLocalDataSourceImplTest : KoinTest {
             ),
         )
         habitLocalDataSource.insertHabit(habit)
-        assertThat(db.cachedStreakEntityQueries.getAllCashedPeriods(habitId).executeAsList()).isEmpty()
+        assertThat(db.cachedStreakEntityQueries.getAllStreaks(habitId).executeAsList()).isEmpty()
     }
 
     @Test

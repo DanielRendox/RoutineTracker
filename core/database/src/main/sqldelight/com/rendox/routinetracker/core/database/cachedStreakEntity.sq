@@ -13,6 +13,10 @@ INSERT OR IGNORE
 INTO cachedStreakEntity
 VALUES (?, ?, ?);
 
+getAllStreaks:
+SELECT * FROM cachedStreakEntity
+WHERE habitId = ?;
+
 getLastStreak:
 WITH RECURSIVE CombinedStreaks AS (
      SELECT habitId, startDate, endDate

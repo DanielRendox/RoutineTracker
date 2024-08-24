@@ -122,7 +122,7 @@ CREATE TABLE tmp_vacationEntity (
     startDate INTEGER NOT NULL,
     endDate INTEGER,
     PRIMARY KEY (habitId, startDate, endDate),
-    FOREIGN KEY (habitId) REFERENCES habitEntity(id)
+    FOREIGN KEY (habitId) REFERENCES habitEntity(id) ON DELETE CASCADE
 );
 
 INSERT INTO tmp_vacationEntity (
