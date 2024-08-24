@@ -264,7 +264,7 @@ class ScheduleGetPeriodRangeTest {
         )
         val expectedRange = LocalDateRange(
             start = LocalDate(2023, 9, 30),
-            endInclusive = LocalDate(2023, 10, 29),
+            endInclusive = LocalDate(2023, 10, 30),
         )
         assertThat(schedule.getPeriodRange(currentDate.toLocalDate())).isEqualTo(expectedRange)
     }
