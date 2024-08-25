@@ -12,10 +12,10 @@ class StreakLocalDataSourceImpl(
     private val ioDispatcher: CoroutineContext,
 ) : StreakLocalDataSource {
     override suspend fun insertStreaks(streaks: Map<Long, List<Streak>>) = withContext(ioDispatcher) {
-        db.cashedStreakQueries.transaction {
+        db.cachedStreakEntityQueries.transaction {
             for ((habitId, streakList) in streaks) {
                 for (streak in streakList) {
-                    db.cashedStreakQueries.insertStreak(
+                    db.cachedStreakEntityQueries.insertStreak(
                         habitId = habitId,
                         startDate = streak.startDate,
                         endDate = streak.endDate,
@@ -30,14 +30,14 @@ class StreakLocalDataSourceImpl(
         period: LocalDateRange,
         streaks: List<Streak>,
     ) {
-        db.cashedStreakQueries.transaction {
-            db.cashedStreakQueries.deleteStreaksInPeriod(
+        db.cachedStreakEntityQueries.transaction {
+            db.cachedStreakEntityQueries.deleteStreaksInPeriod(
                 habitId = habitId,
                 periodStart = period.start,
                 periodEnd = period.endInclusive,
             )
             for (streak in streaks) {
-                db.cashedStreakQueries.insertStreak(
+                db.cachedStreakEntityQueries.insertStreak(
                     habitId = habitId,
                     startDate = streak.startDate,
                     endDate = streak.endDate,
@@ -47,10 +47,10 @@ class StreakLocalDataSourceImpl(
     }
 
     override suspend fun getLastStreak(habitId: Long): Streak? = withContext(ioDispatcher) {
-        db.cashedStreakQueries.getLastStreak(habitId).executeAsOneOrNull()?.toExternalModel()
+        db.cachedStreakEntityQueries.getLastStreak(habitId).executeAsOneOrNull()?.toExternalModel()
     }
 
     override suspend fun getLongestStreaks(habitId: Long): List<Streak> = withContext(ioDispatcher) {
-        db.cashedStreakQueries.getLongestStreak(habitId).executeAsList().map { it.toExternalModel() }
+        db.cachedStreakEntityQueries.getLongestStreak(habitId).executeAsList().map { it.toExternalModel() }
     }
 }

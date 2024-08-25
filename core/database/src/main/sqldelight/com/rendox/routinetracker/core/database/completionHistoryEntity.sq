@@ -5,7 +5,8 @@ CREATE TABLE completionHistoryEntity (
     habitId INTEGER NOT NULL,
     date INTEGER AS LocalDate NOT NULL,
     numOfTimesCompleted REAL AS Float NOT NULL,
-    PRIMARY KEY (habitId, date)
+    PRIMARY KEY (habitId, date),
+    FOREIGN KEY (habitId) REFERENCES habitEntity(id) ON DELETE CASCADE
 );
 
 insertCompletion:
@@ -32,7 +33,7 @@ ORDER BY habitId ASC, date ASC;
 
 getRecordsWithoutStreaks:
 SELECT ch.* FROM completionHistoryEntity ch
-LEFT JOIN cashedStreakEntity cs
+LEFT JOIN cachedStreakEntity cs
 ON ch.habitId = cs.habitId AND ch.date BETWEEN cs.startDate AND cs.endDate
 WHERE ch.habitId = :habitId AND cs.habitId IS NULL;
 

@@ -1,12 +1,16 @@
 import kotlinx.datetime.LocalDate;
 
 CREATE TABLE vacationEntity (
-    id INTEGER PRIMARY KEY,
     habitId INTEGER NOT NULL,
     startDate INTEGER AS LocalDate NOT NULL,
     endDate INTEGER AS LocalDate,
-    FOREIGN KEY (habitId) REFERENCES habitEntity(id)
+    PRIMARY KEY (habitId, startDate, endDate),
+    FOREIGN KEY (habitId) REFERENCES habitEntity(id) ON DELETE CASCADE
 );
+
+getAllVacations:
+SELECT * FROM vacationEntity
+WHERE habitId = ?;
 
 getVacationsInPeriod:
 SELECT * FROM vacationEntity
@@ -30,11 +34,7 @@ ORDER BY habitId ASC, startDate ASC;
 
 insertVacation:
 INSERT INTO vacationEntity
-VALUES (?, ?, ?, ?);
-
-deleteVacationById:
-DELETE FROM vacationEntity
-WHERE id = ?;
+VALUES (?, ?, ?);
 
 deleteAllVacationsForHabit:
 DELETE FROM vacationEntity

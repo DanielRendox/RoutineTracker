@@ -110,13 +110,13 @@ class CompletionHistoryLocalDataSourceImpl(
                     completionRecord.date,
                 )
             }
-            db.cashedStreakQueries.deleteStreaksInPeriod(
+            db.cachedStreakEntityQueries.deleteStreaksInPeriod(
                 habitId,
                 period.start,
                 period.endInclusive,
             )
             for (streak in streaks) {
-                db.cashedStreakQueries.insertStreak(
+                db.cachedStreakEntityQueries.insertStreak(
                     habitId,
                     streak.startDate,
                     streak.endDate,

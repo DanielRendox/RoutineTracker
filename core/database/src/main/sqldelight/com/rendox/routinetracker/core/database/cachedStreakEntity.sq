@@ -1,0 +1,63 @@
+import kotlinx.datetime.LocalDate;
+
+CREATE TABLE cachedStreakEntity (
+    habitId INTEGER NOT NULL,
+    startDate INTEGER AS LocalDate NOT NULL,
+    endDate INTEGER AS LocalDate NOT NULL,
+    PRIMARY KEY (habitId, startDate, endDate),
+    FOREIGN KEY (habitId) REFERENCES habitEntity(id) ON DELETE CASCADE
+);
+
+insertStreak:
+INSERT OR IGNORE
+INTO cachedStreakEntity
+VALUES (?, ?, ?);
+
+getAllStreaks:
+SELECT * FROM cachedStreakEntity
+WHERE habitId = ?;
+
+getLastStreak:
+WITH RECURSIVE CombinedStreaks AS (
+     SELECT habitId, startDate, endDate
+     FROM cachedStreakEntity
+     WHERE habitId = :habitId
+
+     UNION ALL
+
+     SELECT CombinedStreaks.habitId, CombinedStreaks.startDate, cachedStreakEntity.endDate
+     FROM CombinedStreaks
+     JOIN cachedStreakEntity
+     ON CombinedStreaks.habitId = cachedStreakEntity.habitId
+     AND CombinedStreaks.endDate + 1 = cachedStreakEntity.startDate
+)
+SELECT habitId, startDate, endDate
+FROM CombinedStreaks
+WHERE endDate = ( SELECT MAX(endDate) FROM CombinedStreaks )
+ORDER BY startDate
+LIMIT 1;
+
+getLongestStreak:
+WITH RECURSIVE CombinedStreaks AS (
+    SELECT habitId, startDate, endDate
+    FROM cachedStreakEntity
+    WHERE habitId = :habitId
+
+    UNION ALL
+
+    SELECT CombinedStreaks.habitId, CombinedStreaks.startDate, cachedStreakEntity.endDate
+    FROM CombinedStreaks
+    JOIN cachedStreakEntity
+    ON CombinedStreaks.habitId = cachedStreakEntity.habitId
+    AND CombinedStreaks.endDate + 1 = cachedStreakEntity.startDate
+)
+SELECT * FROM CombinedStreaks
+WHERE endDate - startDate = (
+    SELECT MAX(endDate - startDate) FROM CombinedStreaks
+)
+ORDER BY startDate;
+
+deleteStreaksInPeriod:
+DELETE FROM cachedStreakEntity
+WHERE habitId = :habitId
+    AND :periodStart <= startDate AND endDate <= :periodEnd;

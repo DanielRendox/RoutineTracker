@@ -1,0 +1,135 @@
+-- dueDateEntity migration
+CREATE TABLE tmp_dueDateEntity (
+    scheduleId INTEGER NOT NULL,
+    dueDateNumber INTEGER NOT NULL,
+    completionTimeHour INTEGER,
+    completionTimeMinute INTEGER,
+    PRIMARY KEY (scheduleId, dueDateNumber),
+    FOREIGN KEY (scheduleId) REFERENCES scheduleEntity(id) ON DELETE CASCADE
+);
+
+INSERT INTO tmp_dueDateEntity (scheduleId, dueDateNumber, completionTimeHour, completionTimeMinute)
+SELECT scheduleId, dueDateNumber, completionTimeHour, completionTimeMinute FROM dueDateEntity;
+DROP TABLE dueDateEntity;
+ALTER TABLE tmp_dueDateEntity RENAME TO dueDateEntity;
+
+-- scheduleEntity migration
+CREATE TABLE tmp_scheduleEntity (
+    id INTEGER NOT NULL PRIMARY KEY,
+    type TEXT NOT NULL,
+    startDate INTEGER NOT NULL,
+    endDate INTEGER,
+    backlogEnabled INTEGER NOT NULL,
+    cancelDuenessIfDoneAhead INTEGER NOT NULL,
+    startDayOfWeekInWeeklySchedule INTEGER,
+    startFromHabitStartInMonthlyAndAnnualSchedule INTEGER,
+    includeLastDayOfMonthInMonthlySchedule INTEGER,
+    periodicSeparationEnabledInPeriodicSchedule INTEGER,
+    numOfDueDaysInByNumOfDueDaysSchedule INTEGER,
+    numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule INTEGER,
+    numOfDaysInAlternateDaysSchedule INTEGER,
+    FOREIGN KEY (id) REFERENCES habitEntity(id) ON DELETE CASCADE
+);
+
+INSERT INTO tmp_scheduleEntity (
+    id, type, startDate, endDate, backlogEnabled, cancelDuenessIfDoneAhead, startDayOfWeekInWeeklySchedule,
+    startFromHabitStartInMonthlyAndAnnualSchedule, includeLastDayOfMonthInMonthlySchedule,
+    periodicSeparationEnabledInPeriodicSchedule, numOfDueDaysInByNumOfDueDaysSchedule,
+    numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule, numOfDaysInAlternateDaysSchedule
+)
+SELECT
+    id, type, startDate, endDate, backlogEnabled, cancelDuenessIfDoneAhead, startDayOfWeekInWeeklySchedule,
+    startFromHabitStartInMonthlyAndAnnualSchedule, includeLastDayOfMonthInMonthlySchedule,
+    periodicSeparationEnabledInPeriodicSchedule, numOfDueDaysInByNumOfDueDaysSchedule,
+    numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule, numOfDaysInAlternateDaysSchedule
+FROM scheduleEntity;
+DROP TABLE scheduleEntity;
+ALTER TABLE tmp_scheduleEntity RENAME TO scheduleEntity;
+
+-- weekDayMonthRelatedEntity migration
+CREATE TABLE tmp_weekDayMonthRelatedEntity (
+    id INTEGER NOT NULL PRIMARY KEY,
+    scheduleId INTEGER NOT NULL,
+    weekDayIndex INTEGER NOT NULL,
+    weekDayNumberMonthRelated TEXT NOT NULL,
+    FOREIGN KEY(scheduleId) REFERENCES scheduleEntity(id) ON DELETE CASCADE
+);
+
+INSERT INTO tmp_weekDayMonthRelatedEntity (
+    id, scheduleId, weekDayIndex, weekDayNumberMonthRelated
+)
+SELECT
+    id, scheduleId, weekDayIndex, weekDayNumberMonthRelated
+FROM weekDayMonthRelatedEntity;
+
+DROP TABLE weekDayMonthRelatedEntity;
+ALTER TABLE tmp_weekDayMonthRelatedEntity RENAME TO weekDayMonthRelatedEntity;
+
+-- cashedStreakEntity migration
+CREATE TABLE cachedStreakEntity (
+    habitId INTEGER NOT NULL,
+    startDate INTEGER NOT NULL,
+    endDate INTEGER NOT NULL,
+    PRIMARY KEY (habitId, startDate, endDate),
+    FOREIGN KEY (habitId) REFERENCES habitEntity(id) ON DELETE CASCADE
+);
+
+INSERT INTO cachedStreakEntity(habitId, startDate, endDate)
+SELECT habitId, startDate, endDate
+FROM cashedStreakEntity;
+DROP TABLE cashedStreakEntity;
+
+-- streakCashedPeriodEntity migration
+DROP TABLE streakCashedPeriodEntity;
+
+-- completionHistoryEntity migration
+CREATE TABLE tmp_completionHistoryEntity (
+    habitId INTEGER NOT NULL,
+    date INTEGER NOT NULL,
+    numOfTimesCompleted REAL NOT NULL,
+    PRIMARY KEY (habitId, date),
+    FOREIGN KEY (habitId) REFERENCES habitEntity(id) ON DELETE CASCADE
+);
+
+INSERT INTO tmp_completionHistoryEntity (habitId, date, numOfTimesCompleted)
+SELECT habitId, date, numOfTimesCompleted FROM completionHistoryEntity;
+DROP TABLE completionHistoryEntity;
+ALTER TABLE tmp_completionHistoryEntity RENAME TO completionHistoryEntity;
+
+-- specificDateCustomCompletionTime migration
+CREATE TABLE tmp_specificDateCustomCompletionTime (
+    routineId INTEGER NOT NULL,
+    date INTEGER NOT NULL,
+    completionTimeHour INTEGER NOT NULL,
+    completionTimeMinute INTEGER NOT NULL,
+    PRIMARY KEY (routineId, date),
+    FOREIGN KEY (routineId) REFERENCES habitEntity(id) ON DELETE CASCADE
+);
+
+INSERT INTO tmp_specificDateCustomCompletionTime (
+    routineId, date, completionTimeHour, completionTimeMinute
+)
+SELECT
+    routineId, date, completionTimeHour, completionTimeMinute
+FROM specificDateCustomCompletionTime;
+
+DROP TABLE specificDateCustomCompletionTime;
+ALTER TABLE tmp_specificDateCustomCompletionTime RENAME TO specificDateCustomCompletionTime;
+
+-- vacationEntity migration
+CREATE TABLE tmp_vacationEntity (
+    habitId INTEGER NOT NULL,
+    startDate INTEGER NOT NULL,
+    endDate INTEGER,
+    PRIMARY KEY (habitId, startDate, endDate),
+    FOREIGN KEY (habitId) REFERENCES habitEntity(id) ON DELETE CASCADE
+);
+
+INSERT INTO tmp_vacationEntity (
+    habitId, startDate, endDate
+)
+SELECT habitId, startDate, endDate
+FROM vacationEntity;
+
+DROP TABLE vacationEntity;
+ALTER TABLE tmp_vacationEntity RENAME TO vacationEntity;

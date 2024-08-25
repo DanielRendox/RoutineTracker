@@ -18,7 +18,7 @@ CREATE TABLE scheduleEntity (
     numOfDueDaysInByNumOfDueDaysSchedule INTEGER AS Int,
     numOfDueDaysInFirstPeriodInByNumOfDueDaysSchedule INTEGER AS Int,
     numOfDaysInAlternateDaysSchedule INTEGER AS Int,
-    FOREIGN KEY (id) REFERENCES habitEntity(id)
+    FOREIGN KEY (id) REFERENCES habitEntity(id) ON DELETE CASCADE
 );
 
 insertSchedule:

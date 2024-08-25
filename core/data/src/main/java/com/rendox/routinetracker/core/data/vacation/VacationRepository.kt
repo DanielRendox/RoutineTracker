@@ -19,5 +19,4 @@ interface VacationRepository {
         vacation: Vacation,
     )
     suspend fun insertVacations(habitIdsToVacations: Map<Long, List<Vacation>>)
-    suspend fun deleteVacationById(id: Long)
 }

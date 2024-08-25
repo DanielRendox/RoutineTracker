@@ -85,15 +85,7 @@ class HabitLocalDataSourceImpl(
         db.habitEntityQueries.getNumOfHabits().executeAsOne().let { it == 0L }
     }
 
-    override suspend fun deleteHabitById(habitId: Long) {
-        db.habitEntityQueries.transaction {
-            db.habitEntityQueries.deleteHabitById(habitId)
-            scheduleLocalDataSource.deleteSchedule(habitId)
-            db.cashedStreakQueries.deleteAllStreaksForHabit(habitId)
-            db.cashedStreakQueries.deleteAllCashedPeriodsForHabit(habitId)
-            db.completionHistoryEntityQueries.deleteAllCompletionsForHabit(habitId)
-            db.specificDateCustomCompletionTimeQueries.deleteAllCompletionTimesForHabit(habitId)
-            db.vacationEntityQueries.deleteAllVacationsForHabit(habitId)
-        }
+    override suspend fun deleteHabitById(habitId: Long) = withContext(ioDispatcher) {
+        db.habitEntityQueries.deleteHabitById(habitId)
     }
 }
