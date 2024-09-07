@@ -11,9 +11,9 @@ import com.rendox.routinetracker.core.database.di.habitLocalDataModule
 import com.rendox.routinetracker.core.database.di.localDataSourceModule
 import com.rendox.routinetracker.core.database.di.streakLocalDataModule
 import com.rendox.routinetracker.core.domain.databaseprepopulator.DatabasePrepopulator
+import com.rendox.routinetracker.core.domain.databaseprepopulator.databasePrepopulatorModule
 import com.rendox.routinetracker.core.domain.di.completionHistoryDomainModule
 import com.rendox.routinetracker.core.domain.di.completionTimeDomainModule
-import com.rendox.routinetracker.core.domain.di.databasePrepopulatorModule
 import com.rendox.routinetracker.core.domain.di.domainModule
 import com.rendox.routinetracker.core.domain.di.habitDomainModule
 import com.rendox.routinetracker.core.domain.di.streakDomainModule
