@@ -52,8 +52,7 @@ class RoutineDetailsScreenViewModel(
     val calendarDatesFlow = _calendarDatesFlow.asStateFlow()
 
     private val initialMonth = YearMonth.from(todayFlow.value.toJavaLocalDate())
-    private val _currentMonthFlow: MutableStateFlow<YearMonth> = MutableStateFlow(initialMonth)
-    val currentMonthFlow: StateFlow<YearMonth> = _currentMonthFlow.asStateFlow()
+    private val currentMonthFlow: MutableStateFlow<YearMonth> = MutableStateFlow(initialMonth)
 
     private val _currentStreakDurationInDays = MutableStateFlow(0)
     val currentStreakDurationInDays = _currentStreakDurationInDays.asStateFlow()
@@ -83,18 +82,18 @@ class RoutineDetailsScreenViewModel(
     ) {
         // delete all other months because the data may be outdated
         if (forceUpdate) {
-            val start = _currentMonthFlow.value.minusMonths(NUM_OF_MONTHS_TO_LOAD_AHEAD.toLong())
+            val start = currentMonthFlow.value.minusMonths(NUM_OF_MONTHS_TO_LOAD_AHEAD.toLong())
                 .atStartOfMonth().toKotlinLocalDate()
-            val end = _currentMonthFlow.value.plusMonths(NUM_OF_MONTHS_TO_LOAD_AHEAD.toLong())
+            val end = currentMonthFlow.value.plusMonths(NUM_OF_MONTHS_TO_LOAD_AHEAD.toLong())
                 .atEndOfMonth().toKotlinLocalDate()
             _calendarDatesFlow.update { calendarDates ->
                 calendarDates.filterKeys { it in start..end }
             }
         }
-        updateMonth(habit, _currentMonthFlow.value, forceUpdate)
+        updateMonth(habit, currentMonthFlow.value, forceUpdate)
         for (i in 1..NUM_OF_MONTHS_TO_LOAD_AHEAD) {
-            updateMonth(habit, _currentMonthFlow.value.plusMonths(i.toLong()), forceUpdate)
-            updateMonth(habit, _currentMonthFlow.value.minusMonths(i.toLong()), forceUpdate)
+            updateMonth(habit, currentMonthFlow.value.plusMonths(i.toLong()), forceUpdate)
+            updateMonth(habit, currentMonthFlow.value.minusMonths(i.toLong()), forceUpdate)
         }
     }
 
@@ -139,7 +138,7 @@ class RoutineDetailsScreenViewModel(
     }
 
     fun onScrolledToNewMonth(newMonth: YearMonth) {
-        _currentMonthFlow.update { newMonth }
+        currentMonthFlow.update { newMonth }
         if (newMonth != initialMonth) {
             viewModelScope.launch {
                 updateMonthsWithMargin(_habitFlow.value!!)

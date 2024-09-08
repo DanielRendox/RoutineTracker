@@ -47,7 +47,6 @@ internal fun RoutineDetailsRoute(
 ) {
     val habit by viewModel.habitFlow.collectAsStateWithLifecycle()
     val routineCalendarDates by viewModel.calendarDatesFlow.collectAsStateWithLifecycle()
-    val currentMonth by viewModel.currentMonthFlow.collectAsStateWithLifecycle()
     val currentStreakDurationInDays by viewModel.currentStreakDurationInDays.collectAsStateWithLifecycle()
     val longestStreakDurationInDays by viewModel.longestStreakDurationInDays.collectAsStateWithLifecycle()
     val completionAttemptBlockedEvent by viewModel.completionAttemptBlockedEvent.collectAsStateWithLifecycle()
@@ -90,7 +89,7 @@ internal fun RoutineDetailsRoute(
         snackbarHostState = snackbarHostState,
         habit = habit,
         routineCalendarDates = routineCalendarDates,
-        currentMonth = currentMonth,
+        initialMonth = YearMonth.now(),
         currentStreakDurationInDays = currentStreakDurationInDays,
         longestStreakDurationInDays = longestStreakDurationInDays,
         onDeleteHabit = viewModel::onDeleteHabit,
@@ -147,7 +146,7 @@ internal fun RoutineDetailsScreen(
     onDeleteHabit: () -> Unit,
     snackbarHostState: SnackbarHostState,
     routineCalendarDates: Map<LocalDate, CalendarDateData>,
-    currentMonth: YearMonth,
+    initialMonth: YearMonth,
     currentStreakDurationInDays: Int,
     longestStreakDurationInDays: Int,
     insertCompletion: (Habit.CompletionRecord) -> Unit,
@@ -210,7 +209,7 @@ internal fun RoutineDetailsScreen(
             RoutineCalendarScreen(
                 habit = habit,
                 routineCalendarDates = routineCalendarDates,
-                currentMonth = currentMonth,
+                initialMonth = initialMonth,
                 currentStreakDurationInDays = currentStreakDurationInDays,
                 longestStreakDurationInDays = longestStreakDurationInDays,
                 insertCompletion = insertCompletion,

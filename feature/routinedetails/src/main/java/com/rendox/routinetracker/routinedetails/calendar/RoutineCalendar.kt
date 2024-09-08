@@ -36,7 +36,7 @@ import kotlinx.datetime.toKotlinLocalDate
 @Composable
 fun RoutineCalendar(
     modifier: Modifier = Modifier,
-    currentMonth: YearMonth,
+    initialMonth: YearMonth,
     firstDayOfWeek: DayOfWeek,
     routineCalendarDates: Map<LocalDate, CalendarDateData>,
     onDateClick: (date: LocalDate) -> Unit,
@@ -44,7 +44,7 @@ fun RoutineCalendar(
 ) {
     CalendarMonthlyPaged(
         modifier = modifier,
-        initialMonth = currentMonth,
+        initialMonth = initialMonth,
         firstDayOfWeek = firstDayOfWeek,
         onScrolledToNewMonth = onScrolledToNewMonth,
         dayContent = { calendarDay ->

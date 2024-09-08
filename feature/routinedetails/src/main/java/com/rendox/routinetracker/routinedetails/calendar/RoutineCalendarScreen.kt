@@ -46,7 +46,7 @@ fun RoutineCalendarScreen(
     modifier: Modifier = Modifier,
     habit: Habit,
     routineCalendarDates: Map<LocalDate, CalendarDateData>,
-    currentMonth: YearMonth,
+    initialMonth: YearMonth,
     currentStreakDurationInDays: Int,
     longestStreakDurationInDays: Int,
     insertCompletion: (Habit.CompletionRecord) -> Unit,
@@ -83,7 +83,7 @@ fun RoutineCalendarScreen(
                     .fillMaxSize()
                     .padding(24.dp),
                 routineCalendarDates = routineCalendarDates,
-                currentMonth = currentMonth,
+                initialMonth = initialMonth,
                 currentStreakDurationInDays = currentStreakDurationInDays,
                 currentStreakDurationInDaysString = currentStreakDurationInDaysString,
                 longestStreakDurationInDays = longestStreakDurationInDays,
@@ -98,7 +98,7 @@ fun RoutineCalendarScreen(
                     .fillMaxSize()
                     .padding(start = 16.dp, end = 16.dp, top = 24.dp),
                 routineCalendarDates = routineCalendarDates,
-                currentMonth = currentMonth,
+                initialMonth = initialMonth,
                 currentStreakDurationInDays = currentStreakDurationInDays,
                 currentStreakDurationInDaysString = currentStreakDurationInDaysString,
                 longestStreakDurationInDays = longestStreakDurationInDays,
@@ -114,7 +114,7 @@ fun RoutineCalendarScreen(
 private fun RoutineCalendarScreenPortrait(
     modifier: Modifier = Modifier,
     routineCalendarDates: Map<LocalDate, CalendarDateData>,
-    currentMonth: YearMonth,
+    initialMonth: YearMonth,
     currentStreakDurationInDays: Int,
     currentStreakDurationInDaysString: String,
     longestStreakDurationInDays: Int,
@@ -125,7 +125,7 @@ private fun RoutineCalendarScreenPortrait(
     Column(modifier = modifier) {
         RoutineCalendar(
             modifier = Modifier.padding(bottom = 24.dp),
-            currentMonth = currentMonth,
+            initialMonth = initialMonth,
             firstDayOfWeek = WeekFields.of(LocalLocale.current).firstDayOfWeek,
             routineCalendarDates = routineCalendarDates,
             onDateClick = onDateClick,
@@ -161,7 +161,7 @@ private fun RoutineCalendarScreenPortrait(
 private fun RoutineCalendarScreenLandscape(
     modifier: Modifier = Modifier,
     routineCalendarDates: Map<LocalDate, CalendarDateData>,
-    currentMonth: YearMonth,
+    initialMonth: YearMonth,
     currentStreakDurationInDays: Int,
     currentStreakDurationInDaysString: String,
     longestStreakDurationInDays: Int,
@@ -174,7 +174,7 @@ private fun RoutineCalendarScreenLandscape(
             modifier = Modifier
                 .weight(3f)
                 .padding(end = 24.dp),
-            currentMonth = currentMonth,
+            initialMonth = initialMonth,
             firstDayOfWeek = WeekFields.of(LocalLocale.current).firstDayOfWeek,
             routineCalendarDates = routineCalendarDates,
             onDateClick = onDateClick,
@@ -272,7 +272,7 @@ private fun RoutineDetailsScreenPreview() {
                 schedule = Schedule.EveryDaySchedule(startDate = today),
             ),
             routineCalendarDates = emptyMap(),
-            currentMonth = today.toJavaLocalDate().yearMonth,
+            initialMonth = today.toJavaLocalDate().yearMonth,
             currentStreakDurationInDays = 15,
             longestStreakDurationInDays = 30,
             insertCompletion = {},
