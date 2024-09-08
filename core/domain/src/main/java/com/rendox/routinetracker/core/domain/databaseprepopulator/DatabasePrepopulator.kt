@@ -1,5 +1,5 @@
 package com.rendox.routinetracker.core.domain.databaseprepopulator
 
 interface DatabasePrepopulator {
-    suspend fun prepopulateDatabase()
+    suspend fun prepopulateDatabase(numOfHabits: Int = 50)
 }

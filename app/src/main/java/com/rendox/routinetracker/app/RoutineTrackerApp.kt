@@ -62,7 +62,7 @@ class RoutineTrackerApp : Application() {
         }
 
         applicationScope.launch(ioDispatcher) {
-            databasePrepopulator.prepopulateDatabase()
+            databasePrepopulator.prepopulateDatabase(numOfHabits = 30)
         }
     }
 }

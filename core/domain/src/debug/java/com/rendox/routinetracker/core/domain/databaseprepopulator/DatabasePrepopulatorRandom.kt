@@ -4,6 +4,7 @@ import com.rendox.routinetracker.core.data.streaks.StreakRepository
 import com.rendox.routinetracker.core.database.completionhistory.CompletionHistoryLocalDataSource
 import com.rendox.routinetracker.core.database.habit.HabitLocalDataSource
 import com.rendox.routinetracker.core.database.vacation.VacationLocalDataSource
+import com.rendox.routinetracker.core.domain.RandomHabitsGenerator
 import com.rendox.routinetracker.core.domain.streak.computer.StreakComputer
 import com.rendox.routinetracker.core.logic.time.today
 import com.rendox.routinetracker.core.model.Habit
@@ -17,25 +18,25 @@ class DatabasePrepopulatorRandom(
     private val streakComputer: StreakComputer,
     private val streakRepository: StreakRepository,
 ) : DatabasePrepopulator {
-    override suspend fun prepopulateDatabase() {
+    override suspend fun prepopulateDatabase(numOfHabits: Int) {
         val dbIsNotEmpty = !habitLocalDataSource.checkIfIsEmpty()
         if (dbIsNotEmpty) return
 
-        val habits = com.rendox.routinetracker.core.domain.RandomHabitsGenerator.generateRandomHabits(numOfHabits = 20)
+        val habits = RandomHabitsGenerator.generateRandomHabits(numOfHabits)
         habitLocalDataSource.insertHabits(habits)
 
         val insertedHabits = habitLocalDataSource.getAllHabits()
 
         val completionHistory: Map<Long, List<Habit.CompletionRecord>> = insertedHabits
             .associateWith { habit ->
-                com.rendox.routinetracker.core.domain.RandomHabitsGenerator.generateCompletionHistory(habit)
+                RandomHabitsGenerator.generateCompletionHistory(habit)
             }
             .mapKeys { it.key.id!! }
         completionHistoryLocalDataSource.insertCompletions(completionHistory)
 
         val vacationHistory: Map<Long, List<Vacation>> = insertedHabits
             .associateWith { habit ->
-                com.rendox.routinetracker.core.domain.RandomHabitsGenerator.generateVacationHistory(habit)
+                RandomHabitsGenerator.generateVacationHistory(habit)
             }
             .mapKeys { it.key.id!! }
         vacationLocalDataSource.insertVacations(vacationHistory)
